@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trakia</title>
+<meta name="description" content="Dutch ⇄ Bulgarian sentence trainer aligned with the Bulgarian 2952 Anki deck">
+<meta name="theme-color" content="#1f6f8b">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#fcfcfb;--card:#ffffff;--ink:#1c1c1a;--ink2:#5c5c57;--muted:#8a8a84;--line:#e4e4df;--accent:#1f6f8b;--accent-ink:#ffffff;--ok:#0ca30c;--almost:#fab219;--bad:#d03b3b;--ok-bg:#e6f6e6;--almost-bg:#fff4d6;--bad-bg:#fbe5e5;--del:#b32424;--ins:#0a6d0a;--radius:14px;--shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1a1a19;--card:#242422;--ink:#f1f1ec;--ink2:#b9b9b2;--muted:#85857e;--line:#363633;--accent:#5fb3cf;--accent-ink:#0e2a35;--ok-bg:#153a15;--almost-bg:#3d2f0b;--bad-bg:#43191a;--del:#ff8a8a;--ins:#7fe07f;--shadow:0 1px 2px rgba(0,0,0,.4)}}
+:root[data-theme=dark]{--bg:#1a1a19;--card:#242422;--ink:#f1f1ec;--ink2:#b9b9b2;--muted:#85857e;--line:#363633;--accent:#5fb3cf;--accent-ink:#0e2a35;--ok-bg:#153a15;--almost-bg:#3d2f0b;--bad-bg:#43191a;--del:#ff8a8a;--ins:#7fe07f;--shadow:0 1px 2px rgba(0,0,0,.4)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:env(safe-area-inset-top) 16px 0}
+.hrow{display:flex;align-items:center;justify-content:space-between;max-width:720px;margin:0 auto;height:48px}
+h1{font-size:20px;margin:0;letter-spacing:.02em}
+h1 span{color:var(--accent)}
+nav{display:flex;gap:2px;max-width:720px;margin:0 auto}
+nav button{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--ink2);padding:8px 4px;font-size:14px;font-weight:600;cursor:pointer}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:720px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:17px}
+button{font:inherit}
+.btn{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:6px 10px;font-size:13px;font-weight:500}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.muted{color:var(--ink2);font-size:14px}
+.tiny{color:var(--muted);font-size:12px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--line);color:var(--ink2)}
+.badge.accent{background:var(--accent);color:var(--accent-ink)}
+.badge.warn{background:var(--almost-bg);color:var(--ink)}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.meta .spacer{flex:1}
+.prompt{font-size:26px;line-height:1.3;margin:6px 0 10px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chip{font-size:13px;background:var(--almost-bg);border-radius:8px;padding:2px 8px}
+input[type=text],textarea,select,input[type=number]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input[type=text]:focus{outline:none;border-color:var(--accent)}
+input.ok{border-color:var(--ok)}input.almost{border-color:var(--almost)}input.bad{border-color:var(--bad)}
+.preview{font-size:20px;margin:8px 0 0;min-height:1.4em}
+.keys{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.keys button{min-width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:18px;cursor:pointer}
+.verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;align-items:center;gap:10px}
+.verdict.correct{background:var(--ok-bg)}.verdict.almost{background:var(--almost-bg)}.verdict.wrong{background:var(--bad-bg)}
+.verdict small{font-weight:500;font-size:13px;color:var(--ink2)}
+.label{margin:10px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.expected{font-size:20px;margin:0}
+.diff{font-size:17px;margin:4px 0;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
+.diff del{color:var(--del);background:var(--bad-bg);text-decoration:line-through;border-radius:3px}
+.diff ins{color:var(--ins);background:var(--ok-bg);text-decoration:none;border-radius:3px}
+.progressbar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.progressbar div{height:100%;background:var(--accent);width:0;transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:24px;line-height:1.1}
+.stat span{font-size:12px;color:var(--ink2)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+tr.clickable{cursor:pointer}
+.boxes{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:8px 0}
+.boxes div{text-align:center;font-size:12px;color:var(--ink2)}
+.boxes b{display:block;font-size:16px;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin:6px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+canvas{width:100%;height:180px;display:block}
+.chartwrap{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+.field{margin-bottom:14px}
+.field label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+.field .help{font-size:12px;color:var(--muted);margin-top:3px}
+.inline{display:flex;gap:10px;align-items:center}
+.inline input[type=number]{width:110px}
+input[type=range]{width:100%}
+.toggle{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.toggle:last-child{border:0}
+.toggle input{width:20px;height:20px}
+.toggle div{flex:1}
+.toggle .help{font-size:12px;color:var(--muted)}
+.lib-row-detail{background:var(--bg);font-size:13px}
+.lib-row-detail td{padding:10px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast.show{opacity:1}
+kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--bg)}
+@media (max-width:480px){.prompt{font-size:22px}.card{padding:14px}main{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow"><h1><span>Т</span>rakia</h1><span id="hdr-rank" class="tiny"></span></div>
+  <nav>
+    <button data-tab="practise" class="active">Practise</button>
+    <button data-tab="stats">Stats</button>
+    <button data-tab="library">Library</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+</header>
+<main>
+
+<section id="tab-practise" class="tab active">
+  <div id="session-home">
+    <div class="card">
+      <div class="stats" id="home-stats"></div>
+      <p class="muted" id="home-summary"></p>
+      <div class="row">
+        <button class="btn primary" id="btn-start">Practise</button>
+        <button class="btn" id="btn-free">Free practice</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="session-run" hidden>
+    <div class="progressbar"><div id="pbar"></div></div>
+    <div class="card">
+      <div class="meta">
+        <span id="dir-badge" class="badge accent"></span>
+        <span id="free-badge" class="badge warn" hidden>free practice</span>
+        <span id="retry-badge" class="badge" hidden>retry</span>
+        <span class="spacer"></span>
+        <span id="counter" class="tiny"></span>
+      </div>
+      <p id="prompt" class="prompt"></p>
+      <div id="newwords" class="chips"></div>
+      <input type="text" id="answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" placeholder="Type the translation, then Enter">
+      <p id="translit-preview" class="preview" hidden></p>
+      <div id="helper-keys" class="keys" hidden></div>
+      <div class="row" id="answer-actions">
+        <button class="btn primary" id="btn-check">Check</button>
+        <button class="btn" id="btn-dontknow">Don't know</button>
+        <button class="btn small" id="btn-quit">End session</button>
+      </div>
+      <div id="feedback" hidden>
+        <div id="verdict" class="verdict"></div>
+        <p class="label">Expected</p>
+        <p id="expected" class="expected"></p>
+        <p id="diff" class="diff"></p>
+        <p id="alts" class="muted"></p>
+        <p id="gloss" class="tiny"></p>
+        <div class="row">
+          <button class="btn primary" id="btn-next">Next</button>
+          <button class="btn" id="btn-accept">My answer was correct</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="session-done" hidden>
+    <div class="card">
+      <h2>Session done</h2>
+      <div class="stats" id="done-stats"></div>
+      <p class="muted" id="done-summary"></p>
+      <div class="row">
+        <button class="btn primary" id="btn-again">Practise again</button>
+        <button class="btn" id="btn-home">Back</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-stats" class="tab">
+  <div class="card">
+    <h2>Today</h2>
+    <div class="stats" id="stats-today"></div>
+  </div>
+  <div class="card">
+    <h2>Last 14 days</h2>
+    <div class="legend"><span><i style="background:var(--ok)"></i>✓ correct</span><span><i style="background:var(--almost)"></i>≈ almost</span><span><i style="background:var(--bad)"></i>✗ wrong</span></div>
+    <div class="chartwrap"><canvas id="chart"></canvas><div class="tip" id="chart-tip"></div></div>
+    <details><summary class="tiny">table view</summary><table id="chart-table"></table></details>
+  </div>
+  <div class="card">
+    <h2>Progress</h2>
+    <div id="stats-progress"></div>
+  </div>
+  <div class="card">
+    <h2>Hardest sentences</h2>
+    <p class="tiny">Most lapses first. Drilling runs a free-practice session over these cards.</p>
+    <table id="hardest"></table>
+    <div class="row"><button class="btn" id="btn-drill">Drill these</button></div>
+  </div>
+</section>
+
+<section id="tab-library" class="tab">
+  <div class="card">
+    <div class="row" style="margin-top:0">
+      <select id="lib-filter" style="width:auto">
+        <option value="eligible">Eligible now</option>
+        <option value="all">All sentences</option>
+        <option value="seen">Seen</option>
+        <option value="unseen">Not yet seen</option>
+        <option value="locked">Locked (beyond my rank)</option>
+        <option value="imported">Imported</option>
+      </select>
+      <input type="text" id="lib-search" placeholder="search…" style="flex:1;min-width:140px">
+    </div>
+    <p class="tiny" id="lib-count"></p>
+    <table id="lib-table"></table>
+    <div class="row"><button class="btn small" id="lib-more" hidden>Show more</button></div>
+  </div>
+  <div class="card">
+    <h2>Import sentences</h2>
+    <p class="muted">JSON (array of objects), CSV/TSV or Excel (.xlsx). Columns: <b>bg</b>, <b>nl</b> required; optional <b>nl_alt</b>, <b>bg_alt</b> (separate alternatives with <kbd>|</kbd>), <b>en</b>, <b>lemmas</b> (comma-separated dictionary forms, used to compute the rank), <b>tags</b>, <b>id</b>. Rows without lemmas get an estimated rank (≈).</p>
+    <div class="row"><input type="file" id="import-file" accept=".json,.csv,.tsv,.txt,.xlsx,.xls"></div>
+    <p class="tiny" id="import-result"></p>
+  </div>
+  <div class="card">
+    <h2>Export / backup</h2>
+    <div class="row">
+      <button class="btn" id="btn-export-progress">Export progress</button>
+      <label class="btn">Import progress <input type="file" id="import-progress" accept=".json" hidden></label>
+      <button class="btn" id="btn-export-sentences">Export sentences</button>
+    </div>
+    <p class="tiny">Progress export contains your answers, settings, accepted alternatives and imported sentences. Importing it on another device replaces that device's progress.</p>
+  </div>
+</section>
+
+<section id="tab-settings" class="tab">
+  <div class="card">
+    <h2>Anki alignment</h2>
+    <div class="field">
+      <label for="set-rank">I'm at word number … in Anki</label>
+      <div class="inline"><input type="number" id="set-rank" min="0" max="2952" step="1"><span class="tiny" id="rank-word"></span></div>
+      <input type="range" id="set-rank-range" min="0" max="2952" step="1">
+      <div class="help" id="rank-help"></div>
+      <div class="help">Tip: sort the Anki browser by "due" and look at the Rank field of the first new card, or re-export the deck and load the generated words.json here:
+        <label class="btn small" style="display:inline-block;margin-top:4px">Load words.json <input type="file" id="load-words" accept=".json" hidden></label></div>
+    </div>
+    <div class="field">
+      <label for="set-tol">Tolerance (words ahead of Anki)</label>
+      <div class="inline"><input type="number" id="set-tol" min="0" max="500" step="5"></div>
+      <div class="help">Allows sentences whose hardest word is up to this many ranks beyond your position. New words are shown under the prompt.</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Session</h2>
+    <div class="field"><label for="set-dirs">Directions</label>
+      <select id="set-dirs">
+        <option value="gated">Both — Dutch→Bulgarian unlocks after Bulgarian→Dutch was answered correctly once</option>
+        <option value="both">Both, from the start</option>
+        <option value="bg2nl">Bulgarian → Dutch only</option>
+        <option value="nl2bg">Dutch → Bulgarian only</option>
+      </select></div>
+    <div class="field"><label for="set-new">New sentences per session</label><div class="inline"><input type="number" id="set-new" min="0" max="100"></div></div>
+    <div class="field"><label for="set-maxdue">Max reviews per session</label><div class="inline"><input type="number" id="set-maxdue" min="5" max="500"></div></div>
+  </div>
+  <div class="card">
+    <h2>Answer checking</h2>
+    <div class="field"><label for="set-typo">Typo tolerance (% of answer length)</label><div class="inline"><input type="number" id="set-typo" min="0" max="30"></div>
+      <div class="help">10 % ≈ one typo per ten characters still counts as <b>almost</b>. 0 = only exact matches are correct (always 1 char tolerance).</div></div>
+    <div class="toggle"><input type="checkbox" id="set-bag"><div>Bulgarian word order is free<div class="help">Same words in another order counts as <b>almost</b>.</div></div></div>
+    <div class="toggle"><input type="checkbox" id="set-punct"><div>Strict punctuation<div class="help">Off: punctuation and quotes are ignored.</div></div></div>
+    <div class="toggle"><input type="checkbox" id="set-yi"><div>Strict ѝ<div class="help">Off: ѝ (her) and и are treated the same.</div></div></div>
+    <div class="toggle"><input type="checkbox" id="set-accents"><div>Ignore Dutch accents<div class="help">één = een, café = cafe.</div></div></div>
+  </div>
+  <div class="card">
+    <h2>Typing</h2>
+    <div class="toggle"><input type="checkbox" id="set-translit"><div>Latin keyboard for Bulgarian<div class="help">Type <i>kupih hlyab</i>, the Cyrillic preview is what gets checked. sh=ш ch=ч zh=ж sht=щ yu=ю ya=я y=ъ j=й x=ь c=ц q=я</div></div></div>
+    <div class="toggle"><input type="checkbox" id="set-keys"><div>Show helper keys (ъ ь щ ю я ѝ…)</div></div>
+    <div class="field"><label for="set-theme">Theme</label><select id="set-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+  </div>
+  <div class="card">
+    <h2>Danger zone</h2>
+    <div class="row"><button class="btn" id="btn-reset">Reset all progress</button><button class="btn" id="btn-undelete">Restore deleted sentences</button></div>
+    <p class="tiny" id="about"></p>
+  </div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script src="data.js"></script>
+<script src="core.js"></script>
+<script>
+(function () {
+'use strict';
+const C = window.TrakiaCore, DATA = window.TRAKIA_DATA;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---------- storage ----------
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
+};
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', typoPct: 10, bagOfWords: true, strictPunct: false, strictYi: false, stripAccents: true, translit: false, helperKeys: true, theme: 'auto' };
+let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
+let progress = LS.get('progress', {});
+let userAlts = LS.get('userAlts', {});
+let userSentences = LS.get('userSentences', {});
+let deleted = LS.get('deleted', []);
+let log = LS.get('log', []);            // [ts, key, score 2|1|0, free 0|1]
+let sessions = LS.get('sessions', []);  // [startTs]
+const save = {
+  settings: () => LS.set('settings', settings), progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => LS.set('deleted', deleted), log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions),
+};
+const WORDS = DATA.words, WIDX = C.wordIndex(WORDS);
+const WORD_BY_RANK = new Map(WORDS.map(w => [w.rank, w]));
+
+function allSentences() {
+  const del = new Set(deleted), out = [];
+  for (const s of DATA.sentences) if (!del.has(s.id) && !userSentences[s.id]) out.push(s);
+  for (const id in userSentences) if (!del.has(id)) out.push(userSentences[id]);
+  return out;
+}
+let SENT = allSentences(), SENT_BY_ID = new Map(SENT.map(s => [s.id, s]));
+function refreshSentences() { SENT = allSentences(); SENT_BY_ID = new Map(SENT.map(s => [s.id, s])); }
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
+function applyTheme() { document.documentElement.dataset.theme = settings.theme === 'auto' ? '' : settings.theme; }
+function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
+
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+function showTab(name) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  if (name === 'practise') renderHome(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
+  window.scrollTo(0, 0);
+}
+
+// ---------- practise ----------
+let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,wrong}, pending}
+function renderHome() {
+  const now = Date.now();
+  const elig = SENT.filter(s => C.eligible(s, settings));
+  let due = 0, seen = 0;
+  for (const s of SENT) for (const k of C.cardKeys(s, progress, settings)) { const p = progress[k]; if (p) { seen++; if (p.due <= now) due++; } }
+  const today = dayKey(now), todayLog = log.filter(l => dayKey(l[0]) === today), todaySessions = sessions.filter(t => dayKey(t) === today).length;
+  const unseenElig = elig.reduce((n, s) => n + C.cardKeys(s, progress, settings).filter(k => !progress[k]).length, 0);
+  $('home-stats').innerHTML = stat(due, 'due now') + stat(unseenElig, 'new available') + stat(todayLog.length, 'answers today') + stat(todaySessions, 'sessions today');
+  const next = C.nextUnlock(SENT, settings);
+  $('home-summary').innerHTML = `${elig.length} of ${SENT.length} sentences are within your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}); ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
+  $('hdr-rank').textContent = 'word ' + settings.rank;
+  $('btn-start').textContent = due || unseenElig ? 'Practise' : 'Free practice';
+}
+const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
+
+function startSession(opts) {
+  opts = opts || {};
+  let queue, free;
+  if (opts.keys) { queue = opts.keys; free = true; }
+  else if (opts.free) { const b = C.buildSession(SENT, progress, Object.assign({}, settings, { maxDue: 0, newPerSession: 0 }), Date.now()); queue = b.queue; free = true; if (!queue.length) { toast('Nothing to practise yet — start a normal session first'); return; } }
+  else { const b = C.buildSession(SENT, progress, settings, Date.now()); queue = b.queue; free = b.free; }
+  if (!queue.length) { toast('No sentences available — raise your Anki position in Settings'); return; }
+  session = { queue: queue.map(k => ({ key: k })), i: 0, free, counts: { correct: 0, almost: 0, wrong: 0 }, pending: null, started: Date.now() };
+  sessions.push(session.started); save.sessions();
+  $('session-home').hidden = true; $('session-done').hidden = true; $('session-run').hidden = false;
+  renderCard();
+}
+function cardOf(item) { const [id, dir] = item.key.split('|'); return { id, dir, s: SENT_BY_ID.get(id) }; }
+function acceptedFor(s, dir, key) { return dir === 'bg2nl' ? [s.nl, ...s.nl_alt] : [s.bg, ...s.bg_alt]; }
+function allAccepted(s, dir, key) { return acceptedFor(s, dir).concat(userAlts[key] || []); }
+
+function renderCard() {
+  if (!session || session.i >= session.queue.length) return endSession();
+  const item = session.queue[session.i], { dir, s } = cardOf(item);
+  if (!s) { session.i++; return renderCard(); }
+  session.pending = null;
+  $('pbar').style.width = (100 * session.i / session.queue.length) + '%';
+  $('counter').textContent = (session.i + 1) + ' / ' + session.queue.length;
+  $('dir-badge').textContent = dir === 'bg2nl' ? 'BG → NL' : 'NL → BG';
+  $('free-badge').hidden = !session.free; $('retry-badge').hidden = !item.retry;
+  $('prompt').textContent = dir === 'bg2nl' ? s.bg : s.nl;
+  $('prompt').lang = dir === 'bg2nl' ? 'bg' : 'nl';
+  const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
+  $('newwords').innerHTML = chips ? '<span class="tiny" style="align-self:center">new:</span>' + chips : '';
+  const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = dir === 'bg2nl' ? 'nl' : 'bg';
+  inp.placeholder = dir === 'bg2nl' ? 'Type the Dutch translation, then Enter' : 'Напиши превода на български, после Enter';
+  $('translit-preview').hidden = !(settings.translit && dir === 'nl2bg'); $('translit-preview').textContent = '';
+  $('helper-keys').hidden = !(settings.helperKeys && dir === 'nl2bg');
+  $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
+  setTimeout(() => inp.focus(), 50);
+}
+function typedValue() { const v = $('answer').value; const { dir } = cardOf(session.queue[session.i]); return settings.translit && dir === 'nl2bg' ? C.translit(v) : v; }
+$('answer').addEventListener('input', () => { if (!session) return; const { dir } = cardOf(session.queue[session.i]); if (settings.translit && dir === 'nl2bg') $('translit-preview').textContent = C.translit($('answer').value); });
+$('answer').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!session) return; if (session.pending) next(); else checkAnswer(false); } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && session && session.pending && document.activeElement !== $('answer')) { e.preventDefault(); next(); } });
+$('btn-check').addEventListener('click', () => checkAnswer(false));
+$('btn-dontknow').addEventListener('click', () => checkAnswer(true));
+$('btn-next').addEventListener('click', next);
+$('btn-accept').addEventListener('click', acceptMine);
+$('btn-quit').addEventListener('click', endSession);
+$('btn-start').addEventListener('click', () => startSession());
+$('btn-free').addEventListener('click', () => startSession({ free: true }));
+$('btn-again').addEventListener('click', () => startSession());
+$('btn-home').addEventListener('click', () => { $('session-done').hidden = true; $('session-home').hidden = false; renderHome(); });
+
+function checkAnswer(giveUp) {
+  const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key;
+  const lang = dir === 'bg2nl' ? 'nl' : 'bg';
+  const typed = giveUp ? '' : typedValue();
+  const accepted = allAccepted(s, dir, key);
+  const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], lang, settings), reason: 'skip' } : C.check(typed, accepted, lang, settings);
+  session.pending = { result: r.result, typed, key };
+  showFeedback(r, s, dir, accepted, giveUp);
+}
+function showFeedback(r, s, dir, accepted, giveUp) {
+  const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
+  $('answer-actions').hidden = true; $('feedback').hidden = false;
+  const v = $('verdict'); v.className = 'verdict ' + r.result;
+  const why = r.reason === 'typo' ? `<small>${r.dist} character${r.dist > 1 ? 's' : ''} off — counts as correct, box unchanged</small>` : r.reason === 'order' ? '<small>same words, different order</small>' : r.reason === 'skip' ? '<small>shown</small>' : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
+  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + ' ' + why;
+  $('expected').textContent = r.expected || accepted[0];
+  const d = $('diff');
+  if (r.result !== 'correct' && r.t && r.a) d.innerHTML = C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join(''); else d.innerHTML = '';
+  const others = accepted.filter(a => a !== (r.expected || accepted[0]));
+  $('alts').innerHTML = others.length ? 'Also accepted: ' + others.map(esc).join(' · ') : '';
+  $('gloss').textContent = (s.en ? 'EN: ' + s.en : '') + (s.max_rank ? '   · rank ' + s.max_rank : '') + (s.rank_estimated ? ' ≈' : '');
+  $('btn-accept').hidden = r.result === 'correct' || giveUp;
+  setTimeout(() => $('btn-next').focus(), 30);
+}
+function acceptMine() {
+  const p = session.pending; if (!p || !p.typed.trim()) return;
+  (userAlts[p.key] = userAlts[p.key] || []).push(p.typed.trim()); save.userAlts();
+  p.result = 'correct'; $('verdict').className = 'verdict correct'; $('verdict').innerHTML = '✓ Accepted as correct <small>added to your accepted answers</small>';
+  $('answer').className = 'ok'; $('btn-accept').hidden = true; toast('Saved as an accepted answer');
+}
+function next() {
+  const p = session.pending; if (!p) return;
+  const item = session.queue[session.i];
+  progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free);
+  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0]);
+  if (log.length > 20000) log = log.slice(-15000);
+  save.progress(); save.log();
+  session.counts[p.result]++;
+  if (p.result === 'wrong' && !item.retry) session.queue.push({ key: p.key, retry: true });
+  session.i++; renderCard();
+}
+function endSession() {
+  if (!session) return;
+  const c = session.counts, total = c.correct + c.almost + c.wrong;
+  $('session-run').hidden = true; $('session-done').hidden = false;
+  $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
+  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.free ? ' Free practice does not move cards forward, only back.' : '') : 'No answers recorded.';
+  session = null;
+}
+// helper keys
+const KEYS = ['ъ', 'ь', 'щ', 'ю', 'я', 'ѝ', 'ч', 'ш', 'ж', 'ц', 'й'];
+$('helper-keys').innerHTML = KEYS.map(k => `<button type="button" data-k="${k}">${k}</button>`).join('');
+$('helper-keys').addEventListener('click', e => { const k = e.target.dataset.k; if (!k) return; const inp = $('answer'); const st = inp.selectionStart || inp.value.length, en = inp.selectionEnd || st; inp.value = inp.value.slice(0, st) + k + inp.value.slice(en); inp.selectionStart = inp.selectionEnd = st + 1; inp.focus(); inp.dispatchEvent(new Event('input')); });
+$('helper-keys').addEventListener('mousedown', e => e.preventDefault());
+
+// ---------- stats ----------
+function renderStats() {
+  const now = Date.now(), today = dayKey(now);
+  const byDay = {};
+  for (const l of log) { const k = dayKey(l[0]); (byDay[k] = byDay[k] || [0, 0, 0])[l[2]]++; }
+  const t = byDay[today] || [0, 0, 0], tot = t[0] + t[1] + t[2];
+  let streak = 0; for (let d = 0; ; d++) { const k = dayKey(now - d * 86400e3); if (byDay[k]) streak++; else if (d === 0) continue; else break; if (d > 3650) break; }
+  const ms = log.filter(l => dayKey(l[0]) === today).map(l => l[0]);
+  let minutes = 0; for (let i = 1; i < ms.length; i++) { const gap = ms[i] - ms[i - 1]; if (gap < 5 * 60e3) minutes += gap; }
+  $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streak, 'day streak');
+  // chart data
+  const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
+  drawChart(days);
+  $('chart-table').innerHTML = '<tr><th>day</th><th>✓</th><th>≈</th><th>✗</th></tr>' + days.map(d => `<tr><td>${d.k}</td><td>${d.v[2]}</td><td>${d.v[1]}</td><td>${d.v[0]}</td></tr>`).join('');
+  // progress per direction
+  let html = '';
+  for (const dir of ['bg2nl', 'nl2bg']) {
+    const boxes = new Array(9).fill(0); let seen = 0, mastered = 0;
+    for (const k in progress) if (k.endsWith('|' + dir) && SENT_BY_ID.has(k.split('|')[0])) { const b = progress[k].box; boxes[b]++; seen++; if (b >= 8) mastered++; }
+    const elig = SENT.filter(s => C.eligible(s, settings)).length;
+    html += `<p style="margin:6px 0 2px"><b>${dir === 'bg2nl' ? 'Bulgarian → Dutch' : 'Dutch → Bulgarian'}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${boxes.slice(5).reduce((a, b) => a + b, 0)} known · ${mastered} mastered</span></p>`;
+    html += `<div class="bar">${['var(--bad)', 'var(--almost)', 'var(--almost)', 'var(--almost)', 'var(--almost)', 'var(--ok)', 'var(--ok)', 'var(--ok)', 'var(--accent)'].map((c, i) => `<i style="width:${elig ? 100 * boxes[i] / elig : 0}%;background:${c}"></i>`).join('')}</div>`;
+    html += `<div class="boxes">${boxes.map((n, i) => `<div><b>${n}</b>box ${i}</div>`).join('')}</div>`;
+  }
+  html += '<p class="tiny">Boxes: 0 = again now · 1 = 10 min · 2 = 1 h · 3 = 6 h · 4 = 1 day · 5 = 3 d · 6 = 7 d · 7 = 16 d · 8 = 35 d (mastered)</p>';
+  $('stats-progress').innerHTML = html;
+  // hardest
+  const hard = Object.entries(progress).filter(([k, p]) => p.lapses > 0 && SENT_BY_ID.has(k.split('|')[0])).sort((a, b) => b[1].lapses - a[1].lapses || a[1].box - b[1].box).slice(0, 20);
+  $('hardest').innerHTML = hard.length ? '<tr><th>sentence</th><th>dir</th><th>lapses</th><th>box</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); return `<tr><td>${esc(dir === 'bg2nl' ? s.bg : s.nl)}</td><td>${dir === 'bg2nl' ? 'BG→NL' : 'NL→BG'}</td><td>${p.lapses}</td><td>${p.box}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
+  $('btn-drill').disabled = !hard.length; $('btn-drill').onclick = () => { showTab('practise'); startSession({ keys: hard.map(h => h[0]) }); };
+}
+function drawChart(days) {
+  const cv = $('chart'), dpr = window.devicePixelRatio || 1, W = cv.clientWidth || 600, H = 180;
+  cv.width = W * dpr; cv.height = H * dpr; const ctx = cv.getContext && cv.getContext('2d'); if (!ctx) return; ctx.scale(dpr, dpr);
+  const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
+  const padL = 28, padB = 22, padT = 8, iw = W - padL - 6, ih = H - padB - padT;
+  const max = Math.max(5, ...days.map(d => d.v[0] + d.v[1] + d.v[2]));
+  ctx.clearRect(0, 0, W, H); ctx.font = '11px system-ui'; ctx.fillStyle = col('--muted'); ctx.strokeStyle = col('--line'); ctx.lineWidth = 1;
+  const steps = max <= 10 ? 5 : 4;
+  for (let i = 0; i <= steps; i++) { const y = padT + ih - ih * i / steps, val = Math.round(max * i / steps); ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - 6, y); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(val, padL - 6, y + 4); }
+  const bw = iw / days.length, gap = Math.min(8, bw * .3), colors = [col('--bad'), col('--almost'), col('--ok')];
+  cv._bars = [];
+  days.forEach((d, i) => {
+    const x = padL + i * bw + gap / 2, w = bw - gap; let y = padT + ih; const tot = d.v[0] + d.v[1] + d.v[2];
+    [2, 1, 0].forEach(sc => { const h = ih * d.v[sc] / max; if (h > 0) { ctx.fillStyle = colors[sc]; ctx.fillRect(x, y - h, w, Math.max(0, h - 2)); y -= h; } });
+    if (i % 2 === 1 || days.length < 8) { ctx.fillStyle = col('--muted'); ctx.textAlign = 'center'; ctx.fillText(d.label, x + w / 2, H - 6); }
+    cv._bars.push({ x, w, d, tot });
+  });
+  cv.onmousemove = cv.ontouchstart = e => { const r = cv.getBoundingClientRect(), px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; const b = cv._bars.find(b => px >= b.x - 2 && px <= b.x + b.w + 2); const tip = $('chart-tip'); if (!b) { tip.style.display = 'none'; return; } tip.style.display = 'block'; tip.style.left = (b.x + b.w / 2) + 'px'; tip.style.top = '30px'; tip.textContent = `${b.d.k}: ✓ ${b.d.v[2]}  ≈ ${b.d.v[1]}  ✗ ${b.d.v[0]}`; };
+  cv.onmouseleave = () => $('chart-tip').style.display = 'none';
+}
+
+// ---------- library ----------
+let libShown = 60;
+$('lib-filter').addEventListener('change', () => renderLibrary(true)); $('lib-search').addEventListener('input', () => renderLibrary(true));
+$('lib-more').addEventListener('click', () => { libShown += 100; renderLibrary(false); });
+function renderLibrary(reset) {
+  if (reset) libShown = 60;
+  const f = $('lib-filter').value, q = C.normalise($('lib-search').value, 'nl');
+  const now = Date.now();
+  let rows = SENT.filter(s => {
+    const keys = ['bg2nl', 'nl2bg'].map(d => s.id + '|' + d), seen = keys.some(k => progress[k]);
+    if (f === 'eligible' && !C.eligible(s, settings)) return false;
+    if (f === 'locked' && C.eligible(s, settings)) return false;
+    if (f === 'seen' && !seen) return false;
+    if (f === 'unseen' && (seen || !C.eligible(s, settings))) return false;
+    if (f === 'imported' && !userSentences[s.id]) return false;
+    if (q && !(C.normalise(s.bg, 'nl').includes(q) || C.normalise(s.nl, 'nl').includes(q) || C.normalise(s.en || '', 'nl').includes(q) || s.id.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  rows.sort((a, b) => (a.max_rank == null ? 1e9 : a.max_rank) - (b.max_rank == null ? 1e9 : b.max_rank) || a.id.localeCompare(b.id));
+  $('lib-count').textContent = rows.length + ' sentences';
+  const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; return `<span class="badge" title="due ${p.due <= now ? 'now' : 'in ' + fmtAgo(p.due - now)}">${p.box}</span>`; };
+  $('lib-table').innerHTML = '<tr><th>rank</th><th>Bulgarian</th><th>Dutch</th><th>BG→NL</th><th>NL→BG</th></tr>' + rows.slice(0, libShown).map(s => `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td lang="bg">${esc(s.bg)}</td><td lang="nl">${esc(s.nl)}</td><td>${status(s, 'bg2nl')}</td><td>${status(s, 'nl2bg')}</td></tr>`).join('');
+  $('lib-more').hidden = rows.length <= libShown;
+}
+$('lib-table').addEventListener('click', e => {
+  const tr = e.target.closest('tr.clickable'); if (!tr) return;
+  const open = tr.nextElementSibling && tr.nextElementSibling.classList.contains('lib-row-detail');
+  document.querySelectorAll('.lib-row-detail').forEach(x => x.remove());
+  if (open) return;
+  const s = SENT_BY_ID.get(tr.dataset.id); if (!s) return;
+  const ua = ['bg2nl', 'nl2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d === 'bg2nl' ? 'NL' : 'BG'}: ${esc(a)}`)).flat();
+  const det = document.createElement('tr'); det.className = 'lib-row-detail';
+  det.innerHTML = `<td colspan="5">${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
+  tr.after(det);
+  det.querySelector('[data-act=reset]').onclick = () => { delete progress[s.id + '|bg2nl']; delete progress[s.id + '|nl2bg']; save.progress(); renderLibrary(false); toast('Progress reset'); };
+  det.querySelector('[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
+});
+
+// ---------- import / export ----------
+$('import-file').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return; e.target.value = '';
+  try {
+    let rows;
+    if (/\.xlsx?$/i.test(file.name)) {
+      if (!window.XLSX) { toast('Loading Excel reader…'); await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = res; s.onerror = () => rej(new Error('Could not load the Excel reader (offline?). Save as CSV instead.')); document.head.appendChild(s); }); }
+      const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' }).map(r => { const o = {}; for (const k in r) o[k.trim().toLowerCase()] = r[k]; return o; });
+    } else if (/\.json$/i.test(file.name)) {
+      const j = JSON.parse(await file.text()); rows = Array.isArray(j) ? j : (j.sentences || []);
+    } else rows = C.parseDelimited(await file.text());
+    let added = 0, updated = 0, skipped = 0;
+    for (const r of rows) { const s = C.rowToSentence(r, WIDX); if (!s) { skipped++; continue; } if (userSentences[s.id] || DATA.sentences.some(x => x.id === s.id)) updated++; else added++; userSentences[s.id] = s; deleted = deleted.filter(d => d !== s.id); }
+    save.userSentences(); save.deleted(); refreshSentences(); renderLibrary(true);
+    $('import-result').textContent = `${added} added, ${updated} updated, ${skipped} skipped (missing bg or nl).`;
+    toast(`Imported ${added + updated} sentences`);
+  } catch (err) { $('import-result').textContent = 'Import failed: ' + err.message; }
+});
+function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+$('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', { app: 'trakia', version: 1, exported: new Date().toISOString(), settings, progress, userAlts, userSentences, deleted, log, sessions }));
+$('import-progress').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return; e.target.value = '';
+  try { const j = JSON.parse(await file.text()); if (j.app !== 'trakia') throw new Error('not a Trakia progress file');
+    if (!confirm('Replace all progress on this device with the file?')) return;
+    settings = Object.assign({}, DEFAULTS, j.settings || {}); progress = j.progress || {}; userAlts = j.userAlts || {}; userSentences = j.userSentences || {}; deleted = j.deleted || []; log = j.log || []; sessions = j.sessions || [];
+    Object.values(save).forEach(f => f()); refreshSentences(); applyTheme(); renderHome(); toast('Progress imported');
+  } catch (err) { toast('Import failed: ' + err.message); }
+});
+$('btn-export-sentences').addEventListener('click', () => download('trakia-sentences.json', SENT.map(s => Object.assign({}, s, { nl_alt: s.nl_alt.concat(userAlts[s.id + '|bg2nl'] || []), bg_alt: s.bg_alt.concat(userAlts[s.id + '|nl2bg'] || []) }))));
+
+// ---------- settings ----------
+const bind = (id, key, type) => {
+  const el = $(id);
+  const read = () => type === 'bool' ? el.checked : type === 'num' ? +el.value : el.value;
+  const write = () => { if (type === 'bool') el.checked = !!settings[key]; else el.value = settings[key]; };
+  el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
+  return write;
+};
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-keys', 'helperKeys', 'bool'), bind('set-theme', 'theme')];
+function afterSettingChange(key) { if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank; }
+function renderRankHelp() {
+  const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
+  const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
+  $('rank-help').textContent = `${elig} of ${SENT.length} sentences eligible.` + (next ? ` Next unlock at word ${next.max_rank} (${WORD_BY_RANK.get(next.max_rank)?.bg || ''}).` : '');
+}
+function renderSettings() { writers.forEach(w => w()); renderRankHelp(); $('about').textContent = `Trakia · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+$('load-words').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return; e.target.value = '';
+  try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
+});
+$('btn-reset').addEventListener('click', () => { if (!confirm('Delete all progress, accepted answers and statistics on this device?')) return; progress = {}; userAlts = {}; log = []; sessions = []; save.progress(); save.userAlts(); save.log(); save.sessions(); toast('Progress reset'); renderHome(); });
+$('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
+
+// ---------- init ----------
+applyTheme(); renderHome();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+window.addEventListener('resize', () => { if ($('tab-stats').classList.contains('active')) renderStats(); });
+})();
+</script>
+</body>
+</html>
