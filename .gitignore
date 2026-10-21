@@ -1,3 +1,31 @@
+# secrets — never commit credentials of any kind
+.env
+.env.*
+*.env
+.envrc
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.jks
+*.keystore
+*token*
+*secret*
+*credential*
+*.secrets.*
+secrets/
+.netrc
+.npmrc
+.pypirc
+*.gpg
+*.asc
+id_rsa*
+id_ed25519*
+.gh-token
+.github-token
+
+# local / generated
 node_modules/
 *.apkg
 *.log
