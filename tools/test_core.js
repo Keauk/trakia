@@ -38,7 +38,7 @@ t('applyResult ladder', () => {
   const now = 1e12, r = () => 0.5;
   let p = C.applyResult(null, 'correct', now, false, r); assert.equal(p.box, 1); assert.equal(p.due, now + 10 * 60e3);
   p = C.applyResult(p, 'correct', now, false, r); assert.equal(p.box, 2); assert.equal(p.due, now + 3600e3);
-  p = C.applyResult(p, 'almost', now, false, r); assert.equal(p.box, 2);
+  p = C.applyResult(p, 'almost', now, false, r, 'typo', { almostPolicy: 'lenient' }); assert.equal(p.box, 2);  // lenient: almost holds the box
   p = C.applyResult(p, 'wrong', now, false, r); assert.equal(p.box, 0); assert.equal(p.due, now); assert.equal(p.lapses, 1);
   p = C.applyResult({ box: 8 }, 'correct', now, false, r); assert.equal(p.box, 8);
   p = C.applyResult({ box: 5, due: now + 999 }, 'correct', now, true, r); assert.equal(p.box, 5); assert.equal(p.due, now + 999); // free mode leaves schedule
@@ -71,4 +71,35 @@ t('parseDelimited', () => {
   const tsv = C.parseDelimited('bg\tnl\nДа.\tJa.');
   assert.equal(tsv[0].nl, 'Ja.');
 });
+
+// --- D-002: almost policy ---
+t('almostOutcome stages', () => {
+  const S = { almostPolicy: 'staged', almostFreePasses: 2 };
+  assert.deepEqual(C.almostOutcome(null, 'typo', S), { rating: 'correct', rule: 'free-pass', counter: 'almosts', used: 1, passes: 2 });
+  assert.equal(C.almostOutcome({ box: 2, almosts: 2 }, 'typo', S).rule, 'hold');       // passes used up
+  assert.equal(C.almostOutcome({ box: 2, almosts: 2 }, 'order', S).rule, 'free-pass'); // separate counter for word order
+  assert.equal(C.almostOutcome({ box: 4 }, 'typo', S).rule, 'hold');
+  assert.deepEqual(C.almostOutcome({ box: 6 }, 'typo', S), { rating: 'wrong', rule: 'lapse' });
+  assert.equal(C.almostOutcome({ box: 7 }, 'typo', { almostPolicy: 'lenient' }).rating, 'almost');
+  assert.equal(C.almostOutcome({ box: 0 }, 'typo', { almostPolicy: 'strict' }).rating, 'wrong');
+  assert.equal(C.almostOutcome({ box: 0 }, 'typo', { almostPolicy: 'staged', almostFreePasses: 0 }).rule, 'hold');
+});
+t('applyResult with almost policy', () => {
+  const now = 1e12, r = () => 0.5, S = { almostPolicy: 'staged', almostFreePasses: 2 };
+  // new card: two typos advance it to box 2, the third holds
+  let p = C.applyResult(null, 'almost', now, false, r, 'typo', S); assert.equal(p.box, 1); assert.equal(p.almosts, 1);
+  p = C.applyResult(p, 'almost', now, false, r, 'typo', S); assert.equal(p.box, 2); assert.equal(p.almosts, 2);
+  p = C.applyResult(p, 'almost', now, false, r, 'typo', S); assert.equal(p.box, 2); assert.equal(p.almosts, 2); assert.equal(p.lapses, 0);
+  // mature card: an almost lapses it
+  p = C.applyResult({ box: 7, due: now + 5e8 }, 'almost', now, false, r, 'typo', S);
+  assert.equal(p.box, 5); assert.equal(p.due, now); assert.equal(p.lapses, 1);
+  // free practice never consumes passes and never advances
+  p = C.applyResult({ box: 1 }, 'almost', now, true, r, 'typo', S); assert.equal(p.box, 1); assert.equal(p.almosts, undefined);
+  // lenient keeps the old behaviour; strict demotes
+  p = C.applyResult({ box: 7, due: now + 5e8 }, 'almost', now, false, r, 'typo', { almostPolicy: 'lenient' }); assert.equal(p.box, 7); assert.equal(p.lapses, 0);
+  p = C.applyResult({ box: 3 }, 'almost', now, false, r, 'typo', { almostPolicy: 'strict' }); assert.equal(p.box, 1); assert.equal(p.lapses, 1);
+  // no settings at all -> staged defaults
+  p = C.applyResult(null, 'almost', now, false, r, 'typo'); assert.equal(p.box, 1); assert.equal(p.almosts, 1);
+});
+
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

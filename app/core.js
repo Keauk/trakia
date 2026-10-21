@@ -118,10 +118,34 @@
   // --- scheduling ---------------------------------------------------------------------------
   function newRecord() { return { box: 0, due: 0, reps: 0, lapses: 0, streak: 0, last: 0 }; }
 
-  /** apply an answer to a progress record; returns a new record. free = free-practice mode */
-  function applyResult(p, result, now, free, rand) {
+  // --- "almost" policy (decision D-002) --------------------------------------------------------
+  // young card (box <= youngMaxBox): a near miss counts as correct, at most `almostFreePasses` times
+  // (typos and word-order misses have separate counters); established card: it holds its box;
+  // mature card (box >= matureMinBox): it lapses like a wrong answer.
+  const ALMOST = { youngMaxBox: 2, matureMinBox: 6 };
+  function almostOutcome(p, reason, settings) {
+    p = p || newRecord(); settings = settings || {};
+    const policy = settings.almostPolicy || 'staged';
+    const passes = settings.almostFreePasses == null ? 2 : settings.almostFreePasses;
+    const counter = reason === 'order' ? 'orders' : 'almosts';
+    const used = p[counter] || 0;
+    if (policy === 'strict') return { rating: 'wrong', rule: 'strict' };
+    if (policy === 'lenient') return { rating: 'almost', rule: 'hold' };
+    if ((p.box || 0) <= ALMOST.youngMaxBox && used < passes) return { rating: 'correct', rule: 'free-pass', counter, used: used + 1, passes };
+    if ((p.box || 0) >= ALMOST.matureMinBox) return { rating: 'wrong', rule: 'lapse' };
+    return { rating: 'almost', rule: 'hold' };
+  }
+
+  /** apply an answer to a progress record; returns a new record. free = free-practice mode.
+   *  reason ('typo' | 'order') and settings select the "almost" policy; see almostOutcome. */
+  function applyResult(p, result, now, free, rand, reason, settings) {
     p = Object.assign(newRecord(), p || {});
     rand = rand || Math.random;
+    if (result === 'almost') {
+      const o = almostOutcome(p, reason, settings);
+      if (o.rule === 'free-pass' && !free) p[o.counter] = o.used;
+      result = o.rating;
+    }
     p.reps += 1; p.last = now;
     if (result === 'wrong') {
       p.lapses += 1; p.streak = 0; p.box = Math.max(0, p.box - 2); p.due = now;
@@ -242,6 +266,6 @@
     return s;
   }
 
-  const api = { INTERVALS, MAX_BOX, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, almostOutcome, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,6 +1,6 @@
 # D-002: Make "almost" less forgiving as a card matures
 
-Status: proposed · Created: 2026-10-21 · Area: checking and scheduling (`core.js`: `check`, `applyResult`; `index.html`: `showFeedback`)
+Status: done (2026-10-21) · Created: 2026-10-21 · Area: checking and scheduling (`core.js`: `check`, `applyResult`; `index.html`: `showFeedback`)
 
 ## Context
 A near miss (within the typo tolerance, or the same Bulgarian words in another order) is scored
@@ -42,6 +42,17 @@ Thresholds become settings with these defaults so a learner can keep the lenient
 Small: ~40 lines plus tests. Risk: feeling punitive on long sentences where a single typo is likely;
 the diff and the honest verdict text mitigate that, and the typo tolerance setting still applies.
 
+## Implementation notes (as built)
+- `core.js`: `ALMOST = {youngMaxBox: 2, matureMinBox: 6}`, `almostOutcome(p, reason, settings)` returns
+  `{rating, rule}` with rules `free-pass` / `hold` / `lapse` / `strict`; `applyResult` takes `reason`
+  and `settings` and consumes a free pass only outside free practice. Counters `almosts` (typos) and
+  `orders` (word order) live in the progress record.
+- Settings: *What an almost does to the card* — `staged` (default), `lenient` (previous behaviour),
+  `strict`; plus *Free passes per card* (default 2). The box thresholds are constants, not settings.
+- The verdict still reads "≈ Almost" and now states the rule applied; a lapse re-queues the card in
+  the same session. The log row gained a fifth element with the effective rating.
+- Library row details show the free passes used. Stage 3 applies to both directions.
+
 ## Open questions
-- Should stage 3 also apply to the Dutch direction, where typos are less about the target language?
+- Stage 3 currently applies to the Dutch direction too; revisit if Dutch typos lapse too many cards.
 - Under D-001, is "treat as Hard" a better stage-2 mapping than "unchanged"?
