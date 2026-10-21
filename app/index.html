@@ -47,8 +47,6 @@ input[type=text],textarea,select,input[type=number]{width:100%;font:inherit;padd
 input[type=text]:focus{outline:none;border-color:var(--accent)}
 input.ok{border-color:var(--ok)}input.almost{border-color:var(--almost)}input.bad{border-color:var(--bad)}
 .preview{font-size:20px;margin:8px 0 0;min-height:1.4em}
-.keys{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.keys button{min-width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:18px;cursor:pointer}
 .verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;align-items:center;gap:10px}
 .verdict.correct{background:var(--ok-bg)}.verdict.almost{background:var(--almost-bg)}.verdict.wrong{background:var(--bad-bg)}
 .verdict small{font-weight:500;font-size:13px;color:var(--ink2)}
@@ -134,7 +132,6 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       <div id="newwords" class="chips"></div>
       <input type="text" id="answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" placeholder="Type the translation, then Enter">
       <p id="translit-preview" class="preview" hidden></p>
-      <div id="helper-keys" class="keys" hidden></div>
       <div class="row" id="answer-actions">
         <button class="btn primary" id="btn-check">Check</button>
         <button class="btn" id="btn-dontknow">Don't know</button>
@@ -266,7 +263,6 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   <div class="card">
     <h2>Typing</h2>
     <div class="toggle"><input type="checkbox" id="set-translit"><div>Latin keyboard for Bulgarian<div class="help">Type <i>kupih hlyab</i>, the Cyrillic preview is what gets checked. sh=ш ch=ч zh=ж sht=щ yu=ю ya=я y=ъ j=й x=ь c=ц q=я</div></div></div>
-    <div class="toggle"><input type="checkbox" id="set-keys"><div>Show helper keys (ъ ь щ ю я ѝ…)</div></div>
     <div class="field"><label for="set-theme">Theme</label><select id="set-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
   </div>
   <div class="card">
@@ -292,7 +288,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', typoPct: 10, bagOfWords: true, strictPunct: false, strictYi: false, stripAccents: true, translit: false, helperKeys: true, theme: 'auto' };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', typoPct: 10, bagOfWords: true, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 let userAlts = LS.get('userAlts', {});
@@ -379,7 +375,6 @@ function renderCard() {
   const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = dir === 'bg2nl' ? 'nl' : 'bg';
   inp.placeholder = dir === 'bg2nl' ? 'Type the Dutch translation, then Enter' : 'Напиши превода на български, после Enter';
   $('translit-preview').hidden = !(settings.translit && dir === 'nl2bg'); $('translit-preview').textContent = '';
-  $('helper-keys').hidden = !(settings.helperKeys && dir === 'nl2bg');
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
 }
@@ -446,11 +441,6 @@ function endSession() {
   $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.free ? ' Free practice does not move cards forward, only back.' : '') : 'No answers recorded.';
   session = null;
 }
-// helper keys
-const KEYS = ['ъ', 'ь', 'щ', 'ю', 'я', 'ѝ', 'ч', 'ш', 'ж', 'ц', 'й'];
-$('helper-keys').innerHTML = KEYS.map(k => `<button type="button" data-k="${k}">${k}</button>`).join('');
-$('helper-keys').addEventListener('click', e => { const k = e.target.dataset.k; if (!k) return; const inp = $('answer'); const st = inp.selectionStart || inp.value.length, en = inp.selectionEnd || st; inp.value = inp.value.slice(0, st) + k + inp.value.slice(en); inp.selectionStart = inp.selectionEnd = st + 1; inp.focus(); inp.dispatchEvent(new Event('input')); });
-$('helper-keys').addEventListener('mousedown', e => e.preventDefault());
 
 // ---------- stats ----------
 function renderStats() {
@@ -581,7 +571,7 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-keys', 'helperKeys', 'bool'), bind('set-theme', 'theme')];
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
 function afterSettingChange(key) { if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank; }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';

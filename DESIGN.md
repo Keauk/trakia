@@ -234,7 +234,7 @@ same behaviour as on the phone.
 | 2 | scheduling + stats | Leitner ladder, session builder, free practice, stats tab with 14-day chart, export/import progress | done |
 | 3 | import + adjudication | JSON/CSV/XLSX import with merge, "my answer was correct", export merged sentence set, delete/restore | done |
 | 4 | PWA | manifest, service worker, icons, install on Android | done (bump `CACHE_VERSION` in `sw.js` on each release) |
-| 5 | nice-to-have | transliteration input and helper keys (done), dark mode (done); TTS via Web Speech API (`bg-BG` voice on Android), Anki's own 2952 example sentences translated to Dutch as a second pack, edit-in-place in the Library | later |
+| 5 | nice-to-have | transliteration input (done), dark mode (done); TTS via Web Speech API (`bg-BG` voice on Android), Anki's own 2952 example sentences translated to Dutch as a second pack, edit-in-place in the Library | later |
 
 Suggested `index.html` structure (all in one file, ~900 lines total when finished):
 
