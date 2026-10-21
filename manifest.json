@@ -1,12 +1,12 @@
 {
-  "name": "Trakia — Bulgarian sentence trainer",
-  "short_name": "Trakia",
+  "name": "Тракия — Bulgarian sentence trainer",
+  "short_name": "Тракия",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#fcfcfb",
   "theme_color": "#1f6f8b",
-  "lang": "en",
+  "lang": "bg",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
