@@ -34,23 +34,39 @@ SENSE_HINTS = {
 }
 
 def build_index(words):
-    idx = {}
+    # exact dictionary forms win over inflected forms listed in the Forms column
+    # (e.g. "те" = they, rank 47, not the accusative of "ти"); forms are the fallback
+    exact, forms = {}, {}
     for w in words:
-        keys = {norm(w['bg'])}
+        k = norm(w['bg'])
+        if k not in exact or w['rank'] < exact[k]:
+            exact[k] = w['rank']
         # forms like "аз (ме, мен, ми)" or "съм / бъда" or "в (във)"
         for part in re.split(r'[(),/;]', w.get('forms', '')):
-            part = part.strip()
-            if part:
-                keys.add(norm(part))
-        for k in keys:
-            # keep the lowest rank when the same string appears twice
-            if k not in idx or w['rank'] < idx[k]:
-                idx[k] = w['rank']
+            part = norm(part)
+            if part and (part not in forms or w['rank'] < forms[part]):
+                forms[part] = w['rank']
+    idx = dict(forms); idx.update(exact)
     return idx
 
 # words a sentence may use without listing them (see BRIEF.md): never block on these
 FREE = {'ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха',
         'по', 'най', 'ѝ', 'и'}
+
+def resolve_lemma(lem, idx, en=''):
+    """rank of a lemma as written in a sentence's lemma list, or None. Honours "lemma#rank" and the
+    homograph sense hints (checked against the sentence's English gloss)."""
+    n = norm(lem)
+    if '#' in n:
+        n, _, forced = n.partition('#')
+        return int(forced)
+    if n not in idx:
+        return None
+    r = idx[n]
+    for (word, hi), hints in SENSE_HINTS.items():
+        if n == word and any(h in (en or '').lower() for h in hints):
+            r = hi
+    return r
 
 def main(argv):
     out = 'data/sentences.json'
@@ -78,17 +94,10 @@ def main(argv):
             seen.add(key)
             ranks, unresolved = [], []
             for lem in s['lemmas']:
-                n = norm(lem)
-                if '#' in n:
-                    n, _, forced = n.partition('#')
-                    ranks.append(int(forced)); continue
-                if n in idx:
-                    r = idx[n]
-                    for (word, hi), hints in SENSE_HINTS.items():
-                        if n == word and any(h in s.get('en', '').lower() for h in hints):
-                            r = hi
+                r = resolve_lemma(lem, idx, s.get('en', ''))
+                if r is not None:
                     ranks.append(r)
-                elif n in FREE:
+                elif norm(lem) in FREE:
                     pass
                 else:
                     unresolved.append(lem); unknown[lem] += 1
@@ -98,7 +107,7 @@ def main(argv):
                 'bg_alt': [a.strip() for a in s.get('bg_alt', []) if a.strip()],
                 'en': s.get('en', '').strip(), 'lemmas': s['lemmas'],
                 'max_rank': max(ranks) if ranks else None,
-                'tags': s.get('tags', []), 'source': 'generated-2026-10',
+                'tags': s.get('tags', []), 'source': s.get('source') or 'generated-2026-10',
             }
             if unresolved:
                 rec['unresolved'] = unresolved

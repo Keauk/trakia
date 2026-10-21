@@ -155,3 +155,84 @@ Fields not listed were unchanged. The app ignores punctuation when checking answ
   → Je spreekt Bulgaars bijna zonder accent.
 - **nl_alt**: Je spreekt Bulgaars bijna zonder accent.  
   → Je spreekt bijna zonder accent Bulgaars.
+
+# Gap batch review (2026-10-21, sentences F/G/H/J/K/L)
+
+The 579 gap-filling sentences went through the same two passes (6 reviewers × ~100, then 3 × ~193 Bulgarian-only).
+
+## F081
+- _pass 2: Collocation: for impaired walking ability Bulgarians say 'ходи трудно' (ходя = walk as an ability/habit); 'върви трудно' is unnatural here and can be read as 'things are going badly for him'._
+- **bg**: Той върви трудно след операцията.  
+  → Той ходи трудно след операцията.
+- **lemmas**: той | вървя | трудно | след | операция  
+  → той | ходя | трудно | след | операция
+
+## G024
+- _pass 1: nl_alt had comparative 'koeler' (= по-хладно); bg says 'хладно'_
+- **nl_alt**: Aan het eind van september wordt het koeler. | Eind september wordt het koel.  
+  → Aan het eind van september wordt het koel. | Eind september wordt het koel.
+
+## G067
+- _pass 1: nl_alt 'Onze buren hebben' is plural; bg 'съседът ни' is singular_
+- **nl_alt**: Onze buren hebben twee paarden.  
+  → (none)
+
+## G093
+- _pass 1: nl 'In het winkelcentrum zijn een bioscoop en veel winkels' is unnatural Dutch; existential needs 'er'_
+- **nl**: In het winkelcentrum zijn een bioscoop en veel winkels.  
+  → In het winkelcentrum zijn er een bioscoop en veel winkels.
+
+## G113
+- _pass 1: bg_alt 'зад хълма' drops the demonstrative 'онзи' (nl 'die heuvel'); not the same information_
+- **bg_alt**: Селото е зад хълма.  
+  → (none)
+
+## H042
+- _pass 1: 'badplaatsen' means seaside resorts only; 'курорти' is general (also mountain resorts), so 'vakantieoorden' is the better primary_
+- **nl**: In augustus zitten alle badplaatsen vol.  
+  → In augustus zijn alle vakantieoorden vol.
+- **nl_alt**: In augustus zijn alle vakantieoorden vol. | In augustus zitten alle resorts vol.  
+  → In augustus zitten alle badplaatsen vol. | In augustus zitten alle resorts vol.
+
+## H071
+- _pass 1: 'Този пръстен истинско злато ли е' is awkward; material predicate needs 'от' (matches nl 'van echt goud'); old bg kept as alt_
+- **bg**: Този пръстен истинско злато ли е?  
+  → Този пръстен от истинско злато ли е?
+- **bg_alt**: Истинско злато ли е този пръстен? | От истинско злато ли е този пръстен?  
+  → От истинско злато ли е този пръстен? | Истинско злато ли е този пръстен?
+- **lemmas**: този | пръстен | истински | злато  
+  → този | пръстен | от | истински | злато
+
+## H097
+- _pass 1: nl_alt said 'de buren' (plural); bg has 'съседа' (singular)_
+- **nl_alt**: De hond van de buurman maakt me 's ochtends wakker. | 's Morgens word ik gewekt door de hond van de buren.  
+  → De hond van de buurman maakt me 's ochtends wakker. | 's Morgens word ik gewekt door de hond van de buurman.
+
+## H100
+- _pass 1: nl_alt duplicated the primary nl; removed_
+- **nl_alt**: Heb je de lakens en handdoeken al in de was gedaan? | Heb je de lakens en de handdoeken al gewassen?  
+  → Heb je de lakens en handdoeken al in de was gedaan?
+
+## H107
+- _pass 1: primary nl dropped 'моля'; added 'alstublieft', kept the shorter form as alt_
+- **nl**: Gaat u zitten, de dokter komt zo.  
+  → Gaat u alstublieft zitten, de dokter komt zo.
+- **nl_alt**: Gaat u alstublieft zitten, de arts komt zo meteen. | Neemt u plaats, de dokter komt zo.  
+  → Gaat u zitten, de dokter komt zo. | Gaat u alstublieft zitten, de arts komt zo meteen. | Neemt u plaats, de dokter komt zo.
+
+## J062
+- _pass 1: 'Komen jullie binnen!' is not a Dutch imperative; replaced with 'Komt u binnen!'_
+- **nl_alt**: Welkom bij ons thuis! Kom binnen! | Welkom in ons huis! Komen jullie binnen!  
+  → Welkom bij ons thuis! Kom binnen! | Welkom in ons huis! Komt u binnen!
+
+## J064
+- _pass 1: 'en met jou?' only fits as a reply to 'hoe gaat het'; after 'wat is er nieuw' Dutch says 'en bij jou?' / 'en jij?'_
+- **nl**: Wat is er nieuw? – Niets bijzonders, en met jou?  
+  → Wat is er nieuw? – Niets bijzonders, en bij jou?
+- **nl_alt**: Nog nieuws? – Niets bijzonders, en bij jou? | Wat is er nieuw? – Niks bijzonders, en jij?  
+  → Nog nieuws? – Niets bijzonders, en jij? | Wat is er nieuw? – Niks bijzonders, en jij?
+
+## K025
+- _pass 2: Aspect: a single, complete future event after ще takes the perfective (оженя се, listed under lemma женя се); 'ще се женят' is colloquially heard but imperfective, which a strict teacher would correct to 'ще се оженят'._
+- **bg**: Иван и Мария са хубава двойка и скоро ще се женят.  
+  → Иван и Мария са хубава двойка и скоро ще се оженят.

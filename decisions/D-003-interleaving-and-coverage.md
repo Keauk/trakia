@@ -1,6 +1,6 @@
 # D-003: Interleave sessions and close vocabulary coverage gaps
 
-Status: in progress — session mixing done 2026-10-21, gap batch running · Created: 2026-10-21 · Area: session builder (`core.js`: `buildSession`), data pipeline (`tools/`)
+Status: done (2026-10-21) · Created: 2026-10-21 · Area: session builder (`core.js`: `buildSession`), data pipeline (`tools/`)
 
 ## Context
 `buildSession` serves due cards oldest-first and then new sentences in ascending `max_rank` order.
@@ -81,9 +81,16 @@ Anki order"; keep the rank chips under the prompt so new words are always visibl
 - Library filter *Thin coverage* lists sentences containing a word used in no other sentence; the row
   detail names those words ("Only here").
 - Measured before the gap batch (coverage.py, which also resolves inflected forms): 662 words up to
-  rank 1200 in fewer than two sentences, deficit 770 sentence slots. The gap batch targets exactly
-  that list in five rank windows (F, G, H, J, K ids), ~110 sentences each, same brief plus the gap
-  rules, validated and reviewed like the original set.
+  rank 1200 in fewer than two sentences, deficit 770 sentence slots. The gap batch targeted exactly
+  that list in five rank windows (F, G, H, J, K ids, ~110 sentences each) plus a 14-sentence
+  top-up (L ids), same brief plus the gap rules, validated and reviewed in two passes like the
+  original set (13 changes, see data/REVIEW_CHANGES.md). Result: **1578 sentences; every word up
+  to rank 1200 appears in at least two sentences** (ranks 1–600: all 600; 601–1200: 599 of 600 in
+  ≥2 and the last one in 2 after the top-up). Eight writer sentences were dropped as duplicates.
+- Index fix found on the way: dictionary-form matches now win over inflected forms in the
+  validator, the coverage tool and `core.js` (`wordIndex`), so "те" (they) no longer resolves to the
+  accusative of "ти", etc. Ten `max_rank` values changed as a result.
+- Ranks 1201–2952 remain thin (189 of 1752 words covered); a later batch can use the same tool.
 
 ## Open questions
 - ~~Should the rank weighting be a setting?~~ Yes: *New sentence order* in Settings.

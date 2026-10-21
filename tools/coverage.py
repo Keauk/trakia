@@ -8,13 +8,13 @@ or a form from the deck's Forms column; the validator's rules). Prints a per-ban
 --tsv, writes the words that appear in fewer than --min sentences (up to --max-rank) as
   rank <TAB> bulgarian <TAB> english <TAB> pos <TAB> have <TAB> need
 """
-import json, os, re, sys, unicodedata
+import json, os, sys
 from collections import Counter
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def norm(s):
-    return unicodedata.normalize('NFC', s).strip().lower().replace('ѝ', 'и')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from validate_sentences import build_index, resolve_lemma   # same resolution rules as the validator
 
 def main(argv):
     opts = {'--min': '2', '--max-rank': '2952', '--tsv': None}
@@ -25,19 +25,13 @@ def main(argv):
     need_min, max_rank = int(opts['--min']), int(opts['--max-rank'])
     words = json.load(open(os.path.join(root, 'data/words.json'), encoding='utf-8'))
     sents = json.load(open(os.path.join(root, 'data/sentences.json'), encoding='utf-8'))
-    idx = {}
-    for w in words:
-        keys = {norm(w['bg'])}
-        for part in re.split(r'[(),/;]', w.get('forms', '')):
-            if part.strip(): keys.add(norm(part))
-        for k in keys:
-            if k not in idx or w['rank'] < idx[k]: idx[k] = w['rank']
+    idx = build_index(words)
     count = Counter()
     for s in sents:
         ranks = set()
         for l in s['lemmas']:
-            l = norm(l.split('#')[0])
-            if l in idx: ranks.add(idx[l])
+            r = resolve_lemma(l, idx, s.get('en', ''))
+            if r is not None: ranks.add(r)
         for r in ranks: count[r] += 1
     print(f'{len(sents)} sentences, {len(words)} words')
     print(f'{"band":>10}  {"words":>5}  {">=1":>5}  {">=2":>5}  {">=3":>5}')
