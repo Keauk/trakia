@@ -64,6 +64,12 @@ input.ok{border-color:var(--ok)}input.almost{border-color:var(--almost)}input.ba
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+table.fixed{table-layout:fixed}
+td,th{overflow-wrap:anywhere}
+.card table{max-width:100%}
+.badge.b0{background:var(--bad-bg);color:var(--ink)}.badge.b1{background:var(--almost-bg);color:var(--ink)}.badge.b5{background:var(--ok-bg);color:var(--ink)}.badge.b8{background:var(--accent);color:var(--accent-ink)}
+.badge small{font-weight:500;opacity:.8;font-size:11px}
+.sub{display:block;color:var(--ink2);font-size:13px;margin-top:2px}
 tr.clickable{cursor:pointer}
 .boxes{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:8px 0}
 .boxes div{text-align:center;font-size:12px;color:var(--ink2)}
@@ -203,7 +209,8 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       <input type="text" id="lib-search" placeholder="search…" style="flex:1;min-width:140px">
     </div>
     <p class="tiny" id="lib-count"></p>
-    <table id="lib-table"></table>
+    <p class="tiny">The two right columns show each direction's <b>review box</b> (0 = again now … 8 = mastered) and when it is next due. "–" = not practised yet. Tap a row for details.</p>
+    <table id="lib-table" class="fixed"></table>
     <div class="row"><button class="btn small" id="lib-more" hidden>Show more</button></div>
   </div>
   <div class="card">
@@ -471,7 +478,7 @@ function renderStats() {
   $('stats-progress').innerHTML = html;
   // hardest
   const hard = Object.entries(progress).filter(([k, p]) => p.lapses > 0 && SENT_BY_ID.has(k.split('|')[0])).sort((a, b) => b[1].lapses - a[1].lapses || a[1].box - b[1].box).slice(0, 20);
-  $('hardest').innerHTML = hard.length ? '<tr><th>sentence</th><th>dir</th><th>lapses</th><th>box</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); return `<tr><td>${esc(dir === 'bg2nl' ? s.bg : s.nl)}</td><td>${dir === 'bg2nl' ? 'BG→NL' : 'NL→BG'}</td><td>${p.lapses}</td><td>${p.box}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
+  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:62px"><col style="width:56px"><col style="width:40px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>box</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); return `<tr><td>${esc(dir === 'bg2nl' ? s.bg : s.nl)}</td><td>${dir === 'bg2nl' ? 'BG→NL' : 'NL→BG'}</td><td>${p.lapses}</td><td>${p.box}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
   $('btn-drill').disabled = !hard.length; $('btn-drill').onclick = () => { showTab('practise'); startSession({ keys: hard.map(h => h[0]) }); };
 }
 function drawChart(days) {
@@ -515,8 +522,9 @@ function renderLibrary(reset) {
   });
   rows.sort((a, b) => (a.max_rank == null ? 1e9 : a.max_rank) - (b.max_rank == null ? 1e9 : b.max_rank) || a.id.localeCompare(b.id));
   $('lib-count').textContent = rows.length + ' sentences';
-  const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; return `<span class="badge" title="due ${p.due <= now ? 'now' : 'in ' + fmtAgo(p.due - now)}">${p.box}</span>`; };
-  $('lib-table').innerHTML = '<tr><th>rank</th><th>Bulgarian</th><th>Dutch</th><th>BG→NL</th><th>NL→BG</th></tr>' + rows.slice(0, libShown).map(s => `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td lang="bg">${esc(s.bg)}</td><td lang="nl">${esc(s.nl)}</td><td>${status(s, 'bg2nl')}</td><td>${status(s, 'nl2bg')}</td></tr>`).join('');
+  const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; const due = p.due <= now ? 'due' : fmtAgo(p.due - now); const cls = p.box === 0 ? 'b0' : p.box < 5 ? 'b1' : p.box < 8 ? 'b5' : 'b8'; return `<span class="badge ${cls}" title="box ${p.box}, ${p.due <= now ? 'due now' : 'due in ' + due}">${p.box}<small> · ${due}</small></span>`; };
+  const head = '<tr><th>rank</th><th>sentence</th><th>BG→NL</th><th>NL→BG</th></tr>';
+  $('lib-table').innerHTML = '<colgroup><col style="width:46px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="nl">${esc(s.nl)}</span></td><td>${status(s, 'bg2nl')}</td><td>${status(s, 'nl2bg')}</td></tr>`).join('');
   $('lib-more').hidden = rows.length <= libShown;
 }
 $('lib-table').addEventListener('click', e => {
@@ -527,7 +535,8 @@ $('lib-table').addEventListener('click', e => {
   const s = SENT_BY_ID.get(tr.dataset.id); if (!s) return;
   const ua = ['bg2nl', 'nl2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d === 'bg2nl' ? 'NL' : 'BG'}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
-  det.innerHTML = `<td colspan="5">${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
+  const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: box ${p.box}, ${p.reps} answers, ${p.lapses} lapses` : null; }).filter(Boolean);
+  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
   det.querySelector('[data-act=reset]').onclick = () => { delete progress[s.id + '|bg2nl']; delete progress[s.id + '|nl2bg']; save.progress(); renderLibrary(false); toast('Progress reset'); };
   det.querySelector('[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
