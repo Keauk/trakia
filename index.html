@@ -205,6 +205,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
         <option value="unseen">Not yet seen</option>
         <option value="locked">Locked (beyond my rank)</option>
         <option value="imported">Imported</option>
+        <option value="thin">Thin coverage (a word used nowhere else)</option>
       </select>
       <input type="text" id="lib-search" placeholder="search…" style="flex:1;min-width:140px">
     </div>
@@ -256,6 +257,9 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
         <option value="bg2nl">Bulgarian → Dutch only</option>
         <option value="nl2bg">Dutch → Bulgarian only</option>
       </select></div>
+    <div class="field"><label for="set-order">New sentence order</label>
+      <select id="set-order"><option value="mixed">Mixed — random, favouring lower ranks (recommended)</option><option value="strict">Strict — always the lowest rank first</option></select>
+      <div class="help">Mixed interleaves ranks and topics within a session, which is harder in the moment but retains better. Consecutive cards never share a word, and reviews are spread between new cards in both modes.</div></div>
     <div class="field"><label for="set-new">New sentences per session</label><div class="inline"><input type="number" id="set-new" min="0" max="100"></div></div>
     <div class="field"><label for="set-maxdue">Max reviews per session</label><div class="inline"><input type="number" id="set-maxdue" min="5" max="500"></div></div>
   </div>
@@ -305,7 +309,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 let userAlts = LS.get('userAlts', {});
@@ -326,8 +330,10 @@ function allSentences() {
   for (const id in userSentences) if (!del.has(id)) out.push(userSentences[id]);
   return out;
 }
-let SENT = allSentences(), SENT_BY_ID = new Map(SENT.map(s => [s.id, s]));
-function refreshSentences() { SENT = allSentences(); SENT_BY_ID = new Map(SENT.map(s => [s.id, s])); }
+let SENT = allSentences(), SENT_BY_ID = new Map(SENT.map(s => [s.id, s])), LEMMA_COUNT = countLemmas(SENT);
+function refreshSentences() { SENT = allSentences(); SENT_BY_ID = new Map(SENT.map(s => [s.id, s])); LEMMA_COUNT = countLemmas(SENT); }
+function countLemmas(list) { const m = new Map(); for (const s of list) for (const l of new Set((s.lemmas || []).map(x => C.normalise(x.split('#')[0], 'bg')))) m.set(l, (m.get(l) || 0) + 1); return m; }
+function onlyHere(s) { return (s.lemmas || []).map(x => C.normalise(x.split('#')[0], 'bg')).filter(l => !C.STOP.has(l) && LEMMA_COUNT.get(l) === 1); }
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
 function applyTheme() { document.documentElement.dataset.theme = settings.theme === 'auto' ? '' : settings.theme; }
@@ -529,6 +535,7 @@ function renderLibrary(reset) {
     if (f === 'seen' && !seen) return false;
     if (f === 'unseen' && (seen || !C.eligible(s, settings))) return false;
     if (f === 'imported' && !userSentences[s.id]) return false;
+    if (f === 'thin' && !onlyHere(s).length) return false;
     if (q && !(C.normalise(s.bg, 'nl').includes(q) || C.normalise(s.nl, 'nl').includes(q) || C.normalise(s.en || '', 'nl').includes(q) || s.id.toLowerCase().includes(q))) return false;
     return true;
   });
@@ -548,7 +555,7 @@ $('lib-table').addEventListener('click', e => {
   const ua = ['bg2nl', 'nl2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d === 'bg2nl' ? 'NL' : 'BG'}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
   const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: box ${p.box}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
-  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
+  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
   det.querySelector('[data-act=reset]').onclick = () => { delete progress[s.id + '|bg2nl']; delete progress[s.id + '|nl2bg']; save.progress(); renderLibrary(false); toast('Progress reset'); };
   det.querySelector('[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
@@ -593,7 +600,7 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
 function afterSettingChange(key) { if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank; }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';

@@ -175,14 +175,77 @@
     return ks;
   }
 
+  // function words ignored by the "no shared word between consecutive cards" rule (D-003)
+  const STOP = new Set(['и', 'в', 'на', 'за', 'от', 'с', 'че', 'аз', 'ти', 'той', 'тя', 'то', 'ние', 'вие', 'те', 'това', 'този', 'да', 'не', 'ли', 'ще', 'се', 'си', 'съм', 'е', 'но', 'а', 'или', 'много', 'един', 'как', 'какво', 'сега', 'тук', 'там', 'може', 'трябва', 'имам', 'искам', 'мой', 'твой', 'неин', 'негов', 'наш', 'ваш', 'техен']);
+  function contentLemmas(s) {
+    const out = new Set();
+    for (const l of (s && s.lemmas) || []) { const n = normalise(l.split('#')[0], 'bg'); if (n && !STOP.has(n)) out.add(n); }
+    return out;
+  }
+  function sharesLemma(a, b) { for (const x of a) if (b.has(x)) return true; return false; }
+
+  /** weighted sample without replacement; weight(item) > 0 */
+  function weightedSample(items, k, weight, rand) {
+    const pool = items.map(it => ({ it, w: weight(it) })), out = [];
+    while (pool.length && out.length < k) {
+      let total = 0; for (const p of pool) total += p.w;
+      let r = rand() * total, i = 0;
+      for (; i < pool.length - 1; i++) { r -= pool[i].w; if (r <= 0) break; }
+      out.push(pool[i].it); pool.splice(i, 1);
+    }
+    return out;
+  }
+
+  /**
+   * Order the cards so that consecutive cards do not share a content word and directions alternate
+   * where possible. Greedy: at each position pick the earliest remaining card that fits, preferring a
+   * different direction from the previous card; if nothing fits, take the earliest anyway.
+   */
+  function spreadOut(keys, byId) {
+    const rest = keys.slice(), out = [];
+    let prevLem = new Set(), prevDir = '';
+    while (rest.length) {
+      let pick = -1, fallback = -1;
+      for (let i = 0; i < rest.length; i++) {
+        const [id, dir] = rest[i].split('|'), lem = contentLemmas(byId.get(id));
+        if (sharesLemma(prevLem, lem)) continue;
+        if (fallback < 0) fallback = i;
+        if (dir !== prevDir) { pick = i; break; }
+      }
+      if (pick < 0) pick = fallback < 0 ? 0 : fallback;
+      const key = rest.splice(pick, 1)[0], [id, dir] = key.split('|');
+      out.push(key); prevLem = contentLemmas(byId.get(id)); prevDir = dir;
+    }
+    return out;
+  }
+
+  /** merge due and new cards: due order preserved, new cards spread between them, never more than 3 new in a row before a waiting due card */
+  function interleave(due, fresh) {
+    if (!due.length) return fresh.slice();
+    if (!fresh.length) return due.slice();
+    const out = [], per = fresh.length / due.length;
+    let credit = 0, f = 0;
+    for (const d of due) {
+      out.push(d); credit += per;
+      let n = Math.min(3, Math.floor(credit));
+      while (n-- > 0 && f < fresh.length) { out.push(fresh[f++]); credit -= 1; }
+    }
+    while (f < fresh.length) out.push(fresh[f++]);
+    return out;
+  }
+
   /**
    * buildSession(sentences[], progress, settings, now, rand) -> {queue: [key], free: bool, nDue, nNew}
-   * due cards first (oldest first, capped), then new eligible cards (lowest max_rank first).
+   * Due cards (oldest first, capped) and new eligible cards are mixed into one queue (D-003):
+   * unlocked NL->BG cards fill up to half the new slots first; the rest are a weighted random pick
+   * favouring lower ranks (settings.newOrder 'mixed', default) or strictly lowest-rank-first ('strict'); consecutive cards never share a content word when
+   * avoidable, directions alternate, and a due card never waits behind more than three new ones.
    * If nothing is due or new: free practice over the weakest seen cards.
    */
   function buildSession(sentences, progress, settings, now, rand) {
     rand = rand || Math.random;
-    const due = [], fresh = [];
+    const byId = new Map(sentences.map(s => [s.id, s]));
+    const due = [];
     const elig = sentences.filter(s => eligible(s, settings));
     for (const s of sentences) for (const k of cardKeys(s, progress, settings)) {
       const p = progress[k];
@@ -190,18 +253,27 @@
     }
     due.sort((x, y) => x.due - y.due);
     const dueKeys = due.slice(0, settings.maxDue || 40).map(x => x.k);
-    const order = shuffle(elig.slice(), rand).sort((x, y) => (x.max_rank == null ? Infinity : x.max_rank) - (y.max_rank == null ? Infinity : y.max_rank));
-    for (const s of order) {
-      for (const k of cardKeys(s, progress, settings)) if (!progress[k] && fresh.length < (settings.newPerSession || 10)) fresh.push(k);
-      if (fresh.length >= (settings.newPerSession || 10)) break;
+    const nNew = settings.newPerSession == null ? 10 : settings.newPerSession;
+    const candidates = [];
+    for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (!progress[k]) candidates.push({ k, rank: s.max_rank == null ? Infinity : s.max_rank });
+    // unlocked production cards (NL->BG of a sentence already seen) come first, up to half the new slots
+    const prod = shuffle(candidates.filter(c => c.k.endsWith('|nl2bg') && progress[c.k.replace('|nl2bg', '|bg2nl')]), rand).sort((x, y) => x.rank - y.rank).slice(0, Math.ceil(nNew / 2));
+    const taken = new Set(prod.map(c => c.k)), rest = candidates.filter(c => !taken.has(c.k)), slots = nNew - prod.length;
+    let fresh;
+    if (settings.newOrder === 'strict') {
+      fresh = shuffle(rest, rand).sort((x, y) => x.rank - y.rank).slice(0, slots);
+    } else {
+      const R = Math.max(50, settings.rank || 0);
+      fresh = weightedSample(rest, slots, c => c.rank === Infinity ? 0.1 : 1 / (1 + Math.pow(c.rank / R, 2)), rand);
     }
-    let queue = dueKeys.concat(fresh), free = false;
+    fresh = prod.concat(fresh).map(c => c.k);
+    let queue = spreadOut(interleave(dueKeys, fresh), byId), free = false;
     if (!queue.length) {
       free = true;
       const seen = [];
       for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (progress[k]) seen.push(k);
       shuffle(seen, rand).sort((x, y) => progress[x].box - progress[y].box);
-      queue = seen.slice(0, settings.freeSize || 20);
+      queue = spreadOut(seen.slice(0, settings.freeSize || 20), byId);
     }
     return { queue, free, nDue: due.length, nNew: fresh.length };
   }
@@ -266,6 +338,6 @@
     return s;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, almostOutcome, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
