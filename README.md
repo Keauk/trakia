@@ -28,3 +28,12 @@ python3 tools/export_anki_words.py deck.apkg  # refresh data/words.json from a n
 ```
 After changing index.html, core.js or data.js, bump `CACHE_VERSION` in `app/sw.js` so installed
 phones pick up the new version.
+
+## Publish (GitHub Pages)
+
+The site https://keauk.github.io/trakia/ is served from the `gh-pages` branch, which holds only the
+`app/` folder. After committing on `main`:
+
+```bash
+tools/publish.sh
+```
