@@ -88,6 +88,8 @@ input[type=range]{width:100%}
 .toggle .help{font-size:12px;color:var(--muted)}
 .lib-row-detail{background:var(--bg);font-size:13px}
 .lib-row-detail td{padding:10px}
+#update-bar{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:14px;box-shadow:var(--shadow);z-index:9;display:flex;gap:10px;align-items:center}
+#update-bar[hidden]{display:none}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--bg)}
@@ -272,6 +274,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   </div>
 </section>
 </main>
+<div id="update-bar" hidden><span>A new version is ready.</span> <button class="btn small" id="btn-update">Reload</button></div>
 <div id="toast"></div>
 
 <script src="data.js"></script>
@@ -588,7 +591,13 @@ $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted()
 
 // ---------- init ----------
 applyTheme(); renderHome();
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  let hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').then(reg => reg.update().catch(() => {})).catch(() => {});
+  // a new version has taken over: offer a reload (never forced, so a running session is not interrupted)
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) $('update-bar').hidden = false; hadController = true; });
+}
+$('btn-update').addEventListener('click', () => location.reload());
 window.addEventListener('resize', () => { if ($('tab-stats').classList.contains('active')) renderStats(); });
 })();
 </script>

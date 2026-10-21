@@ -1,10 +1,13 @@
 // Trakia service worker: cache-first for the app shell so it works offline once installed.
 // Bump CACHE_VERSION whenever index.html, core.js or data.js change.
-const CACHE_VERSION = 'trakia-v4';
+const CACHE_VERSION = 'trakia-v5';
 const SHELL = ['./', './index.html', './core.js', './data.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' bypasses the browser's HTTP cache so a new version never re-caches stale files
+  e.waitUntil(caches.open(CACHE_VERSION)
+    .then(c => Promise.all(SHELL.map(u => fetch(u, { cache: 'reload' }).then(r => { if (r.ok) return c.put(u, r); throw new Error(u + ' ' + r.status); }))))
+    .then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
