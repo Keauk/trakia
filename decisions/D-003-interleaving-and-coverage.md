@@ -1,6 +1,6 @@
 # D-003: Interleave sessions and close vocabulary coverage gaps
 
-Status: proposed · Created: 2026-10-21 · Area: session builder (`core.js`: `buildSession`), data pipeline (`tools/`)
+Status: in progress — session mixing done 2026-10-21, gap batch running · Created: 2026-10-21 · Area: session builder (`core.js`: `buildSession`), data pipeline (`tools/`)
 
 ## Context
 `buildSession` serves due cards oldest-first and then new sentences in ascending `max_rank` order.
@@ -60,6 +60,31 @@ agent time plus the same validation and review pipeline as the original 999 (abo
 wall-clock with reviews). Risk: weighted random can surprise a learner who expects "next word in
 Anki order"; keep the rank chips under the prompt so new words are always visible.
 
+## Implementation notes (as built)
+**Session mixing** (`core.js`)
+- New cards: unlocked NL→BG cards of sentences already seen fill up to half of `newPerSession` first
+  (lowest rank first). The remaining slots are a weighted random sample without replacement over the
+  other eligible unseen cards, weight `1 / (1 + (max_rank / R)^2)` with `R = max(50, rank)`; rank-less
+  sentences get weight 0.1. Setting *New sentence order*: `mixed` (default) or `strict` (old
+  lowest-rank-first behaviour). Both are deterministic under an injected `rand`.
+- `interleave(due, fresh)`: due order preserved, new cards spread between due cards, at most three new
+  cards before a waiting due card.
+- `spreadOut(keys, byId)`: greedy reorder so consecutive cards share no content lemma (a `STOP` set
+  of ~45 function words is ignored), preferring a change of direction; falls back to the earliest card
+  when no conflict-free card exists. Applied to free practice as well.
+- Tests: interleave limits, spreadOut constraints, mixed spread and lower-rank preference, strict
+  mode exactness, due cards spread through the session, production-card priority.
+
+**Coverage**
+- `tools/coverage.py [--min 2] [--max-rank 1200] [--tsv gaps.tsv]` prints the per-band table and
+  writes the gap list (rank, word, english, pos, have, need).
+- Library filter *Thin coverage* lists sentences containing a word used in no other sentence; the row
+  detail names those words ("Only here").
+- Measured before the gap batch (coverage.py, which also resolves inflected forms): 662 words up to
+  rank 1200 in fewer than two sentences, deficit 770 sentence slots. The gap batch targets exactly
+  that list in five rank windows (F, G, H, J, K ids), ~110 sentences each, same brief plus the gap
+  rules, validated and reviewed like the original set.
+
 ## Open questions
-- Should the rank weighting be a setting ("strict Anki order" vs "mixed")?
+- ~~Should the rank weighting be a setting?~~ Yes: *New sentence order* in Settings.
 - Do we also want topic tags interleaved (the `tags` field exists but is loosely populated)?

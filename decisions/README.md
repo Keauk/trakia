@@ -8,7 +8,7 @@ current code), acceptance criteria (how we know it is done), effort and risks, o
 |----|-------|------|--------|
 | [D-001](D-001-fsrs-scheduler.md) | Replace the Leitner ladder with an FSRS-style scheduler | scheduling | proposed |
 | [D-002](D-002-almost-strictness.md) | Make "almost" less forgiving as a card matures | checking / scheduling | done |
-| [D-003](D-003-interleaving-and-coverage.md) | Interleave sessions and close vocabulary coverage gaps | session builder / data | proposed |
+| [D-003](D-003-interleaving-and-coverage.md) | Interleave sessions and close vocabulary coverage gaps | session builder / data | in progress |
 | [D-004](D-004-productive-direction.md) | Weight sessions toward Dutch → Bulgarian once a sentence is known | session builder | proposed |
 | [D-005](D-005-audio-and-dictation.md) | Speak Bulgarian sentences and add a dictation mode | practise UI | proposed |
 | [D-006](D-006-explanatory-feedback-and-self-judgement.md) | Explain why an answer was wrong; ask for a confidence judgement first | feedback UI | proposed |
