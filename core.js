@@ -307,12 +307,14 @@
 
   /** build lookup: normalised dictionary form / listed form -> {rank, en} */
   function wordIndex(words) {
-    const idx = new Map();
+    // exact dictionary forms win over inflected forms from the Forms column; forms are the fallback
+    const exact = new Map(), forms = new Map();
     for (const w of words) {
-      const keys = new Set([normalise(w.bg, 'bg')]);
-      for (const part of (w.forms || '').split(/[(),\/;]/)) { const p = normalise(part, 'bg'); if (p) keys.add(p); }
-      for (const k of keys) if (!idx.has(k) || w.rank < idx.get(k).rank) idx.set(k, { rank: w.rank, en: w.en, bg: w.bg });
+      const k = normalise(w.bg, 'bg'), rec = { rank: w.rank, en: w.en, bg: w.bg };
+      if (!exact.has(k) || w.rank < exact.get(k).rank) exact.set(k, rec);
+      for (const part of (w.forms || '').split(/[(),\/;]/)) { const p = normalise(part, 'bg'); if (p && (!forms.has(p) || w.rank < forms.get(p).rank)) forms.set(p, rec); }
     }
+    const idx = new Map(forms); for (const [k, v] of exact) idx.set(k, v);
     return idx;
   }
 
