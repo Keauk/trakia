@@ -263,6 +263,14 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
     <h2>Answer checking</h2>
     <div class="field"><label for="set-typo">Typo tolerance (% of answer length)</label><div class="inline"><input type="number" id="set-typo" min="0" max="30"></div>
       <div class="help">10 % ≈ one typo per ten characters still counts as <b>almost</b>. 0 = only exact matches are correct (always 1 char tolerance).</div></div>
+    <div class="field"><label for="set-almost">What an <b>almost</b> does to the card</label>
+      <select id="set-almost">
+        <option value="staged">Staged — free passes while young, holds when established, lapses when mature</option>
+        <option value="lenient">Lenient — always holds the card in its box</option>
+        <option value="strict">Strict — always scheduled as wrong</option>
+      </select>
+      <div class="help">Staged: on a card in box 0–2 a near miss counts as correct, up to the number of free passes below (typos and word-order misses counted separately). In boxes 3–5 the card keeps its box. From box 6 a clean answer is required, otherwise the card lapses. The verdict always still says "almost" and shows the exact diff.</div></div>
+    <div class="field"><label for="set-passes">Free passes per card (staged mode)</label><div class="inline"><input type="number" id="set-passes" min="0" max="10"></div></div>
     <div class="toggle"><input type="checkbox" id="set-bag"><div>Bulgarian word order is free<div class="help">Same words in another order counts as <b>almost</b>.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-punct"><div>Strict punctuation<div class="help">Off: punctuation and quotes are ignored.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-yi"><div>Strict ѝ<div class="help">Off: ѝ (her) and и are treated the same.</div></div></div>
@@ -297,7 +305,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', typoPct: 10, bagOfWords: true, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 let userAlts = LS.get('userAlts', {});
@@ -406,14 +414,17 @@ function checkAnswer(giveUp) {
   const typed = giveUp ? '' : typedValue();
   const accepted = allAccepted(s, dir, key);
   const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], lang, settings), reason: 'skip' } : C.check(typed, accepted, lang, settings);
-  session.pending = { result: r.result, typed, key };
-  showFeedback(r, s, dir, accepted, giveUp);
+  const outcome = r.result === 'almost' ? C.almostOutcome(progress[key], r.reason, settings) : null;
+  session.pending = { result: r.result, typed, key, reason: r.reason, outcome };
+  showFeedback(r, s, dir, accepted, giveUp, outcome);
 }
-function showFeedback(r, s, dir, accepted, giveUp) {
+function showFeedback(r, s, dir, accepted, giveUp, outcome) {
   const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
   $('answer-actions').hidden = true; $('feedback').hidden = false;
   const v = $('verdict'); v.className = 'verdict ' + r.result;
-  const why = r.reason === 'typo' ? `<small>${r.dist} character${r.dist > 1 ? 's' : ''} off — counts as correct, box unchanged</small>` : r.reason === 'order' ? '<small>same words, different order</small>' : r.reason === 'skip' ? '<small>shown</small>' : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
+  const how = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'order' ? 'same words, different order' : '';
+  const rule = !outcome ? '' : outcome.rule === 'free-pass' ? ` · counted as correct (free pass ${outcome.used} of ${outcome.passes} on a young card)` : outcome.rule === 'lapse' ? ' · this card is mature, so it goes back for review' : outcome.rule === 'strict' ? ' · strict mode: scheduled as wrong' : ' · card keeps its box';
+  const why = r.result === 'almost' ? `<small>${how}${session.free ? '' : rule}</small>` : r.reason === 'skip' ? '<small>shown</small>' : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
   v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + ' ' + why;
   $('expected').textContent = r.expected || accepted[0];
   const d = $('diff');
@@ -433,12 +444,13 @@ function acceptMine() {
 function next() {
   const p = session.pending; if (!p) return;
   const item = session.queue[session.i];
-  progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free);
-  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0]);
+  const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
+  progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
+  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0]);
   if (log.length > 20000) log = log.slice(-15000);
   save.progress(); save.log();
   session.counts[p.result]++;
-  if (p.result === 'wrong' && !item.retry) session.queue.push({ key: p.key, retry: true });
+  if (effective === 'wrong' && !item.retry) session.queue.push({ key: p.key, retry: true });
   session.i++; renderCard();
 }
 function endSession() {
@@ -535,7 +547,7 @@ $('lib-table').addEventListener('click', e => {
   const s = SENT_BY_ID.get(tr.dataset.id); if (!s) return;
   const ua = ['bg2nl', 'nl2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d === 'bg2nl' ? 'NL' : 'BG'}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
-  const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: box ${p.box}, ${p.reps} answers, ${p.lapses} lapses` : null; }).filter(Boolean);
+  const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: box ${p.box}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
   det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
   det.querySelector('[data-act=reset]').onclick = () => { delete progress[s.id + '|bg2nl']; delete progress[s.id + '|nl2bg']; save.progress(); renderLibrary(false); toast('Progress reset'); };
@@ -581,7 +593,7 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
 function afterSettingChange(key) { if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank; }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
