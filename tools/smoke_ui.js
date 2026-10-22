@@ -16,7 +16,7 @@ const type = (v, key) => { $('answer').value = v; $('answer').dispatchEvent(new 
 const C = window.TrakiaCore;
 
 // home renders with the deck position
-assert.match($('home-summary').textContent, /within your Anki position \(word 102\)/);
+assert.match($('home-summary').textContent, /fit your Anki position \(word 102\)/);
 assert.match($('hdr-rank').textContent, /word 102/);
 // start a session -> first card is BG->NL, lowest rank first
 $('btn-start').click();

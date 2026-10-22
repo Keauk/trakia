@@ -288,8 +288,25 @@
     return p;
   }
 
+  // grammar stages (decision D-008): a sentence is eligible only if all its tagged grammar features
+  // are allowed at the learner's stage. Untagged sentences pass. Informational tags never gate.
+  const STAGES = {
+    1: ['present', 'da-clause'],
+    2: ['present', 'da-clause', 'future', 'imperative'],
+    3: ['present', 'da-clause', 'future', 'imperative', 'aorist', 'perfect'],
+    4: ['present', 'da-clause', 'future', 'imperative', 'aorist', 'perfect', 'imperfect', 'conditional'],
+    5: null,   // everything
+  };
+  const INFO_TAGS = new Set(['comparative', 'numeral']);
+  function grammarOk(s, settings) {
+    const stage = settings && settings.stage != null ? settings.stage : 5;
+    const allowed = STAGES[stage] === undefined ? null : STAGES[stage];
+    if (!allowed || !s.grammar || !s.grammar.length) return true;
+    for (const g of s.grammar) if (!INFO_TAGS.has(g) && !allowed.includes(g)) return false;
+    return true;
+  }
   function eligible(s, settings) {
-    return s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0);
+    return (s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)) && grammarOk(s, settings);
   }
 
   function shuffle(arr, rand) { rand = rand || Math.random; for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
@@ -468,6 +485,6 @@
     return s;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

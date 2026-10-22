@@ -173,6 +173,17 @@ t('D-003 unlocked production cards come first', () => {
   const s2 = C.buildSession(S, prog5, { rank: 400, newPerSession: 4, directions: 'gated', newOrder: 'strict' }, 1e12, rand);
   assert.deepEqual(s2.queue.filter(k => k.endsWith('|nl2bg')).sort(), ['s20|nl2bg', 's21|nl2bg']);
 });
+t('D-008 grammar stages', () => {
+  const S = [{ id: 'a', max_rank: 10, grammar: ['present'] }, { id: 'b', max_rank: 10, grammar: ['aorist'] }, { id: 'c', max_rank: 10, grammar: ['present', 'future', 'numeral'] }, { id: 'd', max_rank: 10 }];
+  const el = st => S.filter(s => C.eligible(s, { rank: 100, stage: st })).map(s => s.id).join('');
+  assert.equal(el(1), 'ad'); assert.equal(el(2), 'acd'); assert.equal(el(3), 'abcd'); assert.equal(el(5), 'abcd');
+  assert.equal(el(undefined), 'abcd', 'no stage setting = everything');
+  assert.ok(C.grammarOk({ grammar: ['present', 'comparative'] }, { stage: 1 }), 'informational tags never gate');
+  // due cards are served regardless of stage; new cards are gated
+  const now = 1e12, prog = { 'b|bg2nl': { s: 3, d: 5, state: 'review', due: now - 1, last: now - 4 * 86400e3 } };
+  const q = C.buildSession(S, prog, { rank: 100, stage: 1, newPerSession: 10, directions: 'bg2nl', newOrder: 'strict' }, now, () => 0.5).queue;
+  assert.deepEqual(q, ['b|bg2nl', 'a|bg2nl', 'd|bg2nl']);
+});
 t('rowToSentence + index', () => {
   const idx = C.wordIndex([{ rank: 1, bg: 'и', en: 'and', forms: '' }, { rank: 8, bg: 'аз', en: 'I', forms: 'аз (ме, мен, ми)' }, { rank: 300, bg: 'хляб', en: 'bread', forms: '' }]);
   assert.equal(idx.get('ми').rank, 8);
