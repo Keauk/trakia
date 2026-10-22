@@ -28,6 +28,8 @@ interface Settings {
   directions: string; newOrder: string; lang: string; typoPct: number; bagOfWords: boolean;
   almostPolicy: string; almostFreePasses: number; retention: number; maxInterval: number; stage: number;
   strictPunct: boolean; strictYi: boolean; stripAccents: boolean; strictForms: boolean; translit: boolean; theme: string;
+  /** cards in a row on one keyboard before switching (D-021); 1 alternates every card */
+  dirRun: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 

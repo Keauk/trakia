@@ -131,28 +131,27 @@ $('answer').value = 'iets\n'; $('answer').dispatchEvent(new window.InputEvent('i
 assert.equal($('feedback').hidden, false, 'line break from the keyboard submits the answer');
 assert.ok(!/\n/.test($('answer').value), 'no newline left in the field');
 $('btn-quit').click(); $('btn-home').click();
-// --- D-012: collapsible alternatives
+// --- D-012: collapsible alternatives; D-021: every card starts collapsed, the accept button under the toggle
 document.querySelector('nav button[data-tab=practise]').click();
 $('btn-home').click(); $('btn-start').click();
 {
-  let checked = false;
-  for (let i = 0; i < 40 && !$('session-run').hidden && !checked; i++) {
+  let checked = 0;
+  for (let i = 0; i < 40 && !$('session-run').hidden && checked < 2; i++) {
     type('zzz qqq');
     if (!$('alts').hidden) {
       const n = $('alts').querySelectorAll('li').length;
       assert.ok(n >= 1);
-      assert.equal($('alts').open, false, 'collapsed by default');
+      assert.equal($('alts').open, false, checked ? 'collapsed again after the previous card was opened' : 'collapsed by default');
       assert.match($('alts').querySelector('summary').textContent, new RegExp('^' + n + ' other accepted answer'));
       assert.ok(!$('feedback').textContent.includes('Also accepted:'), 'no inline list any more');
+      assert.equal($('alts').nextElementSibling, $('btn-accept'), '"My answer was correct" comes after the toggle');
       $('alts').open = true; $('alts').dispatchEvent(new window.Event('toggle'));
-      assert.equal(JSON.parse(window.localStorage.getItem('trakia.altsOpen')), true, 'open state remembered');
-      $('alts').open = false; $('alts').dispatchEvent(new window.Event('toggle'));
-      assert.equal(JSON.parse(window.localStorage.getItem('trakia.altsOpen')), false);
-      checked = true;
+      assert.equal(window.localStorage.getItem('trakia.altsOpen'), null, 'open state not remembered');
+      checked++;
     }
     type('', 'Enter');
   }
-  assert.ok(checked, 'found a card with alternatives');
+  assert.equal(checked, 2, 'found two cards with alternatives');
   if (!$('session-run').hidden) $('btn-quit').click();
   $('btn-home').click();
 }
@@ -211,7 +210,8 @@ assert.equal($('answer').placeholder, 'Type the English translation');
 type(sEn.en.toLowerCase());
 assert.match($('verdict').className, /correct/, 'English primary accepted in lower case: ' + $('verdict').textContent);
 if (/\p{Lu}/u.test(sEn.en)) { assert.ok($('expected').querySelector('mark'), 'case difference highlighted'); assert.equal($('verdict-note').textContent, 'Accepted — small differences highlighted'); }
-assert.match($('gloss').textContent, /^NL .+ · rank \d+/, 'third language and rank shown as gloss: ' + $('gloss').textContent);
+assert.match($('gloss').textContent, /^rank \d+/, 'only the rank under the answer (D-021): ' + $('gloss').textContent);
+assert.ok(!$('gloss').textContent.includes(sEn.nl), 'no Dutch translation while practising English');
 type('', 'Enter');
 // a contraction / spelling variant of the next English answer is still correct
 const sEn2 = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
@@ -253,6 +253,24 @@ document.querySelector('nav button[data-tab=practise]').click();
 $('btn-start').click();
 assert.ok(/NL/.test($('dir-badge').textContent), 'Dutch direction again: ' + $('dir-badge').textContent);
 $('btn-quit').click(); $('btn-home').click();
+// D-021: cards in a row before switching keyboard
+document.querySelector('nav button[data-tab=settings]').click();
+assert.equal($('set-run').value, '1', 'default: switch on every card');
+$('set-run').value = '4'; $('set-run').dispatchEvent(new window.Event('input'));
+assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).dirRun, 4, 'stored as a number');
+document.querySelector('nav button[data-tab=practise]').click();
+$('btn-start').click();
+{
+  const kbs = [];
+  for (let i = 0; i < 80 && !$('session-run').hidden; i++) { if (!$('retry-badge').hidden) break; kbs.push(/→ BG$/.test($('dir-badge').textContent) ? 'C' : 'L'); $('btn-dontknow').click(); $('btn-next').click(); }
+  const runs = kbs.join('').match(/C+|L+/g) || [];
+  assert.ok(runs.slice(0, -2).every(r => r.length >= 4), 'blocks of four before the last two: ' + kbs.join(''));
+}
+if (!$('session-run').hidden) $('btn-quit').click();
+$('btn-home').click();
+document.querySelector('nav button[data-tab=settings]').click();
+$('set-run').value = '1'; $('set-run').dispatchEvent(new window.Event('input'));
+document.querySelector('nav button[data-tab=practise]').click();
 // import a CSV with lemmas and one estimated row
 const csv = 'bg,nl,nl_alt,lemmas\n"Дай ми хляб.",Geef me brood.,Geef mij brood.,"аз, хляб"\n"Това е тест.",Dit is een test.,,\n';
 const file = new window.File([csv], 'extra.csv', { type: 'text/csv' });

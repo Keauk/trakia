@@ -510,23 +510,59 @@
    * Order the cards so that consecutive cards do not share a content word and directions alternate
    * where possible. Greedy: at each position pick the earliest remaining card that fits, preferring a
    * different direction from the previous card; if nothing fits, take the earliest anyway.
+   * With run > 1 (D-021) cards typed in Bulgarian and cards typed in Dutch or English come in blocks
+   * of `run` instead, keeping the previous direction inside a block where possible.
+   * @param {string[]} keys @param {Map<string, any>} byId @param {number} [run]
    */
-  function spreadOut(keys, byId) {
+  function spreadOut(keys, byId, run) {
     const rest = keys.slice(), out = [];
-    let prevLem = new Set(), prevDir = '';
+    let prevLem = new Set(), prevDir = '', prevKb = /** @type {boolean | null} */ (null), runLen = 0;
     while (rest.length) {
       let pick = -1, fallback = -1;
-      for (let i = 0; i < rest.length; i++) {
-        const [id, dir] = rest[i].split('|'), lem = contentLemmas(byId.get(id));
-        if (sharesLemma(prevLem, lem)) continue;
-        if (fallback < 0) fallback = i;
-        if (dir !== prevDir) { pick = i; break; }
+      if (!run || run <= 1) {
+        for (let i = 0; i < rest.length; i++) {
+          const [id, dir] = rest[i].split('|'), lem = contentLemmas(byId.get(id));
+          if (sharesLemma(prevLem, lem)) continue;
+          if (fallback < 0) fallback = i;
+          if (dir !== prevDir) { pick = i; break; }
+        }
+        if (pick < 0) pick = fallback < 0 ? 0 : fallback;
+      } else {
+        // stay on the keyboard while the block is short, then switch. Inside a block the keyboard comes before
+        // the shared-word rule; at a switch the rule comes first, so the block runs on rather than showing
+        // the reverse of the card just answered. Highest score wins, the earliest card on a tie.
+        const want = prevKb === null ? null : runLen < run ? prevKb : !prevKb, stay = want === prevKb;
+        const top = want === null ? 1 : stay ? 4 : 3;
+        let bestScore = -1;
+        for (let i = 0; i < rest.length; i++) {
+          const [id, dir] = rest[i].split('|'), kb = dir.endsWith('2bg'), fits = !sharesLemma(prevLem, contentLemmas(byId.get(id)));
+          const score = want === null ? 1
+            : stay ? (kb === want ? (fits ? (dir === prevDir ? 4 : 3) : 2) : fits ? 1 : 0)
+            : (kb === want ? (fits ? 3 : 1) : fits ? 2 : 0);
+          if (score > bestScore) { pick = i; bestScore = score; if (score === top) break; }
+        }
       }
-      if (pick < 0) pick = fallback < 0 ? 0 : fallback;
-      const key = rest.splice(pick, 1)[0], [id, dir] = key.split('|');
-      out.push(key); prevLem = contentLemmas(byId.get(id)); prevDir = dir;
+      const key = rest.splice(pick, 1)[0], [id, dir] = key.split('|'), kb = dir.endsWith('2bg');
+      runLen = kb === prevKb ? runLen + 1 : 1;
+      out.push(key); prevLem = contentLemmas(byId.get(id)); prevDir = dir; prevKb = kb;
     }
     return out;
+  }
+
+  /**
+   * Full keyboard blocks (D-021): per keyboard (typed in Bulgarian or not), drop the least urgent due
+   * keys so that its card count is a whole number of blocks. Only when that keyboard has more than
+   * one block and enough due cards to drop; new cards are never dropped.
+   * @param {string[]} dueKeys most urgent first @param {string[]} freshKeys @param {number} run @returns {string[]}
+   */
+  function fullBlocks(dueKeys, freshKeys, run) {
+    if (!run || run <= 1) return dueKeys;
+    const kb = (/** @type {string} */ k) => parseKey(k).toBg, drop = new Set();
+    for (const side of [true, false]) {
+      const due = dueKeys.filter(k => kb(k) === side), n = due.length + freshKeys.filter(k => kb(k) === side).length, r = n % run;
+      if (n > run && r && due.length >= r) for (const k of due.slice(-r)) drop.add(k);
+    }
+    return dueKeys.filter(k => !drop.has(k));
   }
 
   /** merge due and new cards: due order preserved, new cards spread between them, never more than 3 new in a row before a waiting due card */
@@ -549,7 +585,8 @@
    * Due cards (oldest first, capped) and new eligible cards are mixed into one queue (D-003):
    * unlocked NL->BG cards fill up to half the new slots first; the rest are a weighted random pick
    * favouring lower ranks (settings.newOrder 'mixed', default) or strictly lowest-rank-first ('strict'); consecutive cards never share a content word when
-   * avoidable, directions alternate, and a due card never waits behind more than three new ones.
+   * avoidable, directions alternate (or come in keyboard blocks of settings.dirRun, D-021), and a due
+   * card never waits behind more than three new ones.
    * If nothing is due or new: free practice over the weakest seen cards.
    */
   function buildSession(sentences, progress, settings, now, rand) {
@@ -562,7 +599,7 @@
       if (p && p.due <= now) due.push({ k, due: p.due, r: recallNow(p, now, settings) });
     }
     due.sort((x, y) => x.r - y.r || x.due - y.due);   // most forgotten first; learning-step cards (r = 0) lead
-    const dueKeys = due.slice(0, settings.maxDue || 40).map(x => x.k);
+    let dueKeys = due.slice(0, settings.maxDue || 40).map(x => x.k);
     const nNew = settings.newPerSession == null ? 10 : settings.newPerSession;
     const candidates = [];
     for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (!progress[k]) candidates.push({ k, rank: s.max_rank == null ? Infinity : s.max_rank });
@@ -577,13 +614,15 @@
       fresh = weightedSample(rest, slots, c => c.rank === Infinity ? 0.1 : 1 / (1 + Math.pow(c.rank / R, 2)), rand);
     }
     fresh = prod.concat(fresh).map(c => c.k);
-    let queue = spreadOut(interleave(dueKeys, fresh), byId), free = false;
+    const run = settings.dirRun || 1;
+    dueKeys = fullBlocks(dueKeys, fresh, run);
+    let queue = spreadOut(interleave(dueKeys, fresh), byId, run), free = false;
     if (!queue.length) {
       free = true;
       const seen = [];
       for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (progress[k]) seen.push(k);
       shuffle(seen, rand).sort((x, y) => boxFromRecord(progress[x]) - boxFromRecord(progress[y]));
-      queue = spreadOut(seen.slice(0, settings.freeSize || 20), byId);
+      queue = spreadOut(fullBlocks(seen.slice(0, settings.freeSize || 20), [], run), byId, run);
     }
     return { queue, free, nDue: due.length, nNew: fresh.length };
   }
@@ -697,6 +736,6 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, wordSlips, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, wordSlips, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -148,6 +148,41 @@ t('buildSession (strict order)', () => {
   s = C.buildSession([S[0]], { 'a|bg2nl': { box: 2, due: now + 1e9 }, 'a|nl2bg': { box: 1, due: now + 1e9 } }, { rank: 100, directions: 'both' }, now, () => 0.5);
   assert.equal(s.free, true); assert.deepEqual(s.queue, ['a|nl2bg', 'a|bg2nl']);
 });
+t('D-021 keyboard blocks', () => {
+  // twelve sentences with no shared words; L = typed in Dutch/English, C = typed in Bulgarian
+  const ids = 'abcdefghijkl'.split(''), byId = new Map(ids.map((id, i) => [id, { id, lemmas: ['дума' + i] }]));
+  const kb = k => k.endsWith('2bg') ? 'C' : 'L', pattern = q => q.map(kb).join('');
+  const mixed = ids.map((id, i) => id + (i % 2 ? '|nl2bg' : '|bg2nl'));
+  assert.equal(pattern(C.spreadOut(mixed, byId)), 'LCLCLCLCLCLC', 'run 1: alternate as before');
+  assert.deepEqual(C.spreadOut(mixed, byId, 1), C.spreadOut(mixed, byId), 'run 1 is the old order');
+  assert.equal(pattern(C.spreadOut(mixed, byId, 3)), 'LLLCCCLLLCCC');
+  assert.equal(pattern(C.spreadOut(mixed, byId, 4)), 'LLLLCCCCLLCC');
+  // one keyboard runs out: the rest stays on the other, no extra switches
+  const lopsided = ids.map((id, i) => id + (i < 9 ? '|bg2nl' : '|nl2bg'));
+  assert.equal(pattern(C.spreadOut(lopsided, byId, 4)), 'LLLLCCCLLLLL');
+  // inside a block the previous direction is kept (Mixed: Dutch and English do not alternate)
+  const langs = ['a|bg2nl', 'b|bg2en', 'c|bg2nl', 'd|bg2en', 'e|bg2nl', 'f|bg2en'];
+  assert.deepEqual(C.spreadOut(langs, byId, 3).map(k => k.split('|')[1]), ['bg2nl', 'bg2nl', 'bg2nl', 'bg2en', 'bg2en', 'bg2en']);
+  // inside a block the keyboard comes first, even when two cards share a word
+  const shared = new Map([['a', { lemmas: ['хляб'] }], ['b', { lemmas: ['хляб'] }], ['c', { lemmas: ['куче'] }]]);
+  assert.deepEqual(C.spreadOut(['a|bg2nl', 'b|bg2nl', 'c|nl2bg'], shared, 3), ['a|bg2nl', 'b|bg2nl', 'c|nl2bg']);
+  // at a switch the shared-word rule comes first: the reverse of the card just answered does not follow it
+  const rev = new Map([['x', { lemmas: ['хляб'] }], ['y', { lemmas: ['куче'] }], ['z', { lemmas: ['море'] }]]);
+  assert.deepEqual(C.spreadOut(['y|bg2nl', 'x|bg2nl', 'x|nl2bg', 'z|bg2nl'], rev, 2), ['y|bg2nl', 'x|bg2nl', 'z|bg2nl', 'x|nl2bg']);
+  // fullBlocks drops the least urgent due cards per keyboard, never a new one
+  const due = ['d1|bg2nl', 'd2|bg2nl', 'd3|nl2bg', 'd4|bg2nl', 'd5|bg2nl', 'd6|bg2nl'];
+  assert.deepEqual(C.fullBlocks(due, ['n1|bg2nl', 'n2|bg2nl', 'n3|bg2nl', 'n4|bg2nl', 'n5|nl2bg', 'n6|nl2bg', 'n7|nl2bg'], 4), ['d1|bg2nl', 'd2|bg2nl', 'd3|nl2bg', 'd4|bg2nl', 'd5|bg2nl'], '9 Latin → 8: the least urgent Latin review waits; 4 Cyrillic stay');
+  assert.deepEqual(C.fullBlocks(due, [], 1), due, 'run 1 changes nothing');
+  assert.deepEqual(C.fullBlocks(['d1|bg2nl'], ['n1|bg2nl', 'n2|bg2nl', 'n3|bg2nl', 'n4|bg2nl', 'n5|bg2nl'], 4), ['d1|bg2nl'], 'too few due cards to fill: keep them');
+  assert.deepEqual(C.fullBlocks(['d1|bg2nl', 'd2|bg2nl'], ['n1|nl2bg'], 4), ['d1|bg2nl', 'd2|bg2nl'], 'less than one block: keep');
+  // buildSession: due reviews of both kinds, blocks of 4, full
+  const S = ids.map((id, i) => ({ id, bg: 'б' + id, nl: 'n' + id, max_rank: i + 1, lemmas: ['дума' + i] }));
+  const prog = {}; ids.forEach((id, i) => { prog[id + '|bg2nl'] = { box: 2, due: 1e12 - 1e6 * (i + 1) }; if (i < 7) prog[id + '|nl2bg'] = { box: 2, due: 1e12 - 1e6 * (i + 1) }; });
+  const q = C.buildSession(S, prog, { rank: 100, newPerSession: 0, directions: 'both', dirRun: 4 }, 1e12, () => 0.5).queue;
+  assert.equal(q.length, 16, '12 Latin + 7 Cyrillic reviews → 12 + 4: ' + q.length);
+  assert.equal(pattern(q), 'LLLLCCCCLLLLLLLL');
+  assert.equal(C.buildSession(S, prog, { rank: 100, newPerSession: 0, directions: 'both' }, 1e12, () => 0.5).queue.length, 19, 'without blocks all 19 reviews');
+});
 t('D-003 interleave and spreadOut', () => {
   // never more than 3 new cards before a waiting due card; due order kept
   const q = C.interleave(['d1', 'd2'], ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8']);
