@@ -93,6 +93,17 @@ input[type=range]{width:100%}
 .toggle div{flex:1}
 .toggle .help{font-size:12px;color:var(--muted)}
 .lib-row-detail{background:var(--bg);font-size:13px}
+.gcard summary{cursor:pointer;font-weight:600;font-size:16px;display:flex;gap:8px;align-items:center;list-style:none}
+.gcard summary::-webkit-details-marker{display:none}
+.gcard summary::before{content:'▸';color:var(--muted);font-size:14px}
+.gcard[open] summary::before{content:'▾'}
+.gcard table{margin:10px 0;font-size:14px}
+.gcard td:first-child{color:var(--ink2)}
+.gcard .ex{margin:6px 0 0;padding-left:0;list-style:none}
+.gcard .ex li{margin:4px 0}
+.gcard .ex .sub{display:inline;margin-left:6px}
+.stage-h{margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.hint{color:var(--ink2);font-size:14px;margin:-6px 0 10px}
 .lib-row-detail td{padding:10px}
 #update-bar{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:14px;box-shadow:var(--shadow);z-index:9;display:flex;gap:10px;align-items:center}
 #update-bar[hidden]{display:none}
@@ -107,6 +118,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   <div class="hrow"><h1>Тракия</h1><span id="hdr-rank"></span></div>
   <nav>
     <button data-tab="practise" class="active">Practise</button>
+    <button data-tab="grammar">Grammar</button>
     <button data-tab="stats">Stats</button>
     <button data-tab="library">Library</button>
     <button data-tab="settings">Settings</button>
@@ -122,6 +134,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       <div class="row">
         <button class="btn primary" id="btn-start">Practise</button>
         <button class="btn" id="btn-free">Free practice</button>
+        <button class="btn" id="btn-gdrill">Grammar drill</button>
       </div>
     </div>
   </div>
@@ -172,6 +185,14 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   </div>
 </section>
 
+<section id="tab-grammar" class="tab">
+  <div class="card">
+    <h2>Grammar reference</h2>
+    <p class="muted">Tables for each grammar stage, with example sentences from the practice set. Cards beyond your stage are shown collapsed. <b>Drill</b> runs a short "give the form" exercise on that table.</p>
+    <div class="row" style="margin-top:8px"><button class="btn primary" id="btn-gdrill-all">Grammar drill (your stage)</button></div>
+  </div>
+  <div id="grammar-cards"></div>
+</section>
 <section id="tab-stats" class="tab">
   <div class="card">
     <h2>Today</h2>
@@ -186,6 +207,12 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   <div class="card">
     <h2>Progress</h2>
     <div id="stats-progress"></div>
+  </div>
+  <div class="card">
+    <h2>Grammar drills</h2>
+    <div class="stats" id="stats-drills"></div>
+    <p class="tiny">Drill answers are counted here only; they never create review cards.</p>
+    <table id="weak-forms" class="fixed"></table>
   </div>
   <div class="card">
     <h2>Hardest sentences</h2>
@@ -339,11 +366,13 @@ let userSentences = LS.get('userSentences', {});
 let deleted = LS.get('deleted', []);
 let log = LS.get('log', []);            // [ts, key, score 2|1|0, free 0|1]
 let sessions = LS.get('sessions', []);  // [startTs]
+let drills = LS.get('drills', {});       // {itemId: {ok, bad, last}}
+let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 const save = {
   settings: () => LS.set('settings', settings), progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => LS.set('deleted', deleted), log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => LS.set('deleted', deleted), log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog),
 };
-const WORDS = DATA.words, WIDX = C.wordIndex(WORDS);
+const WORDS = DATA.words, WIDX = C.wordIndex(WORDS), GRAMMAR = DATA.grammar;
 const WORD_BY_RANK = new Map(WORDS.map(w => [w.rank, w]));
 
 function allSentences() {
@@ -368,7 +397,7 @@ document.querySelectorAll('nav button').forEach(b => b.addEventListener('click',
 function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
-  if (name === 'practise') renderHome(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
+  if (name === 'practise') renderHome(); if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
   window.scrollTo(0, 0);
 }
 
@@ -402,11 +431,63 @@ function startSession(opts) {
   renderCard();
 }
 function cardOf(item) { const [id, dir] = item.key.split('|'); return { id, dir, s: SENT_BY_ID.get(id) }; }
+
+// ---------- grammar drills (D-009) ----------
+function startDrill(cardFilter) {
+  const items = C.buildDrill(GRAMMAR, settings, drills, 15, Math.random, cardFilter);
+  if (!items.length) { toast('No drill items for this stage'); return; }
+  session = { drill: true, queue: items.map(it => ({ key: 'drill|' + it.id, item: it })), i: 0, free: false, counts: { correct: 0, almost: 0, wrong: 0 }, pending: null, started: Date.now(), label: cardFilter ? (GRAMMAR.cards.find(c => c.id === cardFilter) || {}).title : null };
+  $('session-home').hidden = true; $('session-done').hidden = true; $('session-run').hidden = false;
+  renderCard();
+}
+function renderDrillCard() {
+  const item = session.queue[session.i].item;
+  session.pending = null;
+  $('counter').textContent = (session.i + 1) + ' / ' + session.queue.length;
+  $('dir-badge').textContent = 'Grammar drill'; $('free-badge').hidden = true; $('retry-badge').hidden = true;
+  $('prompt').textContent = item.prompt; $('prompt').lang = 'bg';
+  $('newwords').innerHTML = `<span class="hint">${esc(item.hint)}</span>`;
+  const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = 'bg'; inp.placeholder = 'Type the form, then Enter';
+  $('translit-preview').hidden = !settings.translit; $('translit-preview').textContent = '';
+  $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
+  setTimeout(() => inp.focus(), 50);
+}
+function checkDrill(giveUp) {
+  const item = session.queue[session.i].item;
+  const typed = giveUp ? '' : (settings.translit ? C.translit($('answer').value) : $('answer').value);
+  const r = giveUp ? { result: 'wrong', expected: item.answers[0], t: '', a: C.normalise(item.answers[0], 'bg', settings), reason: 'skip' } : C.check(typed, item.answers, 'bg', Object.assign({}, settings, { bagOfWords: false }));
+  session.pending = { result: r.result, typed, key: item.id };
+  const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
+  $('answer-actions').hidden = true; $('feedback').hidden = false;
+  const v = $('verdict'); v.className = 'verdict ' + r.result;
+  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + (r.reason === 'typo' ? ` <small>${r.dist} character${r.dist > 1 ? 's' : ''} off</small>` : r.reason === 'skip' ? ' <small>shown</small>' : '');
+  $('expected').textContent = r.expected || item.answers[0];
+  $('diff').innerHTML = r.result !== 'correct' && r.t && r.a ? C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join('') : '';
+  const others = item.answers.filter(a => a !== (r.expected || item.answers[0]));
+  $('alts').innerHTML = others.length ? 'Also accepted: ' + others.map(esc).join(' · ') : '';
+  const card = GRAMMAR.cards.find(c => c.id === item.card);
+  $('gloss').innerHTML = card ? `See: <a href="#" data-gcard="${esc(card.id)}">${esc(card.title)}</a>` : '';
+  $('btn-accept').hidden = true;
+  setTimeout(() => $('btn-next').focus(), 30);
+}
+function nextDrill() {
+  const p = session.pending; if (!p) return;
+  const t = drills[p.key] || { ok: 0, bad: 0 };
+  if (p.result === 'wrong') t.bad += 1; else t.ok += 1;
+  t.last = Date.now(); drills[p.key] = t;
+  drillLog.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0]);
+  if (drillLog.length > 20000) drillLog = drillLog.slice(-15000);
+  save.drills(); save.drillLog();
+  session.counts[p.result]++;
+  session.i++; renderCard();
+}
+$('gloss').addEventListener('click', e => { const a = e.target.closest('[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = document.getElementById('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
 function acceptedFor(s, dir, key) { return dir === 'bg2nl' ? [s.nl, ...s.nl_alt] : [s.bg, ...s.bg_alt]; }
 function allAccepted(s, dir, key) { return acceptedFor(s, dir).concat(userAlts[key] || []); }
 
 function renderCard() {
   if (!session || session.i >= session.queue.length) return endSession();
+  if (session.drill) return renderDrillCard();
   const item = session.queue[session.i], { dir, s } = cardOf(item);
   if (!s) { session.i++; return renderCard(); }
   session.pending = null;
@@ -434,10 +515,13 @@ $('btn-accept').addEventListener('click', acceptMine);
 $('btn-quit').addEventListener('click', endSession);
 $('btn-start').addEventListener('click', () => startSession());
 $('btn-free').addEventListener('click', () => startSession({ free: true }));
-$('btn-again').addEventListener('click', () => startSession());
+$('btn-gdrill').addEventListener('click', () => startDrill());
+$('btn-gdrill-all').addEventListener('click', () => { showTab('practise'); startDrill(); });
+$('btn-again').addEventListener('click', () => { if (lastWasDrill) startDrill(); else startSession(); });
 $('btn-home').addEventListener('click', () => { $('session-done').hidden = true; $('session-home').hidden = false; renderHome(); });
 
 function checkAnswer(giveUp) {
+  if (session.drill) return checkDrill(giveUp);
   const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key;
   const lang = dir === 'bg2nl' ? 'nl' : 'bg';
   const typed = giveUp ? '' : typedValue();
@@ -472,6 +556,7 @@ function acceptMine() {
 }
 function next() {
   const p = session.pending; if (!p) return;
+  if (session.drill) return nextDrill();
   const item = session.queue[session.i];
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
   progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
@@ -482,14 +567,39 @@ function next() {
   if (effective === 'wrong' && !item.retry) session.queue.push({ key: p.key, retry: true });
   session.i++; renderCard();
 }
+let lastWasDrill = false;
 function endSession() {
   if (!session) return;
+  lastWasDrill = !!session.drill;
   const c = session.counts, total = c.correct + c.almost + c.wrong;
   $('session-run').hidden = true; $('session-done').hidden = false;
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
-  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
+  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
+  $('btn-again').textContent = session.drill ? 'Drill again' : 'Practise again';
   session = null;
 }
+
+// ---------- grammar tab ----------
+function renderGrammar() {
+  const stage = settings.stage || 5, names = { 1: 'Stage 1 — present tense', 2: 'Stage 2 — future and imperatives', 3: 'Stage 3 — past tense and perfect', 4: 'Stage 4 — imperfect and conditional' };
+  let html = '';
+  for (const st of [1, 2, 3, 4]) {
+    const cards = GRAMMAR.cards.filter(c => c.stage === st); if (!cards.length) continue;
+    html += `<div class="stage-h">${names[st]}${st > stage ? ' · beyond your stage' : ''}</div>`;
+    for (const c of cards) {
+      const ex = (c.examples || []).map(id => SENT_BY_ID.get(id)).filter(Boolean);
+      html += `<details class="card gcard" id="gcard-${esc(c.id)}"${st <= stage ? ' open' : ''}><summary>${esc(c.title)}${st > stage ? ' <span class="badge">stage ' + st + '</span>' : ''}</summary>
+        <p class="muted">${esc(c.intro)}</p>
+        <table class="fixed"><tr>${c.table.headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>${c.table.rows.map(r => `<tr>${r.map(x => `<td lang="bg">${esc(x)}</td>`).join('')}</tr>`).join('')}</table>
+        ${c.notes && c.notes.length ? `<ul class="muted" style="padding-left:18px;margin:6px 0">${c.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+        ${ex.length ? `<p class="label">From the sentences</p><ul class="ex">${ex.map(s => `<li><span lang="bg">${esc(s.bg)}</span><span class="sub tiny" lang="nl">${esc(s.nl)}</span></li>`).join('')}</ul>` : ''}
+        <div class="row"><button class="btn small" data-drill="${esc(c.id)}">Drill this table</button></div>
+      </details>`;
+    }
+  }
+  $('grammar-cards').innerHTML = html;
+}
+$('grammar-cards').addEventListener('click', e => { const b = e.target.closest('[data-drill]'); if (!b) return; const id = b.dataset.drill; showTab('practise'); startDrill(id); });
 
 // ---------- stats ----------
 function renderStats() {
@@ -505,6 +615,13 @@ function renderStats() {
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);
   $('chart-table').innerHTML = '<tr><th>day</th><th>✓</th><th>≈</th><th>✗</th></tr>' + days.map(d => `<tr><td>${d.k}</td><td>${d.v[2]}</td><td>${d.v[1]}</td><td>${d.v[0]}</td></tr>`).join('');
+  // grammar drills
+  const dToday = drillLog.filter(l => dayKey(l[0]) === today), dTot = dToday.length, dOk = dToday.filter(l => l[2] > 0).length;
+  const dAll = drillLog.length, dAllOk = drillLog.filter(l => l[2] > 0).length;
+  $('stats-drills').innerHTML = stat(dTot, 'drill answers today') + stat(dTot ? Math.round(100 * dOk / dTot) + '%' : '–', 'accuracy today') + stat(dAll, 'all time') + stat(dAll ? Math.round(100 * dAllOk / dAll) + '%' : '–', 'accuracy all time');
+  const items = Object.fromEntries(C.drillItems(GRAMMAR, 5).map(it => [it.id, it]));
+  const weak = Object.entries(drills).filter(([k, t]) => t.bad > 0 && items[k]).sort((a, b) => (b[1].bad - b[1].ok) - (a[1].bad - a[1].ok) || b[1].bad - a[1].bad).slice(0, 10);
+  $('weak-forms').innerHTML = weak.length ? '<colgroup><col><col style="width:40%"><col style="width:60px"><col style="width:60px"></colgroup><tr><th>form</th><th>answer</th><th>wrong</th><th>right</th></tr>' + weak.map(([k, t]) => `<tr><td>${esc(items[k].prompt)} <span class="tiny">${esc(items[k].hint)}</span></td><td lang="bg">${esc(items[k].answers[0])}</td><td>${t.bad}</td><td>${t.ok}</td></tr>`).join('') : '<tr><td class="tiny">No drill mistakes yet.</td></tr>';
   // progress per direction: stability bands
   let html = '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length;
@@ -610,12 +727,12 @@ $('import-file').addEventListener('change', async e => {
   } catch (err) { $('import-result').textContent = 'Import failed: ' + err.message; }
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
-$('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', { app: 'trakia', version: 1, exported: new Date().toISOString(), settings, progress, userAlts, userSentences, deleted, log, sessions }));
+$('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', { app: 'trakia', version: 1, exported: new Date().toISOString(), settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog }));
 $('import-progress').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return; e.target.value = '';
   try { const j = JSON.parse(await file.text()); if (j.app !== 'trakia') throw new Error('not a Trakia progress file');
     if (!confirm('Replace all progress on this device with the file?')) return;
-    settings = Object.assign({}, DEFAULTS, j.settings || {}); progress = j.progress || {}; userAlts = j.userAlts || {}; userSentences = j.userSentences || {}; deleted = j.deleted || []; log = j.log || []; sessions = j.sessions || [];
+    settings = Object.assign({}, DEFAULTS, j.settings || {}); progress = j.progress || {}; userAlts = j.userAlts || {}; userSentences = j.userSentences || {}; deleted = j.deleted || []; log = j.log || []; sessions = j.sessions || []; drills = j.drills || {}; drillLog = j.drillLog || [];
     Object.values(save).forEach(f => f()); refreshSentences(); applyTheme(); renderHome(); toast('Progress imported');
   } catch (err) { toast('Import failed: ' + err.message); }
 });
@@ -643,7 +760,7 @@ $('load-words').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return; e.target.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm('Delete all progress, accepted answers and statistics on this device?')) return; progress = {}; userAlts = {}; log = []; sessions = []; save.progress(); save.userAlts(); save.log(); save.sessions(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm('Delete all progress, accepted answers and statistics on this device?')) return; progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
 
 // ---------- init ----------
