@@ -1,6 +1,6 @@
 # D-009: Grammar reference tab with "give the form" drills
 
-Status: proposed · Created: 2026-10-22 · Area: new tab (`index.html`), content (`data/grammar.json`), drills (`core.js`)
+Status: done (2026-10-22) · Created: 2026-10-22 · Area: new tab (`index.html`), content (`data/grammar.json`), drills (`core.js`)
 
 ## Context
 The app gates sentences by grammar stage (D-008) but never teaches the grammar a stage unlocks, and
@@ -51,6 +51,33 @@ tab, with small drills on exactly those forms, shortens the loop between forgett
 - Drill checking reuses `normalise` / `check` with `typoPct` and no bag-of-words (single forms).
 - UI: a fifth tab "Grammar"; cards as `<details>` blocks; the drill runs inside the existing practice
   card with a "Grammar drill" badge and no direction badge.
+
+## Decisions taken
+- Grammar-only: no single-word vocabulary drills (Anki covers words).
+- Drill answers get their own line on the Stats tab; they never enter the daily sentence accuracy.
+
+## As built (2026-10-22)
+- `data/grammar.json`: 17 cards (11 for stage 1, 2 for stage 2, 2 for stage 3, 2 for stage 4) with
+  tables, notes and up to three example sentence ids chosen from the dataset by pattern; plus the
+  paradigms: 18 present-tense verbs, 15 aorist, 10 imperfect, 15 л-participles, 18 imperatives, long
+  and short possessives, 16 nouns for possessive drills, 18 nouns for article drills, the conditional
+  auxiliary. Bundled into `app/data.js` by `build_data.py`.
+- `core.js`: `drillItems(grammar, stage)` expands the paradigms into ~1000 items with stable ids
+  (`conj:съм:ние`, `poss:short:my:майка`, `art:хляб:subj`, `fut:…`, `imp:…`, `aor:…`, `perf:…`,
+  `impf:…`, `cond:…`); `buildDrill(grammar, settings, tally, n, rand, cardFilter)` samples 15 items
+  without replacement, weight `(1 + 5·wrong)² / (1 + right)`, and avoids the same verb or noun twice
+  in a row. Perfect and conditional accept masculine and feminine participles (and both clitic
+  orders for the perfect); masculine possessives accept the subject and object article forms.
+- UI: a **Grammar** tab (cards per stage as collapsible tables, cards beyond the stage collapsed
+  with a badge, "Drill this table" per card, "Grammar drill (your stage)" at the top); a **Grammar
+  drill** button on the home card; drills run in the normal practice card with a "Grammar drill"
+  badge, a hint line, the same correct / almost / wrong verdicts and diff, no "my answer was correct",
+  and a "See: <card>" link into the reference. Stats gets a "Grammar drills" card (today / all-time
+  answers and accuracy, weak-forms table). `drills` tally and `drillLog` are stored, exported and
+  imported with the progress file.
+- Tests: generator coverage (every item's first answer passes `check`), stage filtering, specific
+  forms, weighting of weak forms, single-table drills; the headless UI test runs a drill end to end.
+- Content review: one model pass over every form; findings applied (see the commit).
 
 ## Acceptance criteria
 - Stage-1 and stage-2 cards complete and reviewed; stage 3–4 cards may follow when the learner reaches them.

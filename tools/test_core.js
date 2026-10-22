@@ -184,6 +184,32 @@ t('D-008 grammar stages', () => {
   const q = C.buildSession(S, prog, { rank: 100, stage: 1, newPerSession: 10, directions: 'bg2nl', newOrder: 'strict' }, now, () => 0.5).queue;
   assert.deepEqual(q, ['b|bg2nl', 'a|bg2nl', 'd|bg2nl']);
 });
+t('D-009 drill generator', () => {
+  const G = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'data', 'grammar.json'), 'utf8'));
+  const all = C.drillItems(G, 5), s1 = C.drillItems(G, 1), s2 = C.drillItems(G, 2);
+  assert.ok(all.length > 400, 'items: ' + all.length);
+  assert.ok(s1.every(it => it.stage === 1) && s1.length < s2.length && s2.length < all.length);
+  assert.ok(s1.some(it => it.kind === 'conj') && s1.some(it => it.kind === 'poss') && s1.some(it => it.kind === 'art'));
+  assert.ok(!s1.some(it => it.kind === 'fut') && s2.some(it => it.kind === 'fut') && s2.some(it => it.kind === 'imp'));
+  const ids = new Set(all.map(it => it.id)); assert.equal(ids.size, all.length, 'ids unique');
+  // every answer passes the checker when typed exactly; paradigms cover all six persons
+  for (const it of all) { assert.ok(it.answers.length && it.answers.every(a => a && !/undefined/.test(a)), it.id); assert.equal(C.check(it.answers[0], it.answers, 'bg', { bagOfWords: false }).result, 'correct', it.id); }
+  for (const v of G.paradigms.present) assert.equal(Object.keys(v.forms).length, 6, v.verb);
+  // specific forms
+  const by = Object.fromEntries(all.map(it => [it.id, it]));
+  assert.deepEqual(by['conj:съм:ние'].answers, ['сме']); assert.deepEqual(by['poss:short:my:майка'].answers, ['майка ми']); assert.deepEqual(by['poss:long:his:къща'].answers, ['неговата къща']);
+  assert.deepEqual(by['art:хляб:subj'].answers, ['хлябът']); assert.deepEqual(by['art:хляб:obj'].answers, ['хляба']); assert.deepEqual(by['fut:отида:аз'].answers, ['ще отида']);
+  assert.deepEqual(by['imp:дойда:вие'].answers, ['елате']); assert.deepEqual(by['aor:купя:ние'].answers, ['купихме']);
+  assert.ok(by['perf:чета:аз'].answers.includes('чел съм') && by['perf:чета:аз'].answers.includes('чела съм') && by['perf:чета:те'].answers.includes('чели са'));
+  assert.ok(by['cond:искам:аз'].answers.includes('бих искала'));
+  // weighting: a form answered wrong is picked far more often
+  let seed = 9; const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+  const tally = { 'conj:съм:ние': { ok: 0, bad: 5 } };
+  let hits = 0; for (let i = 0; i < 40; i++) if (C.buildDrill(G, { stage: 1 }, tally, 15, rand).some(it => it.id === 'conj:съм:ние')) hits++;
+  assert.ok(hits >= 20, 'weak form picked in ' + hits + ' of 40 drills');
+  const d = C.buildDrill(G, { stage: 1 }, {}, 15, rand); assert.equal(d.length, 15); assert.equal(new Set(d.map(it => it.id)).size, 15);
+  assert.ok(C.buildDrill(G, { stage: 1 }, {}, 10, rand, 'sum').every(it => it.card === 'sum'));
+});
 t('rowToSentence + index', () => {
   const idx = C.wordIndex([{ rank: 1, bg: 'и', en: 'and', forms: '' }, { rank: 8, bg: 'аз', en: 'I', forms: 'аз (ме, мен, ми)' }, { rank: 300, bg: 'хляб', en: 'bread', forms: '' }]);
   assert.equal(idx.get('ми').rank, 8);

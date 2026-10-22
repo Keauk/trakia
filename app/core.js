@@ -485,6 +485,52 @@
     return s;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+
+  // --- grammar drills (decision D-009) -----------------------------------------------------------
+  // Items are generated from data/grammar.json paradigms so the reference tables and the drills
+  // can never drift apart. Each item: {id, kind, stage, prompt, hint, answers[], card}.
+  const PRON_LABEL = { 'аз': 'аз', 'ти': 'ти', 'той/тя/то': 'той / тя / то', 'ние': 'ние', 'вие': 'вие', 'те': 'те' };
+  const PERSON_IDX = { 'аз': 0, 'ти': 1, 'той/тя/то': 2, 'ние': 3, 'вие': 4, 'те': 5 };
+  function drillItems(G, stage) {
+    stage = stage == null ? 5 : stage;
+    const items = [], P = G.pronouns, pd = G.paradigms;
+    const add = it => { if (it.stage <= stage) items.push(it); };
+    for (const v of pd.present) for (const p of P) add({ id: `conj:${v.verb}:${p}`, kind: 'conj', stage: 1, card: v.verb === 'съм' ? 'sum' : (v.verb === 'имам' || v.verb === 'нямам') ? 'imam' : ['чета', 'говоря', 'гледам', 'искам', 'обичам', 'работя', 'живея', 'пия'].includes(v.verb) ? 'present' : 'irregular', prompt: `${PRON_LABEL[p]} + ${v.verb}`, hint: 'present tense', answers: [v.forms[p]] });
+    for (const [owner, clit] of Object.entries(pd.possShort)) for (const n of pd.nouns) {
+      const L = pd.possLong[owner];
+      const longAns = [`${L[n.g][1]} ${n.bg}`]; if (n.g === 'm' && /ят$/.test(L.m[1])) longAns.push(`${L.m[1].replace(/ят$/, 'я')} ${n.bg}`);
+      add({ id: `poss:long:${owner}:${n.bg}`, kind: 'poss', stage: 1, card: 'poss-long', prompt: `${owner} ${n.en}`, hint: `long form, with the article (${n.bg})`, answers: longAns });
+      const shortAns = n.kin && n.g !== 'pl' ? [`${n.bg} ${clit}`] : [`${n.def} ${clit}`]; if (!n.kin && n.g === 'm' && n.obj && n.obj !== n.def) shortAns.push(`${n.obj} ${clit}`);
+      add({ id: `poss:short:${owner}:${n.bg}`, kind: 'poss', stage: 1, card: 'poss-short', prompt: `${owner} ${n.en}`, hint: `short form, clitic after the noun (${n.bg})`, answers: shortAns });
+    }
+    for (const n of pd.articleNouns) {
+      if (n.g === 'm') {
+        add({ id: `art:${n.bg}:subj`, kind: 'art', stage: 1, card: 'article', prompt: `${n.bg} → the ${n.en}`, hint: 'as the subject of the sentence', answers: [n.subj] });
+        add({ id: `art:${n.bg}:obj`, kind: 'art', stage: 1, card: 'article', prompt: `${n.bg} → the ${n.en}`, hint: 'as an object / after a preposition', answers: [n.obj] });
+      } else add({ id: `art:${n.bg}:def`, kind: 'art', stage: 1, card: 'article', prompt: `${n.bg} → the ${n.en}`, hint: 'definite form', answers: [n.def] });
+    }
+    const presentOf = {}; for (const v of pd.present) presentOf[v.verb] = v.forms;
+    for (const verb of pd.futureVerbs) if (presentOf[verb]) for (const p of P) add({ id: `fut:${verb}:${p}`, kind: 'fut', stage: 2, card: 'future', prompt: `${PRON_LABEL[p]} + ${verb}`, hint: 'future (ще …)', answers: [`ще ${presentOf[verb][p]}`] });
+    for (const im of pd.imperatives) { add({ id: `imp:${im.verb}:ти`, kind: 'imp', stage: 2, card: 'imperative', prompt: `ти + ${im.verb}`, hint: 'imperative (command to one person)', answers: [im.ti] }); add({ id: `imp:${im.verb}:вие`, kind: 'imp', stage: 2, card: 'imperative', prompt: `вие + ${im.verb}`, hint: 'imperative (polite / plural)', answers: [im.vie] }); }
+    for (const v of pd.aorist) for (const p of P) add({ id: `aor:${v.verb}:${p}`, kind: 'aor', stage: 3, card: 'aorist', prompt: `${PRON_LABEL[p]} + ${v.verb}`, hint: 'past tense (aorist)', answers: [v.forms[p]] });
+    const SUM = presentOf['съм'];
+    for (const verb of pd.perfectVerbs) { const pt = pd.participles[verb]; if (!pt) continue; for (const p of P) { const i = PERSON_IDX[p], aux = SUM[p]; const parts = i === 2 ? [pt[0], pt[1], pt[2]] : i < 2 ? [pt[0], pt[1]] : [pt[3]]; const answers = []; for (const x of parts) { answers.push(i === 2 ? `${x} ${aux}` : `${x} ${aux}`); answers.push(`${aux} ${x}`); } add({ id: `perf:${verb}:${p}`, kind: 'perf', stage: 3, card: 'perfect', prompt: `${PRON_LABEL[p]} + ${verb}`, hint: 'perfect (participle + съм)', answers }); } }
+    for (const v of pd.imperfect) for (const p of P) add({ id: `impf:${v.verb}:${p}`, kind: 'impf', stage: 4, card: 'imperfect', prompt: `${PRON_LABEL[p]} + ${v.verb}`, hint: 'imperfect (ongoing past)', answers: [v.forms[p]] });
+    for (const verb of pd.conditionalVerbs) { const pt = pd.participles[verb]; if (!pt) continue; for (const p of P) { const i = PERSON_IDX[p], aux = pd.conditional[p]; const parts = i === 2 ? [pt[0], pt[1], pt[2]] : i < 2 ? [pt[0], pt[1]] : [pt[3]]; add({ id: `cond:${verb}:${p}`, kind: 'cond', stage: 4, card: 'conditional', prompt: `${PRON_LABEL[p]} + ${verb}`, hint: 'conditional (бих …)', answers: parts.map(x => `${aux} ${x}`) }); } }
+    return items;
+  }
+  /** pick n drill items for the learner's stage, weighted toward forms answered wrong before. tally: {id: {ok, bad}} */
+  function buildDrill(G, settings, tally, n, rand, cardFilter) {
+    rand = rand || Math.random; tally = tally || {};
+    let pool = drillItems(G, settings && settings.stage);
+    if (cardFilter) pool = pool.filter(it => it.card === cardFilter || it.kind === cardFilter);
+    const weight = it => { const t = tally[it.id] || {}; return Math.max(0.15, Math.pow(1 + 5 * (t.bad || 0), 2) / (1 + (t.ok || 0))); };
+    const picked = weightedSample(pool, Math.min(n || 15, pool.length), weight, rand);
+    // avoid the same verb / noun twice in a row where possible
+    const out = []; const rest = picked.slice();
+    while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
+    return out;
+  }
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

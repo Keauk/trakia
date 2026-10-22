@@ -86,6 +86,44 @@ document.querySelector('nav button[data-tab=settings]').click(); $('set-translit
 document.querySelector('nav button[data-tab=practise]').click();
 $('answer').value = 'kupih hlyab'; $('answer').dispatchEvent(new window.Event('input'));
 assert.equal($('translit-preview').textContent, 'купих хляб');
+// --- D-009: grammar tab and drills
+document.querySelector('nav button[data-tab=grammar]').click();
+assert.ok(document.querySelectorAll('#grammar-cards details').length >= 15, 'grammar cards rendered');
+assert.ok($('grammar-cards').textContent.includes('съм'), 'tables contain forms');
+document.querySelector('nav button[data-tab=practise]').click();
+$('btn-home').click();
+$('btn-gdrill').click();
+assert.equal($('session-run').hidden, false); assert.equal($('dir-badge').textContent, 'Grammar drill');
+assert.equal($('counter').textContent, '1 / 15');
+// answer the first item correctly using the generated answer, the second wrongly
+const drillItems = Object.fromEntries(C.drillItems(window.TRAKIA_DATA.grammar, 5).map(it => [it.prompt + '|' + it.hint, it]));
+let it = drillItems[$('prompt').textContent + '|' + $('newwords').textContent];
+assert.ok(it, 'drill prompt maps to a generated item');
+type(it.answers[0]);
+assert.match($('verdict').className, /correct/);
+assert.ok($('gloss').textContent.startsWith('See:'), 'link to the grammar card');
+type('', 'Enter');
+type('ггг');
+assert.match($('verdict').className, /wrong/);
+assert.equal($('btn-accept').hidden, true, 'no accept-my-answer in drills');
+type('', 'Enter');
+const tally = JSON.parse(window.localStorage.getItem('trakia.drills'));
+assert.equal(Object.values(tally).reduce((a, t) => a + t.ok + t.bad, 0), 2);
+assert.equal(JSON.parse(window.localStorage.getItem('trakia.drillLog')).length, 2);
+// drills never touch the review progress
+assert.equal(Object.keys(JSON.parse(window.localStorage.getItem('trakia.progress'))).filter(k => k.startsWith('drill')).length, 0);
+$('btn-quit').click();
+assert.match($('done-summary').textContent, /Grammar drill/);
+assert.equal($('btn-again').textContent, 'Drill again');
+document.querySelector('nav button[data-tab=stats]').click();
+assert.match($('stats-drills').textContent, /drill answers today/);
+assert.ok($('weak-forms').textContent.length > 5, 'weak forms table rendered');
+// drill a single table from the grammar tab
+document.querySelector('nav button[data-tab=grammar]').click();
+document.querySelector('[data-drill=sum]').click();
+assert.equal($('dir-badge').textContent, 'Grammar drill');
+assert.ok(/\+ съм$/.test($('prompt').textContent), 'single-table drill: ' + $('prompt').textContent);
+$('btn-quit').click(); $('btn-home').click();
 // import a CSV with lemmas and one estimated row
 const csv = 'bg,nl,nl_alt,lemmas\n"Дай ми хляб.",Geef me brood.,Geef mij brood.,"аз, хляб"\n"Това е тест.",Dit is een test.,,\n';
 const file = new window.File([csv], 'extra.csv', { type: 'text/csv' });
