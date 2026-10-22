@@ -1,6 +1,6 @@
 // Trakia service worker: cache-first for the app shell so it works offline once installed.
 // Bump CACHE_VERSION whenever index.html, core.js or data.js change.
-const CACHE_VERSION = 'trakia-v22';
+const CACHE_VERSION = 'trakia-v23';
 const SHELL = ['./', './index.html', './core.js', './ui.js', './data.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

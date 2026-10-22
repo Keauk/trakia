@@ -119,7 +119,7 @@ input[type=range]{width:100%}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--bg)}
-@media (max-width:480px){.prompt{font-size:25px}.card{padding:14px 14px 12px}main{padding:10px}#answer{font-size:18px}}
+@media (max-width:480px){.prompt{font-size:25px}.card{padding:14px 14px 12px}main{padding:10px}#answer{font-size:18px}.home-actions{display:grid;grid-template-columns:1fr 1fr}.home-actions .primary{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -140,7 +140,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
     <div class="card">
       <div class="stats" id="home-stats"></div>
       <p class="muted" id="home-summary"></p>
-      <div class="row">
+      <div class="row home-actions">
         <button class="btn primary" id="btn-start">Practise</button>
         <button class="btn" id="btn-free">Free practice</button>
         <button class="btn" id="btn-gdrill">Grammar drill</button>
@@ -159,7 +159,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       </div>
       <p id="prompt" class="prompt"></p>
       <div id="newwords" class="chips"></div>
-      <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Type the translation, then Enter"></textarea>
+      <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Enter translation"></textarea>
       <p id="translit-preview" class="preview" hidden></p>
       <div class="row" id="answer-actions">
         <button class="btn primary" id="btn-check">Check</button>
