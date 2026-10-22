@@ -140,6 +140,9 @@ accepted answer) and treats that as *Almost* rather than *Wrong*. Enable/disable
 
 ### 4.2 Scheduling (unlimited sessions per day)
 
+> Superseded 2026-10-22 by decision D-001: scheduling is now FSRS-6 (see `decisions/D-001-fsrs-scheduler.md`).
+> The ladder below is kept for history; its intervals survive only as the migration table.
+
 Day-granular SRS like Anki is the wrong fit when you want to practise several times a day, so use
 a **minute-granular Leitner ladder**:
 

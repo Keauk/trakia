@@ -1,0 +1,25 @@
+{
+  "name": "trakia",
+  "version": "0.1.0",
+  "description": "Dutch-Bulgarian sentence trainer (PWA)",
+  "scripts": {
+    "test": "node tools/test_core.js && node tools/smoke_ui.js",
+    "build": "python3 tools/build_data.py",
+    "publish": "tools/publish.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Keauk/trakia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Keauk/trakia/issues"
+  },
+  "homepage": "https://github.com/Keauk/trakia#readme",
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  },
+  "private": true
+}

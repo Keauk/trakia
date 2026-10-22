@@ -118,11 +118,138 @@
   // --- scheduling ---------------------------------------------------------------------------
   function newRecord() { return { box: 0, due: 0, reps: 0, lapses: 0, streak: 0, last: 0 }; }
 
+  // --- FSRS-6 scheduler (decision D-001) ---------------------------------------------------------
+  // Port of py-fsrs 6.3.2 (open-spaced-repetition), the algorithm Anki ships. A card has stability
+  // s (days until recall probability drops to 90 %), difficulty d (1..10), state 'learning' |
+  // 'review' | 'relearning' and a learning step. Short learning steps keep the minute-granular
+  // behaviour; FSRS schedules whole days once a card graduates.
+  const FSRS_PARAMS = [0.212, 1.2931, 2.3065, 8.2956, 6.4133, 0.8334, 3.0194, 0.001, 1.8722, 0.1666, 0.796, 1.4835, 0.0614, 0.2629, 1.6483, 0.6014, 1.8729, 0.5425, 0.0912, 0.0658, 0.1542];
+  const FSRS_DEFAULTS = { retention: 0.9, learningSteps: [1 * MIN, 10 * MIN, 60 * MIN], relearningSteps: [10 * MIN], maxInterval: 365, fuzz: true };
+  const FUZZ_RANGES = [[2.5, 7.0, 0.15], [7.0, 20.0, 0.1], [20.0, Infinity, 0.05]];
+  const AGAIN = 1, HARD = 2, GOOD = 3, EASY = 4;
+  const clampD = d => Math.min(10, Math.max(1, d)), clampS = x => Math.max(0.001, x);
+
+  function fsrsOpts(settings) {
+    const o = Object.assign({}, FSRS_DEFAULTS, settings && settings.fsrs ? settings.fsrs : {});
+    if (settings && settings.retention != null) o.retention = settings.retention;
+    if (settings && settings.maxInterval != null) o.maxInterval = settings.maxInterval;
+    o.w = o.w || FSRS_PARAMS;
+    o.decay = -o.w[20];
+    o.factor = Math.pow(0.9, 1 / o.decay) - 1;
+    return o;
+  }
+  /** probability of recall after `elapsedDays` for stability s */
+  function retrievability(s, elapsedDays, opts) {
+    const o = opts || fsrsOpts();
+    return Math.pow(1 + o.factor * Math.max(0, elapsedDays) / s, o.decay);
+  }
+  function initialDifficulty(w, rating, clamp) { const d = w[4] - Math.exp(w[5] * (rating - 1)) + 1; return clamp === false ? d : clampD(d); }
+  function nextDifficulty(w, d, rating) {
+    const delta = -(w[6] * (rating - 3));
+    const damped = d + (10 - d) * delta / 9;
+    return clampD(w[7] * initialDifficulty(w, EASY, false) + (1 - w[7]) * damped);
+  }
+  function shortTermStability(w, s, rating) {
+    let inc = Math.exp(w[17] * (rating - 3 + w[18])) * Math.pow(s, -w[19]);
+    if (rating >= HARD) inc = Math.max(inc, 1);
+    return clampS(s * inc);
+  }
+  function recallStability(w, d, s, r, rating) {
+    const hard = rating === HARD ? w[15] : 1, easy = rating === EASY ? w[16] : 1;
+    return clampS(s * (1 + Math.exp(w[8]) * (11 - d) * Math.pow(s, -w[9]) * (Math.exp((1 - r) * w[10]) - 1) * hard * easy));
+  }
+  function forgetStability(w, d, s, r) {
+    const long = w[11] * Math.pow(d, -w[12]) * (Math.pow(s + 1, w[13]) - 1) * Math.exp((1 - r) * w[14]);
+    const short = s / Math.exp(w[17] * w[18]);
+    return clampS(Math.min(long, short));
+  }
+  /** whole days until the next review for stability s at the desired retention */
+  function nextIntervalDays(s, o) {
+    const ivl = Math.round((s / o.factor) * (Math.pow(o.retention, 1 / o.decay) - 1));
+    return Math.min(Math.max(ivl, 1), o.maxInterval);
+  }
+  function fuzzInterval(days, o, rand) {
+    if (!o.fuzz || days < 2.5) return days;
+    let delta = 1;
+    for (const [start, end, f] of FUZZ_RANGES) delta += f * Math.max(Math.min(days, end) - start, 0);
+    let lo = Math.max(2, Math.round(days - delta)), hi = Math.min(Math.round(days + delta), o.maxInterval);
+    lo = Math.min(lo, hi);
+    return Math.min(Math.round(rand() * (hi - lo + 1) + lo), o.maxInterval);
+  }
+
+  /**
+   * fsrsReview(card, rating, now, opts, rand) -> new card with s, d, state, step, due, last.
+   * Mirrors py-fsrs Scheduler.review_card. card may be {} for a brand-new card.
+   */
+  function fsrsReview(card, rating, now, opts, rand) {
+    const o = opts || fsrsOpts(), w = o.w; rand = rand || Math.random;
+    card = card || {};
+    const c = { state: card.state || 'learning', step: card.step == null ? 0 : card.step, s: card.s == null ? null : card.s, d: card.d == null ? null : card.d, last: card.last || 0 };
+    const elapsed = c.last ? (now - c.last) / D : null;     // fractional days since last review
+    const sameDay = elapsed != null && elapsed < 1;
+    const R = () => retrievability(c.s, elapsed, o);
+    let ivl;                                               // ms
+    const graduate = () => { c.state = 'review'; c.step = null; ivl = nextIntervalDays(c.s, o); };
+    const stepsFor = st => st === 'learning' ? o.learningSteps : o.relearningSteps;
+    if (c.state === 'learning' || c.state === 'relearning') {
+      if (c.s == null || c.d == null) { c.s = clampS(w[rating - 1]); c.d = initialDifficulty(w, rating); }
+      else if (sameDay) { c.s = shortTermStability(w, c.s, rating); c.d = nextDifficulty(w, c.d, rating); }
+      else { c.s = rating === AGAIN ? forgetStability(w, c.d, c.s, R()) : recallStability(w, c.d, c.s, R(), rating); c.d = nextDifficulty(w, c.d, rating); }
+      const steps = stepsFor(c.state);
+      if (!steps.length || (c.step >= steps.length && rating >= HARD)) graduate();
+      else if (rating === AGAIN) { c.step = 0; ivl = steps[0]; }
+      else if (rating === HARD) ivl = c.step === 0 && steps.length === 1 ? steps[0] * 1.5 : c.step === 0 ? (steps[0] + steps[1]) / 2 : steps[c.step];
+      else if (rating === GOOD) { if (c.step + 1 === steps.length) graduate(); else { c.step += 1; ivl = steps[c.step]; } }
+      else graduate();
+    } else {  // review
+      c.s = sameDay ? shortTermStability(w, c.s, rating) : (rating === AGAIN ? forgetStability(w, c.d, c.s, R()) : recallStability(w, c.d, c.s, R(), rating));
+      c.d = nextDifficulty(w, c.d, rating);
+      if (rating === AGAIN) { if (!o.relearningSteps.length) ivl = nextIntervalDays(c.s, o); else { c.state = 'relearning'; c.step = 0; ivl = o.relearningSteps[0]; } }
+      else ivl = nextIntervalDays(c.s, o);
+    }
+    if (c.state === 'review') ivl = fuzzInterval(ivl, o, rand) * D;   // days -> ms
+    c.due = now + ivl; c.last = now;
+    return c;
+  }
+
+  // ladder intervals in days, used to migrate old Leitner records and to derive a display box
+  const BOX_DAYS = INTERVALS.map(ms => ms / D);
+  /** one-time conversion of a Leitner record to FSRS fields (idempotent) */
+  function migrateRecord(p) {
+    if (!p || p.s != null) return p;
+    const q = Object.assign({}, p);
+    const box = q.box || 0;
+    q.s = Math.max(BOX_DAYS[box], 10 * MIN / D);
+    q.d = clampD(5 + 0.5 * (q.lapses || 0));
+    q.state = box >= 4 ? 'review' : 'learning';
+    q.step = box >= 4 ? null : Math.min(box, 1);
+    return q;
+  }
+  function boxFromRecord(p) {
+    if (!p) return 0;
+    if (p.s == null) return p.box || 0;
+    if (p.state !== 'review') return p.step || 0;
+    let b = 2; for (let i = 2; i < BOX_DAYS.length; i++) if (p.s >= BOX_DAYS[i]) b = i;
+    return b;
+  }
+  /** 'young' | 'established' | 'mature' — drives the "almost" policy */
+  function maturity(p) {
+    if (!p) return 'young';
+    if (p.s == null) { const b = p.box || 0; return b <= 2 ? 'young' : b >= 6 ? 'mature' : 'established'; }
+    if (p.state !== 'review' || p.s < 1) return 'young';
+    return p.s >= 7 ? 'mature' : 'established';
+  }
+  /** current recall probability of a card (0 for cards in learning steps or never seen) */
+  function recallNow(p, now, settings) {
+    if (!p || p.s == null || p.state !== 'review' || !p.last) return 0;
+    return retrievability(p.s, (now - p.last) / D, fsrsOpts(settings));
+  }
+
   // --- "almost" policy (decision D-002) --------------------------------------------------------
   // young card (box <= youngMaxBox): a near miss counts as correct, at most `almostFreePasses` times
   // (typos and word-order misses have separate counters); established card: it holds its box;
   // mature card (box >= matureMinBox): it lapses like a wrong answer.
-  const ALMOST = { youngMaxBox: 2, matureMinBox: 6 };
+  const ALMOST = { youngMaxBox: 2, matureMinBox: 6 };   // legacy box thresholds; see maturity()
   function almostOutcome(p, reason, settings) {
     p = p || newRecord(); settings = settings || {};
     const policy = settings.almostPolicy || 'staged';
@@ -131,32 +258,33 @@
     const used = p[counter] || 0;
     if (policy === 'strict') return { rating: 'wrong', rule: 'strict' };
     if (policy === 'lenient') return { rating: 'almost', rule: 'hold' };
-    if ((p.box || 0) <= ALMOST.youngMaxBox && used < passes) return { rating: 'correct', rule: 'free-pass', counter, used: used + 1, passes };
-    if ((p.box || 0) >= ALMOST.matureMinBox) return { rating: 'wrong', rule: 'lapse' };
+    const m = maturity(p);
+    if (m === 'young' && used < passes) return { rating: 'correct', rule: 'free-pass', counter, used: used + 1, passes };
+    if (m === 'mature') return { rating: 'wrong', rule: 'lapse' };
     return { rating: 'almost', rule: 'hold' };
   }
 
   /** apply an answer to a progress record; returns a new record. free = free-practice mode.
-   *  reason ('typo' | 'order') and settings select the "almost" policy; see almostOutcome. */
+   *  reason ('typo' | 'order') and settings select the "almost" policy; see almostOutcome.
+   *  Scheduling is FSRS-6 (D-001): correct -> Good, almost -> Hard (or Good / Again per policy), wrong -> Again. */
   function applyResult(p, result, now, free, rand, reason, settings) {
-    p = Object.assign(newRecord(), p || {});
+    p = Object.assign(newRecord(), migrateRecord(p) || {});
     rand = rand || Math.random;
     if (result === 'almost') {
       const o = almostOutcome(p, reason, settings);
       if (o.rule === 'free-pass' && !free) p[o.counter] = o.used;
+      p.lastRule = o.rule;
       result = o.rating;
-    }
-    p.reps += 1; p.last = now;
-    if (result === 'wrong') {
-      p.lapses += 1; p.streak = 0; p.box = Math.max(0, p.box - 2); p.due = now;
-      return p;
-    }
-    p.streak += 1;
-    if (free) { if (p.box === 0) { p.box = 1; p.due = now + INTERVALS[1]; } return p; }
-    if (result === 'correct') p.box = Math.min(MAX_BOX, p.box + 1);
-    else if (p.box === 0) p.box = 1;           // almost: stay, but leave box 0
-    const iv = INTERVALS[p.box];
-    p.due = now + Math.round(iv * (0.9 + rand() * 0.2));
+    } else delete p.lastRule;
+    const rating = result === 'correct' ? GOOD : result === 'almost' ? HARD : AGAIN;
+    p.reps += 1; p.last = p.last || 0;
+    if (result === 'wrong') { p.lapses += 1; p.streak = 0; } else p.streak += 1;
+    if (free && result !== 'wrong') { p.box = boxFromRecord(p); return p; }   // free practice never moves a card forward
+    const c = fsrsReview({ s: p.s, d: p.d, state: p.state, step: p.step, last: p.last }, rating, now, fsrsOpts(settings), rand);
+    p.s = c.s; p.d = c.d; p.state = c.state; p.step = c.step; p.due = c.due; p.last = now;
+    if (free) p.due = now;                                   // a lapse in free practice is due right away
+    p.box = boxFromRecord(p);
+    p.rating = rating;
     return p;
   }
 
@@ -249,9 +377,9 @@
     const elig = sentences.filter(s => eligible(s, settings));
     for (const s of sentences) for (const k of cardKeys(s, progress, settings)) {
       const p = progress[k];
-      if (p && p.due <= now) due.push({ k, due: p.due });
+      if (p && p.due <= now) due.push({ k, due: p.due, r: recallNow(p, now, settings) });
     }
-    due.sort((x, y) => x.due - y.due);
+    due.sort((x, y) => x.r - y.r || x.due - y.due);   // most forgotten first; learning-step cards (r = 0) lead
     const dueKeys = due.slice(0, settings.maxDue || 40).map(x => x.k);
     const nNew = settings.newPerSession == null ? 10 : settings.newPerSession;
     const candidates = [];
@@ -272,7 +400,7 @@
       free = true;
       const seen = [];
       for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (progress[k]) seen.push(k);
-      shuffle(seen, rand).sort((x, y) => progress[x].box - progress[y].box);
+      shuffle(seen, rand).sort((x, y) => boxFromRecord(progress[x]) - boxFromRecord(progress[y]));
       queue = spreadOut(seen.slice(0, settings.freeSize || 20), byId);
     }
     return { queue, free, nDue: due.length, nNew: fresh.length };
@@ -340,6 +468,6 @@
     return s;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

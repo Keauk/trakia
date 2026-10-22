@@ -34,14 +34,75 @@ t('translit', () => {
   assert.equal(C.translit('Shte dojda s priyatel. Zdravej!'), 'Ще дойда с приятел. Здравей!');
   assert.equal(C.translit('chasha chaj, kashkaval, yod'), 'чаша чай, кашкавал, ьод');
 });
-t('applyResult ladder', () => {
+t('FSRS reference: py-fsrs test_review_card', () => {
+  // steps as in py-fsrs defaults (1 min, 10 min / 10 min), fuzz off, retention 0.9
+  const o = C.fsrsOpts({ fsrs: { learningSteps: [60e3, 600e3], relearningSteps: [600e3], maxInterval: 36500, fuzz: false } });
+  const G = 3, A = 1, ratings = [G, G, G, G, G, G, A, A, G, G, G, G, G];
+  let card = {}, now = Date.UTC(2022, 10, 29, 12, 30), hist = [];
+  for (const r of ratings) { card = C.fsrsReview(card, r, now, o); hist.push(Math.floor((card.due - card.last) / 86400e3)); now = card.due; }
+  assert.deepEqual(hist, [0, 2, 11, 46, 163, 498, 0, 0, 2, 4, 7, 12, 21]);
+});
+t('FSRS reference: py-fsrs test_memo_state', () => {
+  const o = C.fsrsOpts({ fsrs: { learningSteps: [60e3, 600e3], relearningSteps: [600e3], maxInterval: 36500, fuzz: true } });
+  const ratings = [1, 3, 3, 3, 3, 3], ivls = [0, 0, 1, 3, 8, 21];
+  let card = {}, now = Date.UTC(2022, 10, 29, 12, 30);
+  for (let i = 0; i < ratings.length; i++) { now += ivls[i] * 86400e3; card = C.fsrsReview(card, ratings[i], now, o, () => 0.5); }
+  assert.ok(Math.abs(card.s - 53.62691) < 1e-4, 'stability ' + card.s);
+  assert.ok(Math.abs(card.d - 6.3574867) < 1e-4, 'difficulty ' + card.d);
+});
+t('FSRS retrievability and retention', () => {
+  const o = C.fsrsOpts();
+  assert.ok(Math.abs(C.retrievability(10, 10, o) - 0.9) < 1e-9, 'R(S,S) = 0.9');
+  assert.ok(C.retrievability(10, 30, o) < C.retrievability(10, 5, o));
+  const run = ret => { const oo = C.fsrsOpts({ retention: ret, fsrs: { fuzz: false } }); let c = {}, now = 1e12; for (const r of [3, 3, 3, 3]) { c = C.fsrsReview(c, r, now, oo); now = c.due; } return (c.due - c.last) / 86400e3; };
+  assert.ok(run(0.8) > run(0.9) && run(0.9) > run(0.95), [run(0.8), run(0.9), run(0.95)].join(','));
+  const capped = C.fsrsOpts({ maxInterval: 30, fsrs: { fuzz: false } });
+  let c = { s: 500, d: 3, state: 'review', last: 1e12 - 400 * 86400e3 }; c = C.fsrsReview(c, 3, 1e12, capped);
+  assert.equal((c.due - c.last) / 86400e3, 30);
+});
+t('applyResult with FSRS learning steps', () => {
+  const now = 1e12, r = () => 0.5, S = { almostPolicy: 'staged', almostFreePasses: 2 };
+  let p = C.applyResult(null, 'correct', now, false, r, null, S);
+  assert.equal(p.state, 'learning'); assert.equal(p.step, 1); assert.equal(p.due, now + 10 * 60e3); assert.equal(p.box, 1); assert.equal(p.rating, 3);
+  p = C.applyResult(p, 'correct', now + 10 * 60e3, false, r, null, S);
+  assert.equal(p.step, 2); assert.equal(p.due, now + 10 * 60e3 + 3600e3);
+  p = C.applyResult(p, 'correct', now + 70 * 60e3, false, r, null, S);
+  assert.equal(p.state, 'review'); assert.ok(p.due - p.last >= 86400e3, 'graduated to at least a day');
+  assert.ok(p.s > 2, 'stability grew: ' + p.s);
+  let good = { s: 5, d: 5, state: 'review', last: now - 5 * 86400e3, due: now }, bad = Object.assign({}, good);
+  for (let i = 0; i < 5; i++) good = C.applyResult(good, 'correct', good.due, false, r, null, S);
+  bad = C.applyResult(bad, 'wrong', now, false, r, null, S); assert.equal(bad.state, 'relearning'); assert.equal(bad.lapses, 1);
+  bad = C.applyResult(bad, 'wrong', bad.due, false, r, null, S); assert.equal(bad.lapses, 2);
+  bad = C.applyResult(bad, 'correct', bad.due, false, r, null, S); assert.equal(bad.state, 'review');
+  assert.ok(good.due - good.last > bad.due - bad.last);
+  p = C.applyResult(null, 'wrong', now, false, r, null, S); assert.equal(p.state, 'learning'); assert.equal(p.step, 0); assert.equal(p.lapses, 1); assert.equal(p.box, 0);
+});
+t('FSRS migration of Leitner records', () => {
+  const m = C.migrateRecord({ box: 7, due: 5, reps: 9, lapses: 1, streak: 3, last: 4 });
+  assert.equal(m.state, 'review'); assert.equal(m.s, 16); assert.equal(m.d, 5.5); assert.equal(m.due, 5); assert.equal(m.reps, 9);
+  const l = C.migrateRecord({ box: 1, due: 5, reps: 1, lapses: 0, streak: 1, last: 4 });
+  assert.equal(l.state, 'learning'); assert.equal(l.step, 1);
+  const z = C.migrateRecord({ box: 0, due: 5 }); assert.equal(z.step, 0); assert.ok(z.s > 0);
+  assert.equal(C.migrateRecord(m), m, 'idempotent');
+  assert.equal(C.maturity({ box: 7 }), 'mature'); assert.equal(C.maturity({ s: 3, state: 'review' }), 'established'); assert.equal(C.maturity({ s: 9, state: 'learning' }), 'young'); assert.equal(C.maturity({ s: 9, state: 'review' }), 'mature');
+  assert.equal(C.boxFromRecord(m), 7); assert.equal(C.boxFromRecord({ s: 40, state: 'review' }), 8); assert.equal(C.boxFromRecord({ s: 0.5, state: 'review' }), 3);  // half a day >= the 6 h rung
+});
+t('free practice never moves a card forward', () => {
   const now = 1e12, r = () => 0.5;
-  let p = C.applyResult(null, 'correct', now, false, r); assert.equal(p.box, 1); assert.equal(p.due, now + 10 * 60e3);
-  p = C.applyResult(p, 'correct', now, false, r); assert.equal(p.box, 2); assert.equal(p.due, now + 3600e3);
-  p = C.applyResult(p, 'almost', now, false, r, 'typo', { almostPolicy: 'lenient' }); assert.equal(p.box, 2);  // lenient: almost holds the box
-  p = C.applyResult(p, 'wrong', now, false, r); assert.equal(p.box, 0); assert.equal(p.due, now); assert.equal(p.lapses, 1);
-  p = C.applyResult({ box: 8 }, 'correct', now, false, r); assert.equal(p.box, 8);
-  p = C.applyResult({ box: 5, due: now + 999 }, 'correct', now, true, r); assert.equal(p.box, 5); assert.equal(p.due, now + 999); // free mode leaves schedule
+  let p = C.applyResult({ s: 20, d: 5, state: 'review', due: now + 5e8, last: now - 1e8, reps: 3, lapses: 0, streak: 2 }, 'correct', now, true, r, null, {});
+  assert.equal(p.due, now + 5e8); assert.equal(p.s, 20); assert.equal(p.reps, 4); assert.equal(p.streak, 3);
+  p = C.applyResult(p, 'wrong', now, true, r, null, {});
+  assert.equal(p.state, 'relearning'); assert.equal(p.due, now); assert.equal(p.lapses, 1); assert.ok(p.s < 20);
+});
+t('session: most forgotten due cards first', () => {
+  const S = [{ id: 'a', max_rank: 10 }, { id: 'b', max_rank: 20 }, { id: 'c', max_rank: 30 }];
+  const now = 1e12, day = 86400e3;
+  const prog = { 'a|bg2nl': { s: 10, d: 5, state: 'review', due: now - day, last: now - 11 * day },
+                 'b|bg2nl': { s: 2, d: 5, state: 'review', due: now - day, last: now - 20 * day },
+                 'c|bg2nl': { state: 'learning', step: 1, s: 2, d: 5, due: now - 1, last: now - 3600e3 } };
+  const s = C.buildSession(S, prog, { rank: 100, newPerSession: 0, directions: 'bg2nl', newOrder: 'strict' }, now, () => 0.5);
+  assert.deepEqual(s.queue, ['c|bg2nl', 'b|bg2nl', 'a|bg2nl']);
+  assert.ok(C.recallNow(prog['b|bg2nl'], now, {}) < C.recallNow(prog['a|bg2nl'], now, {}));
 });
 t('buildSession (strict order)', () => {
   const S = [{ id: 'a', max_rank: 10 }, { id: 'b', max_rank: 50 }, { id: 'c', max_rank: 500 }, { id: 'd', max_rank: null }];
@@ -140,22 +201,21 @@ t('almostOutcome stages', () => {
   assert.equal(C.almostOutcome({ box: 0 }, 'typo', { almostPolicy: 'strict' }).rating, 'wrong');
   assert.equal(C.almostOutcome({ box: 0 }, 'typo', { almostPolicy: 'staged', almostFreePasses: 0 }).rule, 'hold');
 });
-t('applyResult with almost policy', () => {
+t('applyResult with almost policy (FSRS)', () => {
   const now = 1e12, r = () => 0.5, S = { almostPolicy: 'staged', almostFreePasses: 2 };
-  // new card: two typos advance it to box 2, the third holds
-  let p = C.applyResult(null, 'almost', now, false, r, 'typo', S); assert.equal(p.box, 1); assert.equal(p.almosts, 1);
-  p = C.applyResult(p, 'almost', now, false, r, 'typo', S); assert.equal(p.box, 2); assert.equal(p.almosts, 2);
-  p = C.applyResult(p, 'almost', now, false, r, 'typo', S); assert.equal(p.box, 2); assert.equal(p.almosts, 2); assert.equal(p.lapses, 0);
-  // mature card: an almost lapses it
-  p = C.applyResult({ box: 7, due: now + 5e8 }, 'almost', now, false, r, 'typo', S);
-  assert.equal(p.box, 5); assert.equal(p.due, now); assert.equal(p.lapses, 1);
+  // new card: two typos advance it through the learning steps, the third holds (Hard repeats the step)
+  let p = C.applyResult(null, 'almost', now, false, r, 'typo', S); assert.equal(p.step, 1); assert.equal(p.almosts, 1); assert.equal(p.rating, 3);
+  p = C.applyResult(p, 'almost', p.due, false, r, 'typo', S); assert.equal(p.step, 2); assert.equal(p.almosts, 2);
+  p = C.applyResult(p, 'almost', p.due, false, r, 'typo', S); assert.equal(p.step, 2); assert.equal(p.almosts, 2); assert.equal(p.lapses, 0); assert.equal(p.rating, 2);
+  // mature card (legacy box 7 -> stability 16 d): an almost lapses it
+  p = C.applyResult({ box: 7, due: now + 5e8, last: now - 16 * 86400e3 }, 'almost', now, false, r, 'typo', S);
+  assert.equal(p.state, 'relearning'); assert.equal(p.due, now + 10 * 60e3); assert.equal(p.lapses, 1); assert.equal(p.rating, 1);
   // free practice never consumes passes and never advances
-  p = C.applyResult({ box: 1 }, 'almost', now, true, r, 'typo', S); assert.equal(p.box, 1); assert.equal(p.almosts, undefined);
-  // lenient keeps the old behaviour; strict demotes
-  p = C.applyResult({ box: 7, due: now + 5e8 }, 'almost', now, false, r, 'typo', { almostPolicy: 'lenient' }); assert.equal(p.box, 7); assert.equal(p.lapses, 0);
-  p = C.applyResult({ box: 3 }, 'almost', now, false, r, 'typo', { almostPolicy: 'strict' }); assert.equal(p.box, 1); assert.equal(p.lapses, 1);
+  p = C.applyResult({ box: 1, due: now + 5e8, last: now - 1 }, 'almost', now, true, r, 'typo', S); assert.equal(p.due, now + 5e8); assert.equal(p.almosts, undefined);
+  // lenient keeps the card in review as Hard; strict demotes
+  p = C.applyResult({ box: 7, due: now + 5e8, last: now - 16 * 86400e3 }, 'almost', now, false, r, 'typo', { almostPolicy: 'lenient' }); assert.equal(p.state, 'review'); assert.equal(p.lapses, 0); assert.equal(p.rating, 2);
+  p = C.applyResult({ box: 3, due: now, last: now - 3600e3 }, 'almost', now, false, r, 'typo', { almostPolicy: 'strict' }); assert.equal(p.lapses, 1); assert.equal(p.rating, 1);
   // no settings at all -> staged defaults
-  p = C.applyResult(null, 'almost', now, false, r, 'typo'); assert.equal(p.box, 1); assert.equal(p.almosts, 1);
+  p = C.applyResult(null, 'almost', now, false, r, 'typo'); assert.equal(p.step, 1); assert.equal(p.almosts, 1);
 });
-
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

@@ -1,6 +1,6 @@
 # D-001: Replace the Leitner ladder with an FSRS-style scheduler
 
-Status: proposed · Created: 2026-10-21 · Area: scheduling (`app/core.js`: `INTERVALS`, `applyResult`, `buildSession`)
+Status: done (2026-10-22) · Created: 2026-10-21 · Area: scheduling (`app/core.js`: `INTERVALS`, `applyResult`, `buildSession`)
 
 ## Context
 Scheduling today is a fixed Leitner ladder: nine boxes with intervals 0, 10 min, 1 h, 6 h, 1 d, 3 d,
@@ -54,7 +54,36 @@ Keep the minute-granular feel with explicit learning steps before FSRS takes ove
 About 250 lines in `core.js` plus tests; one evening. Risks: subtle maths bugs (mitigated by reference
 vectors); the first weeks after migration will feel different because intervals change.
 
+## Implementation notes (as built)
+- `core.js` ports **py-fsrs 6.3.2** (FSRS-6, 21 parameters, the version Anki ships): `fsrsReview(card,
+  rating, now, opts, rand)` mirrors `Scheduler.review_card` including learning/relearning steps,
+  same-day short-term stability, whole-day review intervals, the maximum interval and py-fsrs's fuzz
+  ranges. Two reference vectors from the py-fsrs test suite pass exactly (`test_review_card` interval
+  history and `test_memo_state` stability/difficulty to 1e-4).
+- Steps: learning 1 min → 10 min → 1 h (a new card answered Good waits 10 min, then 1 h, then
+  graduates to days; 1 min is only reached after Again, and the session re-queues such cards anyway),
+  relearning 10 min. Ratings: correct → Good, almost → Hard, wrong → Again; the D-002 policy can turn
+  an almost into Good (free pass) or Again (mature card). No Easy.
+- Settings: *Desired retention* (0.80–0.95, default 0.90, with a live example of resulting
+  intervals) and *Longest interval* (default 365 days).
+- Record fields: `s` (stability, days), `d`, `state`, `step`, `due`, `last`, `rating` (last rating),
+  plus the existing `reps`, `lapses`, `streak`, `almosts`, `orders`. `box` is kept as a derived
+  display value (`boxFromRecord`) for export compatibility and free-practice ordering.
+- Migration (`migrateRecord`, run once at load and lazily in `applyResult`): box → stability equal to
+  the ladder interval in days, difficulty 5 + 0.5 × lapses, box ≥ 4 → review, else learning at the
+  matching step; `due` unchanged, so nothing becomes due or unseen because of the switch.
+- D-002 maturity now comes from the record: young = in learning steps or stability < 1 day,
+  mature = review with stability ≥ 7 days, established in between (legacy boxes map the same way).
+- Sessions order due cards by predicted recall (most forgotten first; learning-step cards lead).
+- Stats shows stability bands (learning, < 7 d, 7–30 d, ≥ 30 d) and the predicted recall of the cards
+  due now; the Library badge shows stability and due time; row details show difficulty and recall.
+- Free practice: correct/almost leave the schedule untouched; wrong lapses the card (relearning, due
+  now). The log row gained the FSRS rating as its sixth element, enough to export a revlog for the
+  optimiser later.
+- Not done: parameter optimisation from the user's own history (needs `fsrs-optimizer` on an exported
+  revlog); Easy rating.
+
 ## Open questions
-- Keep a user-visible "box" at all, or switch the Library and Stats to stability and retrievability?
-- Treat almost as Hard or as Good with a flag? (Interacts with D-002.)
+- ~~Keep a user-visible "box"?~~ Switched to stability and recall; box survives only as a derived field.
+- ~~Treat almost as Hard or as Good?~~ Hard, except where the D-002 policy says Good or Again.
 - Do we want an optimiser later (export revlog, run `fsrs-optimizer`, paste parameters into Settings)?

@@ -23,7 +23,8 @@ file also works on the laptop.
 ## Develop
 
 ```bash
-node tools/test_core.js                       # unit tests for the matching / scheduling logic
+npm install                                   # once: jsdom for the headless UI test
+npm test                                      # unit tests (incl. FSRS reference vectors) + headless UI test
 python3 tools/build_data.py                   # regenerate app/data.js after editing data/*.json
 python3 tools/export_anki_words.py deck.apkg  # refresh data/words.json from a new Anki export
 ```
