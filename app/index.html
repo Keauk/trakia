@@ -31,7 +31,7 @@ header{position:sticky;top:0;z-index:5;background:var(--header);border-bottom:1p
 h1{font:700 24px/1.2 var(--serif);margin:0;color:var(--ink)}
 #hdr-rank{font:400 12px var(--mono);color:var(--faint);white-space:nowrap}
 nav{display:flex;gap:2px;background:var(--nav-track);padding:3px;border-radius:10px}
-.hright{display:flex;align-items:center;gap:10px}
+.hright{display:flex;align-items:center;gap:19px}
 /* light/dark switch (D-016): a moon in light mode, a sun in dark mode */
 .theme-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer}
 .theme-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -171,7 +171,8 @@ input[type=range]{width:100%}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--input-bg)}
-@media (min-width:768px){.m-only{display:none!important}}
+/* wide screens: the tabs sit on the page centre line, the same as the content column */
+@media (min-width:768px){.m-only{display:none!important}.hrow{display:grid;grid-template-columns:1fr auto 1fr}.hrow h1{justify-self:start}.hright{justify-self:end}}
 /* phones: tabs become a bottom bar, practise actions sit at the bottom of the screen */
 @media (max-width:767px){
 :root{--tabbar-h:calc(44px + env(safe-area-inset-bottom))}
@@ -187,6 +188,7 @@ body.running header{position:static;background:none;border:0}
 body.running .hrow{padding:0}body.running h1,body.running .hright{display:none}
 .theme-btn{width:44px;height:44px}
 .hright .theme-btn{margin:-10px -12px -10px -6px}
+.hright{gap:16px}
 body.running main{padding-top:0;padding-bottom:calc(var(--tabbar-h) + 96px)}
 .run-top{display:flex;align-items:center;gap:10px;margin:0 -12px;padding:8px 12px 8px 6px}
 .icon-btn{flex:none;width:44px;height:44px;background:none;border:0;color:var(--faint);font:400 20px var(--sans);cursor:pointer}
