@@ -220,7 +220,7 @@ sEn3.en_loose = ['Something rather loosely rendered.'];
 type('Something rather loosely rendered');
 assert.match($('verdict').className, /correct/, 'loose answer accepted: ' + $('verdict').textContent);
 assert.ok($('verdict').querySelector('.loose-tag'), 'loose tag shown');
-assert.equal($('expected-label').hidden, false); assert.equal($('expected-label').textContent, 'Closer to the Bulgarian');
+assert.equal($('expected-label').hidden, false); assert.equal($('expected-label').textContent, '→ Exact translation');
 assert.ok([sEn3.en].concat(sEn3.en_alt || []).includes($('expected').textContent), 'closer is an exact answer: ' + $('expected').textContent);
 assert.ok($('expected').querySelector('mark'), 'closer answer highlighted against what was typed');
 assert.ok([...$('alts').querySelectorAll('li.loose')].length === 0, 'the typed loose answer is not listed again');

@@ -15,7 +15,10 @@ highest rank of the words they use, so the learner only sees sentences built fro
 2. Every sentence must be natural, idiomatic, correct modern Bulgarian with correct stress-free
    spelling, correct definite articles, correct aspect, and correct clitic placement (clitics never
    sentence-initial; "ли" after the questioned word).
-3. Write the Dutch translation in natural, modern Standard Dutch (Netherlands), not a word-for-word gloss.
+3. Write the Dutch translation in natural, modern Standard Dutch (Netherlands), not a word-for-word gloss,
+   but faithful (D-017): where natural Dutch allows it, keep the Bulgarian's number, definiteness,
+   person, tense and structure. The same holds for the English primary. Idiomatic renderings go
+   in the looser tier below.
 4. Give alternative accepted answers in BOTH directions:
    - `nl_alt`: other fully correct Dutch translations of the Bulgarian sentence (different tense
      rendering, word order, synonym, "je/jij", "ik heb gekocht"/"ik kocht", etc.). 1-3 items, only
@@ -24,16 +27,22 @@ highest rank of the words they use, so the learner only sees sentences built fro
      kept: "Аз съм учител" / "Учител съм"; word-order variants; "във/със" forms, etc.). 0-3 items.
      Only include bg_alt items that also respect constraint 1.
    - `en_alt`: other fully correct English translations, by the same rule as `nl_alt`.
-   - **Exact vs looser vs wrong (D-014).** Judge every alternative against the Bulgarian, not
-     against the primary. *Exact* (`nl_alt`, `en_alt`): same meaning in the grammar the language
-     normally uses for it: synonyms, British/American pairs, word order, contractions, "I want" /
-     "I'd like", present simple / continuous for the Bulgarian present, Dutch perfect or imperfect
-     for a Bulgarian aorist, and every reading of a genuinely ambiguous Bulgarian sentence ("в
-     неделя" = "on Sunday" and "on Sundays"). *Looser* (`nl_loose`, `en_loose`, 0-3 items): natural
-     and essentially the same, but drifting in tense (an English present perfect for an aorist),
-     number, definiteness or structure; the app accepts these with a "≈ looser" note. Leave out
-     anything that adds, drops or changes meaning ("freeze to death" for "замръзнем", "take" for
-     "нося", "a cold" for "хрема").
+   - **Exact vs looser vs wrong (D-014, made stricter by D-017).** Judge every alternative against
+     the Bulgarian, not against the primary. The test: a teacher marking a translation exercise.
+     *Exact* (`nl_alt`, `en_alt`): full marks with no comment. That covers what the target language
+     forces (articles, subject pronouns, word order, possessives for body parts, reported-speech
+     backshift), equivalent tenses (present simple / continuous for the Bulgarian present; English
+     past simple, Dutch imperfect or perfect for an aorist; will / going to for ще), dictionary
+     synonyms of the same Bulgarian word, British/American pairs, contractions, and every reading of
+     a genuinely ambiguous Bulgarian sentence ("в неделя" = "on Sunday" and "on Sundays").
+     *Looser* (`nl_loose`, `en_loose`): right, but the teacher would add a note. Drift in number
+     ("look you in the eye" for "в очите"), definiteness, person, voice, politeness ("I'd like" for
+     "искам"), structure ("look into your eyes" for "те гледам в очите"), a word that translates
+     another Bulgarian word ("dad" for "баща"), an idiom instead of the plain words ("stand a
+     chance"), small additions or omissions, or tense (an English present perfect for an aorist).
+     The app accepts these with a "≈ looser" note and shows the exact answer. Leave out anything
+     that adds, drops or changes meaning ("freeze to death" for "замръзнем", "take" for "нося", "a
+     cold" for "хрема").
 5. `lemmas`: list the dictionary forms (exactly as spelled in column `bulgarian` of the vocabulary
    file) of EVERY content word you used from the file: nouns, verbs, adjectives, adverbs, pronouns,
    prepositions, conjunctions, numerals, particles. This is used to compute the sentence's rank, so be
