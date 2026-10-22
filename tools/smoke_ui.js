@@ -86,6 +86,14 @@ document.querySelector('nav button[data-tab=settings]').click(); $('set-translit
 document.querySelector('nav button[data-tab=practise]').click();
 $('answer').value = 'kupih hlyab'; $('answer').dispatchEvent(new window.Event('input'));
 assert.equal($('translit-preview').textContent, 'купих хляб');
+// --- autofill: answer field is a single-line textarea; a keyboard-inserted line break submits
+assert.equal($('answer').tagName, 'TEXTAREA'); assert.equal($('answer').getAttribute('autocomplete'), 'off');
+document.querySelector('nav button[data-tab=practise]').click();
+$('btn-home').click(); $('btn-start').click();
+$('answer').value = 'iets\n'; $('answer').dispatchEvent(new window.InputEvent('input', { inputType: 'insertLineBreak' }));
+assert.equal($('feedback').hidden, false, 'line break from the keyboard submits the answer');
+assert.ok(!/\n/.test($('answer').value), 'no newline left in the field');
+$('btn-quit').click(); $('btn-home').click();
 // --- D-012: collapsible alternatives
 document.querySelector('nav button[data-tab=practise]').click();
 $('btn-home').click(); $('btn-start').click();

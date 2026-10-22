@@ -44,10 +44,10 @@ button{font:inherit}
 .prompt{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif;font-size:28px;line-height:1.35;margin:8px 0 12px;font-weight:500;letter-spacing:.01em}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
 .chip{font-size:13px;background:var(--almost-bg);border-radius:8px;padding:2px 8px}
-input[type=text],textarea,select,input[type=number]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
-#answer{font-size:19px;padding:14px 16px;border-width:2px;border-radius:12px;background:var(--card)}
-input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
-input.ok{border-color:var(--ok)}input.almost{border-color:var(--almost)}input.bad{border-color:var(--bad)}
+input[type=text],input[type=search],textarea,select,input[type=number]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+#answer{font-size:19px;padding:14px 16px;border-width:2px;border-radius:12px;background:var(--card);resize:none;overflow:hidden;line-height:1.4;min-height:0;display:block}
+input[type=text]:focus,input[type=search]:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+#answer.ok{border-color:var(--ok)}#answer.almost{border-color:var(--almost)}#answer.bad{border-color:var(--bad)}
 .preview{font-size:20px;margin:8px 0 0;min-height:1.4em}
 .verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;align-items:baseline;gap:10px}
 .verdict.correct{background:var(--ok-bg)}.verdict.almost{background:var(--almost-bg)}.verdict.wrong{background:var(--bad-bg)}
@@ -159,7 +159,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       </div>
       <p id="prompt" class="prompt"></p>
       <div id="newwords" class="chips"></div>
-      <input type="text" id="answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" placeholder="Type the translation, then Enter">
+      <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Type the translation, then Enter"></textarea>
       <p id="translit-preview" class="preview" hidden></p>
       <div class="row" id="answer-actions">
         <button class="btn primary" id="btn-check">Check</button>
@@ -244,7 +244,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
         <option value="imported">Imported</option>
         <option value="thin">Thin coverage (a word used nowhere else)</option>
       </select>
-      <input type="text" id="lib-search" placeholder="search…" style="flex:1;min-width:140px">
+      <input type="search" id="lib-search" name="trakia-search" autocomplete="off" autocorrect="off" spellcheck="false" data-form-type="other" placeholder="search…" style="flex:1;min-width:140px">
     </div>
     <p class="tiny" id="lib-count"></p>
     <p class="tiny">The two right columns show each direction's <b>stability</b> (how many days until recall drops to 90 %; "learning" while a card is in its first short steps) and when it is next due. "–" = not practised yet. Tap a row for details.</p>
@@ -411,6 +411,7 @@ function renderAlts(list) {
   el.querySelector('ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('');
   el.open = LS.get('altsOpen', false) === true;
 }
+function fitAnswer() { const a = $('answer'); a.style.height = 'auto'; a.style.height = a.scrollHeight + 'px'; }
 function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(d * 24) + ' h'; return (d < 10 ? d.toFixed(1) : Math.round(d)) + ' d'; }
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
@@ -470,7 +471,7 @@ function renderDrillCard() {
   $('dir-badge').textContent = 'Grammar drill'; $('free-badge').hidden = true; $('retry-badge').hidden = true;
   $('prompt').textContent = item.prompt; $('prompt').lang = 'bg';
   $('newwords').innerHTML = `<span class="hint">${esc(item.hint)}</span>`;
-  const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = 'bg'; inp.placeholder = 'Type the form, then Enter';
+  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = 'bg'; inp.placeholder = 'Type the form, then Enter';
   $('translit-preview').hidden = !settings.translit; $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
@@ -504,6 +505,15 @@ function nextDrill() {
   session.counts[p.result]++;
   session.i++; renderCard();
 }
+$('answer').addEventListener('input', e => {
+  const a = $('answer');
+  if (/[\r\n]/.test(a.value)) {
+    const typedEnter = e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph' || (!e.inputType && /[\r\n]$/.test(a.value));
+    const pos = a.selectionStart; a.value = a.value.replace(/[\r\n]+/g, typedEnter ? '' : ' ').trimEnd(); a.selectionStart = a.selectionEnd = Math.min(pos, a.value.length);
+    if (typedEnter && session) { if (session.pending) next(); else checkAnswer(false); return; }   // keyboards that insert a line break instead of sending Enter
+  }
+  fitAnswer();
+});
 $('alts').addEventListener('toggle', () => { if (!$('alts').hidden) LS.set('altsOpen', $('alts').open); });
 $('gloss').addEventListener('click', e => { const a = e.target.closest('[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = document.getElementById('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
 function allAccepted(s, dir, key) { return C.acceptedFor(s, dir).concat(userAlts[key] || []); }
@@ -521,7 +531,7 @@ function renderCard() {
   $('prompt').lang = K.toBg ? K.lang : 'bg';
   const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
   $('newwords').innerHTML = chips ? '<span class="tiny" style="align-self:center">new:</span>' + chips : '';
-  const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = K.toBg ? 'bg' : K.lang;
+  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = K.toBg ? 'bg' : K.lang;
   inp.placeholder = K.toBg ? 'Напиши превода на български, после Enter' : `Type the ${LANG_NAME[K.lang] || K.lang} translation, then Enter`;
   $('translit-preview').hidden = !(settings.translit && K.toBg); $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
