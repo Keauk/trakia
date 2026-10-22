@@ -10,6 +10,8 @@ interface Sentence {
   nl_alt: string[]; bg_alt: string[]; en_alt: string[];
   /** accepted with a "looser translation" note (D-014) */
   nl_loose?: string[]; en_loose?: string[];
+  /** Bulgarian answers accepted only for the English prompt: the other "you" form (D-018) */
+  bg_alt_en?: string[];
   lemmas: string[]; max_rank: number | null; tags: string[]; source: string; grammar?: string[];
 }
 

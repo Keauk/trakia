@@ -119,7 +119,7 @@
     const V = { bg: new Set(), nl: new Set(), en: new Set() };
     const add = (lang, s) => { for (const w of normalise(s, lang).split(' ')) if (w) V[lang].add(w); };
     for (const s of sentences) {
-      for (const x of [s.bg].concat(s.bg_alt || [])) add('bg', x);
+      for (const x of [s.bg].concat(s.bg_alt || [], s.bg_alt_en || [])) add('bg', x);
       for (const L of ['nl', 'en']) for (const x of [s[L]].concat(s[L + '_alt'] || [], s[L + '_loose'] || [])) if (x) add(L, x);
     }
     for (const w of words || []) { add('bg', w.bg); for (const part of (w.forms || '').split(/[(),\/;]/)) add('bg', part); }
@@ -458,10 +458,11 @@
     const toBg = dir.endsWith('2bg'), lang = toBg ? dir.slice(0, -3) : dir.slice(3);
     return { id, dir, lang, toBg };
   }
-  /** accepted answers for a card: the other-language sentence (+ alternatives) or the Bulgarian */
+  /** accepted answers for a card: the other-language sentence (+ alternatives) or the Bulgarian;
+   *  an English prompt also accepts the other "you" form (ти/вие), which English leaves open (D-018) */
   function acceptedFor(s, dir) {
     const k = parseKey('x|' + dir);
-    if (k.toBg) return [s.bg].concat(s.bg_alt || []);
+    if (k.toBg) return [s.bg].concat(s.bg_alt || [], k.lang === 'en' ? s.bg_alt_en || [] : []);
     return [s[k.lang] || ''].concat(s[k.lang + '_alt'] || []).filter(Boolean);
   }
   /** answers accepted with a "looser translation" note (D-014); none for the Bulgarian directions */
@@ -619,7 +620,7 @@
     const s = {
       id: String(row.id || '').trim() || hashId(String(row.bg).trim()),
       bg: String(row.bg || '').trim(), nl: String(row.nl || '').trim(),
-      nl_alt: split(row.nl_alt, '|'), bg_alt: split(row.bg_alt, '|'), en_alt: split(row.en_alt, '|'),
+      nl_alt: split(row.nl_alt, '|'), bg_alt: split(row.bg_alt, '|'), en_alt: split(row.en_alt, '|'), bg_alt_en: split(row.bg_alt_en, '|'),
       nl_loose: split(row.nl_loose, '|'), en_loose: split(row.en_loose, '|'),
       en: String(row.en || '').trim(), lemmas: split(row.lemmas, ','), tags: split(row.tags, ','),
       source: row.source || 'import',
