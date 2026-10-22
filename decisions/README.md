@@ -14,6 +14,7 @@ current code), acceptance criteria (how we know it is done), effort and risks, o
 | [D-006](D-006-explanatory-feedback-and-self-judgement.md) | Explain why an answer was wrong; ask for a confidence judgement first | feedback UI | proposed |
 | [D-007](D-007-short-sessions-and-reminders.md) | Short, frequent sessions and a reminder nudge | session / PWA | proposed |
 | [D-008](D-008-grammar-stages.md) | Gate sentences by grammar stage, not only by vocabulary rank | data / eligibility | done |
+| [D-009](D-009-grammar-reference-and-drills.md) | Grammar reference tab with "give the form" drills | new tab / content | proposed |
 
-Suggested order: D-002 and D-003 are small and independent; D-001 is the big one and D-004 builds on
-it; D-005 and D-006 are UI additions that do not touch scheduling; D-007 last.
+Suggested order for the open items: D-006 (explanations), D-009 (grammar reference and drills), D-005 (audio),
+D-004 (production focus), D-007 (sessions and reminders).
