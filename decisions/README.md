@@ -15,6 +15,7 @@ current code), acceptance criteria (how we know it is done), effort and risks, o
 | [D-007](D-007-short-sessions-and-reminders.md) | Short, frequent sessions and a reminder nudge | session / PWA | proposed |
 | [D-008](D-008-grammar-stages.md) | Gate sentences by grammar stage, not only by vocabulary rank | data / eligibility | done |
 | [D-009](D-009-grammar-reference-and-drills.md) | Grammar reference tab with "give the form" drills | new tab / content | done |
+| [D-010](D-010-answer-comparison-layout.md) | Show "you typed" and "correct" as two aligned lines instead of an inline diff | feedback UI | proposed |
 
-Suggested order for the open items: D-006 (explanations), D-005 (audio), D-004 (production focus),
-D-007 (sessions and reminders).
+Suggested order for the open items: D-010 (answer comparison layout), D-006 (explanations), D-005 (audio),
+D-004 (production focus), D-007 (sessions and reminders).
