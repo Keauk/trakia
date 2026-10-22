@@ -14,7 +14,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1a1a19;--card:#242422;--ink:#f1f1ec;--ink2:#b9b9b2;--muted:#85857e;--line:#363633;--accent:#5fb3cf;--accent-ink:#0e2a35;--ok-bg:#153a15;--almost-bg:#3d2f0b;--bad-bg:#43191a;--del:#ff8a8a;--ins:#7fe07f;--shadow:0 1px 2px rgba(0,0,0,.4)}}
 :root[data-theme=dark]{--bg:#1a1a19;--card:#242422;--ink:#f1f1ec;--ink2:#b9b9b2;--muted:#85857e;--line:#363633;--accent:#5fb3cf;--accent-ink:#0e2a35;--ok-bg:#153a15;--almost-bg:#3d2f0b;--bad-bg:#43191a;--del:#ff8a8a;--ins:#7fe07f;--shadow:0 1px 2px rgba(0,0,0,.4)}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-feature-settings:"locl" 0;-webkit-text-size-adjust:100%}
 body{padding-bottom:env(safe-area-inset-bottom)}
 header{position:sticky;top:0;z-index:5;background:var(--hdr);color:var(--hdr-ink);padding:env(safe-area-inset-top) 16px 0;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .hrow{display:flex;align-items:baseline;justify-content:space-between;max-width:720px;margin:0 auto;height:50px}
@@ -49,7 +49,7 @@ input[type=text],textarea,select,input[type=number]{width:100%;font:inherit;padd
 input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
 input.ok{border-color:var(--ok)}input.almost{border-color:var(--almost)}input.bad{border-color:var(--bad)}
 .preview{font-size:20px;margin:8px 0 0;min-height:1.4em}
-.verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;align-items:center;gap:10px}
+.verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;align-items:baseline;gap:10px}
 .verdict.correct{background:var(--ok-bg)}.verdict.almost{background:var(--almost-bg)}.verdict.wrong{background:var(--bad-bg)}
 .verdict small{font-weight:500;font-size:13px;color:var(--ink2)}
 .label{margin:10px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
