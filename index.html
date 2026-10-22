@@ -101,7 +101,7 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .expected del{background:var(--wrong-tint);color:var(--wrong);text-decoration:line-through 2px;border-radius:4px;padding:0 2px;margin:0 -2px}
 .label{margin:10px 0 2px;font:500 12px var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
 .result .label{margin:0}
-.links{display:flex;flex-wrap:wrap;align-items:flex-start;gap:4px 18px}
+.links{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .alts summary{cursor:pointer;list-style:none;display:block;color:var(--muted);font:500 13px/1.5 var(--sans);user-select:none}
 .alts summary::-webkit-details-marker{display:none}
 .alts summary::before{content:'▸ '}
@@ -109,8 +109,8 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .alts summary:hover,.alts summary:focus-visible{color:var(--ink)}
 .alts ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;font:400 14px/1.4 var(--sans);color:var(--ink-2)}
 .alts li.loose{color:var(--muted)}
-.link-btn{background:none;border:0;padding:0;color:var(--muted);font:500 13px/1.5 var(--sans);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
-.link-btn:hover{color:var(--ink)}
+.link-btn{background:none;border:0;padding:0;color:var(--faint);font:400 12px/1.5 var(--sans);cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in oklab,currentColor 40%,transparent);text-underline-offset:3px}
+.link-btn:hover{color:var(--ink-2);text-decoration-color:currentColor}
 .gloss{font:400 12px/1.5 var(--mono);color:var(--faint);margin:0}
 .next-row{flex:none}
 .btn.next{background:var(--st);color:var(--next-fg);border:0;border-radius:10px;padding:12px 26px;font:600 15px/1.2 var(--sans);white-space:nowrap}
@@ -425,6 +425,9 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <option value="bg2nl">Out of Bulgarian only (read Bulgarian, type the other language)</option>
         <option value="nl2bg">Into Bulgarian only (read the other language, type Bulgarian)</option>
       </select></div>
+    <div class="field"><label for="set-run">Cards in a row before switching keyboard</label>
+      <select id="set-run"><option value="1">1 — switch direction on every card</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="8">8</option><option value="10">10</option></select>
+      <div class="help">Cards you answer in Dutch or English and cards you answer in Bulgarian come in blocks of this many, so you switch between the Latin and the Cyrillic keyboard less often. To keep the blocks full, up to one block minus one of the least urgent reviews waits for the next session; new sentences are never left out.</div></div>
     <div class="field"><label for="set-order">New sentence order</label>
       <select id="set-order"><option value="mixed">Mixed — random, favouring lower ranks (recommended)</option><option value="strict">Strict — always the lowest rank first</option></select>
       <div class="help">Mixed interleaves ranks and topics within a session, which is harder in the moment but retains better. Consecutive cards never share a word, and reviews are spread between new cards in both modes.</div></div>

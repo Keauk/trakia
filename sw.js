@@ -1,6 +1,6 @@
 // Trakia service worker: cache-first for the app shell so it works offline once installed.
 // Bump CACHE_VERSION whenever index.html, ui.js, core.js or data.js change.
-const CACHE_VERSION = 'trakia-v32';
+const CACHE_VERSION = 'trakia-v33';
 const SHELL = ['./', './index.html', './core.js', './ui.js', './data.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png',
   './fonts/golos-text-latin.woff2', './fonts/golos-text-cyrillic.woff2', './fonts/pt-serif-700-cyrillic.woff2', './fonts/ibm-plex-mono-400-latin.woff2', './fonts/ibm-plex-mono-500-latin.woff2'];
 
