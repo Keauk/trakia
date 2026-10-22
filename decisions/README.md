@@ -21,6 +21,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-011](D-011-english-practice-language.md) | English as a second practice language (BG ⇄ EN) | data / directions | done |
 | [D-013](D-013-ui-file-and-type-checking.md) | Move the UI script out of index.html and type-check the JavaScript | tooling | done |
 | [D-012](D-012-collapsible-alternatives.md) | Collapse the "Also accepted" list behind a subtle toggle | feedback UI | done |
+| [D-014](D-014-stricter-answers-and-loose-tier.md) | Accept fewer loose translations, mark the looser ones, stop counting wrong word forms as typos | checking / data | done |
 
 Suggested order for the open items: D-010 (answer comparison layout), D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

@@ -110,6 +110,9 @@ def main(argv):
                 'max_rank': max(ranks) if ranks else None,
                 'tags': s.get('tags', []), 'source': s.get('source') or 'generated-2026-10',
             }
+            for loose in ('nl_loose', 'en_loose'):   # looser accepted translations (D-014)
+                if any(a.strip() for a in s.get(loose, [])):
+                    rec[loose] = [a.strip() for a in s[loose] if a.strip()]
             for extra in ('grammar', 'note', 'rank_estimated'):   # pass-through fields
                 if s.get(extra) not in (None, [], ''):
                     rec[extra] = s[extra]

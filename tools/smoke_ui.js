@@ -30,7 +30,8 @@ assert.equal($('btn-accept').hidden, true);
 type('', 'Enter'); // next
 // second card: one typo -> almost
 const s2 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
-const typo = s2.nl.slice(0, -2) + s2.nl.slice(-1);  // drop one char
+const longest = s2.nl.split(/\s+/).sort((a, b) => b.length - a.length)[0];
+const typo = s2.nl.replace(longest, longest[0] + (longest[1] === 'q' ? 'x' : 'q') + longest.slice(2));  // one letter replaced by q, so it is no real word (D-014)
 type(typo);
 assert.match($('verdict').className, /almost/, 'typo counts as almost: ' + $('verdict').textContent);
 assert.ok($('diff').innerHTML.includes('<ins>'), 'diff shows the missing char');
@@ -178,6 +179,19 @@ const sEn2 = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textCon
 type(sEn2.en.replace(/\bI am\b/, "I'm").replace(/\bdo not\b/, "don't").replace(/\bcolor\b/, 'colour'));
 assert.match($('verdict').className, /correct|almost/, 'variant accepted: ' + $('verdict').textContent);
 type('', 'Enter');
+// D-014: a looser translation is correct, tagged "≈ looser", and shows the closer exact answer with a diff
+const sEn3 = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
+sEn3.en_loose = ['Something rather loosely rendered.'];
+type('Something rather loosely rendered');
+assert.match($('verdict').className, /correct/, 'loose answer accepted: ' + $('verdict').textContent);
+assert.ok($('verdict').querySelector('.loose-tag'), 'loose tag shown');
+assert.equal($('expected-label').textContent, 'Closer to the Bulgarian');
+assert.ok([sEn3.en].concat(sEn3.en_alt || []).includes($('expected').textContent), 'closer is an exact answer: ' + $('expected').textContent);
+assert.ok($('diff').innerHTML.includes('<ins>'), 'diff against the closer answer');
+assert.ok([...$('alts').querySelectorAll('li.loose')].length === 0, 'the typed loose answer is not listed again');
+delete sEn3.en_loose;
+type('', 'Enter');
+assert.equal($('expected-label').textContent, 'Closer to the Bulgarian', 'label is only reset on the next verdict');
 $('btn-quit').click();
 const progEn = JSON.parse(window.localStorage.getItem('trakia.progress'));
 assert.ok(Object.keys(progEn).some(k => k.endsWith('|bg2en')), 'English cards stored under their own keys');

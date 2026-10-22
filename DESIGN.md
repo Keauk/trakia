@@ -68,6 +68,8 @@ trakia/
   "nl_alt": ["Morgen ga ik naar de markt met mijn moeder."],
   "bg_alt": ["Утре ще отида на пазар с майка ми."],
   "en": "Tomorrow I'll go to the market with my mother.",
+  "en_alt": ["Tomorrow I'm going to the market with my mother."],
+  "en_loose": ["Tomorrow I'll go shopping with my mother."],
   "lemmas": ["утре", "ходя", "пазар", "с", "майка", "мой"],
   "max_rank": 231,
   "tags": ["shopping", "future", "family"],
@@ -92,6 +94,8 @@ One sheet, header row, one sentence per row. Column names are matched case-insen
 | `nl_alt`  | no       | extra accepted Dutch answers, separated by ` \| `          |
 | `bg_alt`  | no       | extra accepted Bulgarian answers, separated by ` \| `      |
 | `en`      | no       | English gloss                                             |
+| `en_alt`  | no       | extra accepted English answers, separated by ` \| `       |
+| `nl_loose`, `en_loose` | no | looser accepted answers (shown with "≈ looser", D-014), ` \| ` |
 | `lemmas`  | no       | dictionary forms separated by `, `                        |
 | `tags`    | no       | separated by `, `                                         |
 | `id`      | no       | stable id; generated from a hash of `bg` if missing       |
@@ -124,11 +128,16 @@ Three layers, in order:
    (the stressed ѝ is impossible to type on most keyboards), and for Dutch optionally strip accents
    (`één → een`). Settings let you make punctuation or ѝ strict again.
 2. **Exact match** against the primary answer, the `*_alt` list, and your own accepted answers
-   (`userAlts`). → *Correct*.
+   (`userAlts`). → *Correct*. Then against the *looser* translations `nl_loose` / `en_loose`
+   (D-014): natural but drifting from the Bulgarian in tense, number or structure. → *Correct*
+   with a "≈ looser" tag; the expected line then shows the closest exact answer with a diff.
 3. **Near miss**: Damerau-Levenshtein distance to the closest accepted answer. If
    `distance ≤ max(1, round(0.08 × length))` (≈ one typo per 12 characters) → *Almost*: shown as
    correct with the differing characters highlighted, counts as correct for scheduling but does
-   not advance the box. Above that → *Wrong*: the expected answer is shown with a character diff
+   not advance the box. (D-002 has since staged this by card maturity.) A near miss that is really a
+   different word form (Sunday/Sundays, книга/книгата, in/on, a missing or extra word; "real word"
+   = it occurs in the corpus) is *Wrong*, not *Almost* (D-014, setting *A wrong word form is an
+   error*). Above that → *Wrong*: the expected answer is shown with a character diff
    (inline `<ins>/<del>` from a simple LCS diff) and the alternatives are listed.
 
 After a *Wrong* there is always a **"My answer was correct"** button. It adds your typed answer to

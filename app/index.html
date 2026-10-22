@@ -49,7 +49,7 @@ input[type=text],input[type=search],textarea,select,input[type=number]{width:100
 input[type=text]:focus,input[type=search]:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
 #answer.ok{border-color:var(--ok)}#answer.almost{border-color:var(--almost)}#answer.bad{border-color:var(--bad)}
 .preview{font-size:20px;margin:8px 0 0;min-height:1.4em}
-.verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;align-items:baseline;gap:10px}
+.verdict{font-size:20px;font-weight:700;padding:10px 14px;border-radius:10px;margin:14px 0 10px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
 .verdict.correct{background:var(--ok-bg)}.verdict.almost{background:var(--almost-bg)}.verdict.wrong{background:var(--bad-bg)}
 .verdict small{font-weight:500;font-size:13px;color:var(--ink2)}
 .label{margin:10px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -113,6 +113,8 @@ input[type=range]{width:100%}
 .alts summary:hover,.alts summary:focus-visible{color:var(--ink2)}
 .alts ul{margin:4px 0 0;padding-left:16px}
 .alts li{margin:2px 0}
+.alts li.loose{color:var(--muted)}
+.loose-tag{font-size:12px;font-weight:600;color:var(--ink2);border:1px solid currentColor;border-radius:999px;padding:0 7px;align-self:center;opacity:.8}
 .lib-row-detail td{padding:10px}
 #update-bar{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:14px;box-shadow:var(--shadow);z-index:9;display:flex;gap:10px;align-items:center}
 #update-bar[hidden]{display:none}
@@ -168,7 +170,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       </div>
       <div id="feedback" hidden>
         <div id="verdict" class="verdict"></div>
-        <p class="label">Expected</p>
+        <p class="label" id="expected-label">Expected</p>
         <p id="expected" class="expected"></p>
         <p id="diff" class="diff"></p>
         <details id="alts" class="alts"><summary></summary><ul></ul></details>
@@ -335,6 +337,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       </select>
       <div class="help">Staged: on a young card (still in the learning steps, or stability under a day) a near miss counts as correct, up to the number of free passes below (typos and word-order misses counted separately). On an established card (stability 1–7 days) it counts as Hard. On a mature card (stability 7 days or more) a clean answer is required, otherwise the card lapses. The verdict always still says "almost" and shows the exact diff.</div></div>
     <div class="field"><label for="set-passes">Free passes per card (staged mode)</label><div class="inline"><input type="number" id="set-passes" min="0" max="10"></div></div>
+    <div class="toggle"><input type="checkbox" id="set-forms"><div>A wrong word form is an error, not a typo<div class="help">On: within the typo tolerance, typing another form of a word (Sunday → Sundays, книгата → книга), swapping two short words (in → on) or leaving out a whole word counts as <b>wrong</b>. Real typos, like swapped letters or a missing space, still count as <b>almost</b>.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-bag"><div>Bulgarian word order is free<div class="help">Same words in another order counts as <b>almost</b>.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-punct"><div>Strict punctuation<div class="help">Off: punctuation and quotes are ignored.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-yi"><div>Strict ѝ<div class="help">Off: ѝ (her) and и are treated the same.</div></div></div>

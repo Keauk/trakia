@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto' };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -41,7 +41,14 @@ function allSentences() {
   return out;
 }
 let SENT = allSentences(), SENT_BY_ID = new Map(SENT.map(s => [s.id, s])), LEMMA_COUNT = countLemmas(SENT);
-function refreshSentences() { SENT = allSentences(); SENT_BY_ID = new Map(SENT.map(s => [s.id, s])); LEMMA_COUNT = countLemmas(SENT); }
+function refreshSentences() { SENT = allSentences(); SENT_BY_ID = new Map(SENT.map(s => [s.id, s])); LEMMA_COUNT = countLemmas(SENT); VOCAB = buildVocab(); }
+// known word forms per language, so the checker can tell a wrong word form from a typo (D-014)
+function buildVocab() {
+  /** @type {Record<string, string[]>} */ const extra = { bg: C.drillItems(GRAMMAR).flatMap(it => it.answers), nl: [], en: [] };
+  for (const k in userAlts) { const K = C.parseKey(k); (extra[K.toBg ? 'bg' : K.lang] || []).push(...userAlts[k]); }
+  return C.vocabulary(SENT, WORDS, extra);
+}
+let VOCAB = buildVocab();
 function countLemmas(list) { const m = new Map(); for (const s of list) for (const l of new Set((s.lemmas || []).map(x => C.normalise(x.split('#')[0], 'bg')))) m.set(l, (m.get(l) || 0) + 1); return m; }
 function onlyHere(s) { return (s.lemmas || []).map(x => C.normalise(x.split('#')[0], 'bg')).filter(l => !C.STOP.has(l) && LEMMA_COUNT.get(l) === 1); }
 
@@ -50,12 +57,13 @@ function applyTheme() { document.documentElement.dataset.theme = settings.theme 
 const LANG_NAME = { nl: 'Dutch', en: 'English' }, LANG_CODE = { nl: 'NL', en: 'EN' };
 function dirLabel(dir) { const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
 function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, text: s[L] || s.nl, alts: s[L + '_alt'] || [] }; }
-function renderAlts(list) {
-  const el = $('alts');
-  if (!list.length) { el.hidden = true; el.open = false; return; }
+/** the collapsible "other accepted answers" list; looser translations (D-014) last, marked ≈ */
+function renderAlts(list, loose) {
+  const el = $('alts'), n = list.length + (loose || []).length;
+  if (!n) { el.hidden = true; el.open = false; return; }
   el.hidden = false;
-  q(el, 'summary').textContent = list.length === 1 ? '1 other accepted answer' : `${list.length} other accepted answers`;
-  q(el, 'ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('');
+  q(el, 'summary').textContent = n === 1 ? '1 other accepted answer' : `${n} other accepted answers`;
+  q(el, 'ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('') + (loose || []).map(a => `<li class="loose" title="accepted, but looser than the Bulgarian">≈ ${esc(a)}</li>`).join('');
   el.open = LS.get('altsOpen', false) === true;
 }
 function fitAnswer() { const a = $('answer'); a.style.height = 'auto'; a.style.height = a.scrollHeight + 'px'; }
@@ -126,12 +134,13 @@ function renderDrillCard() {
 function checkDrill(giveUp) {
   const item = session.queue[session.i].item;
   const typed = giveUp ? '' : (settings.translit ? C.translit($('answer').value) : $('answer').value);
-  const r = giveUp ? { result: 'wrong', expected: item.answers[0], t: '', a: C.normalise(item.answers[0], 'bg', settings), reason: 'skip' } : C.check(typed, item.answers, 'bg', Object.assign({}, settings, { bagOfWords: false }));
+  const r = giveUp ? { result: 'wrong', expected: item.answers[0], t: '', a: C.normalise(item.answers[0], 'bg', settings), reason: 'skip' } : C.check(typed, item.answers, 'bg', Object.assign({}, settings, { bagOfWords: false, vocab: VOCAB.bg }));
   session.pending = { result: r.result, typed, key: item.id };
   const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
   $('answer-actions').hidden = true; $('feedback').hidden = false;
   const v = $('verdict'); v.className = 'verdict ' + r.result;
-  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + (r.reason === 'typo' ? ` <small>${r.dist} character${r.dist > 1 ? 's' : ''} off</small>` : r.reason === 'skip' ? ' <small>shown</small>' : '');
+  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + (r.reason === 'typo' ? ` <small>${r.dist} character${r.dist > 1 ? 's' : ''} off</small>` : r.reason === 'form' ? ` <small>${slipText(r.slips)}</small>` : r.reason === 'skip' ? ' <small>shown</small>' : '');
+  $('expected-label').textContent = 'Expected';
   $('expected').textContent = r.expected || item.answers[0];
   $('diff').innerHTML = r.result !== 'correct' && r.t && r.a ? C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join('') : '';
   const others = item.answers.filter(a => a !== (r.expected || item.answers[0]));
@@ -206,25 +215,33 @@ function checkAnswer(giveUp) {
   const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key, K = C.parseKey(key);
   const lang = K.toBg ? 'bg' : K.lang;
   const typed = giveUp ? '' : typedValue();
-  const accepted = allAccepted(s, dir, key);
-  const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], lang, settings), reason: 'skip' } : C.check(typed, accepted, lang, settings);
+  const accepted = allAccepted(s, dir, key), loose = C.looseFor(s, dir);
+  const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], lang, settings), reason: 'skip' } : C.check(typed, accepted, lang, Object.assign({}, settings, { vocab: VOCAB[lang] }), loose);
   const outcome = r.result === 'almost' ? C.almostOutcome(progress[key], r.reason, settings) : null;
   session.pending = { result: r.result, typed, key, reason: r.reason, outcome };
-  showFeedback(r, s, dir, accepted, giveUp, outcome);
+  showFeedback(r, s, dir, accepted, giveUp, outcome, loose);
 }
-function showFeedback(r, s, dir, accepted, giveUp, outcome) {
+/** "different word form: sundays → sunday · missing: the" for the form slips of a D-014 check */
+function slipText(slips) {
+  return 'different word form: ' + (slips || []).map(([t, a]) => !t ? `missing “${esc(a)}”` : !a ? `extra “${esc(t)}”` : `${esc(t)} → ${esc(a)}`).join(' · ');
+}
+function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
   $('answer-actions').hidden = true; $('feedback').hidden = false;
   const v = $('verdict'); v.className = 'verdict ' + r.result;
   const how = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'order' ? 'same words, different order' : '';
   const rule = !outcome ? '' : outcome.rule === 'free-pass' ? ` · counted as correct (free pass ${outcome.used} of ${outcome.passes} on a young card)` : outcome.rule === 'lapse' ? ' · this card is mature, so it goes back for review' : outcome.rule === 'strict' ? ' · strict mode: scheduled as wrong' : ' · counted as Hard';
-  const why = r.result === 'almost' ? `<small>${how}${session.free ? '' : rule}</small>` : r.reason === 'skip' ? '<small>shown</small>' : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
-  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + ' ' + why;
-  $('expected').textContent = r.expected || accepted[0];
-  const d = $('diff');
-  if (r.result !== 'correct' && r.t && r.a) d.innerHTML = C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join(''); else d.innerHTML = '';
-  const others = accepted.filter(a => a !== (r.expected || accepted[0]));
-  renderAlts(others);
+  const why = r.result === 'almost' ? `<small>${how}${session.free ? '' : rule}</small>` : r.reason === 'skip' ? '<small>shown</small>' : r.reason === 'form' ? `<small>${slipText(r.slips)}</small>` : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
+  // a looser translation (D-014) is accepted, but the expected line shows the closest exact one and the diff against it
+  const closer = r.loose && r.closer && r.result !== 'wrong' ? r.closer : '';
+  const tag = r.loose && r.result !== 'wrong' ? ' <span class="loose-tag" title="Accepted, but this translation is looser than the Bulgarian. The line below is closer.">≈ looser</span>' : '';
+  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + tag + ' ' + why;
+  $('expected-label').textContent = closer ? 'Closer to the Bulgarian' : 'Expected';
+  $('expected').textContent = closer || r.expected || accepted[0];
+  const d = $('diff'), cmpTo = closer ? C.normalise(closer, C.parseKey(session.queue[session.i].key).lang, settings) : r.a;
+  if ((r.result !== 'correct' || closer) && r.t && cmpTo) d.innerHTML = C.diff(r.t, cmpTo).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join(''); else d.innerHTML = '';
+  const shown = closer || r.expected || accepted[0];
+  renderAlts(accepted.filter(a => a !== shown), (loose || []).filter(a => a !== shown && a !== r.expected));
   const K2 = C.parseKey(session.queue[session.i].key); const third = K2.lang === 'en' ? (s.nl ? 'NL: ' + s.nl : '') : (s.en ? 'EN: ' + s.en : '');
   $('gloss').textContent = third + (s.max_rank ? '   · rank ' + s.max_rank : '') + (s.rank_estimated ? ' ≈' : '');
   $('btn-accept').hidden = r.result === 'correct' || giveUp;
@@ -232,7 +249,7 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome) {
 }
 function acceptMine() {
   const p = session.pending; if (!p || !p.typed.trim()) return;
-  (userAlts[p.key] = userAlts[p.key] || []).push(p.typed.trim()); save.userAlts();
+  (userAlts[p.key] = userAlts[p.key] || []).push(p.typed.trim()); save.userAlts(); VOCAB = buildVocab();
   p.result = 'correct'; $('verdict').className = 'verdict correct'; $('verdict').innerHTML = '✓ Accepted as correct <small>added to your accepted answers</small>';
   $('answer').className = 'ok'; $('btn-accept').hidden = true; toast('Saved as an accepted answer');
 }
@@ -387,7 +404,7 @@ $('lib-table').addEventListener('click', e => {
   const ua = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d.endsWith('2bg') ? 'BG' : LANG_CODE[d.slice(3)]}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
   const pr = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${dirLabel(d)}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
-  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl ? `<div><b>NL</b> ${esc(s.nl)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${(s.en_alt || []).length ? `<div><b>EN also</b> ${s.en_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
+  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl ? `<div><b>NL</b> ${esc(s.nl)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${(s.en_alt || []).length ? `<div><b>EN also</b> ${s.en_alt.map(esc).join(' · ')}</div>` : ''}${(s.nl_loose || []).length ? `<div><b>NL looser</b> ${(s.nl_loose || []).map(esc).join(' · ')}</div>` : ''}${(s.en_loose || []).length ? `<div><b>EN looser</b> ${(s.en_loose || []).map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
   q(det, '[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) delete progress[s.id + '|' + d]; save.progress(); renderLibrary(false); toast('Progress reset'); };
   q(det, '[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
@@ -432,7 +449,7 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
 function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';

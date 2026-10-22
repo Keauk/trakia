@@ -23,6 +23,17 @@ highest rank of the words they use, so the learner only sees sentences built fro
    - `bg_alt`: other fully correct Bulgarian renderings of the Dutch sentence (pronoun dropped vs
      kept: "Аз съм учител" / "Учител съм"; word-order variants; "във/със" forms, etc.). 0-3 items.
      Only include bg_alt items that also respect constraint 1.
+   - `en_alt`: other fully correct English translations, by the same rule as `nl_alt`.
+   - **Exact vs looser vs wrong (D-014).** Judge every alternative against the Bulgarian, not
+     against the primary. *Exact* (`nl_alt`, `en_alt`): same meaning in the grammar the language
+     normally uses for it: synonyms, British/American pairs, word order, contractions, "I want" /
+     "I'd like", present simple / continuous for the Bulgarian present, Dutch perfect or imperfect
+     for a Bulgarian aorist, and every reading of a genuinely ambiguous Bulgarian sentence ("в
+     неделя" = "on Sunday" and "on Sundays"). *Looser* (`nl_loose`, `en_loose`, 0-3 items): natural
+     and essentially the same, but drifting in tense (an English present perfect for an aorist),
+     number, definiteness or structure; the app accepts these with a "≈ looser" note. Leave out
+     anything that adds, drops or changes meaning ("freeze to death" for "замръзнем", "take" for
+     "нося", "a cold" for "хрема").
 5. `lemmas`: list the dictionary forms (exactly as spelled in column `bulgarian` of the vocabulary
    file) of EVERY content word you used from the file: nouns, verbs, adjectives, adverbs, pronouns,
    prepositions, conjunctions, numerals, particles. This is used to compute the sentence's rank, so be
@@ -47,6 +58,8 @@ Write ONE file, valid JSON (UTF-8, no comments, no trailing commas), an array of
   "nl_alt": ["Ik kocht brood en melk."],
   "bg_alt": ["Аз купих хляб и мляко."],
   "en": "I bought bread and milk.",
+  "en_alt": ["I bought milk and bread."],
+  "en_loose": ["I've bought bread and milk."],
   "lemmas": ["купувам", "хляб", "и", "мляко"],
   "tags": ["food", "past"]
 }

@@ -8,6 +8,8 @@ interface Word { rank: number; bg: string; en: string; pos: string; forms: strin
 interface Sentence {
   id: string; bg: string; nl: string; en: string;
   nl_alt: string[]; bg_alt: string[]; en_alt: string[];
+  /** accepted with a "looser translation" note (D-014) */
+  nl_loose?: string[]; en_loose?: string[];
   lemmas: string[]; max_rank: number | null; tags: string[]; source: string; grammar?: string[];
 }
 
@@ -23,7 +25,7 @@ interface Settings {
   rank: number; tolerance: number; newPerSession: number; maxDue: number;
   directions: string; newOrder: string; lang: string; typoPct: number; bagOfWords: boolean;
   almostPolicy: string; almostFreePasses: number; retention: number; maxInterval: number; stage: number;
-  strictPunct: boolean; strictYi: boolean; stripAccents: boolean; translit: boolean; theme: string;
+  strictPunct: boolean; strictYi: boolean; stripAccents: boolean; strictForms: boolean; translit: boolean; theme: string;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 

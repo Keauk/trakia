@@ -4,12 +4,12 @@
 Usage: python3 tools/apply_patches.py data/sentences.json patches/*.json [-o data/sentences.json]
 
 Patch file: JSON array of {"id": ..., "<field>": <new value>, ..., "drop": true?, "reason": "..."}.
-Fields bg, nl, nl_alt, bg_alt, en, lemmas, tags replace the old value entirely. "drop": true removes
+Fields bg, nl, nl_alt, bg_alt, en, en_alt, nl_loose, en_loose, lemmas, tags replace the old value entirely. "drop": true removes
 the sentence. After patching, lemmas are re-resolved against data/words.json (via
 validate_sentences.py) so max_rank stays correct; unresolved lemmas are reported.
 """
 import json, sys, os, subprocess, tempfile
-FIELDS = ('bg', 'nl', 'nl_alt', 'bg_alt', 'en', 'en_alt', 'lemmas', 'tags')
+FIELDS = ('bg', 'nl', 'nl_alt', 'bg_alt', 'en', 'en_alt', 'nl_loose', 'en_loose', 'lemmas', 'tags')
 
 def main(argv):
     out = None

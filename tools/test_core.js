@@ -281,4 +281,47 @@ t('applyResult with almost policy (FSRS)', () => {
   // no settings at all -> staged defaults
   p = C.applyResult(null, 'almost', now, false, r, 'typo'); assert.equal(p.step, 1); assert.equal(p.almosts, 1);
 });
+t('D-014 loose tier', () => {
+  const acc = ["My father fixed the car's trunk.", "My father repaired the car's trunk."], loose = ["My father has fixed the car's trunk.", "My father has repaired the car's trunk."];
+  let r = C.check("My father fixed the car's trunk", acc, 'en', {}, loose);
+  assert.equal(r.result, 'correct'); assert.ok(!r.loose);
+  r = C.check("My father has repaired the car's trunk", acc, 'en', {}, loose);
+  assert.equal(r.result, 'correct'); assert.equal(r.loose, true); assert.equal(r.closer, acc[1]);   // closest exact answer, not the primary
+  r = C.check("My father has repaird the car's trunk", acc, 'en', {}, loose);
+  assert.equal(r.result, 'almost'); assert.equal(r.loose, true);
+  assert.equal(C.check("My father took the car's trunk", acc, 'en', {}, loose).result, 'wrong');
+  const s = { id: 'J013', bg: 'Баща ми поправи багажника на колата.', nl: 'Mijn vader heeft de kofferbak gerepareerd.', en: acc[0], en_alt: [acc[1]], en_loose: loose, nl_alt: [], bg_alt: [] };
+  assert.deepEqual(C.looseFor(s, 'bg2en'), loose); assert.deepEqual(C.looseFor(s, 'en2bg'), []); assert.deepEqual(C.looseFor(s, 'bg2nl'), []);
+  const imp = C.rowToSentence({ bg: 'Чай.', nl: 'Thee.', en_loose: 'Some tea. | A tea.' }, C.wordIndex([]));
+  assert.deepEqual(imp.en_loose, ['Some tea.', 'A tea.']); assert.deepEqual(imp.nl_loose, []);
+});
+t('D-014 wrong word form is not a typo', () => {
+  const sents = [{ id: 'x', bg: 'Работиш ли в неделя? Купих книгата и книга.', nl: 'Werk je op zondag?', nl_alt: ['Werk je zondags?'], en: 'Do you work on Sunday?', en_alt: ['He works on Sundays in a shop.'], en_loose: ['A loose answer.'], bg_alt: [] }];
+  const V = C.vocabulary(sents, [{ rank: 1, bg: 'работя', en: 'work', pos: 'verb', forms: 'работя (работиш, работи)' }], { bg: ['работим'] });
+  assert.ok(V.en.has('sundays') && V.en.has('loose') && V.nl.has('zondags') && V.bg.has('работи') && V.bg.has('работим'));
+  const en = { vocab: V.en }, acc = ['Do you work on Sunday?'];
+  let r = C.check('Do you work on Sundays?', acc, 'en', en);
+  assert.equal(r.result, 'wrong'); assert.equal(r.reason, 'form'); assert.deepEqual(r.slips, [['sundays', 'sunday']]);
+  assert.equal(C.check('Do you work on Sundya?', acc, 'en', en).result, 'almost');            // not a real word: a typo
+  assert.equal(C.check('Do you wrok on Sunday?', acc, 'en', en).result, 'almost');
+  assert.equal(C.check('Doyou work on Sunday?', acc, 'en', en).result, 'almost');             // missing space
+  assert.deepEqual(C.check('Do you work in Sunday?', acc, 'en', en).slips, [['in', 'on']]);  // two short words swapped
+  assert.deepEqual(C.check('Do you work on a Sunday?', acc, 'en', en).slips, [['a', '']]);   // extra word, even though "asunday" is one letter off
+  assert.deepEqual(C.check('Dinner is on the tables.', ['Dinner is on the table.'], 'en', en).slips, [['tables', 'table']]);   // "tables" is in no sentence: the ending decides
+  assert.equal(C.check('Dinner is on the tabel.', ['Dinner is on the table.'], 'en', en).result, 'almost');
+  assert.equal(C.check('I work every day.', ['I worked every day.'], 'en', en).reason, 'form');     // -ed left out
+  assert.equal(C.check('I worke every day.', ['I worked every day.'], 'en', en).result, 'almost');  // one letter dropped: a typo
+  assert.deepEqual(C.check('Чашата е на масата.', ['Чашата е на маса.'], 'bg', { vocab: new Set() }).slips, [['масата', 'маса']]);
+  assert.equal(C.check('Do you work on Sundays?', acc, 'en', { vocab: V.en, strictForms: false }).result, 'almost');
+  assert.equal(C.check('Do you work on Sundays?', acc, 'en').result, 'almost');               // no vocabulary: old behaviour
+  const bg = { vocab: V.bg }, bacc = ['Работиш ли в неделя?'];
+  assert.deepEqual(C.check('Работи ли в неделя', bacc, 'bg', bg).slips, [['работи', 'работиш']]);
+  assert.deepEqual(C.check('Работиш ли неделя', bacc, 'bg', bg).slips, [['', 'в']]);
+  assert.equal(C.check('Работиш ли в недля', bacc, 'bg', bg).result, 'almost');
+  assert.equal(C.check('Купих книгат', ['Купих книгата.'], 'bg', bg).result, 'almost');
+  assert.equal(C.check('В неделя ли работиш', bacc, 'bg', bg).result, 'almost');            // word order still "almost"
+  // Dutch stressed / unstressed pronouns are equal, so they never count as a form slip
+  assert.equal(C.normalise("Werk jij op zondag? Is dit m'n fiets of jouw fiets?", 'nl'), 'werk je op zondag is dit mijn fiets of je fiets');
+  assert.equal(C.check('Werk jij op zondag?', ['Werk je op zondag?'], 'nl', { vocab: V.nl }).result, 'correct');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));
