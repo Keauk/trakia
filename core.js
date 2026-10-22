@@ -15,7 +15,9 @@
     "i've": 'i have', "you've": 'you have', "we've": 'we have', "they've": 'they have', "i'll": 'i will', "you'll": 'you will', "he'll": 'he will', "she'll": 'she will', "it'll": 'it will', "we'll": 'we will', "they'll": 'they will',
     "i'd": 'i would', "you'd": 'you would', "he'd": 'he would', "she'd": 'she would', "we'd": 'we would', "they'd": 'they would',
     "don't": 'do not', "doesn't": 'does not', "didn't": 'did not', "can't": 'cannot', "can not": 'cannot', "won't": 'will not', "wouldn't": 'would not', "couldn't": 'could not', "shouldn't": 'should not', "mustn't": 'must not', "isn't": 'is not', "aren't": 'are not', "wasn't": 'was not', "weren't": 'were not', "haven't": 'have not', "hasn't": 'has not', "hadn't": 'had not' };
-  const EN_SPELL = { colour: 'color', colours: 'colors', favourite: 'favorite', neighbour: 'neighbor', neighbours: 'neighbors', travelling: 'traveling', travelled: 'traveled', centre: 'center', theatre: 'theater', grey: 'gray', realise: 'realize', realised: 'realized', organise: 'organize', organised: 'organized', apologise: 'apologize', programme: 'program', metre: 'meter', metres: 'meters', litre: 'liter', litres: 'liters', catalogue: 'catalog', dialogue: 'dialog', mum: 'mom', pyjamas: 'pajamas', aeroplane: 'airplane', kerb: 'curb', tyre: 'tire', tyres: 'tires', licence: 'license', practise: 'practice', defence: 'defense', jewellery: 'jewelry', cosy: 'cozy', okay: 'ok', flavour: 'flavor', honour: 'honor', humour: 'humor', labour: 'labor', behaviour: 'behavior', cancelled: 'canceled', modelling: 'modeling', whisky: 'whiskey', storey: 'story', doughnut: 'donut', cheque: 'check' };
+  const EN_SPELL = { colour: 'color', colours: 'colors', favourite: 'favorite', neighbour: 'neighbor', neighbours: 'neighbors', travelling: 'traveling', travelled: 'traveled', centre: 'center', theatre: 'theater', grey: 'gray', realise: 'realize', realised: 'realized', organise: 'organize', organised: 'organized', apologise: 'apologize', programme: 'program', metre: 'meter', metres: 'meters', litre: 'liter', litres: 'liters', catalogue: 'catalog', dialogue: 'dialog', mum: 'mom', pyjamas: 'pajamas', aeroplane: 'airplane', kerb: 'curb', tyre: 'tire', tyres: 'tires', licence: 'license', practise: 'practice', defence: 'defense', jewellery: 'jewelry', cosy: 'cozy', okay: 'ok', flavour: 'flavor', honour: 'honor', humour: 'humor', labour: 'labor', behaviour: 'behavior', cancelled: 'canceled', modelling: 'modeling', whisky: 'whiskey', storey: 'story', doughnut: 'donut', cheque: 'check', towards: 'toward', afterwards: 'afterward', learnt: 'learned', dreamt: 'dreamed', spelt: 'spelled', burnt: 'burned', gotten: 'got' };
+  // Dutch stressed and unstressed pronouns are the same answer (D-014: otherwise je/jij would count as a wrong word form)
+  const NL_PRON = { jij: 'je', jou: 'je', jouw: 'je', mij: 'me', wij: 'we', zij: 'ze' };
   const EN_CONTR_RX = new RegExp('\\b(' + Object.keys(EN_CONTR).map(k => k.replace(/'/g, "['’]")).join('|') + ')\\b', 'g');
   function normalise(s, lang, opt) {
     opt = opt || {};
@@ -23,9 +25,11 @@
     if (!opt.strictYi) s = s.replace(/ѝ/g, 'и');
     if (lang === 'nl' && opt.stripAccents !== false) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
     if (lang === 'en') s = s.replace(EN_CONTR_RX, m => EN_CONTR[m.replace(/’/g, "'")]);
+    if (lang === 'nl') s = s.replace(/\b([mz])['’]n\b/g, '$1ijn');
     if (!opt.strictPunct) s = s.replace(PUNCT, ' ');
     s = s.replace(/\s+/g, ' ').trim();
     if (lang === 'en') s = s.split(' ').map(w => EN_SPELL[w] || w).join(' ');
+    if (lang === 'nl') s = s.split(' ').map(w => NL_PRON[w] || w).join(' ');
     return s;
   }
 
@@ -52,33 +56,120 @@
     return x === y;
   }
 
+  // --- word-form slips (decision D-014) -------------------------------------------------------
+  // Inside the typo tolerance, a difference that swaps a real word for another form of it
+  // (sunday/sundays, книга/книгата), swaps two short words (in/on, de/het) or leaves out or adds a
+  // whole word is a grammar error, not a typo. "Real word" = occurs in the corpus (opt.vocab).
+
+  // inflectional endings: adding one to the expected word (or leaving out one of two letters or more)
+  // makes another form of it, even when that form never occurs in the corpus (table -> tables)
+  const ENDINGS = { en: ['s', 'es', 'ed', 'd', 'ing'], nl: ['s', 'en', 'n', 'e', 't', 'te', 'de', 'ten', 'den'], bg: ['та', 'то', 'те', 'ът', 'ят', 'а', 'я', 'ите'] };
+  /** is typed word tw a different form of expected word aw (rather than a typo of it)? */
+  function formSlip(tw, aw, vocab, lang) {
+    const end = ENDINGS[lang] || [];
+    if (tw.length > aw.length && aw.length >= 3 && tw.startsWith(aw) && end.includes(tw.slice(aw.length))) return true;
+    if (aw.length > tw.length + 1 && tw.length >= 3 && aw.startsWith(tw) && end.includes(aw.slice(tw.length))) return true;
+    if (!vocab.has(tw)) return false;
+    let p = 0; while (p < tw.length && p < aw.length && tw[p] === aw[p]) p++;
+    return p >= 3 || (tw.length <= 3 && aw.length <= 3);
+  }
   /**
-   * check(typed, accepted[], lang, opt) -> {result: 'correct'|'almost'|'wrong', expected, dist, t, a, reason}
-   * lang: 'nl' or 'bg' (the language of the answer). opt: settings (typoPct, bagOfWords, strict*).
+   * Align two normalised answers word by word and return the word-form slips as [typed, expected]
+   * pairs ('' for a missing or extra word). Missing or extra spaces are typos, not slips.
+   * @param {string} t @param {string} a @param {Set<string>} vocab @param {string} [lang] @returns {string[][]}
    */
-  function check(typed, accepted, lang, opt) {
-    opt = opt || {};
+  function wordSlips(t, a, vocab, lang) {
+    const T = t.split(' '), A = a.split(' '), m = T.length, n = A.length;
+    const sub = (x, y) => x === y ? 0 : distance(x, y) / Math.max(x.length, y.length);
+    // x typed where y1 + y2 (or x1 + x2 where y) was expected: a missing or extra space, plus at most
+    // one typo when both parts are real words of two letters or more (so a dropped "a" or "в" is a slip)
+    const glued = (x, y, p1, p2) => x === y || (p1.length > 1 && p2.length > 1 && distance(x, y) <= 1) ? 0.5 : Infinity;
+    /** @type {number[][]} */ const d = [];
+    for (let i = 0; i <= m; i++) { d[i] = []; for (let j = 0; j <= n; j++) {
+      if (!i && !j) { d[i][j] = 0; continue; }
+      let v = Infinity;
+      if (i && j) v = d[i - 1][j - 1] + sub(T[i - 1], A[j - 1]);
+      if (i) v = Math.min(v, d[i - 1][j] + 1);
+      if (j) v = Math.min(v, d[i][j - 1] + 1);
+      if (i && j > 1) v = Math.min(v, d[i - 1][j - 2] + glued(T[i - 1], A[j - 2] + A[j - 1], A[j - 2], A[j - 1]));   // typed two words as one
+      if (i > 1 && j) v = Math.min(v, d[i - 2][j - 1] + glued(T[i - 2] + T[i - 1], A[j - 1], T[i - 2], T[i - 1]));   // typed one word as two
+      d[i][j] = v;
+    } }
+    const out = [];
+    let i = m, j = n;
+    while (i || j) {
+      const v = d[i][j];
+      if (i && j && v === d[i - 1][j - 1] + sub(T[i - 1], A[j - 1])) { if (T[i - 1] !== A[j - 1] && formSlip(T[i - 1], A[j - 1], vocab, lang || '')) out.push([T[i - 1], A[j - 1]]); i--; j--; }
+      else if (i && j > 1 && v === d[i - 1][j - 2] + glued(T[i - 1], A[j - 2] + A[j - 1], A[j - 2], A[j - 1])) { i--; j -= 2; }
+      else if (i > 1 && j && v === d[i - 2][j - 1] + glued(T[i - 2] + T[i - 1], A[j - 1], T[i - 2], T[i - 1])) { i -= 2; j--; }
+      else if (i && v === d[i - 1][j] + 1) { out.push([T[i - 1], '']); i--; }
+      else { out.push(['', A[j - 1]]); j--; }
+    }
+    return out.reverse();
+  }
+
+  /**
+   * Every normalised word form that occurs in an accepted answer, the deck (dictionary and listed
+   * forms) or the extra strings per language (grammar-drill answers, the learner's own accepted
+   * answers). check() uses it to tell a wrong word form from a typo.
+   * @param {Sentence[]} sentences @param {Word[]} [words] @param {Record<string, string[]>} [extra]
+   * @returns {Record<string, Set<string>>}
+   */
+  function vocabulary(sentences, words, extra) {
+    const V = { bg: new Set(), nl: new Set(), en: new Set() };
+    const add = (lang, s) => { for (const w of normalise(s, lang).split(' ')) if (w) V[lang].add(w); };
+    for (const s of sentences) {
+      for (const x of [s.bg].concat(s.bg_alt || [])) add('bg', x);
+      for (const L of ['nl', 'en']) for (const x of [s[L]].concat(s[L + '_alt'] || [], s[L + '_loose'] || [])) if (x) add(L, x);
+    }
+    for (const w of words || []) { add('bg', w.bg); for (const part of (w.forms || '').split(/[(),\/;]/)) add('bg', part); }
+    for (const L in extra || {}) if (V[L]) for (const x of (extra || {})[L]) add(L, x);
+    return V;
+  }
+
+  /**
+   * check(typed, accepted[], lang, opt, loose[]) -> {result: 'correct'|'almost'|'wrong', expected, dist, t, a, reason, loose, closer, slips}
+   * lang: 'nl', 'en' or 'bg' (the language of the answer). opt: settings (typoPct, bagOfWords,
+   * strictForms, strict*) plus vocab (Set of known word forms for lang, see vocabulary()).
+   * loose: answers accepted with a "looser translation" note (D-014); closer is then the exact
+   * answer nearest to what was typed.
+   */
+  function check(typed, accepted, lang, opt, loose) {
+    opt = opt || {}; loose = loose || [];
     const t = normalise(typed, lang, opt);
-    let best = null;
-    for (const acc of accepted) {
-      const a = normalise(acc, lang, opt);
-      if (!a) continue;
-      if (t === a) return { result: 'correct', expected: acc, dist: 0, t, a };
-      const dist = distance(t, a);
-      if (!best || dist < best.dist) best = { dist, acc, a };
+    /** @typedef {{dist: number, acc: string, a: string, loose: boolean}} Cand */
+    /** @type {Cand | null} */ let best = null;
+    /** @type {Cand | null} */ let bestExact = null;
+    for (const [list, isLoose] of /** @type {[string[], boolean][]} */ ([[accepted, false], [loose, true]])) {
+      for (const acc of list) {
+        const a = normalise(acc, lang, opt);
+        if (!a) continue;
+        const dist = t === a ? 0 : distance(t, a);
+        const cand = { dist, acc, a, loose: isLoose };
+        if (!isLoose && (!bestExact || dist < bestExact.dist)) bestExact = cand;
+        if (dist === 0 && !isLoose) return { result: 'correct', expected: acc, dist: 0, t, a };
+        if (!best || dist < best.dist) best = cand;
+      }
     }
     if (!best) return { result: 'wrong', expected: '', dist: Infinity, t, a: '' };
     const out = { expected: best.acc, dist: best.dist, t, a: best.a };
+    if (best.loose) Object.assign(out, { loose: true, closer: bestExact ? bestExact.acc : '' });
+    if (best.dist === 0) return Object.assign(out, { result: 'correct' });
     if (!t) return Object.assign(out, { result: 'wrong', reason: 'empty' });
     const pct = opt.typoPct == null ? 10 : opt.typoPct;
     const thresh = Math.max(1, Math.round(best.a.length * pct / 100));
-    if (best.dist <= thresh) return Object.assign(out, { result: 'almost', reason: 'typo' });
+    let slips = [];
+    if (best.dist <= thresh) {
+      if (opt.vocab && opt.strictForms !== false) slips = wordSlips(t, best.a, opt.vocab, lang);
+      if (!slips.length) return Object.assign(out, { result: 'almost', reason: 'typo' });
+    }
     if (opt.bagOfWords !== false && lang === 'bg') {
       for (const acc of accepted) {
         const a = normalise(acc, lang, opt);
-        if (a && sameBag(t, a)) return Object.assign(out, { result: 'almost', expected: acc, a, reason: 'order' });
+        if (a && sameBag(t, a)) return { result: 'almost', expected: acc, dist: best.dist, t, a, reason: 'order' };
       }
     }
+    if (slips.length) return Object.assign(out, { result: 'wrong', reason: 'form', slips });
     return Object.assign(out, { result: 'wrong' });
   }
 
@@ -101,6 +192,29 @@
     while (i < m) push('del', a[i++]);
     while (j < n) push('ins', b[j++]);
     return ops;
+  }
+
+  /**
+   * Word highlights for the expected line of the result bar (D-015): the words of `expected`, each with
+   * miss = true when a word-level LCS against `typed` leaves it unmatched. Case-sensitive (an accepted
+   * "sunday" still marks "Sunday"); leading and trailing punctuation is ignored, ’ counts as '.
+   * @param {string} typed @param {string} expected @returns {{w: string, miss: boolean}[]}
+   */
+  function wordMarks(typed, expected) {
+    const key = w => w.replace(/’/g, "'").replace(/^[^\p{L}\p{N}\p{M}]+|[^\p{L}\p{N}\p{M}]+$/gu, '');
+    const words = (expected || '').split(/\s+/).filter(Boolean), b = words.map(key);
+    const a = (typed || '').split(/\s+/).filter(Boolean).map(key).filter(Boolean);
+    const m = a.length, n = b.length, L = [];
+    for (let i = 0; i <= m; i++) L[i] = new Int16Array(n + 1);
+    for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--)
+      L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const hit = new Array(n).fill(false);
+    for (let i = 0, j = 0; i < m && j < n;) {
+      if (a[i] === b[j]) { hit[j] = true; i++; j++; }
+      else if (L[i + 1][j] >= L[i][j + 1]) i++;
+      else j++;
+    }
+    return words.map((w, j) => ({ w, miss: !hit[j] && b[j] !== '' }));
   }
 
   // Latin -> Cyrillic phonetic transliteration (longest match first)
@@ -350,6 +464,11 @@
     if (k.toBg) return [s.bg].concat(s.bg_alt || []);
     return [s[k.lang] || ''].concat(s[k.lang + '_alt'] || []).filter(Boolean);
   }
+  /** answers accepted with a "looser translation" note (D-014); none for the Bulgarian directions */
+  function looseFor(s, dir) {
+    const k = parseKey('x|' + dir);
+    return k.toBg ? [] : (s[k.lang + '_loose'] || []).filter(Boolean);
+  }
 
   // function words ignored by the "no shared word between consecutive cards" rule (D-003)
   const STOP = new Set(['и', 'в', 'на', 'за', 'от', 'с', 'че', 'аз', 'ти', 'той', 'тя', 'то', 'ние', 'вие', 'те', 'това', 'този', 'да', 'не', 'ли', 'ще', 'се', 'си', 'съм', 'е', 'но', 'а', 'или', 'много', 'един', 'как', 'какво', 'сега', 'тук', 'там', 'може', 'трябва', 'имам', 'искам', 'мой', 'твой', 'неин', 'негов', 'наш', 'ваш', 'техен']);
@@ -501,6 +620,7 @@
       id: String(row.id || '').trim() || hashId(String(row.bg).trim()),
       bg: String(row.bg || '').trim(), nl: String(row.nl || '').trim(),
       nl_alt: split(row.nl_alt, '|'), bg_alt: split(row.bg_alt, '|'), en_alt: split(row.en_alt, '|'),
+      nl_loose: split(row.nl_loose, '|'), en_loose: split(row.en_loose, '|'),
       en: String(row.en || '').trim(), lemmas: split(row.lemmas, ','), tags: split(row.tags, ','),
       source: row.source || 'import',
     };
@@ -562,6 +682,6 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, wordSlips, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
