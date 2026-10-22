@@ -1,3 +1,4 @@
+// @ts-check
 /* Trakia core: pure functions (no DOM). Loaded by index.html and testable with node (tools/test_core.js). */
 (function (global) {
   'use strict';
@@ -282,7 +283,7 @@
     rand = rand || Math.random;
     if (result === 'almost') {
       const o = almostOutcome(p, reason, settings);
-      if (o.rule === 'free-pass' && !free) p[o.counter] = o.used;
+      if (o.rule === 'free-pass' && o.counter && !free) p[o.counter] = o.used;
       p.lastRule = o.rule;
       result = o.rating;
     } else delete p.lastRule;

@@ -7,7 +7,7 @@ in the Anki deck *Bulgarian 2952 (mixed)*.
 
 ## 1. Recommendation in one paragraph
 
-Build it as a **single-file web app** (`app/index.html`: HTML + CSS + vanilla JS, no build step)
+Build it as a **static web app with no build step** (`app/index.html` for markup and CSS, `app/ui.js` for the UI script, `app/core.js` for the logic; plain JavaScript checked by `tsc` through JSDoc types, D-013)
 that is installable as a **PWA** on Android. It runs from a plain folder with
 `python3 -m http.server`, works offline once installed, and stores progress in the browser
 (`localStorage`, with JSON export/import for backups and for moving between laptop and phone).
@@ -50,7 +50,9 @@ trakia/
   tools/test_core.js           unit tests for app/core.js  (node tools/test_core.js)
   tools/check_decisions.py     checks decisions/D-*.md against decisions/TEMPLATE.md and the README table
   tools/SENTENCE_BRIEF.md      the brief the sentence-writing agents followed
-  app/index.html           the trainer UI (single file: markup, CSS, UI script)
+  app/index.html           the trainer UI: markup and CSS
+  app/ui.js                the UI script (DOM, sessions, settings, library, stats); was inline until D-013
+  app/types.d.ts           shared shapes for the type check (Sentence, Settings, ProgressRecord, ...)
   app/core.js              pure logic: normalise, check, diff, translit, scheduling, import parsing
   app/data.js              generated bundle of words + sentences (so file:// and offline work)
   app/manifest.json, app/sw.js, app/icon*.{svg,png}   PWA install + offline cache

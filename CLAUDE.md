@@ -45,7 +45,9 @@ Rules:
 
 ## Before committing anything
 
-- `npm test` (unit tests and the headless UI test) must pass.
-- After changing `index.html`, `core.js` or `data.js`, bump `CACHE_VERSION` in `app/sw.js`.
+- `npm test` (unit tests, the headless UI test and the `tsc` type check) must pass. The JavaScript
+  is checked through JSDoc types; shared shapes live in `app/types.d.ts`. Annotate new code, do not
+  silence errors with `any` unless a DOM API leaves no alternative.
+- After changing `index.html`, `ui.js`, `core.js` or `data.js`, bump `CACHE_VERSION` in `app/sw.js`.
 - After editing `data/*.json`, run `python3 tools/build_data.py`.
 - Committing, pushing and publishing (`tools/publish.sh`) are separate steps the user asks for.

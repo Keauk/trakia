@@ -2,7 +2,13 @@
 (function () {
 'use strict';
 const C = window.TrakiaCore, DATA = window.TRAKIA_DATA;
-const $ = id => document.getElementById(id);
+/** Element by id (every id used here exists in index.html). See AppElement in types.d.ts.
+ * @type {(id: string) => AppElement} */
+const $ = id => /** @type {any} */ (document.getElementById(id));
+/** First element under `root` matching `sel` (must exist). @type {(root: ParentNode, sel: string) => AppElement} */
+const q = (root, sel) => /** @type {any} */ (root.querySelector(sel));
+/** Closest ancestor of an event's target matching `sel`, or null. @type {(e: Event, sel: string) => AppElement | null} */
+const closest = (e, sel) => /** @type {any} */ (e.target instanceof Element ? e.target.closest(sel) : null);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- storage ----------
@@ -48,8 +54,8 @@ function renderAlts(list) {
   const el = $('alts');
   if (!list.length) { el.hidden = true; el.open = false; return; }
   el.hidden = false;
-  el.querySelector('summary').textContent = list.length === 1 ? '1 other accepted answer' : `${list.length} other accepted answers`;
-  el.querySelector('ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('');
+  q(el, 'summary').textContent = list.length === 1 ? '1 other accepted answer' : `${list.length} other accepted answers`;
+  q(el, 'ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('');
   el.open = LS.get('altsOpen', false) === true;
 }
 function fitAnswer() { const a = $('answer'); a.style.height = 'auto'; a.style.height = a.scrollHeight + 'px'; }
@@ -58,9 +64,9 @@ function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
 
 // ---------- tabs ----------
-document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 function showTab(name) {
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   if (name === 'practise') renderHome(); if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
   window.scrollTo(0, 0);
@@ -149,14 +155,14 @@ function nextDrill() {
 $('answer').addEventListener('input', e => {
   const a = $('answer');
   if (/[\r\n]/.test(a.value)) {
-    const typedEnter = e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph' || (!e.inputType && /[\r\n]$/.test(a.value));
-    const pos = a.selectionStart; a.value = a.value.replace(/[\r\n]+/g, typedEnter ? '' : ' ').trimEnd(); a.selectionStart = a.selectionEnd = Math.min(pos, a.value.length);
+    const it = /** @type {InputEvent} */ (e).inputType; const typedEnter = it === 'insertLineBreak' || it === 'insertParagraph' || (!it && /[\r\n]$/.test(a.value));
+    const pos = a.selectionStart ?? a.value.length; a.value = a.value.replace(/[\r\n]+/g, typedEnter ? '' : ' ').trimEnd(); a.selectionStart = a.selectionEnd = Math.min(pos, a.value.length);
     if (typedEnter && session) { if (session.pending) next(); else checkAnswer(false); return; }   // keyboards that insert a line break instead of sending Enter
   }
   fitAnswer();
 });
 $('alts').addEventListener('toggle', () => { if (!$('alts').hidden) LS.set('altsOpen', $('alts').open); });
-$('gloss').addEventListener('click', e => { const a = e.target.closest('[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = document.getElementById('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
+$('gloss').addEventListener('click', e => { const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = $('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
 function allAccepted(s, dir, key) { return C.acceptedFor(s, dir).concat(userAlts[key] || []); }
 
 function renderCard() {
@@ -275,7 +281,7 @@ function renderGrammar() {
   }
   $('grammar-cards').innerHTML = html;
 }
-$('grammar-cards').addEventListener('click', e => { const b = e.target.closest('[data-drill]'); if (!b) return; const id = b.dataset.drill; showTab('practise'); startDrill(id); });
+$('grammar-cards').addEventListener('click', e => { const b = closest(e, '[data-drill]'); if (!b) return; const id = b.dataset.drill; showTab('practise'); startDrill(id); });
 
 // ---------- stats ----------
 function renderStats() {
@@ -330,16 +336,18 @@ function drawChart(days) {
   const max = Math.max(5, ...days.map(d => d.v[0] + d.v[1] + d.v[2]));
   ctx.clearRect(0, 0, W, H); ctx.font = '11px system-ui'; ctx.fillStyle = col('--muted'); ctx.strokeStyle = col('--line'); ctx.lineWidth = 1;
   const steps = max <= 10 ? 5 : 4;
-  for (let i = 0; i <= steps; i++) { const y = padT + ih - ih * i / steps, val = Math.round(max * i / steps); ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - 6, y); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(val, padL - 6, y + 4); }
+  for (let i = 0; i <= steps; i++) { const y = padT + ih - ih * i / steps, val = Math.round(max * i / steps); ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - 6, y); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(String(val), padL - 6, y + 4); }
   const bw = iw / days.length, gap = Math.min(8, bw * .3), colors = [col('--bad'), col('--almost'), col('--ok')];
-  cv._bars = [];
+  /** @type {NonNullable<AppElement['_bars']>} */ const bars = []; cv._bars = bars;
   days.forEach((d, i) => {
     const x = padL + i * bw + gap / 2, w = bw - gap; let y = padT + ih; const tot = d.v[0] + d.v[1] + d.v[2];
     [2, 1, 0].forEach(sc => { const h = ih * d.v[sc] / max; if (h > 0) { ctx.fillStyle = colors[sc]; ctx.fillRect(x, y - h, w, Math.max(0, h - 2)); y -= h; } });
     if (i % 2 === 1 || days.length < 8) { ctx.fillStyle = col('--muted'); ctx.textAlign = 'center'; ctx.fillText(d.label, x + w / 2, H - 6); }
-    cv._bars.push({ x, w, d, tot });
+    bars.push({ x, w, d, tot });
   });
-  cv.onmousemove = cv.ontouchstart = e => { const r = cv.getBoundingClientRect(), px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; const b = cv._bars.find(b => px >= b.x - 2 && px <= b.x + b.w + 2); const tip = $('chart-tip'); if (!b) { tip.style.display = 'none'; return; } tip.style.display = 'block'; tip.style.left = (b.x + b.w / 2) + 'px'; tip.style.top = '30px'; tip.textContent = `${b.d.k}: ✓ ${b.d.v[2]}  ≈ ${b.d.v[1]}  ✗ ${b.d.v[0]}`; };
+  /** @param {MouseEvent | TouchEvent} e */
+  const hover = e => { const r = cv.getBoundingClientRect(), px = ('touches' in e ? e.touches[0].clientX : e.clientX) - r.left; const b = (cv._bars || []).find(b => px >= b.x - 2 && px <= b.x + b.w + 2); const tip = $('chart-tip'); if (!b) { tip.style.display = 'none'; return; } tip.style.display = 'block'; tip.style.left = (b.x + b.w / 2) + 'px'; tip.style.top = '30px'; tip.textContent = `${b.d.k}: ✓ ${b.d.v[2]}  ≈ ${b.d.v[1]}  ✗ ${b.d.v[0]}`; };
+  cv.onmousemove = hover; cv.ontouchstart = hover;
   cv.onmouseleave = () => $('chart-tip').style.display = 'none';
 }
 
@@ -371,7 +379,7 @@ function renderLibrary(reset) {
   $('lib-more').hidden = rows.length <= libShown;
 }
 $('lib-table').addEventListener('click', e => {
-  const tr = e.target.closest('tr.clickable'); if (!tr) return;
+  const tr = closest(e, 'tr.clickable'); if (!tr) return;
   const open = tr.nextElementSibling && tr.nextElementSibling.classList.contains('lib-row-detail');
   document.querySelectorAll('.lib-row-detail').forEach(x => x.remove());
   if (open) return;
@@ -381,13 +389,13 @@ $('lib-table').addEventListener('click', e => {
   const pr = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${dirLabel(d)}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
   det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl ? `<div><b>NL</b> ${esc(s.nl)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${(s.en_alt || []).length ? `<div><b>EN also</b> ${s.en_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
-  det.querySelector('[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) delete progress[s.id + '|' + d]; save.progress(); renderLibrary(false); toast('Progress reset'); };
-  det.querySelector('[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
+  q(det, '[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) delete progress[s.id + '|' + d]; save.progress(); renderLibrary(false); toast('Progress reset'); };
+  q(det, '[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
 });
 
 // ---------- import / export ----------
 $('import-file').addEventListener('change', async e => {
-  const file = e.target.files[0]; if (!file) return; e.target.value = '';
+  const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try {
     let rows;
     if (/\.xlsx?$/i.test(file.name)) {
@@ -402,17 +410,17 @@ $('import-file').addEventListener('change', async e => {
     save.userSentences(); save.deleted(); refreshSentences(); renderLibrary(true);
     $('import-result').textContent = `${added} added, ${updated} updated, ${skipped} skipped (missing bg or nl).`;
     toast(`Imported ${added + updated} sentences`);
-  } catch (err) { $('import-result').textContent = 'Import failed: ' + err.message; }
+  } catch (err) { $('import-result').textContent = 'Import failed: ' + (err instanceof Error ? err.message : String(err)); }
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 $('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', { app: 'trakia', version: 1, exported: new Date().toISOString(), settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog }));
 $('import-progress').addEventListener('change', async e => {
-  const file = e.target.files[0]; if (!file) return; e.target.value = '';
+  const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); if (j.app !== 'trakia') throw new Error('not a Trakia progress file');
     if (!confirm('Replace all progress on this device with the file?')) return;
     settings = Object.assign({}, DEFAULTS, j.settings || {}); progress = j.progress || {}; userAlts = j.userAlts || {}; userSentences = j.userSentences || {}; deleted = j.deleted || []; log = j.log || []; sessions = j.sessions || []; drills = j.drills || {}; drillLog = j.drillLog || [];
     Object.values(save).forEach(f => f()); refreshSentences(); applyTheme(); renderHome(); toast('Progress imported');
-  } catch (err) { toast('Import failed: ' + err.message); }
+  } catch (err) { toast('Import failed: ' + (err instanceof Error ? err.message : String(err))); }
 });
 $('btn-export-sentences').addEventListener('click', () => download('trakia-sentences.json', SENT.map(s => Object.assign({}, s, { nl_alt: s.nl_alt.concat(userAlts[s.id + '|bg2nl'] || []), en_alt: (s.en_alt || []).concat(userAlts[s.id + '|bg2en'] || []), bg_alt: s.bg_alt.concat(userAlts[s.id + '|nl2bg'] || [], userAlts[s.id + '|en2bg'] || []) }))));
 
@@ -435,7 +443,7 @@ function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s =
 function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your Anki position fit this stage.`; }
 function renderSettings() { writers.forEach(w => w()); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
-  const file = e.target.files[0]; if (!file) return; e.target.value = '';
+  const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
 $('btn-reset').addEventListener('click', () => { if (!confirm('Delete all progress, accepted answers and statistics on this device?')) return; progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
