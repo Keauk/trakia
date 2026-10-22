@@ -86,6 +86,31 @@ document.querySelector('nav button[data-tab=settings]').click(); $('set-translit
 document.querySelector('nav button[data-tab=practise]').click();
 $('answer').value = 'kupih hlyab'; $('answer').dispatchEvent(new window.Event('input'));
 assert.equal($('translit-preview').textContent, 'купих хляб');
+// --- D-012: collapsible alternatives
+document.querySelector('nav button[data-tab=practise]').click();
+$('btn-home').click(); $('btn-start').click();
+{
+  let checked = false;
+  for (let i = 0; i < 40 && !$('session-run').hidden && !checked; i++) {
+    type('zzz qqq');
+    if (!$('alts').hidden) {
+      const n = $('alts').querySelectorAll('li').length;
+      assert.ok(n >= 1);
+      assert.equal($('alts').open, false, 'collapsed by default');
+      assert.match($('alts').querySelector('summary').textContent, new RegExp('^' + n + ' other accepted answer'));
+      assert.ok(!$('feedback').textContent.includes('Also accepted:'), 'no inline list any more');
+      $('alts').open = true; $('alts').dispatchEvent(new window.Event('toggle'));
+      assert.equal(JSON.parse(window.localStorage.getItem('trakia.altsOpen')), true, 'open state remembered');
+      $('alts').open = false; $('alts').dispatchEvent(new window.Event('toggle'));
+      assert.equal(JSON.parse(window.localStorage.getItem('trakia.altsOpen')), false);
+      checked = true;
+    }
+    type('', 'Enter');
+  }
+  assert.ok(checked, 'found a card with alternatives');
+  if (!$('session-run').hidden) $('btn-quit').click();
+  $('btn-home').click();
+}
 // --- D-009: grammar tab and drills
 document.querySelector('nav button[data-tab=grammar]').click();
 assert.ok(document.querySelectorAll('#grammar-cards details').length >= 15, 'grammar cards rendered');

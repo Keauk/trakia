@@ -19,6 +19,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-009](D-009-grammar-reference-and-drills.md) | Grammar reference tab with "give the form" drills | new tab / content | done |
 | [D-010](D-010-answer-comparison-layout.md) | Show "you typed" and "correct" as two aligned lines instead of an inline diff | feedback UI | proposed |
 | [D-011](D-011-english-practice-language.md) | English as a second practice language (BG ⇄ EN) | data / directions | done |
+| [D-012](D-012-collapsible-alternatives.md) | Collapse the "Also accepted" list behind a subtle toggle | feedback UI | done |
 
 Suggested order for the open items: D-010 (answer comparison layout), D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

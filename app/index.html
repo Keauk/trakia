@@ -104,6 +104,15 @@ input[type=range]{width:100%}
 .gcard .ex .sub{display:inline;margin-left:6px}
 .stage-h{margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .hint{color:var(--ink2);font-size:14px;margin:-6px 0 10px}
+.alts{margin:6px 0 2px;font-size:14px;color:var(--ink2)}
+.alts[hidden]{display:none}
+.alts summary{cursor:pointer;list-style:none;display:inline-block;padding:2px 0;color:var(--muted);font-size:13px;user-select:none}
+.alts summary::-webkit-details-marker{display:none}
+.alts summary::before{content:'▸ '}
+.alts[open] summary::before{content:'▾ '}
+.alts summary:hover,.alts summary:focus-visible{color:var(--ink2)}
+.alts ul{margin:4px 0 0;padding-left:16px}
+.alts li{margin:2px 0}
 .lib-row-detail td{padding:10px}
 #update-bar{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:14px;box-shadow:var(--shadow);z-index:9;display:flex;gap:10px;align-items:center}
 #update-bar[hidden]{display:none}
@@ -162,7 +171,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
         <p class="label">Expected</p>
         <p id="expected" class="expected"></p>
         <p id="diff" class="diff"></p>
-        <p id="alts" class="muted"></p>
+        <details id="alts" class="alts"><summary></summary><ul></ul></details>
         <p id="gloss" class="tiny"></p>
         <div class="row">
           <button class="btn primary" id="btn-next">Next</button>
@@ -394,6 +403,14 @@ function applyTheme() { document.documentElement.dataset.theme = settings.theme 
 const LANG_NAME = { nl: 'Dutch', en: 'English' }, LANG_CODE = { nl: 'NL', en: 'EN' };
 function dirLabel(dir) { const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
 function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, text: s[L] || s.nl, alts: s[L + '_alt'] || [] }; }
+function renderAlts(list) {
+  const el = $('alts');
+  if (!list.length) { el.hidden = true; el.open = false; return; }
+  el.hidden = false;
+  el.querySelector('summary').textContent = list.length === 1 ? '1 other accepted answer' : `${list.length} other accepted answers`;
+  el.querySelector('ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('');
+  el.open = LS.get('altsOpen', false) === true;
+}
 function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(d * 24) + ' h'; return (d < 10 ? d.toFixed(1) : Math.round(d)) + ' d'; }
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
@@ -470,7 +487,7 @@ function checkDrill(giveUp) {
   $('expected').textContent = r.expected || item.answers[0];
   $('diff').innerHTML = r.result !== 'correct' && r.t && r.a ? C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join('') : '';
   const others = item.answers.filter(a => a !== (r.expected || item.answers[0]));
-  $('alts').innerHTML = others.length ? 'Also accepted: ' + others.map(esc).join(' · ') : '';
+  renderAlts(others);
   const card = GRAMMAR.cards.find(c => c.id === item.card);
   $('gloss').innerHTML = card ? `See: <a href="#" data-gcard="${esc(card.id)}">${esc(card.title)}</a>` : '';
   $('btn-accept').hidden = true;
@@ -487,6 +504,7 @@ function nextDrill() {
   session.counts[p.result]++;
   session.i++; renderCard();
 }
+$('alts').addEventListener('toggle', () => { if (!$('alts').hidden) LS.set('altsOpen', $('alts').open); });
 $('gloss').addEventListener('click', e => { const a = e.target.closest('[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = document.getElementById('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
 function allAccepted(s, dir, key) { return C.acceptedFor(s, dir).concat(userAlts[key] || []); }
 
@@ -549,7 +567,7 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome) {
   const d = $('diff');
   if (r.result !== 'correct' && r.t && r.a) d.innerHTML = C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join(''); else d.innerHTML = '';
   const others = accepted.filter(a => a !== (r.expected || accepted[0]));
-  $('alts').innerHTML = others.length ? 'Also accepted: ' + others.map(esc).join(' · ') : '';
+  renderAlts(others);
   const K2 = C.parseKey(session.queue[session.i].key); const third = K2.lang === 'en' ? (s.nl ? 'NL: ' + s.nl : '') : (s.en ? 'EN: ' + s.en : '');
   $('gloss').textContent = third + (s.max_rank ? '   · rank ' + s.max_rank : '') + (s.rank_estimated ? ' ≈' : '');
   $('btn-accept').hidden = r.result === 'correct' || giveUp;
