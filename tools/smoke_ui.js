@@ -168,7 +168,7 @@ assert.equal($('session-run').hidden, false);
 assert.equal($('dir-badge').textContent, 'BG → EN', 'first English card is BG → EN');
 const sEn = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
 assert.ok(sEn, 'prompt is a sentence');
-assert.match($('answer').placeholder, /English/);
+assert.equal($('answer').placeholder, 'Enter translation');
 type(sEn.en);
 assert.match($('verdict').className, /correct/, 'English primary accepted: ' + $('verdict').textContent);
 assert.match($('gloss').textContent, /^NL: /, 'third language shown as gloss');

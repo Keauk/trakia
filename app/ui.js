@@ -112,7 +112,7 @@ function renderDrillCard() {
   $('dir-badge').textContent = 'Grammar drill'; $('free-badge').hidden = true; $('retry-badge').hidden = true;
   $('prompt').textContent = item.prompt; $('prompt').lang = 'bg';
   $('newwords').innerHTML = `<span class="hint">${esc(item.hint)}</span>`;
-  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = 'bg'; inp.placeholder = 'Type the form, then Enter';
+  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = 'bg'; inp.placeholder = 'Въведи формата';
   $('translit-preview').hidden = !settings.translit; $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
@@ -173,7 +173,7 @@ function renderCard() {
   const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
   $('newwords').innerHTML = chips ? '<span class="tiny" style="align-self:center">new:</span>' + chips : '';
   const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = K.toBg ? 'bg' : K.lang;
-  inp.placeholder = K.toBg ? 'Въведи превод' : `Type the ${LANG_NAME[K.lang] || K.lang} translation, then Enter`;
+  inp.placeholder = K.toBg ? 'Въведи превод' : 'Enter translation';
   $('translit-preview').hidden = !(settings.translit && K.toBg); $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
