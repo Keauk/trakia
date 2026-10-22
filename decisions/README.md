@@ -16,7 +16,7 @@ current code), acceptance criteria (how we know it is done), effort and risks, o
 | [D-008](D-008-grammar-stages.md) | Gate sentences by grammar stage, not only by vocabulary rank | data / eligibility | done |
 | [D-009](D-009-grammar-reference-and-drills.md) | Grammar reference tab with "give the form" drills | new tab / content | done |
 | [D-010](D-010-answer-comparison-layout.md) | Show "you typed" and "correct" as two aligned lines instead of an inline diff | feedback UI | proposed |
-| [D-011](D-011-english-practice-language.md) | English as a second practice language (BG ⇄ EN) | data / directions | proposed |
+| [D-011](D-011-english-practice-language.md) | English as a second practice language (BG ⇄ EN) | data / directions | done |
 
 Suggested order for the open items: D-010 (answer comparison layout), D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

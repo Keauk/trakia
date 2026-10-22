@@ -105,6 +105,7 @@ def main(argv):
                 'id': s['id'], 'bg': s['bg'].strip(), 'nl': s['nl'].strip(),
                 'nl_alt': [a.strip() for a in s.get('nl_alt', []) if a.strip()],
                 'bg_alt': [a.strip() for a in s.get('bg_alt', []) if a.strip()],
+                'en_alt': [a.strip() for a in s.get('en_alt', []) if a.strip()],
                 'en': s.get('en', '').strip(), 'lemmas': s['lemmas'],
                 'max_rank': max(ranks) if ranks else None,
                 'tags': s.get('tags', []), 'source': s.get('source') or 'generated-2026-10',

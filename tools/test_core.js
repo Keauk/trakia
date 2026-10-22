@@ -210,6 +210,32 @@ t('D-009 drill generator', () => {
   const d = C.buildDrill(G, { stage: 1 }, {}, 15, rand); assert.equal(d.length, 15); assert.equal(new Set(d.map(it => it.id)).size, 15);
   assert.ok(C.buildDrill(G, { stage: 1 }, {}, 10, rand, 'sum').every(it => it.card === 'sum'));
 });
+t('D-011 English normalisation and languages', () => {
+  assert.equal(C.normalise("I'm not here, don't wait.", 'en'), 'i am not here do not wait');
+  assert.equal(C.normalise('I am not here, do not wait', 'en'), 'i am not here do not wait');
+  assert.equal(C.check("It's my favourite colour.", ['It is my favorite color.'], 'en').result, 'correct');
+  assert.equal(C.check("I can't come", ["I cannot come."], 'en').result, 'correct');
+  assert.equal(C.check('I’m fine', ["I'm fine."], 'en').result, 'correct');
+  assert.equal(C.check('He is at the centre', ['He is at the center.'], 'en').result, 'correct');
+  assert.equal(C.normalise("Ik ben er niet", 'nl'), 'ik ben er niet');
+  assert.equal(C.langFor('A001', { lang: 'en' }), 'en'); assert.equal(C.langFor('A001', { lang: 'nl' }), 'nl'); assert.equal(C.langFor('A001', {}), 'nl');
+  const ids = ['A001', 'A002', 'B017', 'C100', 'D050', 'E099', 'F010', 'G020', 'H030', 'J040'];
+  const mixed = ids.map(i => C.langFor(i, { lang: 'mixed' }));
+  assert.ok(mixed.includes('en') && mixed.includes('nl'), 'mixed splits: ' + mixed.join(','));
+  assert.deepEqual(ids.map(i => C.langFor(i, { lang: 'mixed' })), mixed, 'stable');
+  assert.deepEqual(C.parseKey('B017|en2bg'), { id: 'B017', dir: 'en2bg', lang: 'en', toBg: true });
+  assert.deepEqual(C.parseKey('B017|bg2nl'), { id: 'B017', dir: 'bg2nl', lang: 'nl', toBg: false });
+  const s = { id: 'x', bg: 'Да.', bg_alt: ['Да, да.'], nl: 'Ja.', nl_alt: ['Jawel.'], en: 'Yes.', en_alt: ['Yeah.'] };
+  assert.deepEqual(C.acceptedFor(s, 'bg2en'), ['Yes.', 'Yeah.']); assert.deepEqual(C.acceptedFor(s, 'en2bg'), ['Да.', 'Да, да.']); assert.deepEqual(C.acceptedFor(s, 'bg2nl'), ['Ja.', 'Jawel.']);
+  const S = [{ id: 'a', max_rank: 10 }, { id: 'b', max_rank: 20 }];
+  assert.deepEqual(C.cardKeys(S[0], {}, { lang: 'en', directions: 'gated' }), ['a|bg2en']);
+  assert.deepEqual(C.cardKeys(S[0], { 'a|bg2en': { box: 1 } }, { lang: 'en', directions: 'gated' }), ['a|bg2en', 'a|en2bg']);
+  assert.deepEqual(C.cardKeys(S[0], { 'a|bg2nl': { box: 1 } }, { lang: 'en', directions: 'gated' }), ['a|bg2en'], 'Dutch progress does not unlock the English card');
+  const q = C.buildSession(S, { 'b|bg2en': { box: 1, due: 2e12 } }, { lang: 'en', rank: 100, newPerSession: 2, directions: 'gated', newOrder: 'strict' }, 1e12, () => 0.5).queue;
+  assert.ok(q.includes('b|en2bg') && q.includes('a|bg2en'), q.join(','));
+  const idx = C.wordIndex([{ rank: 1, bg: 'да', en: 'yes', forms: '' }]);
+  assert.deepEqual(C.rowToSentence({ bg: 'Да.', nl: 'Ja.', en: 'Yes.', en_alt: 'Yeah. | Yep.' }, idx).en_alt, ['Yeah.', 'Yep.']);
+});
 t('rowToSentence + index', () => {
   const idx = C.wordIndex([{ rank: 1, bg: 'и', en: 'and', forms: '' }, { rank: 8, bg: 'аз', en: 'I', forms: 'аз (ме, мен, ми)' }, { rank: 300, bg: 'хляб', en: 'bread', forms: '' }]);
   assert.equal(idx.get('ми').rank, 8);

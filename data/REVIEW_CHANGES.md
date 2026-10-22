@@ -376,3 +376,247 @@ The 1078 new sentences went through the same two passes (11 reviewers × ~100, t
 - _pass 1: 'een nieuw' (noun omitted) is unidiomatic; standard Dutch uses 'een nieuwe'_
 - **nl**: Het beeldscherm is kapot en ik moet een nieuw kopen.  
   → Het beeldscherm is kapot en ik moet een nieuwe kopen.
+
+# English review (2026-10-22, decision D-011)
+
+All 2656 `en` lines were reviewed as answers and given alternatives (18 reviewers × ~150).
+
+## A170
+- _кажи = say/tell, not whisper; nl 'zeg het in mijn oor'_
+- **en**: Whisper it in my ear.  
+  → Say it in my ear.
+
+## M074
+- _parenthetical gloss removed (not typeable as an answer); queue sense moved to alts_
+- **en**: Who is last (in the queue)?  
+  → Who is last?
+
+## M003
+- _English negation needs 'or' ('meat and eggs' reads as the combination); nl: geen vlees en geen eieren_
+- **en**: I don't eat meat and eggs.  
+  → I don't eat meat or eggs.
+
+## A020
+- _Grandma/Grandpa used as names: capitalise_
+- **en**: Grandma and grandpa live in a big house.  
+  → Grandma and Grandpa live in a big house.
+
+## B006
+- _'severe pain' is the natural collocation (nl 'hevige pijn'); literal 'strong' kept as alt_
+- **en**: I have a strong pain in my leg.  
+  → I have a severe pain in my leg.
+
+## B135
+- _imperfective лежиш = stay lying down/rest (nl 'blijven liggen'); 'lie down' suggests a single act_
+- **en**: The doctor said you should lie down.  
+  → The doctor said you should stay in bed.
+
+## B107
+- _'reads with glasses' is unidiomatic; 'with glasses on' is the natural phrasing_
+- **en**: Grandma reads with glasses.  
+  → Grandma reads with glasses on.
+
+## B128
+- _Mum used as a name is capitalised_
+- **en**: Come in, mum is in the kitchen.  
+  → Come in, Mum is in the kitchen.
+
+## C046
+- _'small and expensive besides' sounds stilted_
+- **en**: The apartment is small and expensive besides.  
+  → The apartment is small, and on top of that it's expensive.
+
+## C162
+- _bg has 'те' (understand you); object was dropped_
+- **en**: It's hard for me to understand when you speak fast.  
+  → It's hard for me to understand you when you speak fast.
+
+## F066
+- _'it's cool' reads as slang 'it's fine'; хладно = chilly_
+- **en**: Take a sweater, it's cool.  
+  → Take a sweater, it's chilly.
+
+## F064
+- _Вие (Можете): 'Could you' shows the polite register_
+- **en**: Can you explain to me what this dish is?  
+  → Could you explain to me what this dish is?
+
+## C105
+- _'time for sleep' is unidiomatic_
+- **en**: Good night, children! It's time for sleep.  
+  → Good night, children! It's time to sleep.
+
+## Q032
+- _'too wide' is unnatural for clothing fit; 'loose' is the idiomatic word (nl: te wijd)_
+- **en**: The jeans are too wide for me, I need a belt.  
+  → My jeans are too loose, I need a belt.
+
+## Q093
+- _removed gloss parenthetical '(me)'; bg has no object, practice sentence must be clean_
+- **en**: My grandfather tells (me) about the village.  
+  → My grandfather talks about the village.
+
+## G097
+- _пътуване = travelling (nl 'om te reizen'); 'for a trip' sounded unnatural_
+- **en**: April is a nice month for a trip.  
+  → April is a good month for travelling.
+
+## H111
+- _'bathed' dated; imperfect къпаха се = were swimming (nl 'gezwommen')_
+- **en**: The children bathed in the river all afternoon.  
+  → The children were swimming in the river all afternoon.
+
+## H024
+- _'Which is' less natural; nl 'Wat is'_
+- **en**: Which is the main square in the capital?  
+  → What's the main square in the capital?
+
+## H050
+- _generic паякът; 'the spider' read as a specific spider (nl 'een spin')_
+- **en**: Bees and ants are insects, but the spider isn't.  
+  → Bees and ants are insects, but a spider isn't.
+
+## J056
+- _'checkout' is a supermarket exit, odd for ordering; каса here = till/cash desk_
+- **en**: Order and pay at the checkout.  
+  → Order and pay at the till.
+
+## J061
+- _'Again I can't' is unnatural word order_
+- **en**: Again I can't unlock the door.  
+  → Once again, I can't unlock the door.
+
+## D158
+- _full sentence more natural than clipped 'A pity'_
+- **en**: A pity you can't come with us.  
+  → It's a pity you can't come with us.
+
+## D156
+- _'its own' for children sounds unnatural in modern English_
+- **en**: Don't compare the children, each has its own character.  
+  → Don't compare the children, each has their own character.
+
+## K047
+- _успеха is definite (the success of this venture); 'I believe in success' reads as a general motto_
+- **en**: It's a big risk, but I believe in success.  
+  → It's a big risk, but I believe it will succeed.
+
+## K085
+- _'Good luck and success!' is unnatural English; Успех и късмет = all the best / every success and good luck; 'You're starting' more natural_
+- **en**: You start a new job tomorrow? Good luck and success!  
+  → You're starting a new job tomorrow? Good luck and all the best!
+
+## D159
+- _'how many people there are' is unidiomatic as an exclamation_
+- **en**: Wow, how many people there are on the beach!  
+  → Wow, there are so many people on the beach!
+
+## R070
+- _'responsibility is big' unnatural, 'great' is the collocation; bg repeats 'от друга страна'_
+- **en**: On the one hand the income is good, on the other the responsibility is big.  
+  → On the one hand the income is good, on the other hand the responsibility is great.
+
+## R071
+- _mixed 'a career' / 'the family' read unnaturally; bg generic definites = 'your' (nl: je carrière, je gezin)_
+- **en**: On the one hand a career is important, on the other, the family.  
+  → On the one hand your career is important, on the other hand your family.
+
+## R085
+- _'bigger than the budget' is an unnatural collocation; nl 'hoger'_
+- **en**: The expenses are bigger than the budget.  
+  → The expenses are higher than the budget.
+
+## S018
+- _'if you please' is archaic; ако обичате is a plain polite please_
+- **en**: One beer, please – a cold one, if you please.  
+  → One beer, please – a cold one, if you don't mind.
+
+## S080
+- _'the newspaper writes about' is a calque; more idiomatic phrasing_
+- **en**: The newspaper writes about a new crime in the neighbourhood.  
+  → The newspaper reports on a new crime in the neighbourhood.
+
+## S036
+- _'for his part' is stilted; а…пък is a simple contrast_
+- **en**: Mum is frying fish, and Dad, for his part, is making a salad.  
+  → Mum is frying fish, while Dad is making a salad.
+
+## T044
+- _'turned on the heating already in autumn' is unnatural (Dutch word order)_
+- **en**: We turned on the heating already in autumn.  
+  → We turned on the heating as early as autumn.
+
+## T075
+- _'snapped me' is too informal for neutral снима_
+- **en**: The camera on the boulevard snapped me and I got a fine.  
+  → The camera on the boulevard caught me and I got a fine.
+
+## T055
+- _generic noun: 'the silence' reads as a specific silence in English_
+- **en**: I love the silence and calm evenings.  
+  → I love silence and calm evenings.
+
+## T104
+- _'took one look' adds emphasis not in bg_
+- **en**: I took one look at the long queue at the checkout and left.  
+  → I looked at the long queue at the checkout and left.
+
+## T119
+- _capitalise Mum used as a name_
+- **en**: We prepared a surprise for mum's birthday.  
+  → We prepared a surprise for Mum's birthday.
+
+## U125
+- _'The sign' is not in bg/nl_
+- **en**: The sign on the pastry shop door says 'Closed'.  
+  → On the door of the pastry shop it says 'Closed'.
+
+## U126
+- _word order made 'take away from the pastry shop' ambiguous_
+- **en**: I got two pieces of cake to take away from the pastry shop.  
+  → I got two pieces of cake from the pastry shop to take home.
+
+## U058
+- _'doesn't warm' without an object is unnatural_
+- **en**: The winter sun shines but doesn't warm.  
+  → The winter sun shines but gives no warmth.
+
+## V027
+- _bg ми / nl me: 'to me' was dropped_
+- **en**: The doctor recommended vitamins and more rest.  
+  → The doctor recommended vitamins and more rest to me.
+
+## V052
+- _'The running training' is unnatural English_
+- **en**: The running training starts at seven o'clock.  
+  → Running practice starts at seven o'clock.
+
+## W072
+- _'is postponed' unnatural in reported speech; bg 'се отлага' = is being postponed_
+- **en**: They announced that the plane's departure is postponed.  
+  → They announced that the plane's departure has been postponed.
+
+## W066
+- _'Dad' used as a name is capitalised_
+- **en**: Every morning dad drives us to secondary school.  
+  → Every morning Dad drives us to secondary school.
+
+## W036
+- _'author of the paintings' is unnatural English; nl 'maker'_
+- **en**: The author of the paintings was also at the exhibition.  
+  → The creator of the paintings was also at the exhibition.
+
+## E099
+- _'on your heavy loss' is unidiomatic for a bereavement_
+- **en**: I sincerely sympathize with you on your heavy loss.  
+  → I sincerely sympathize with you in your great loss.
+
+## E118
+- _English backshift after past reporting verb: was is the natural primary form_
+- **en**: The judge decided that the man is innocent.  
+  → The judge decided that the man was innocent.
+
+## E172
+- _English uses present perfect (continuous) with lately_
+- **en**: Lately I feel constantly tired.  
+  → Lately I've been feeling constantly tired.

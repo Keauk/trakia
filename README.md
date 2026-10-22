@@ -1,6 +1,6 @@
 # Тракия (Trakia)
 
-Dutch ⇄ Bulgarian sentence trainer, aligned with the Anki deck *Bulgarian 2952 (mixed)*.
+Dutch/English ⇄ Bulgarian sentence trainer, aligned with the Anki deck *Bulgarian 2952 (mixed)*.
 See [DESIGN.md](DESIGN.md) for the design and how to run it.
 
 ```

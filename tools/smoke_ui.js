@@ -124,6 +124,49 @@ document.querySelector('[data-drill=sum]').click();
 assert.equal($('dir-badge').textContent, 'Grammar drill');
 assert.ok(/\+ съм$/.test($('prompt').textContent), 'single-table drill: ' + $('prompt').textContent);
 $('btn-quit').click(); $('btn-home').click();
+// --- D-011: English practice language
+const nlProgressBefore = Object.keys(JSON.parse(window.localStorage.getItem('trakia.progress'))).filter(k => /\|(bg2nl|nl2bg)$/.test(k)).length;
+document.querySelector('nav button[data-tab=settings]').click();
+$('set-lang').value = 'en'; $('set-lang').dispatchEvent(new window.Event('input'));
+assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).lang, 'en');
+document.querySelector('nav button[data-tab=practise]').click();
+assert.match($('home-summary').textContent, /practising in English/);
+$('btn-start').click();
+assert.equal($('session-run').hidden, false);
+assert.equal($('dir-badge').textContent, 'BG → EN', 'first English card is BG → EN');
+const sEn = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
+assert.ok(sEn, 'prompt is a sentence');
+assert.match($('answer').placeholder, /English/);
+type(sEn.en);
+assert.match($('verdict').className, /correct/, 'English primary accepted: ' + $('verdict').textContent);
+assert.match($('gloss').textContent, /^NL: /, 'third language shown as gloss');
+type('', 'Enter');
+// a contraction / spelling variant of the next English answer is still correct
+const sEn2 = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
+type(sEn2.en.replace(/\bI am\b/, "I'm").replace(/\bdo not\b/, "don't").replace(/\bcolor\b/, 'colour'));
+assert.match($('verdict').className, /correct|almost/, 'variant accepted: ' + $('verdict').textContent);
+type('', 'Enter');
+$('btn-quit').click();
+const progEn = JSON.parse(window.localStorage.getItem('trakia.progress'));
+assert.ok(Object.keys(progEn).some(k => k.endsWith('|bg2en')), 'English cards stored under their own keys');
+assert.equal(Object.keys(progEn).filter(k => /\|(bg2nl|nl2bg)$/.test(k)).length, nlProgressBefore, 'Dutch progress untouched');
+// the English card unlocks its production card in the next session
+$('btn-home').click(); $('btn-start').click();
+let sawEnProd = false;
+for (let i = 0; i < 60 && !$('session-run').hidden; i++) { if ($('dir-badge').textContent === 'EN → BG') { sawEnProd = true; break; } $('btn-dontknow').click(); $('btn-next').click(); }
+assert.ok(sawEnProd, 'EN → BG card appeared');
+assert.equal($('prompt').lang, 'en');
+$('btn-quit').click(); $('btn-home').click();
+// Library shows English under the Bulgarian and English columns
+document.querySelector('nav button[data-tab=library]').click();
+assert.ok($('lib-table').textContent.includes('BG→EN'), 'library header follows the language');
+// back to Dutch: Dutch cards are the ones served again
+document.querySelector('nav button[data-tab=settings]').click();
+$('set-lang').value = 'nl'; $('set-lang').dispatchEvent(new window.Event('input'));
+document.querySelector('nav button[data-tab=practise]').click();
+$('btn-start').click();
+assert.ok(/NL/.test($('dir-badge').textContent), 'Dutch direction again: ' + $('dir-badge').textContent);
+$('btn-quit').click(); $('btn-home').click();
 // import a CSV with lemmas and one estimated row
 const csv = 'bg,nl,nl_alt,lemmas\n"Дай ми хляб.",Geef me brood.,Geef mij brood.,"аз, хляб"\n"Това е тест.",Dit is een test.,,\n';
 const file = new window.File([csv], 'extra.csv', { type: 'text/csv' });

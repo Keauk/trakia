@@ -1,6 +1,6 @@
 # D-011: English as a second practice language (BG ⇄ EN)
 
-Status: proposed · Created: 2026-10-22 · Area: data (`en`, `en_alt`), `core.js` (directions, normalisation), Settings, Library, import/export
+Status: done (2026-10-22) · Created: 2026-10-22 · Area: data (`en`, `en_alt`), `core.js` (directions, normalisation), Settings, Library, import/export
 
 ## Context
 The app practises Dutch ⇄ Bulgarian only. The Anki deck is Bulgarian ⇄ English, so the learner
@@ -43,6 +43,28 @@ spelling).
   small fixed tables in `core.js`.
 - The gating rule (NL→BG after BG→NL) becomes "X→BG after BG→X" for the assigned language.
 - Stats: per-direction blocks show both languages when both have cards.
+
+## Decisions taken
+- Mixed ships in the first version (a stable split by sentence id, no stored assignment).
+- The Library follows the selected language; Stats shows every direction that has cards, plus the
+  current language's directions.
+
+## As built (2026-10-22)
+- Data: 18 reviewers × ~150 sentences; `en` corrected on 48 sentences (calques, dropped objects,
+  reporting-verb tense, register), 5394 alternatives added (2614 sentences have 1–3 `en_alt`, 42 very
+  short ones have none because no meaningfully different correct wording exists). Changes listed in
+  `data/REVIEW_CHANGES.md`. The validator and `apply_patches.py` carry `en_alt`; the import accepts an
+  `en_alt` column; the sentence export includes `en_alt` plus user alternatives for both languages.
+- `core.js`: `normalise(s, 'en')` expands contractions (straight and curly apostrophes) and maps the
+  common British spellings to American before comparing; `langFor(id, settings)`, `cardKeys` with
+  `bg2<lang>` / `<lang>2bg` keys and per-language gating; `parseKey`; `acceptedFor(s, dir)`;
+  production-card priority works for either language; `rowToSentence` reads `en_alt`.
+- UI: *Practice language* (Dutch / English / Mixed) in Settings; direction badges and prompts follow
+  the card's language; the third language is shown as a gloss after answering; the Library shows the
+  selected language's sentence and status columns; Stats lists each direction that has cards; progress
+  keys are separate per language (Dutch progress untouched when switching, covered by the UI test).
+- Bundle: `app/data.js` is now 1.8 MB (the alternatives added ~260 KB); splitting it is still the
+  next step before another large batch.
 
 ## Acceptance criteria
 - Every sentence has 1–3 `en_alt` entries and a reviewed `en`.

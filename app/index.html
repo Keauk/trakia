@@ -244,7 +244,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   </div>
   <div class="card">
     <h2>Import sentences</h2>
-    <p class="muted">JSON (array of objects), CSV/TSV or Excel (.xlsx). Columns: <b>bg</b>, <b>nl</b> required; optional <b>nl_alt</b>, <b>bg_alt</b> (separate alternatives with <kbd>|</kbd>), <b>en</b>, <b>lemmas</b> (comma-separated dictionary forms, used to compute the rank), <b>tags</b>, <b>id</b>. Rows without lemmas get an estimated rank (≈).</p>
+    <p class="muted">JSON (array of objects), CSV/TSV or Excel (.xlsx). Columns: <b>bg</b>, <b>nl</b> required; optional <b>nl_alt</b>, <b>bg_alt</b>, <b>en_alt</b> (separate alternatives with <kbd>|</kbd>), <b>en</b>, <b>lemmas</b> (comma-separated dictionary forms, used to compute the rank), <b>tags</b>, <b>id</b>. Rows without lemmas get an estimated rank (≈).</p>
     <div class="row"><input type="file" id="import-file" accept=".json,.csv,.tsv,.txt,.xlsx,.xls"></div>
     <p class="tiny" id="import-result"></p>
   </div>
@@ -298,12 +298,15 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
   </div>
   <div class="card">
     <h2>Session</h2>
+    <div class="field"><label for="set-lang">Practice language (the other side of Bulgarian)</label>
+      <select id="set-lang"><option value="nl">Dutch</option><option value="en">English</option><option value="mixed">Mixed — each sentence in one of the two, half and half</option></select>
+      <div class="help">Progress is kept per language, so you can switch at any time. Mixed assigns every sentence to Dutch or English once and keeps that assignment.</div></div>
     <div class="field"><label for="set-dirs">Directions</label>
       <select id="set-dirs">
-        <option value="gated">Both — Dutch→Bulgarian unlocks after Bulgarian→Dutch was answered correctly once</option>
+        <option value="gated">Both — into Bulgarian unlocks after out of Bulgarian was answered correctly once</option>
         <option value="both">Both, from the start</option>
-        <option value="bg2nl">Bulgarian → Dutch only</option>
-        <option value="nl2bg">Dutch → Bulgarian only</option>
+        <option value="bg2nl">Out of Bulgarian only (read Bulgarian, type the other language)</option>
+        <option value="nl2bg">Into Bulgarian only (read the other language, type Bulgarian)</option>
       </select></div>
     <div class="field"><label for="set-order">New sentence order</label>
       <select id="set-order"><option value="mixed">Mixed — random, favouring lower ranks (recommended)</option><option value="strict">Strict — always the lowest rank first</option></select>
@@ -357,7 +360,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -388,6 +391,9 @@ function onlyHere(s) { return (s.lemmas || []).map(x => C.normalise(x.split('#')
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
 function applyTheme() { document.documentElement.dataset.theme = settings.theme === 'auto' ? '' : settings.theme; }
+const LANG_NAME = { nl: 'Dutch', en: 'English' }, LANG_CODE = { nl: 'NL', en: 'EN' };
+function dirLabel(dir) { const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
+function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, text: s[L] || s.nl, alts: s[L + '_alt'] || [] }; }
 function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(d * 24) + ' h'; return (d < 10 ? d.toFixed(1) : Math.round(d)) + ' d'; }
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
@@ -412,7 +418,7 @@ function renderHome() {
   const unseenElig = elig.reduce((n, s) => n + C.cardKeys(s, progress, settings).filter(k => !progress[k]).length, 0);
   $('home-stats').innerHTML = stat(due, 'due now') + stat(unseenElig, 'new available') + stat(todayLog.length, 'answers today') + stat(todaySessions, 'sessions today');
   const next = C.nextUnlock(SENT, settings);
-  $('home-summary').innerHTML = `${elig.length} of ${SENT.length} sentences fit your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}) and grammar stage ${settings.stage || 5}; ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
+  $('home-summary').innerHTML = `${elig.length} of ${SENT.length} sentences fit your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}) and grammar stage ${settings.stage || 5}; practising in ${settings.lang === 'mixed' ? 'Dutch and English (mixed)' : LANG_NAME[settings.lang] || 'Dutch'}; ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || unseenElig ? 'Practise' : 'Free practice';
 }
@@ -482,30 +488,30 @@ function nextDrill() {
   session.i++; renderCard();
 }
 $('gloss').addEventListener('click', e => { const a = e.target.closest('[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = document.getElementById('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
-function acceptedFor(s, dir, key) { return dir === 'bg2nl' ? [s.nl, ...s.nl_alt] : [s.bg, ...s.bg_alt]; }
-function allAccepted(s, dir, key) { return acceptedFor(s, dir).concat(userAlts[key] || []); }
+function allAccepted(s, dir, key) { return C.acceptedFor(s, dir).concat(userAlts[key] || []); }
 
 function renderCard() {
   if (!session || session.i >= session.queue.length) return endSession();
   if (session.drill) return renderDrillCard();
-  const item = session.queue[session.i], { dir, s } = cardOf(item);
+  const item = session.queue[session.i], { dir, s } = cardOf(item), K = C.parseKey(item.key);
   if (!s) { session.i++; return renderCard(); }
   session.pending = null;
   $('counter').textContent = (session.i + 1) + ' / ' + session.queue.length;
-  $('dir-badge').textContent = dir === 'bg2nl' ? 'BG → NL' : 'NL → BG';
+  $('dir-badge').textContent = dirLabel(dir);
   $('free-badge').hidden = !session.free; $('retry-badge').hidden = !item.retry;
-  $('prompt').textContent = dir === 'bg2nl' ? s.bg : s.nl;
-  $('prompt').lang = dir === 'bg2nl' ? 'bg' : 'nl';
+  $('prompt').textContent = K.toBg ? (s[K.lang] || s.nl) : s.bg;
+  $('prompt').lang = K.toBg ? K.lang : 'bg';
   const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
   $('newwords').innerHTML = chips ? '<span class="tiny" style="align-self:center">new:</span>' + chips : '';
-  const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = dir === 'bg2nl' ? 'nl' : 'bg';
-  inp.placeholder = dir === 'bg2nl' ? 'Type the Dutch translation, then Enter' : 'Напиши превода на български, после Enter';
-  $('translit-preview').hidden = !(settings.translit && dir === 'nl2bg'); $('translit-preview').textContent = '';
+  const inp = $('answer'); inp.value = ''; inp.className = ''; inp.lang = K.toBg ? 'bg' : K.lang;
+  inp.placeholder = K.toBg ? 'Напиши превода на български, после Enter' : `Type the ${LANG_NAME[K.lang] || K.lang} translation, then Enter`;
+  $('translit-preview').hidden = !(settings.translit && K.toBg); $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
 }
-function typedValue() { const v = $('answer').value; const { dir } = cardOf(session.queue[session.i]); return settings.translit && dir === 'nl2bg' ? C.translit(v) : v; }
-$('answer').addEventListener('input', () => { if (!session) return; const { dir } = cardOf(session.queue[session.i]); if (settings.translit && dir === 'nl2bg') $('translit-preview').textContent = C.translit($('answer').value); });
+function toBgCard() { const it = session && session.queue[session.i]; return !!(it && !session.drill && C.parseKey(it.key).toBg); }
+function typedValue() { const v = $('answer').value; return settings.translit && toBgCard() ? C.translit(v) : v; }
+$('answer').addEventListener('input', () => { if (!session || session.drill) return; if (settings.translit && toBgCard()) $('translit-preview').textContent = C.translit($('answer').value); });
 $('answer').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!session) return; if (session.pending) next(); else checkAnswer(false); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && session && session.pending && document.activeElement !== $('answer')) { e.preventDefault(); next(); } });
 $('btn-check').addEventListener('click', () => checkAnswer(false));
@@ -522,8 +528,8 @@ $('btn-home').addEventListener('click', () => { $('session-done').hidden = true;
 
 function checkAnswer(giveUp) {
   if (session.drill) return checkDrill(giveUp);
-  const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key;
-  const lang = dir === 'bg2nl' ? 'nl' : 'bg';
+  const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key, K = C.parseKey(key);
+  const lang = K.toBg ? 'bg' : K.lang;
   const typed = giveUp ? '' : typedValue();
   const accepted = allAccepted(s, dir, key);
   const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], lang, settings), reason: 'skip' } : C.check(typed, accepted, lang, settings);
@@ -544,7 +550,8 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome) {
   if (r.result !== 'correct' && r.t && r.a) d.innerHTML = C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join(''); else d.innerHTML = '';
   const others = accepted.filter(a => a !== (r.expected || accepted[0]));
   $('alts').innerHTML = others.length ? 'Also accepted: ' + others.map(esc).join(' · ') : '';
-  $('gloss').textContent = (s.en ? 'EN: ' + s.en : '') + (s.max_rank ? '   · rank ' + s.max_rank : '') + (s.rank_estimated ? ' ≈' : '');
+  const K2 = C.parseKey(session.queue[session.i].key); const third = K2.lang === 'en' ? (s.nl ? 'NL: ' + s.nl : '') : (s.en ? 'EN: ' + s.en : '');
+  $('gloss').textContent = third + (s.max_rank ? '   · rank ' + s.max_rank : '') + (s.rank_estimated ? ' ≈' : '');
   $('btn-accept').hidden = r.result === 'correct' || giveUp;
   setTimeout(() => $('btn-next').focus(), 30);
 }
@@ -625,7 +632,9 @@ function renderStats() {
   // progress per direction: stability bands
   let html = '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length;
-  for (const dir of ['bg2nl', 'nl2bg']) {
+  const curLangs = settings.lang === 'mixed' ? ['nl', 'en'] : [settings.lang || 'nl'];
+  const dirsShown = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].filter(d => curLangs.includes(C.parseKey('x|' + d).lang) || Object.keys(progress).some(k => k.endsWith('|' + d)));
+  for (const dir of dirsShown) {
     const bands = [0, 0, 0, 0]; let seen = 0, dueN = 0, recallSum = 0, recallN = 0;
     for (const k in progress) if (k.endsWith('|' + dir) && SENT_BY_ID.has(k.split('|')[0])) {
       const p = progress[k]; seen++;
@@ -633,7 +642,7 @@ function renderStats() {
       if (p.due <= now) { dueN++; if (p.state === 'review') { recallSum += C.recallNow(p, now, settings); recallN++; } }
     }
     const avg = recallN ? Math.round(100 * recallSum / recallN) + ' %' : '–';
-    html += `<p style="margin:6px 0 2px"><b>${dir === 'bg2nl' ? 'Bulgarian → Dutch' : 'Dutch → Bulgarian'}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${dueN} due now · predicted recall of due cards ${avg}</span></p>`;
+    html += `<p style="margin:6px 0 2px"><b>${dirLabel(dir).replace('BG', 'Bulgarian').replace('NL', 'Dutch').replace('EN', 'English')}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${dueN} due now · predicted recall of due cards ${avg}</span></p>`;
     html += `<div class="bar">${['var(--almost)', 'var(--ok)', 'var(--ok)', 'var(--accent)'].map((c, i) => `<i style="width:${elig ? 100 * bands[i] / elig : 0}%;background:${c};opacity:${i === 1 ? .6 : 1}"></i>`).join('')}</div>`;
     html += `<div class="boxes" style="grid-template-columns:repeat(4,1fr)">${['learning', '< 7 d', '7–30 d', '≥ 30 d'].map((l, i) => `<div><b>${bands[i]}</b>${l}</div>`).join('')}</div>`;
   }
@@ -641,7 +650,7 @@ function renderStats() {
   $('stats-progress').innerHTML = html;
   // hardest
   const hard = Object.entries(progress).filter(([k, p]) => p.lapses > 0 && SENT_BY_ID.has(k.split('|')[0])).sort((a, b) => b[1].lapses - a[1].lapses || (a[1].s || 0) - (b[1].s || 0)).slice(0, 20);
-  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:62px"><col style="width:56px"><col style="width:60px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>stab.</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); return `<tr><td>${esc(dir === 'bg2nl' ? s.bg : s.nl)}</td><td>${dir === 'bg2nl' ? 'BG→NL' : 'NL→BG'}</td><td>${p.lapses}</td><td>${p.state === 'review' ? fmtDays(p.s) : 'learn'}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
+  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:62px"><col style="width:56px"><col style="width:60px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>stab.</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); const Kh = C.parseKey(k); return `<tr><td>${esc(Kh.toBg ? (s[Kh.lang] || s.nl) : s.bg)}</td><td>${dirLabel(dir)}</td><td>${p.lapses}</td><td>${p.state === 'review' ? fmtDays(p.s) : 'learn'}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
   $('btn-drill').disabled = !hard.length; $('btn-drill').onclick = () => { showTab('practise'); startSession({ keys: hard.map(h => h[0]) }); };
 }
 function drawChart(days) {
@@ -674,7 +683,7 @@ function renderLibrary(reset) {
   const f = $('lib-filter').value, q = C.normalise($('lib-search').value, 'nl');
   const now = Date.now();
   let rows = SENT.filter(s => {
-    const keys = ['bg2nl', 'nl2bg'].map(d => s.id + '|' + d), seen = keys.some(k => progress[k]);
+    const keys = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => s.id + '|' + d), seen = keys.some(k => progress[k]);
     if (f === 'eligible' && !C.eligible(s, settings)) return false;
     if (f === 'locked' && (s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0))) return false;
     if (f === 'stage' && C.grammarOk(s, settings)) return false;
@@ -688,8 +697,8 @@ function renderLibrary(reset) {
   rows.sort((a, b) => (a.max_rank == null ? 1e9 : a.max_rank) - (b.max_rank == null ? 1e9 : b.max_rank) || a.id.localeCompare(b.id));
   $('lib-count').textContent = rows.length + ' sentences';
   const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; const due = p.due <= now ? 'due' : fmtAgo(p.due - now); const m = C.maturity(p); const learning = p.state !== 'review'; const cls = learning && (p.step || 0) === 0 ? 'b0' : m === 'young' ? 'b1' : m === 'established' ? 'b5' : 'b8'; const label = learning ? (p.state === 'relearning' ? 'relearn' : 'learning') : fmtDays(p.s); return `<span class="badge ${cls}" title="${learning ? p.state + ' step ' + (p.step || 0) : 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1)}; ${p.due <= now ? 'due now' : 'due in ' + due}">${label}<small> · ${due}</small></span>`; };
-  const head = '<tr><th>rank</th><th>sentence</th><th>BG→NL</th><th>NL→BG</th></tr>';
-  $('lib-table').innerHTML = '<colgroup><col style="width:46px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="nl">${esc(s.nl)}</span></td><td>${status(s, 'bg2nl')}</td><td>${status(s, 'nl2bg')}</td></tr>`).join('');
+  const head = `<tr><th>rank</th><th>sentence</th><th>BG→${settings.lang === 'mixed' ? 'X' : LANG_CODE[settings.lang] || 'NL'}</th><th>${settings.lang === 'mixed' ? 'X' : LANG_CODE[settings.lang] || 'NL'}→BG</th></tr>`;
+  $('lib-table').innerHTML = '<colgroup><col style="width:46px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => (() => { const o = otherText(s); return `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></td><td>${status(s, 'bg2' + o.lang)}</td><td>${status(s, o.lang + '2bg')}</td></tr>`; })()).join('');
   $('lib-more').hidden = rows.length <= libShown;
 }
 $('lib-table').addEventListener('click', e => {
@@ -698,12 +707,12 @@ $('lib-table').addEventListener('click', e => {
   document.querySelectorAll('.lib-row-detail').forEach(x => x.remove());
   if (open) return;
   const s = SENT_BY_ID.get(tr.dataset.id); if (!s) return;
-  const ua = ['bg2nl', 'nl2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d === 'bg2nl' ? 'NL' : 'BG'}: ${esc(a)}`)).flat();
+  const ua = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d.endsWith('2bg') ? 'BG' : LANG_CODE[d.slice(3)]}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
-  const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
-  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
+  const pr = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${dirLabel(d)}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
+  det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl ? `<div><b>NL</b> ${esc(s.nl)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${(s.en_alt || []).length ? `<div><b>EN also</b> ${s.en_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
-  det.querySelector('[data-act=reset]').onclick = () => { delete progress[s.id + '|bg2nl']; delete progress[s.id + '|nl2bg']; save.progress(); renderLibrary(false); toast('Progress reset'); };
+  det.querySelector('[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) delete progress[s.id + '|' + d]; save.progress(); renderLibrary(false); toast('Progress reset'); };
   det.querySelector('[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
 });
 
@@ -736,7 +745,7 @@ $('import-progress').addEventListener('change', async e => {
     Object.values(save).forEach(f => f()); refreshSentences(); applyTheme(); renderHome(); toast('Progress imported');
   } catch (err) { toast('Import failed: ' + err.message); }
 });
-$('btn-export-sentences').addEventListener('click', () => download('trakia-sentences.json', SENT.map(s => Object.assign({}, s, { nl_alt: s.nl_alt.concat(userAlts[s.id + '|bg2nl'] || []), bg_alt: s.bg_alt.concat(userAlts[s.id + '|nl2bg'] || []) }))));
+$('btn-export-sentences').addEventListener('click', () => download('trakia-sentences.json', SENT.map(s => Object.assign({}, s, { nl_alt: s.nl_alt.concat(userAlts[s.id + '|bg2nl'] || []), en_alt: (s.en_alt || []).concat(userAlts[s.id + '|bg2en'] || []), bg_alt: s.bg_alt.concat(userAlts[s.id + '|nl2bg'] || [], userAlts[s.id + '|en2bg'] || []) }))));
 
 // ---------- settings ----------
 const bind = (id, key, type) => {
@@ -746,8 +755,8 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
-function afterSettingChange(key) { if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
+function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);

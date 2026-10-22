@@ -9,7 +9,7 @@ the sentence. After patching, lemmas are re-resolved against data/words.json (vi
 validate_sentences.py) so max_rank stays correct; unresolved lemmas are reported.
 """
 import json, sys, os, subprocess, tempfile
-FIELDS = ('bg', 'nl', 'nl_alt', 'bg_alt', 'en', 'lemmas', 'tags')
+FIELDS = ('bg', 'nl', 'nl_alt', 'bg_alt', 'en', 'en_alt', 'lemmas', 'tags')
 
 def main(argv):
     out = None
