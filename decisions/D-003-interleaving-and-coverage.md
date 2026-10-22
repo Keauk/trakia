@@ -90,7 +90,8 @@ Anki order"; keep the rank chips under the prompt so new words are always visibl
 - Index fix found on the way: dictionary-form matches now win over inflected forms in the
   validator, the coverage tool and `core.js` (`wordIndex`), so "те" (they) no longer resolves to the
   accusative of "ти", etc. Ten `max_rank` values changed as a result.
-- Ranks 1201–2952 remain thin (189 of 1752 words covered); a later batch can use the same tool.
+- 2026-10-22: a second gap batch (ids R–W, 778 sentences) covered ranks 1201–2000; every word up to
+  rank 2000 now appears in at least two sentences. Ranks 2001–2952 remain thin (151 of 952 words).
 
 ## Open questions
 - ~~Should the rank weighting be a setting?~~ Yes: *New sentence order* in Settings.

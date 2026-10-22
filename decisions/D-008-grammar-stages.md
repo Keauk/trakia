@@ -1,6 +1,6 @@
 # D-008: Gate sentences by grammar stage, not only by vocabulary rank
 
-Status: in progress (2026-10-22) · Created: 2026-10-22 · Area: data (`grammar` field), `core.js` (`eligible`), Settings
+Status: done (2026-10-22) · Created: 2026-10-22 · Area: data (`grammar` field), `core.js` (`eligible`), Settings
 
 ## Context
 Eligibility was purely lexical: a sentence unlocks when every word in it is below the learner's Anki
@@ -39,6 +39,30 @@ marked wrong or almost for grammar that was never taught, and the D-002 free pas
 - Tagging is by model, from the Bulgarian text only; spot-check with a sample. "беше/бях" count as
   aorist unless clearly imperfect alongside another imperfect verb.
 - The home card's "eligible" count and "next unlock" use both filters.
+
+## Measurements (2026-10-22, after tagging the 1578 existing sentences)
+Features found: present 1109, aorist 286, imperative 206, da-clause 194, future 105, imperfect 31,
+perfect 28, passive 6, conditional 1 (numeral 127 and comparative 39 are informational).
+
+| Anki rank | stage 1 | stage 2 | stage 3 | stage 4 | stage 5 |
+|-----------|--------:|--------:|--------:|--------:|--------:|
+| 131       | 95      | 110     | 125     | 127     | 127     |
+| 300       | 269     | 346     | 398     | 405     | 405     |
+| 600       | 453     | 606     | 714     | 724     | 724     |
+
+So at the learner's current position the stage-1 pool is already larger than the whole pool was
+before the gap batch (68); the present-tense batch (M, P, Q) adds another ~300 stage-1 sentences in
+ranks 1–600.
+
+## As built (2026-10-22)
+- All 2656 sentences carry `grammar`; the validator passes the field through. New batches are tagged
+  with the same brief before merging.
+- Present-tense batch: 300 sentences (M 1–150, P 1–300, Q 1–600), all stage 1 after tagging (two
+  formulaic "Извинете/Извинявай" sentences were hand-tagged as present rather than imperative).
+- Pools after the batch: rank 131 → 155 / 170 / 185 / 187 / 187 for stages 1–5; rank 300 → 469 /
+  546 / 598 / 605 / 605; rank 600 → 750 / 903 / 1011 / 1021 / 1021.
+- Settings: *Grammar stage* select with a live count; header shows "word N · stage S"; Library filter
+  *Beyond my grammar stage*; row details list the features.
 
 ## Acceptance criteria
 - Every sentence in `data/sentences.json` has a non-empty `grammar` list.

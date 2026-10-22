@@ -43,7 +43,7 @@ Alignment therefore reduces to one number: **your current Anki position N** (tod
 trakia/
   DESIGN.md, README.md
   data/words.json          exported from the apkg (2952 entries, ordered by rank)
-  data/sentences.json      1578 generated sentences (validated, with max_rank)
+  data/sentences.json      2656 generated sentences (validated, with max_rank)
   tools/export_anki_words.py   apkg -> data/words.json
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe)
   tools/build_data.py          data/*.json -> app/data.js (run after any data change)
@@ -232,7 +232,7 @@ same behaviour as on the phone.
 
 | # | milestone | what is done | effort |
 |---|-----------|--------------|--------|
-| 0 | data | `words.json` export, 1578 generated sentences (validated, `max_rank` computed) | done |
+| 0 | data | `words.json` export, 2656 generated sentences (validated, `max_rank` computed) | done |
 | 1 | core loop | rank slider, pick sentence, type answer, check (normalise + exact + near-miss), correct/almost/wrong verdict with diff, progress in localStorage | done |
 | 2 | scheduling + stats | Leitner ladder, session builder, free practice, stats tab with 14-day chart, export/import progress | done |
 | 3 | import + adjudication | JSON/CSV/XLSX import with merge, "my answer was correct", export merged sentence set, delete/restore | done |

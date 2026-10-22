@@ -109,6 +109,9 @@ def main(argv):
                 'max_rank': max(ranks) if ranks else None,
                 'tags': s.get('tags', []), 'source': s.get('source') or 'generated-2026-10',
             }
+            for extra in ('grammar', 'note', 'rank_estimated'):   # pass-through fields
+                if s.get(extra) not in (None, [], ''):
+                    rec[extra] = s[extra]
             if unresolved:
                 rec['unresolved'] = unresolved
             merged.append(rec)

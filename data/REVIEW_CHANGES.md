@@ -236,3 +236,143 @@ The 579 gap-filling sentences went through the same two passes (6 reviewers × ~
 - _pass 2: Aspect: a single, complete future event after ще takes the perfective (оженя се, listed under lemma женя се); 'ще се женят' is colloquially heard but imperfective, which a strict teacher would correct to 'ще се оженят'._
 - **bg**: Иван и Мария са хубава двойка и скоро ще се женят.  
   → Иван и Мария са хубава двойка и скоро ще се оженят.
+
+# Batch 2 review (2026-10-22, sentences M/P/Q present-tense and R–W ranks 1201–2000)
+
+The 1078 new sentences went through the same two passes (11 reviewers × ~100, then 6 × ~180 Bulgarian-only).
+
+## M003
+- _pass 1: 'geen vlees en eieren' is non-standard Dutch; negation must be repeated ('geen ... en geen') or use 'of'_
+- **nl**: Ik eet geen vlees en eieren.  
+  → Ik eet geen vlees en geen eieren.
+
+## M027
+- _pass 1: primary nl 'is verliefd op' (= влюбена е в) is looser than bg 'обича'; made the literal rendering primary and kept the other as alt_
+- **nl**: Mijn dochter is verliefd op een jongen.  
+  → Mijn dochter houdt van een jongen.
+- **nl_alt**: Mijn dochter houdt van een jongen.  
+  → Mijn dochter is verliefd op een jongen.
+
+## M074
+- _pass 1: 'Wie is er de laatste?' is not natural Dutch; removed_
+- **nl_alt**: Wie is er de laatste?  
+  → (none)
+
+## P029
+- _pass 1: 'Не обичам много пипер' is most naturally read as 'I don't like pepper much'; added that Dutch reading as an accepted alternative_
+- **nl_alt**: Ik houd niet van veel peper. | Ik heb niet graag veel peper.  
+  → Ik houd niet van veel peper. | Ik heb niet graag veel peper. | Ik hou niet zo van peper.
+
+## Q087
+- _pass 1: 'хората' is generic here; Dutch normally drops the article ('met mensen'); added that common answer_
+- **nl_alt**: Ik leer de taal om met de mensen te praten. | Ik leer de taal zodat ik met de mensen kan praten.  
+  → Ik leer de taal om met de mensen te praten. | Ik leer de taal zodat ik met de mensen kan praten. | Ik leer de taal om met mensen te praten.
+
+## Q094
+- _pass 1: 'споря' = argue/dispute, not quarrel; 'ruzie maken' corresponds to 'карам се', so moved it to nl_alt and made 'discussiëren' primary_
+- **nl**: Ik wil geen ruzie met je maken.  
+  → Ik wil niet met je discussiëren.
+- **nl_alt**: Ik wil niet met je discussiëren. | Ik wil niet met jou in discussie gaan.  
+  → Ik wil niet met jou in discussie gaan. | Ik wil geen ruzie met je maken.
+
+## R057
+- _pass 1: 'учител' goes with 'ученици'; university 'студенти' have a 'преподавател' — mismatch sounded translated; 'ученик' (rank 1182) is within range_
+- **bg**: Учителят има много търпение със студентите.  
+  → Учителят има много търпение с учениците.
+- **nl**: De leraar heeft veel geduld met de studenten.  
+  → De leraar heeft veel geduld met de leerlingen.
+- **nl_alt**: De docent heeft veel geduld met de studenten.  
+  → De docent heeft veel geduld met de leerlingen. | De leraar heeft veel geduld met zijn leerlingen.
+- **en**: The teacher has a lot of patience with the students.  
+  → The teacher has a lot of patience with the pupils.
+- **lemmas**: учител | имам | много | търпение | с | студент  
+  → учител | имам | много | търпение | с | ученик
+
+## R114
+- _pass 1: nl_alt said 'in december klaar'; bg 'до декември' = by/before December_
+- **nl_alt**: De bouwvakkers hebben beloofd het werk voor december af te maken. | De bouwvakkers beloofden dat het werk in december klaar zou zijn.  
+  → De bouwvakkers hebben beloofd het werk voor december af te maken. | De bouwvakkers beloofden dat het werk voor december klaar zou zijn.
+
+## R116
+- _pass 1: nl_alt 'Lees jullie de tekst...' is not valid Dutch imperative; removed_
+- **nl_alt**: Lees de tekst op pagina zes. | Lees jullie de tekst op bladzijde zes.  
+  → Lees de tekst op pagina zes.
+
+## S092
+- _pass 2: Punctuation: the parenthetical expression 'общо взето' at the start of the sentence is normally set off with a comma._
+- **bg**: Общо взето филмът беше добър, но много дълъг.  
+  → Общо взето, филмът беше добър, но много дълъг.
+
+## S121
+- _pass 1: added the very common 'apart afrekenen'_
+- **nl_alt**: Mogen we apart betalen? | Kunnen we los betalen?  
+  → Mogen we apart betalen? | Kunnen we los betalen? | Kunnen we apart afrekenen?
+
+## S125
+- _pass 1: 'на името Петров' is unidiomatic; 'на име Петров' (or 'на името на Петров') is the natural phrase_
+- **bg**: Здравейте, имам резервация за две нощи на името Петров.  
+  → Здравейте, имам резервация за две нощи на име Петров.
+
+## T096
+- _pass 1: 'op het dorp' is regional, not Standard Dutch; 'in het dorp' promoted to nl, 'op het platteland' added as the countryside reading of 'на село'_
+- **nl**: Op het dorp plant opa kool en maïs.  
+  → In het dorp plant opa kool en maïs.
+- **nl_alt**: In het dorp plant opa kool en maïs.  
+  → Op het platteland plant opa kool en maïs.
+
+## T098
+- _pass 1: nl_alt had singular 'wordt' with a coordinated subject (maïs en meloen); plural 'worden' required_
+- **nl_alt**: Op het strand wordt gekookte maïs en meloen verkocht.  
+  → Op het strand worden gekookte maïs en meloenen verkocht.
+
+## T116
+- _pass 1: 'overhoord in geschiedenis' and 'getoetst op geschiedenis' are unidiomatic; school-subject phrasing is 'voor geschiedenis' / 'een overhoring geschiedenis'_
+- **nl**: — Morgen worden we overhoord in geschiedenis. — Ik wens je succes!  
+  → — Morgen worden we overhoord voor geschiedenis. — Ik wens je succes!
+- **nl_alt**: — Morgen worden we getoetst op geschiedenis. — Ik wens je succes!  
+  → — Morgen krijgen we een overhoring geschiedenis. — Ik wens je succes!
+
+## U070
+- _pass 1: nl_alt used informal 'je kaartjes' while bg has polite 'билетите ви' (⇒ u)_
+- **nl_alt**: Bij de receptie kunnen ze je kaartjes printen.  
+  → Bij de receptie kunnen ze uw kaartjes printen.
+
+## U078
+- _pass 1: 'Roer de room door de kruiden' reverses the direction (cream into spices); bg says stir the cream with the spices_
+- **nl**: Roer de room door de kruiden.  
+  → Roer de kruiden door de room.
+- **nl_alt**: Meng de room met de kruiden.  
+  → Meng de room met de kruiden. | Roer de room en de kruiden door elkaar.
+
+## U124
+- _pass 1: bg is impersonal 'вече е затворено'; primary nl added a subject 'we zijn' - swapped with the impersonal alt_
+- **nl**: Sorry, maar we zijn al gesloten.  
+  → Sorry, maar het is al gesloten.
+- **nl_alt**: Het spijt me, maar het is al dicht. | Sorry, maar het is al gesloten.  
+  → Het spijt me, maar het is al dicht. | Sorry, maar we zijn al gesloten.
+
+## U130
+- _pass 1: bg 'този' = 'deze'; alt had 'die' (that)_
+- **nl_alt**: Die azijn smaakt erg sterk.  
+  → Deze azijn smaakt erg sterk.
+
+## V025
+- _pass 2: Habitual time expression: with „всяка събота“ the standard adverb is the indefinite „сутрин“ (всяка събота сутрин); the articled „сутринта“ refers to a specific morning (в събота сутринта) and sounds off after „всяка“._
+- **bg**: Всяка събота сутринта ходим във фермата на дядо ми.  
+  → Всяка събота сутрин ходим във фермата на дядо ми.
+- **bg_alt**: Ходим във фермата на дядо ми всяка събота сутринта.  
+  → Ходим във фермата на дядо ми всяка събота сутрин.
+- **lemmas**: всеки | събота | сутринта | ходя | в | ферма | на | дядо | аз  
+  → всеки | събота | сутрин | ходя | в | ферма | на | дядо | аз
+
+## V096
+- _pass 1: primary nl added 'moesten' (had to) not in bg 'чакахме'; swapped with the faithful alternative_
+- **nl**: De kassamedewerker had geen kleingeld en we moesten tien minuten wachten.  
+  → De kassier had geen kleingeld en we hebben tien minuten gewacht.
+- **nl_alt**: De kassier had geen kleingeld en we hebben tien minuten gewacht. | De kassamedewerker had geen kleingeld, dus we wachtten tien minuten.  
+  → De kassamedewerker had geen kleingeld en we moesten tien minuten wachten. | De kassamedewerker had geen kleingeld, dus we wachtten tien minuten.
+
+## W079
+- _pass 1: 'een nieuw' (noun omitted) is unidiomatic; standard Dutch uses 'een nieuwe'_
+- **nl**: Het beeldscherm is kapot en ik moet een nieuw kopen.  
+  → Het beeldscherm is kapot en ik moet een nieuwe kopen.
