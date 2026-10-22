@@ -35,6 +35,11 @@ highest rank of the words they use, so the learner only sees sentences built fro
      "you two", "madam", "Are you students?").
    - Gender (D-018): when neither the Dutch nor the English shows the gender of "I" or of a single
      "you", put the other-gender Bulgarian in `bg_alt` ("Не съм сигурна" → "Не съм сигурен").
+   - **Combinations (D-020).** The app only accepts whole listed sentences. When two choices are
+     independent, list every combination: "Aan het eind van de week" / "Eind van de week" with
+     "platteland" / "dorp" gives four answers, not two. `node tools/find_combinations.js --ids
+     <ids>` lists the mixtures that are still missing. Add only the ones that are good sentences:
+     a mixture can lose a verb particle or mix ти and вие.
    - **Exact vs looser vs wrong (D-014, made stricter by D-017).** Judge every alternative against
      the Bulgarian, not against the primary. The test: a teacher marking a translation exercise.
      *Exact* (`nl_alt`, `en_alt`): full marks with no comment. That covers what the target language

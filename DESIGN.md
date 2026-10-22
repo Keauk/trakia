@@ -47,6 +47,7 @@ trakia/
   tools/export_anki_words.py   apkg -> data/words.json
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe)
   tools/build_data.py          data/*.json -> app/data.js (run after any data change)
+  tools/find_combinations.js   lists mixtures of two accepted answers that are not accepted yet (D-020)
   tools/test_core.js           unit tests for app/core.js  (node tools/test_core.js)
   tools/check_decisions.py     checks decisions/D-*.md against decisions/TEMPLATE.md and the README table
   tools/SENTENCE_BRIEF.md      the brief the sentence-writing agents followed

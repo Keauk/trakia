@@ -7,7 +7,7 @@ See [DESIGN.md](DESIGN.md) for the design and how to run it.
 data/words.json        word list exported from the Anki deck (ordered by Rank = study order)
 data/grammar.json      grammar reference tables and drill paradigms (Grammar tab)
 data/sentences.json    practice sentences with Dutch translations, alternatives and max_rank (reviewed twice; see data/REVIEW_CHANGES.md)
-tools/                 export_anki_words.py, validate_sentences.py, build_data.py, check_decisions.py, publish.sh, tests
+tools/                 export_anki_words.py, validate_sentences.py, build_data.py, find_combinations.js, check_decisions.py, publish.sh, tests
 decisions/             decision log, one record per feature (see decisions/README.md and CLAUDE.md)
 app/                   the PWA: index.html (markup + CSS), ui.js (UI script), core.js (logic), types.d.ts (shared shapes), data.js (generated bundle), sw.js, manifest.json, fonts/ (bundled woff2 subsets, OFL.txt)
 ```

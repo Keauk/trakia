@@ -27,6 +27,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-017](D-017-faithful-exact-tier.md) | Only a faithful translation counts as exact; mark every idiomatic drift as looser | data / feedback UI | done |
 | [D-018](D-018-ambiguous-you-and-gender.md) | Accept ти and вие when the English "you" leaves it open, and either gender when no prompt shows it | checking / data | done |
 | [D-019](D-019-extra-word-highlight.md) | Show an extra typed word in the expected line, struck through where it was typed | feedback UI | done |
+| [D-020](D-020-combined-alternatives.md) | Accept every correct combination of the listed alternatives | data / tooling | done |
 
 Suggested order for the open items: D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

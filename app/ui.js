@@ -77,7 +77,7 @@ function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, t
 /** the collapsible "other accepted answers" list; looser translations (D-014) last, marked ≈ */
 function renderAlts(list, loose) {
   const el = $('alts'), n = list.length + (loose || []).length;
-  if (!n) { el.hidden = true; el.open = false; return; }
+  if (!n) { el.hidden = true; el.open = false; q(el, 'ul').innerHTML = ''; return; }
   el.hidden = false;
   q(el, 'summary').textContent = n === 1 ? '1 other accepted answer' : `${n} other accepted answers`;
   q(el, 'ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('') + (loose || []).map(a => `<li class="loose" title="accepted, but looser than the Bulgarian">≈ ${esc(a)}</li>`).join('');
