@@ -25,6 +25,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-015](D-015-practise-screen-redesign.md) | Restyle the app after the practise-screen design: palette, type, progress bar, phone tab bar, word highlights | look / feedback UI | done |
 | [D-016](D-016-theme-switch.md) | Switch between light and dark mode from the top bar | top bar | done |
 | [D-017](D-017-faithful-exact-tier.md) | Only a faithful translation counts as exact; mark every idiomatic drift as looser | data / feedback UI | done |
+| [D-018](D-018-ambiguous-you-and-gender.md) | Accept ти and вие when the English "you" leaves it open, and either gender when no prompt shows it | checking / data | done |
 
 Suggested order for the open items: D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

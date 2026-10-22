@@ -96,6 +96,7 @@ One sheet, header row, one sentence per row. Column names are matched case-insen
 | `en`      | no       | English gloss                                             |
 | `en_alt`  | no       | extra accepted English answers, separated by ` \| `       |
 | `nl_loose`, `en_loose` | no | looser accepted answers (shown with "≈ looser", D-014), ` \| ` |
+| `bg_alt_en` | no      | Bulgarian answers accepted only for the English prompt: the other "you" form (ти/вие, D-018), ` \| ` |
 | `lemmas`  | no       | dictionary forms separated by `, `                        |
 | `tags`    | no       | separated by `, `                                         |
 | `id`      | no       | stable id; generated from a hash of `bg` if missing       |
@@ -127,12 +128,13 @@ Three layers, in order:
    lowercase, collapse spaces, strip all punctuation and quotes (`.,!?;:…«»"'-–—`), map `ѝ → и`
    (the stressed ѝ is impossible to type on most keyboards), and for Dutch optionally strip accents
    (`één → een`). Settings let you make punctuation or ѝ strict again.
-2. **Exact match** against the primary answer, the `*_alt` list, and your own accepted answers
-   (`userAlts`). → *Correct*. Then against the *looser* translations `nl_loose` / `en_loose`
-   (D-014, D-017): right, but not a faithful translation of the Bulgarian (drift in number,
-   definiteness, tense, structure or word choice; the exact tier holds only answers a teacher
-   would mark with no comment). → *Correct* with a "≈ looser" tag; the expected line, labelled
-   "→ Exact translation", then shows the closest exact answer, highlighted against what was typed.
+2. **Exact match** against the primary answer, the `*_alt` list (for an English prompt also
+   `bg_alt_en`, D-018), and your own accepted answers (`userAlts`). → *Correct*. Then against
+   the *looser* translations `nl_loose` / `en_loose` (D-014, D-017): right, but not a faithful
+   translation of the Bulgarian (drift in number, definiteness, tense, structure or word choice;
+   the exact tier holds only answers a teacher would mark with no comment). → *Correct* with a
+   "≈ looser" tag; the expected line, labelled "→ Exact translation", then shows the closest
+   exact answer, highlighted against what was typed.
 3. **Near miss**: Damerau-Levenshtein distance to the closest accepted answer. If
    `distance ≤ max(1, round(0.08 × length))` (≈ one typo per 12 characters) → *Almost*: shown as
    correct with the differing characters highlighted, counts as correct for scheduling but does

@@ -27,6 +27,14 @@ highest rank of the words they use, so the learner only sees sentences built fro
      kept: "Аз съм учител" / "Учител съм"; word-order variants; "във/със" forms, etc.). 0-3 items.
      Only include bg_alt items that also respect constraint 1.
    - `en_alt`: other fully correct English translations, by the same rule as `nl_alt`.
+   - `bg_alt_en` (D-018): Bulgarian answers accepted only for the English prompt. English "you" does
+     not tell ти from вие, so when the Bulgarian addresses someone in the 2nd person and the English
+     primary leaves it open, give the other form here, for `bg` and every `bg_alt` ("Имате ли
+     момче или момиче?" → "Имаш ли момче или момиче?"; "Ела!" → "Елате!"). Polite or plural вие
+     takes plural agreement ("Уморени ли сте?"). Leave it out when the English decides ("children",
+     "you two", "madam", "Are you students?").
+   - Gender (D-018): when neither the Dutch nor the English shows the gender of "I" or of a single
+     "you", put the other-gender Bulgarian in `bg_alt` ("Не съм сигурна" → "Не съм сигурен").
    - **Exact vs looser vs wrong (D-014, made stricter by D-017).** Judge every alternative against
      the Bulgarian, not against the primary. The test: a teacher marking a translation exercise.
      *Exact* (`nl_alt`, `en_alt`): full marks with no comment. That covers what the target language

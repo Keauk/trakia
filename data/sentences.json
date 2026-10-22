@@ -60,6 +60,10 @@
 "en_loose": [
 "Do you come from Sofia?"
 ],
+"bg_alt_en": [
+"Вие от София ли сте?",
+"От София ли сте?"
+],
 "grammar": [
 "present"
 ]
@@ -128,6 +132,10 @@
 "What's in your hand?",
 "What is in your hand?"
 ],
+"bg_alt_en": [
+"Какво имате в ръката?",
+"Какво имате в ръката си?"
+],
 "grammar": [
 "present"
 ]
@@ -164,6 +172,9 @@
 "What's that on your head?",
 "What do you have on your head?",
 "What have you got on your head?"
+],
+"bg_alt_en": [
+"Какво ви е на главата?"
 ],
 "grammar": [
 "present"
@@ -225,6 +236,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "You have a big heart."
+],
+"bg_alt_en": [
+"Имате добро сърце.",
+"Вие имате добро сърце."
 ],
 "grammar": [
 "present"
@@ -358,6 +373,9 @@
 "Tell me what you'd like.",
 "Tell me what it is you want."
 ],
+"bg_alt_en": [
+"Кажете ми какво искате."
+],
 "grammar": [
 "present",
 "imperative"
@@ -423,6 +441,9 @@
 "en_loose": [
 "Do you know what my mum says?",
 "Do you know what my mom says?"
+],
+"bg_alt_en": [
+"Знаете ли какво казва майка ми?"
 ],
 "grammar": [
 "present"
@@ -522,6 +543,10 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Дайте ми ръка.",
+"Дайте ми ръката си."
+],
 "grammar": [
 "imperative"
 ]
@@ -549,6 +574,10 @@
 "negative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Не ви виждам.",
+"Аз не ви виждам."
+],
 "grammar": [
 "present"
 ]
@@ -618,6 +647,10 @@
 "Have you got any sisters?",
 "Do you have sisters?"
 ],
+"bg_alt_en": [
+"Имате ли сестра?",
+"Вие имате ли сестра?"
+],
 "grammar": [
 "present"
 ]
@@ -674,6 +707,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Кафето ви е на масата."
+],
 "grammar": [
 "present"
 ]
@@ -841,6 +877,9 @@
 "Do you have any brothers or sisters?",
 "Do you have siblings?"
 ],
+"bg_alt_en": [
+"Имаш ли братя и сестри?"
+],
 "grammar": [
 "present"
 ]
@@ -876,6 +915,9 @@
 "en_loose": [
 "Would you come with us?",
 "Are you coming with us?"
+],
+"bg_alt_en": [
+"Ще дойдете ли с нас?"
 ],
 "grammar": [
 "future"
@@ -914,6 +956,10 @@
 "Can I join you?",
 "Could I come with you?"
 ],
+"bg_alt_en": [
+"Мога ли да дойда с теб?",
+"Може ли да дойда с теб?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -947,6 +993,9 @@
 "en_loose": [
 "I knew you were coming.",
 "I knew that you were coming."
+],
+"bg_alt_en": [
+"Знаех, че ще дойдете."
 ],
 "grammar": [
 "future",
@@ -988,6 +1037,9 @@
 "If you want, you can come with us.",
 "If you'd like, come with us."
 ],
+"bg_alt_en": [
+"Ако искате, елате с нас."
+],
 "grammar": [
 "present",
 "imperative"
@@ -1018,6 +1070,9 @@
 "source": "present-batch-2026-10",
 "nl_loose": [
 "Ga je met ons mee?"
+],
+"bg_alt_en": [
+"Идвате ли с нас?"
 ],
 "grammar": [
 "present"
@@ -1058,6 +1113,10 @@
 "If you want me to, I can come.",
 "I can come if you want me to."
 ],
+"bg_alt_en": [
+"Ако искате, мога да дойда.",
+"Мога да дойда, ако искате."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -1092,6 +1151,9 @@
 "en_loose": [
 "Do you have a son or a daughter?",
 "Have you got a son or a daughter?"
+],
+"bg_alt_en": [
+"Имаш ли момче или момиче?"
 ],
 "grammar": [
 "present"
@@ -1128,6 +1190,9 @@
 ],
 "en_loose": [
 "Did you buy bread?"
+],
+"bg_alt_en": [
+"Взехте ли хляб?"
 ],
 "grammar": [
 "aorist"
@@ -1274,6 +1339,9 @@
 "Hi! What are you up to?",
 "Hey! What are you up to?"
 ],
+"bg_alt_en": [
+"Здрасти! Какво правите?"
+],
 "grammar": [
 "present"
 ]
@@ -1414,6 +1482,10 @@
 "feelings"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Мисля за вас.",
+"Аз мисля за вас."
+],
 "grammar": [
 "present"
 ]
@@ -1580,6 +1652,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Ти лекар ли си?",
+"Лекар ли си?"
+],
 "grammar": [
 "present"
 ]
@@ -1689,6 +1765,9 @@
 "What did you cook for dinner?",
 "What did you guys make for dinner?"
 ],
+"bg_alt_en": [
+"Какво направи за вечеря?"
+],
 "grammar": [
 "aorist"
 ]
@@ -1757,6 +1836,9 @@
 "source": "present-batch-2026-10",
 "nl_loose": [
 "Wat denkt u van het appartement?"
+],
+"bg_alt_en": [
+"Какво мислиш за апартамента?"
 ],
 "grammar": [
 "present"
@@ -1828,6 +1910,10 @@
 "Hand me the key, please.",
 "Please hand me the key."
 ],
+"bg_alt_en": [
+"Дайте ми ключа, моля.",
+"Моля ви, дайте ми ключа."
+],
 "grammar": [
 "imperative"
 ]
@@ -1894,6 +1980,9 @@
 "Get the key and come here.",
 "Take the key and come along."
 ],
+"bg_alt_en": [
+"Вземете ключа и елате."
+],
 "grammar": [
 "imperative"
 ]
@@ -1934,6 +2023,9 @@
 "I've told you I don't have a key.",
 "I told you I don't have the key."
 ],
+"bg_alt_en": [
+"Казах ви, че нямам ключ."
+],
 "grammar": [
 "present",
 "aorist"
@@ -1972,6 +2064,10 @@
 "Can you pass me the key?",
 "Would you give me the key?"
 ],
+"bg_alt_en": [
+"Можете ли да ми дадете ключа?",
+"Ще ми дадете ли ключа?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -2006,6 +2102,9 @@
 "source": "present-batch-2026-10",
 "en_loose": [
 "I'd like to give you the key."
+],
+"bg_alt_en": [
+"Искам да ти дам ключа."
 ],
 "grammar": [
 "present",
@@ -2043,6 +2142,9 @@
 "en_loose": [
 "Do you talk to your dad?"
 ],
+"bg_alt_en": [
+"Говорите ли с баща си?"
+],
 "grammar": [
 "present"
 ]
@@ -2074,6 +2176,9 @@
 "nl_loose": [
 "Ik praat met jou!",
 "Ik heb het tegen jou!"
+],
+"bg_alt_en": [
+"На вас говоря!"
 ],
 "grammar": [
 "present"
@@ -2139,6 +2244,10 @@
 "en_loose": [
 "What do they call you?"
 ],
+"bg_alt_en": [
+"Как се казвате?",
+"Как ви е името?"
+],
 "grammar": [
 "present"
 ]
@@ -2178,6 +2287,10 @@
 "What is your mom's name?",
 "What's your mum called?",
 "What's your mom called?"
+],
+"bg_alt_en": [
+"Как се казва майка ви?",
+"Как е името на майка ви?"
 ],
 "grammar": [
 "present"
@@ -2250,6 +2363,10 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Kom even naar de keuken, alsjeblieft."
+],
+"bg_alt_en": [
+"Елате в кухнята, моля.",
+"Моля ви, елате в кухнята."
 ],
 "grammar": [
 "imperative"
@@ -2386,6 +2503,10 @@
 "en_loose": [
 "Hi, how's it going?"
 ],
+"bg_alt_en": [
+"Здравейте, как сте?",
+"Здрасти, как сте?"
+],
 "grammar": [
 "present"
 ]
@@ -2419,6 +2540,10 @@
 "en_loose": [
 "What's in your mouth?",
 "What is in your mouth?"
+],
+"bg_alt_en": [
+"Какво имате в устата?",
+"Какво имате в устата си?"
 ],
 "grammar": [
 "present"
@@ -2594,6 +2719,10 @@
 "I'm looking into your eyes.",
 "I look into your eyes."
 ],
+"bg_alt_en": [
+"Гледам ви в очите.",
+"Аз ви гледам в очите."
+],
 "grammar": [
 "present"
 ]
@@ -2634,6 +2763,10 @@
 "en_loose": [
 "Please keep an eye on the children.",
 "Please look after the kids."
+],
+"bg_alt_en": [
+"Гледай децата, моля.",
+"Моля, гледай децата."
 ],
 "grammar": [
 "imperative"
@@ -2843,6 +2976,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Имате хубаво тяло.",
+"Вие имате хубаво тяло."
+],
 "grammar": [
 "present"
 ]
@@ -2902,6 +3039,9 @@
 "feelings"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Направете го за себе си."
+],
 "grammar": [
 "imperative"
 ]
@@ -2972,6 +3112,10 @@
 "You have very beautiful teeth.",
 "Your teeth are really nice."
 ],
+"bg_alt_en": [
+"Зъбите ви са много хубави.",
+"Имате много хубави зъби."
+],
 "grammar": [
 "present"
 ]
@@ -3037,6 +3181,10 @@
 "en_loose": [
 "I can't understand you."
 ],
+"bg_alt_en": [
+"Не ви разбирам.",
+"Аз не ви разбирам."
+],
 "grammar": [
 "present"
 ]
@@ -3069,6 +3217,9 @@
 "Do you see what I'm saying?",
 "Can you understand what I'm saying?",
 "Do you all understand what I'm saying?"
+],
+"bg_alt_en": [
+"Разбираш ли какво казвам?"
 ],
 "grammar": [
 "present"
@@ -3108,6 +3259,9 @@
 "How did you guess I'm from Sofia?",
 "How did you know I'm from Sofia?",
 "How did you know that I'm from Sofia?"
+],
+"bg_alt_en": [
+"Как разбрахте, че съм от София?"
 ],
 "grammar": [
 "present",
@@ -3178,6 +3332,9 @@
 ],
 "en_loose": [
 "I don't understand what you're saying."
+],
+"bg_alt_en": [
+"Не мога да разбера какво казваш."
 ],
 "grammar": [
 "present",
@@ -3282,6 +3439,9 @@
 ],
 "en_loose": [
 "Tell me in my ear."
+],
+"bg_alt_en": [
+"Кажете ми го на ухото."
 ],
 "grammar": [
 "imperative"
@@ -3498,6 +3658,10 @@
 "en_loose": [
 "I have seen you in the restaurant."
 ],
+"bg_alt_en": [
+"Видях ви в ресторанта.",
+"Аз ви видях в ресторанта."
+],
 "grammar": [
 "aorist"
 ]
@@ -3533,6 +3697,9 @@
 "How do you like the new restaurant?",
 "What do you make of the new restaurant?",
 "What's your opinion of the new restaurant?"
+],
+"bg_alt_en": [
+"Какво мислите за новия ресторант?"
 ],
 "grammar": [
 "present"
@@ -3869,6 +4036,10 @@
 "en_loose": [
 "Do you know who that is?"
 ],
+"bg_alt_en": [
+"Знаете ли кой е той?",
+"Вие знаете ли кой е той?"
+],
 "grammar": [
 "present"
 ]
@@ -3931,6 +4102,9 @@
 "Which of the girls is your daughter?",
 "Which one of the girls is your daughter?"
 ],
+"bg_alt_en": [
+"Кое момиче е дъщеря ти?"
+],
 "grammar": [
 "present"
 ]
@@ -3969,6 +4143,9 @@
 "en_loose": [
 "Who prepares breakfast in your family?",
 "Who cooks breakfast in your family?"
+],
+"bg_alt_en": [
+"Кой прави закуската в семейството ти?"
 ],
 "grammar": [
 "present"
@@ -4041,6 +4218,10 @@
 "Are you enjoying the food?",
 "Do you enjoy the food?"
 ],
+"bg_alt_en": [
+"Харесва ли ви храната?",
+"Харесвате ли храната?"
+],
 "grammar": [
 "present"
 ]
@@ -4075,6 +4256,10 @@
 "en_loose": [
 "I love your new apartment.",
 "I really like your new apartment."
+],
+"bg_alt_en": [
+"Харесвам новия ти апартамент.",
+"Харесва ми новият ти апартамент."
 ],
 "grammar": [
 "present"
@@ -4169,6 +4354,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Харесва ли ви Пловдив?",
+"Харесвате ли Пловдив?"
+],
 "grammar": [
 "present"
 ]
@@ -4198,6 +4387,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Харесвам косата ви.",
+"Косата ви ми харесва."
+],
 "grammar": [
 "present"
 ]
@@ -4253,6 +4446,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Do you know where the restaurant is located?"
+],
+"bg_alt_en": [
+"Знаеш ли къде е ресторантът?"
 ],
 "grammar": [
 "present"
@@ -4531,6 +4727,9 @@
 "en_loose": [
 "Could you come on Sunday?"
 ],
+"bg_alt_en": [
+"Можете ли да дойдете в неделя?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -4565,6 +4764,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Какво правите в неделя?"
+],
 "grammar": [
 "present"
 ]
@@ -4633,6 +4835,10 @@
 "I really love you.",
 "I love you so very much."
 ],
+"bg_alt_en": [
+"Обичам ви много.",
+"Много ви обичам."
+],
 "grammar": [
 "present"
 ]
@@ -4693,6 +4899,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Обича ли ви той?",
+"Той обича ли ви?"
+],
 "grammar": [
 "present"
 ]
@@ -4758,6 +4968,10 @@
 "How do you like my new shoes?",
 "Do you like my new pair of shoes?"
 ],
+"bg_alt_en": [
+"Харесват ли ви новите ми обувки?",
+"Харесвате ли новите ми обувки?"
+],
 "grammar": [
 "present"
 ]
@@ -4792,6 +5006,10 @@
 "en_loose": [
 "Which pair of shoes do you like?",
 "What pair of shoes do you like?"
+],
+"bg_alt_en": [
+"Кои обувки харесвате?",
+"Кои обувки ви харесват?"
 ],
 "grammar": [
 "present"
@@ -4896,6 +5114,9 @@
 "Bring us two beers, please.",
 "Could you give us two beers, please?"
 ],
+"bg_alt_en": [
+"Дай ни две бири, моля."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -4970,6 +5191,10 @@
 "Hi, fancy a beer?",
 "Hi, would you like a beer?"
 ],
+"bg_alt_en": [
+"Здрасти, искате ли бира?",
+"Здравейте, искате ли бира?"
+],
 "grammar": [
 "present"
 ]
@@ -4997,6 +5222,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Тази бира е за вас."
+],
 "grammar": [
 "present"
 ]
@@ -5071,6 +5299,10 @@
 "Would you like coffee or tea?",
 "Would you like some coffee or tea?",
 "Would you like a coffee or a tea?"
+],
+"bg_alt_en": [
+"Искате ли кафе или чай?",
+"Вие искате ли кафе или чай?"
 ],
 "grammar": [
 "present"
@@ -5147,6 +5379,10 @@
 "Make me a cup of tea, please.",
 "Please make me a cup of tea."
 ],
+"bg_alt_en": [
+"Направете ми чай, моля.",
+"Моля ви, направете ми чай."
+],
 "grammar": [
 "imperative"
 ]
@@ -5209,6 +5445,9 @@
 "source": "present-batch-2026-10",
 "nl_loose": [
 "Tegen wie praat je?"
+],
+"bg_alt_en": [
+"С кого говорите?"
 ],
 "grammar": [
 "present"
@@ -5284,6 +5523,9 @@
 "What time do you get up on Sundays?",
 "What time do you get up on Sunday?"
 ],
+"bg_alt_en": [
+"Кога ставате в неделя?"
+],
 "grammar": [
 "present"
 ]
@@ -5318,6 +5560,9 @@
 "What's up with you?",
 "What's the matter with you?",
 "What's wrong with you?"
+],
+"bg_alt_en": [
+"Какво става с вас?"
 ],
 "grammar": [
 "present"
@@ -5448,6 +5693,9 @@
 "Ask your mom.",
 "Go ask your mother."
 ],
+"bg_alt_en": [
+"Питайте майка си."
+],
 "grammar": [
 "imperative"
 ]
@@ -5475,6 +5723,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Ask him what he'd like."
+],
+"bg_alt_en": [
+"Попитайте го какво иска."
 ],
 "grammar": [
 "present",
@@ -5645,6 +5896,10 @@
 "nl_loose": [
 "Met wie woon je samen?"
 ],
+"bg_alt_en": [
+"С кого живеете?",
+"Вие с кого живеете?"
+],
 "grammar": [
 "present"
 ]
@@ -5778,6 +6033,10 @@
 "How many kids do you have?",
 "How many kids have you got?"
 ],
+"bg_alt_en": [
+"Колко деца имаш?",
+"Ти колко деца имаш?"
+],
 "grammar": [
 "present"
 ]
@@ -5807,6 +6066,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "How many eggs would you like?"
+],
+"bg_alt_en": [
+"Колко яйца искате?",
+"Вие колко яйца искате?"
 ],
 "grammar": [
 "present"
@@ -6098,6 +6361,9 @@
 "en_loose": [
 "Why are you asking after my brother?"
 ],
+"bg_alt_en": [
+"Защо питате за брат ми?"
+],
 "grammar": [
 "present"
 ]
@@ -6160,6 +6426,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Защо ме гледате?"
+],
 "grammar": [
 "present"
 ]
@@ -6190,6 +6459,9 @@
 "source": "present-batch-2026-10",
 "en_loose": [
 "Why are you lying in bed?"
+],
+"bg_alt_en": [
+"Защо сте в леглото?"
 ],
 "grammar": [
 "present"
@@ -6303,6 +6575,9 @@
 "Grandpa, would you like tea?",
 "Grandpa, do you want a cup of tea?"
 ],
+"bg_alt_en": [
+"Дядо, искате ли чай?"
+],
 "grammar": [
 "present"
 ]
@@ -6334,6 +6609,9 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Как е дядо ви?"
+],
 "grammar": [
 "present"
 ]
@@ -6405,6 +6683,9 @@
 "en_loose": [
 "Fine, and you?"
 ],
+"bg_alt_en": [
+"Добре съм, а вие?"
+],
 "grammar": [
 "present"
 ]
@@ -6439,6 +6720,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "I come from Amsterdam. And you?"
+],
+"bg_alt_en": [
+"Аз съм от Амстердам. А ти?",
+"От Амстердам съм. А ти?"
 ],
 "grammar": [
 "present"
@@ -6480,6 +6765,10 @@
 "I'll have meat. How about you?",
 "I'm going to have meat. And you?"
 ],
+"bg_alt_en": [
+"Аз ще взема месо. А ти?",
+"Ще взема месо. А ти?"
+],
 "grammar": [
 "future"
 ]
@@ -6518,6 +6807,10 @@
 ],
 "en_loose": [
 "I like tea. Do you?"
+],
+"bg_alt_en": [
+"Аз обичам чай. А вие?",
+"Обичам чай. А вие?"
 ],
 "grammar": [
 "present"
@@ -6627,6 +6920,9 @@
 "en_loose": [
 "Do you enjoy wine?",
 "Are you fond of wine?"
+],
+"bg_alt_en": [
+"Обичаш ли вино?"
 ],
 "grammar": [
 "present"
@@ -6796,6 +7092,10 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Къде работи жена ви?",
+"Жена ви къде работи?"
+],
 "grammar": [
 "present"
 ]
@@ -6997,6 +7297,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Работите ли в неделя?"
+],
 "grammar": [
 "present"
 ]
@@ -7098,6 +7401,9 @@
 "The meat is off, don't eat it!",
 "The meat is spoiled, don't eat it!",
 "The meat's gone off, don't eat it!"
+],
+"bg_alt_en": [
+"Месото е лошо, не го яжте!"
 ],
 "grammar": [
 "present",
@@ -7203,6 +7509,10 @@
 "What would you like to eat?",
 "What do you want to have to eat?"
 ],
+"bg_alt_en": [
+"Какво искате да ядете?",
+"Вие какво искате да ядете?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -7236,6 +7546,10 @@
 "en_loose": [
 "How come you're not eating?"
 ],
+"bg_alt_en": [
+"Защо не ядете?",
+"Вие защо не ядете?"
+],
 "grammar": [
 "present"
 ]
@@ -7264,6 +7578,9 @@
 "en_loose": [
 "Eat up your breakfast!",
 "Eat your breakfast up!"
+],
+"bg_alt_en": [
+"Яжте си закуската!"
 ],
 "grammar": [
 "imperative"
@@ -7375,6 +7692,10 @@
 "What do you have for lunch?",
 "What are you having for lunch?",
 "What do you eat at lunch?"
+],
+"bg_alt_en": [
+"Какво ядете за обяд?",
+"Какво ядете на обяд?"
 ],
 "grammar": [
 "present"
@@ -7576,6 +7897,9 @@
 "Goedendag, heeft u een tafel voor vier personen?",
 "Goedendag, hebben jullie een tafel voor vier personen?"
 ],
+"bg_alt_en": [
+"Здравей, имаш ли маса за четирима?"
+],
 "grammar": [
 "present",
 "numeral"
@@ -7606,6 +7930,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Your clothes are lying on the bed."
+],
+"bg_alt_en": [
+"Дрехите ви са на леглото."
 ],
 "grammar": [
 "present"
@@ -7918,6 +8245,9 @@
 "Do you like tea with milk in it?",
 "Do you like milky tea?"
 ],
+"bg_alt_en": [
+"Обичате ли чай с мляко?"
+],
 "grammar": [
 "present"
 ]
@@ -8137,6 +8467,9 @@
 "Would you like white cheese or yellow cheese?",
 "Would you like white cheese or kashkaval?"
 ],
+"bg_alt_en": [
+"Искате ли сирене или кашкавал?"
+],
 "grammar": [
 "present"
 ]
@@ -8198,6 +8531,9 @@
 "Have you seen the neighbours?",
 "Did you guys see the neighbours?",
 "Did you all see the neighbours?"
+],
+"bg_alt_en": [
+"Видя ли съседите?"
 ],
 "grammar": [
 "aorist"
@@ -8292,6 +8628,10 @@
 "Hello, I'm your new neighbour.",
 "Hi, I'm your new neighbour."
 ],
+"bg_alt_en": [
+"Здравей, аз съм новият съсед.",
+"Здравей, новият съсед съм."
+],
 "grammar": [
 "present"
 ]
@@ -8328,6 +8668,10 @@
 ],
 "en_loose": [
 "Do you know what the neighbour is called?"
+],
+"bg_alt_en": [
+"Знаете ли името на съседа?",
+"Знаете ли как се казва съседът?"
 ],
 "grammar": [
 "present"
@@ -8389,6 +8733,9 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Waarom geef je geen antwoord?"
+],
+"bg_alt_en": [
+"Защо не отговаряте?"
 ],
 "grammar": [
 "present"
@@ -8798,6 +9145,11 @@
 "en_loose": [
 "Where do you live these days?"
 ],
+"bg_alt_en": [
+"Къде живееш сега?",
+"Къде живееш ти сега?",
+"Сега къде живееш?"
+],
 "grammar": [
 "present"
 ]
@@ -8830,6 +9182,9 @@
 "Now I see what you want.",
 "I see now what you want.",
 "Now I get what you want."
+],
+"bg_alt_en": [
+"Сега разбирам какво искате."
 ],
 "grammar": [
 "present"
@@ -8865,6 +9220,10 @@
 "Where are you off to now?",
 "Where are you heading now?",
 "Where are you headed now?"
+],
+"bg_alt_en": [
+"Къде отивате сега?",
+"Сега къде отивате?"
 ],
 "grammar": [
 "present"
@@ -8928,6 +9287,10 @@
 "future"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Какво ще правите сега?",
+"Сега какво ще правите?"
+],
 "grammar": [
 "future"
 ]
@@ -9065,6 +9428,9 @@
 "Hang on, I'm coming!",
 "Wait for me, I'm on my way!"
 ],
+"bg_alt_en": [
+"Чакайте ме, идвам!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -9099,6 +9465,9 @@
 "Get up! Breakfast is waiting.",
 "Get up! Your breakfast is waiting for you.",
 "Get up! Your breakfast is waiting."
+],
+"bg_alt_en": [
+"Ставайте! Закуската ви чака."
 ],
 "grammar": [
 "present",
@@ -9137,6 +9506,9 @@
 "en_loose": [
 "If you don't have the key, wait for me."
 ],
+"bg_alt_en": [
+"Ако нямате ключ, чакайте ме."
+],
 "grammar": [
 "present",
 "imperative"
@@ -9171,6 +9543,10 @@
 "past"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Чакахме ви в ресторанта.",
+"Ние ви чакахме в ресторанта."
+],
 "grammar": [
 "imperfect"
 ]
@@ -9203,6 +9579,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Bye, I'll be waiting!"
+],
+"bg_alt_en": [
+"Чао, ще ви чакам!"
 ],
 "grammar": [
 "future"
@@ -9241,6 +9620,9 @@
 "future"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Ще те чакаме в неделя за обяд."
+],
 "grammar": [
 "future"
 ]
@@ -9904,6 +10286,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Имаш ли стая за гости?"
+],
 "grammar": [
 "present"
 ]
@@ -9977,6 +10362,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Ходиш ли на гости в неделя?",
+"В неделя ходиш ли на гости?"
+],
 "grammar": [
 "present"
 ]
@@ -10077,6 +10466,9 @@
 "You have such long hair!",
 "Your hair is so long!",
 "Your hair is really long!"
+],
+"bg_alt_en": [
+"Косата ви е много дълга!"
 ],
 "grammar": [
 "present"
@@ -10200,6 +10592,9 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Vraagt u het maar aan de juffrouw, zij weet het."
+],
+"bg_alt_en": [
+"Питай госпожицата, тя знае."
 ],
 "grammar": [
 "present",
@@ -10402,6 +10797,10 @@
 "en_loose": [
 "Where does your new neighbour come from?"
 ],
+"bg_alt_en": [
+"Откъде е новият ти съсед?",
+"Новият ти съсед откъде е?"
+],
 "grammar": [
 "present"
 ]
@@ -10435,6 +10834,9 @@
 "Hi! Where have you come from?",
 "Hello! Where have you come from?"
 ],
+"bg_alt_en": [
+"Здрасти! Откъде идвате?"
+],
 "grammar": [
 "present"
 ]
@@ -10467,6 +10869,9 @@
 "source": "present-batch-2026-10",
 "en_loose": [
 "How come you know my name?"
+],
+"bg_alt_en": [
+"Откъде знаеш името ми?"
 ],
 "grammar": [
 "present"
@@ -10686,6 +11091,10 @@
 "en_loose": [
 "Why aren't you drinking your medicine?",
 "Why don't you drink your medicine?"
+],
+"bg_alt_en": [
+"Защо не пиете лекарството си?",
+"Защо не си пиете лекарството?"
 ],
 "grammar": [
 "present"
@@ -10935,6 +11344,9 @@
 "How do you prepare shopska salad?",
 "How do you prepare a shopska salad?"
 ],
+"bg_alt_en": [
+"Как правите шопска салата?"
+],
 "grammar": [
 "present"
 ]
@@ -10965,6 +11377,9 @@
 "negative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Чувам ви, но не ви виждам."
+],
 "grammar": [
 "present"
 ]
@@ -10995,6 +11410,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Have you heard what the doctor said?"
+],
+"bg_alt_en": [
+"Чухте ли какво каза лекарят?"
 ],
 "grammar": [
 "aorist"
@@ -11089,6 +11507,9 @@
 "en_loose": [
 "Would you like some more banitsa?",
 "Would you like more banitsa?"
+],
+"bg_alt_en": [
+"Искате ли още баница?"
 ],
 "grammar": [
 "present"
@@ -11190,6 +11611,9 @@
 "en_loose": [
 "Listen to what I'm saying!"
 ],
+"bg_alt_en": [
+"Слушайте какво ви казвам!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -11285,6 +11709,10 @@
 "Have you eaten already?",
 "Have you already eaten?"
 ],
+"bg_alt_en": [
+"Яде ли вече?",
+"Вече яде ли?"
+],
 "grammar": [
 "aorist"
 ]
@@ -11317,6 +11745,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Wake up, breakfast is already on the table!"
+],
+"bg_alt_en": [
+"Ставайте, закуската вече е на масата!"
 ],
 "grammar": [
 "present",
@@ -11394,6 +11825,9 @@
 ],
 "en_loose": [
 "Do you have anything for the flu?"
+],
+"bg_alt_en": [
+"Имаш ли лекарство за грип?"
 ],
 "grammar": [
 "present"
@@ -11569,6 +12003,9 @@
 "Does it still hurt?",
 "Are you still in pain?"
 ],
+"bg_alt_en": [
+"Имате ли още болки?"
+],
 "grammar": [
 "present"
 ]
@@ -11609,6 +12046,10 @@
 "Where are you in pain?",
 "Where do you feel pain?",
 "Where are you hurting?"
+],
+"bg_alt_en": [
+"Къде имаш болки?",
+"Къде имаш болка?"
 ],
 "grammar": [
 "present"
@@ -11811,6 +12252,9 @@
 "What have you bought for grandma?",
 "What did you get for grandma?"
 ],
+"bg_alt_en": [
+"Какво купихте за баба?"
+],
 "grammar": [
 "aorist"
 ]
@@ -11880,6 +12324,9 @@
 "en_loose": [
 "Where do you buy your fish?",
 "Where do you get fish?"
+],
+"bg_alt_en": [
+"Къде купувате риба?"
 ],
 "grammar": [
 "present"
@@ -12015,6 +12462,10 @@
 "nl_loose": [
 "Help me even, alsjeblieft."
 ],
+"bg_alt_en": [
+"Помогнете ми, моля ви.",
+"Моля ви, помогнете ми."
+],
 "grammar": [
 "present",
 "imperative"
@@ -12080,6 +12531,9 @@
 "en_loose": [
 "Can you remember our old house?",
 "Do you still remember our old house?"
+],
+"bg_alt_en": [
+"Помните ли старата ни къща?"
 ],
 "grammar": [
 "present"
@@ -12188,6 +12642,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Get some more bread, please."
+],
+"bg_alt_en": [
+"Купете още малко хляб, моля."
 ],
 "grammar": [
 "imperative"
@@ -12325,6 +12782,10 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Пак ли имате грип?",
+"Имате ли пак грип?"
+],
 "grammar": [
 "present"
 ]
@@ -12611,6 +13072,9 @@
 ],
 "en_loose": [
 "Buy some grapes too, please."
+],
+"bg_alt_en": [
+"Вземете и малко грозде, моля."
 ],
 "grammar": [
 "imperative"
@@ -12899,6 +13363,9 @@
 "nl_loose": [
 "Vind je appels of bananen lekker?"
 ],
+"bg_alt_en": [
+"Обичате ли ябълки или банани?"
+],
 "grammar": [
 "present"
 ]
@@ -12927,6 +13394,9 @@
 "source": "present-batch-2026-10",
 "en_loose": [
 "The last apple is yours."
+],
+"bg_alt_en": [
+"Последната ябълка е за вас."
 ],
 "grammar": [
 "present"
@@ -13092,6 +13562,9 @@
 "en_loose": [
 "Would you like rakia or wine?",
 "Would you like some rakia or wine?"
+],
+"bg_alt_en": [
+"Ракия ли искаш, или вино?"
 ],
 "grammar": [
 "present"
@@ -13265,6 +13738,9 @@
 "en_loose": [
 "Your jacket is lying on the chair."
 ],
+"bg_alt_en": [
+"Якето ви е на стола."
+],
 "grammar": [
 "present"
 ]
@@ -13299,6 +13775,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "No worries, I'll wait for you here."
+],
+"bg_alt_en": [
+"Няма проблем, ще ви чакам тук.",
+"Няма проблем, тук ще ви чакам."
 ],
 "grammar": [
 "present",
@@ -13342,6 +13822,9 @@
 "You haven't got chicken? No problem, I'd like kebapcheta.",
 "You don't have chicken? No problem, I'd like kebapcheta.",
 "Don't you have chicken? No problem, I'll have kebapcheta."
+],
+"bg_alt_en": [
+"Нямаш пиле? Няма проблем, искам кебапчета."
 ],
 "grammar": [
 "present"
@@ -13444,6 +13927,10 @@
 "You come from Amsterdam, don't you?",
 "You come from Amsterdam, right?"
 ],
+"bg_alt_en": [
+"Вие сте от Амстердам, нали?",
+"От Амстердам сте, нали?"
+],
 "grammar": [
 "present"
 ]
@@ -13478,6 +13965,9 @@
 "Surely you'll come on Sunday?",
 "You're coming on Sunday, aren't you?",
 "You're coming on Sunday, right?"
+],
+"bg_alt_en": [
+"Нали ще дойдете в неделя?"
 ],
 "grammar": [
 "future"
@@ -13544,6 +14034,9 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Wanneer ga je naar Sofia?"
+],
+"bg_alt_en": [
+"Кога тръгвате за София?"
 ],
 "grammar": [
 "present"
@@ -13618,6 +14111,9 @@
 "Continue, I'm listening.",
 "Go ahead, I'm listening."
 ],
+"bg_alt_en": [
+"Продължавайте, слушам ви."
+],
 "grammar": [
 "present",
 "imperative"
@@ -13654,6 +14150,9 @@
 "en_loose": [
 "Do you think it will take long?"
 ],
+"bg_alt_en": [
+"Мислите ли, че ще продължи дълго?"
+],
 "grammar": [
 "present",
 "future"
@@ -13686,6 +14185,9 @@
 "nl_loose": [
 "Waarom blijf je het vragen?",
 "Waarom blijf je maar vragen?"
+],
+"bg_alt_en": [
+"Защо продължавате да питате?"
 ],
 "grammar": [
 "present",
@@ -13753,6 +14255,9 @@
 "en_loose": [
 "I'll pay, you're my guest."
 ],
+"bg_alt_en": [
+"Аз плащам, вие сте ми гост."
+],
 "grammar": [
 "present"
 ]
@@ -13818,6 +14323,9 @@
 "en_loose": [
 "What kind of juice would you like?",
 "Which juice do you want?"
+],
+"bg_alt_en": [
+"Какъв сок искате?"
 ],
 "grammar": [
 "present"
@@ -13885,6 +14393,9 @@
 "nl_loose": [
 "Alsjeblieft, je sleutels."
 ],
+"bg_alt_en": [
+"Ето ключовете ви."
+],
 "grammar": [
 "present"
 ]
@@ -13920,6 +14431,9 @@
 "en_loose": [
 "Here's the medicine."
 ],
+"bg_alt_en": [
+"Ето ви лекарството."
+],
 "grammar": [
 "present"
 ]
@@ -13952,6 +14466,10 @@
 "source": "present-batch-2026-10",
 "en_loose": [
 "Excuse me, I'm trying to find the hospital."
+],
+"bg_alt_en": [
+"Извини, търся болницата.",
+"Извинявай, търся болницата."
 ],
 "grammar": [
 "present"
@@ -13991,6 +14509,10 @@
 "en_loose": [
 "You have to take your medicine.",
 "You need to take your medicine."
+],
+"bg_alt_en": [
+"Трябва да изпиете лекарството.",
+"Трябва да пиете лекарството."
 ],
 "grammar": [
 "present",
@@ -14067,6 +14589,9 @@
 "You need to see a doctor.",
 "You have to see a doctor."
 ],
+"bg_alt_en": [
+"Трябва да отидете на лекар."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -14095,6 +14620,9 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Колко домата ви трябват?"
+],
 "grammar": [
 "present",
 "numeral"
@@ -14262,6 +14790,9 @@
 "Sorry, I've forgotten your name.",
 "I'm sorry, I've forgotten your name."
 ],
+"bg_alt_en": [
+"Извинявайте, забравих името ви."
+],
 "grammar": [
 "imperative",
 "aorist"
@@ -14301,6 +14832,10 @@
 "Bring a hat and a jacket.",
 "Grab a hat and a jacket."
 ],
+"bg_alt_en": [
+"Вземете си шапка и яке.",
+"Вземете шапка и яке."
+],
 "grammar": [
 "imperative"
 ]
@@ -14336,6 +14871,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Does this hat belong to you?"
+],
+"bg_alt_en": [
+"Тази шапка на вас ли е?",
+"На вас ли е тази шапка?"
 ],
 "grammar": [
 "present"
@@ -14400,6 +14939,10 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Stop hier even, alsjeblieft."
+],
+"bg_alt_en": [
+"Спрете тук, моля.",
+"Моля, спрете тук."
 ],
 "grammar": [
 "imperative"
@@ -14498,6 +15041,9 @@
 "When are you coming back?",
 "When are you going to be back?"
 ],
+"bg_alt_en": [
+"Кога ще се върнете?"
+],
 "grammar": [
 "future"
 ]
@@ -14574,6 +15120,9 @@
 "en_loose": [
 "When will you be back from Sofia?"
 ],
+"bg_alt_en": [
+"Кога се връщате от София?"
+],
 "grammar": [
 "present"
 ]
@@ -14611,6 +15160,9 @@
 "Have you finished lunch yet?",
 "Have you already finished lunch?",
 "Are you finished with lunch already?"
+],
+"bg_alt_en": [
+"Свършихте ли вече с обяда?"
 ],
 "grammar": [
 "aorist"
@@ -14665,7 +15217,9 @@
 "bg": "Чакай, още не съм свършил!",
 "nl": "Wacht, ik ben nog niet klaar!",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Чакай, още не съм свършила!"
+],
 "en_alt": [
 "Wait, I haven't finished yet!",
 "Wait, I'm not done yet!",
@@ -14687,6 +15241,10 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Wacht even, ik ben nog niet klaar!"
+],
+"bg_alt_en": [
+"Чакайте, още не съм свършил!",
+"Чакайте, още не съм свършила!"
 ],
 "grammar": [
 "imperative",
@@ -14792,6 +15350,9 @@
 "Have you already paid the bill?",
 "Have you paid the bill already?",
 "Have you paid the check yet?"
+],
+"bg_alt_en": [
+"Плати ли вече сметката?"
 ],
 "grammar": [
 "aorist"
@@ -15026,6 +15587,9 @@
 "en_loose": [
 "Come on, tell me what you want."
 ],
+"bg_alt_en": [
+"Кажете де, какво искате?"
+],
 "grammar": [
 "present",
 "imperative"
@@ -15060,6 +15624,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Come on, tell me, what's happened?"
+],
+"bg_alt_en": [
+"Кажете де, какво стана?"
 ],
 "grammar": [
 "imperative",
@@ -15254,6 +15821,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Чорапите ви са в чантата ми."
+],
 "grammar": [
 "present"
 ]
@@ -15328,6 +15898,9 @@
 "Would you help me with the bag?",
 "Could you please help me with the bag?"
 ],
+"bg_alt_en": [
+"Може ли да ми помогнеш с чантата?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -15365,6 +15938,10 @@
 "Is it possible to stop here?",
 "Could you stop here?",
 "Would you stop here?"
+],
+"bg_alt_en": [
+"Може ли да спреш тук?",
+"Можеш ли да спреш тук?"
 ],
 "grammar": [
 "present",
@@ -15437,6 +16014,9 @@
 "Your trousers are really long.",
 "Your pants are really long."
 ],
+"bg_alt_en": [
+"Панталонът ви е много дълъг."
+],
 "grammar": [
 "present"
 ]
@@ -15472,6 +16052,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Excuse me, where are the toilets?"
+],
+"bg_alt_en": [
+"Извини, къде е тоалетната?",
+"Извинявай, къде е тоалетната?"
 ],
 "grammar": [
 "present",
@@ -15812,6 +16396,9 @@
 "nl_loose": [
 "Ga nu niet de deur uit, je hebt koorts."
 ],
+"bg_alt_en": [
+"Не излизайте сега, имате температура."
+],
 "grammar": [
 "present",
 "imperative"
@@ -15936,6 +16523,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Стойте тук и чакайте."
+],
 "grammar": [
 "imperative"
 ]
@@ -15966,6 +16556,9 @@
 "en_loose": [
 "Why are you standing in the doorway?",
 "Why are you standing by the door?"
+],
+"bg_alt_en": [
+"Защо стоите на вратата?"
 ],
 "grammar": [
 "present"
@@ -16245,6 +16838,10 @@
 "en_loose": [
 "I'll let you know later."
 ],
+"bg_alt_en": [
+"Ще ви кажа после.",
+"После ще ви кажа."
+],
 "grammar": [
 "future"
 ]
@@ -16342,6 +16939,9 @@
 "en_loose": [
 "Don't sit down on the floor!"
 ],
+"bg_alt_en": [
+"Не седете на пода!"
+],
 "grammar": [
 "imperative"
 ]
@@ -16377,6 +16977,9 @@
 "en_loose": [
 "Why are you sitting on the ground? There's a chair.",
 "Why are you sitting on the floor? There's a chair here."
+],
+"bg_alt_en": [
+"Защо седите на пода? Има стол."
 ],
 "grammar": [
 "present"
@@ -16510,6 +17113,9 @@
 "Come back on Friday!",
 "Come back Friday!"
 ],
+"bg_alt_en": [
+"Елате пак в петък!"
+],
 "grammar": [
 "imperative"
 ]
@@ -16584,6 +17190,10 @@
 ],
 "en_loose": [
 "Are you coming with me on Friday?"
+],
+"bg_alt_en": [
+"Ще дойдете ли с мен в петък?",
+"В петък ще дойдете ли с мен?"
 ],
 "grammar": [
 "future"
@@ -16851,6 +17461,9 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Защо казвате, че е грозна?"
+],
 "grammar": [
 "present"
 ]
@@ -16950,6 +17563,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Търся очилата си. Виждате ли ги?"
+],
 "grammar": [
 "present"
 ]
@@ -16997,7 +17613,9 @@
 "Ik was toen erg jong."
 ],
 "bg_alt": [
-"Тогава аз бях много млад."
+"Тогава аз бях много млад.",
+"Тогава бях много млада.",
+"Тогава аз бях много млада."
 ],
 "en_alt": [
 "Back then I was very young.",
@@ -17057,6 +17675,9 @@
 "en_loose": [
 "You don't want banitsa? So what do you want?"
 ],
+"bg_alt_en": [
+"Не искате баница? Тогава какво искате?"
+],
 "grammar": [
 "present"
 ]
@@ -17091,6 +17712,9 @@
 "The doctor said you should rest in bed.",
 "The doctor said you need to stay in bed.",
 "The doctor told you to lie down."
+],
+"bg_alt_en": [
+"Лекарят каза да лежите."
 ],
 "grammar": [
 "da-clause",
@@ -17204,6 +17828,9 @@
 "nl_loose": [
 "Komt u maar binnen, de dokter wacht op u."
 ],
+"bg_alt_en": [
+"Влез, моля, лекарят те чака."
+],
 "grammar": [
 "present",
 "imperative"
@@ -17238,6 +17865,9 @@
 "negative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Не влизай в стаята, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -17438,6 +18068,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Какво търсите в хладилника?"
+],
 "grammar": [
 "present"
 ]
@@ -17963,6 +18596,9 @@
 "nl_loose": [
 "Wil je me het menu voorlezen, alsjeblieft?"
 ],
+"bg_alt_en": [
+"Прочетете ми менюто, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -18281,6 +18917,9 @@
 "Sorry, I can't hear you very well.",
 "Sorry, I can't hear you properly."
 ],
+"bg_alt_en": [
+"Извинявайте, не ви чувам добре."
+],
 "grammar": [
 "present"
 ]
@@ -18423,6 +19062,9 @@
 "nl_loose": [
 "Lig je nog te slapen? Het is al negen uur."
 ],
+"bg_alt_en": [
+"Още ли спите? Вече е девет."
+],
 "grammar": [
 "present",
 "numeral"
@@ -18487,6 +19129,9 @@
 "en_loose": [
 "Don't do that!"
 ],
+"bg_alt_en": [
+"Не правете така!"
+],
 "grammar": [
 "imperative"
 ]
@@ -18518,6 +19163,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Така ли? Не ви вярвам."
+],
 "grammar": [
 "present"
 ]
@@ -18651,6 +19299,9 @@
 "en_loose": [
 "I've brought you juice and apples."
 ],
+"bg_alt_en": [
+"Нося ви сок и ябълки."
+],
 "grammar": [
 "present"
 ]
@@ -18748,6 +19399,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Защо носите палто и шапка?"
+],
 "grammar": [
 "present"
 ]
@@ -18821,6 +19475,9 @@
 "en_loose": [
 "What have you got in that big bag?",
 "What do you have in that big bag?"
+],
+"bg_alt_en": [
+"Какво носите в тази голяма чанта?"
 ],
 "grammar": [
 "present"
@@ -18948,6 +19605,9 @@
 "Hold the cup with both hands.",
 "Hold the glass with both hands.",
 "Hold the mug with both hands."
+],
+"bg_alt_en": [
+"Дръжте чашата с две ръце."
 ],
 "grammar": [
 "imperative",
@@ -19164,6 +19824,9 @@
 "en_loose": [
 "Come in, Mother is in the kitchen.",
 "Come in, my mum is in the kitchen."
+],
+"bg_alt_en": [
+"Влизайте, мама е в кухнята."
 ],
 "grammar": [
 "present",
@@ -19415,6 +20078,10 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Дайте ми една чиния и една вилица.",
+"Дайте ми чиния и вилица."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -19445,6 +20112,10 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Извини, нямам вилица.",
+"Извинявай, нямам вилица."
+],
 "grammar": [
 "present",
 "imperative"
@@ -19578,6 +20249,9 @@
 "Why have you stopped writing?",
 "Why did you quit writing?"
 ],
+"bg_alt_en": [
+"Защо спряхте да пишете?"
+],
 "grammar": [
 "da-clause",
 "aorist"
@@ -19640,6 +20314,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Напишете името си тук, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -19670,6 +20347,9 @@
 "source": "present-batch-2026-10",
 "nl_loose": [
 "Wie schrijf je?"
+],
+"bg_alt_en": [
+"На кого пишете?"
 ],
 "grammar": [
 "present"
@@ -19773,6 +20453,10 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Затворете вратата, моля ви.",
+"Моля ви, затворете вратата."
+],
 "grammar": [
 "present",
 "imperative"
@@ -19812,6 +20496,10 @@
 "Are you closed on Sunday?",
 "Are you closed on Sundays?",
 "Are you shut on Sundays?"
+],
+"bg_alt_en": [
+"Затваряш ли в неделя?",
+"В неделя затваряш ли?"
 ],
 "grammar": [
 "present"
@@ -19878,6 +20566,9 @@
 "negative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Не затваряйте прозореца, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -19908,6 +20599,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Защо затваряте прозореца?"
+],
 "grammar": [
 "present"
 ]
@@ -19969,6 +20663,9 @@
 "en_loose": [
 "Your wife is really beautiful.",
 "Your wife is really pretty."
+],
+"bg_alt_en": [
+"Съпругата ти е много красива."
 ],
 "grammar": [
 "present"
@@ -20039,6 +20736,10 @@
 "Add a little salt and pepper to the fish.",
 "Add some salt and pepper to the fish."
 ],
+"bg_alt_en": [
+"Сложете малко сол и пипер на рибата.",
+"Сложете на рибата малко сол и пипер."
+],
 "grammar": [
 "imperative"
 ]
@@ -20072,6 +20773,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Don't add sugar to my coffee."
+],
+"bg_alt_en": [
+"Не слагайте захар в кафето ми."
 ],
 "grammar": [
 "imperative"
@@ -20146,6 +20850,9 @@
 "Have you put the soap in the kitchen?",
 "Is it you who put the soap in the kitchen?"
 ],
+"bg_alt_en": [
+"Вие ли сложихте сапуна в кухнята?"
+],
 "grammar": [
 "aorist"
 ]
@@ -20178,6 +20885,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Сложете тенджерата на печката."
+],
 "grammar": [
 "imperative"
 ]
@@ -20214,6 +20924,9 @@
 "I've put your coat in the wardrobe.",
 "I've put your coat in the closet.",
 "I hung your coat in the wardrobe."
+],
+"bg_alt_en": [
+"Сложих палтото ви в гардероба."
 ],
 "grammar": [
 "aorist"
@@ -20283,6 +20996,9 @@
 "Have you added pepper to the soup?",
 "Did you add pepper to the soup?"
 ],
+"bg_alt_en": [
+"Сложихте ли пипер в супата?"
+],
 "grammar": [
 "aorist"
 ]
@@ -20320,6 +21036,10 @@
 "Do you put sugar in your tea?",
 "Do you take sugar in your tea?",
 "Are you putting sugar in your tea?"
+],
+"bg_alt_en": [
+"Слагате ли захар в чая?",
+"Слагате ли захар в чая си?"
 ],
 "grammar": [
 "present"
@@ -20385,6 +21105,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Не знам какво искате от мен."
+],
 "grammar": [
 "present"
 ]
@@ -20420,6 +21143,9 @@
 "Come to the kitchen as soon as you're done.",
 "Once you're done, come to the kitchen.",
 "When you're done, come to the kitchen."
+],
+"bg_alt_en": [
+"Щом свършите, елате в кухнята."
 ],
 "grammar": [
 "present",
@@ -20498,6 +21224,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Щом имате температура, трябва да лежите.",
+"Трябва да лежите, щом имате температура."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -20538,6 +21268,9 @@
 "Do you have a frying pan? I'd like to make myself some eggs.",
 "Do you have a frying pan? I want to fry myself some eggs."
 ],
+"bg_alt_en": [
+"Имате ли тиган? Искам да си направя яйца."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -20575,6 +21308,9 @@
 "en_loose": [
 "Add a little oil to the frying pan."
 ],
+"bg_alt_en": [
+"Сложете малко олио в тигана."
+],
 "grammar": [
 "imperative"
 ]
@@ -20608,6 +21344,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Имате ли малък тиган?"
+],
 "grammar": [
 "present"
 ]
@@ -20746,6 +21485,10 @@
 "nl_loose": [
 "Komt u binnen!"
 ],
+"bg_alt_en": [
+"Заповядай, влез!",
+"Влез, заповядай!"
+],
 "grammar": [
 "imperative"
 ]
@@ -20846,6 +21589,9 @@
 "Eat your soup with a spoon, not with a fork!",
 "Eat your soup with a spoon, not a fork!"
 ],
+"bg_alt_en": [
+"Яжте супата с лъжица, а не с вилица!"
+],
 "grammar": [
 "imperative"
 ]
@@ -20914,6 +21660,9 @@
 "en_loose": [
 "Put a knife and a spoon on the table."
 ],
+"bg_alt_en": [
+"Сложете ножа и лъжицата на масата."
+],
 "grammar": [
 "imperative"
 ]
@@ -20950,6 +21699,10 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Донесете ми още една възглавница, моля.",
+"Моля, донесете ми още една възглавница."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -21084,6 +21837,10 @@
 "future"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Ще ви се обадя в събота.",
+"В събота ще ви се обадя."
+],
 "grammar": [
 "future"
 ]
@@ -21187,6 +21944,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "How many languages can you speak?"
+],
+"bg_alt_en": [
+"Колко езика говорите?"
 ],
 "grammar": [
 "present",
@@ -21407,6 +22167,9 @@
 "en_loose": [
 "Hello! How can I help you?"
 ],
+"bg_alt_en": [
+"Добър ден! С какво мога да ти помогна?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -21443,6 +22206,9 @@
 "— Hello, how are you? — I'm fine, and you?",
 "— Hello, how are you? — I'm fine, and how are you?"
 ],
+"bg_alt_en": [
+"— Добър ден, как си? — Добре съм, а ти?"
+],
 "grammar": [
 "present"
 ]
@@ -21473,6 +22239,10 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Познавате ли братовчедите ми?",
+"Вие познавате ли братовчедите ми?"
+],
 "grammar": [
 "present"
 ]
@@ -21509,6 +22279,9 @@
 "Sorry, I didn't know it was you.",
 "Sorry, I didn't recognise you at first."
 ],
+"bg_alt_en": [
+"Извинявайте, не ви познах."
+],
 "grammar": [
 "imperative",
 "aorist"
@@ -21537,6 +22310,9 @@
 "question"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Познавате ли братовчед ми?"
+],
 "grammar": [
 "present"
 ]
@@ -21575,6 +22351,10 @@
 "Try the kebapcheta, they're very tasty!",
 "Try the kebapcheta, they're really tasty!"
 ],
+"bg_alt_en": [
+"Опитайте кебапчетата, много са хубави!",
+"Опитайте кебапчетата, те са много хубави!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -21603,6 +22383,9 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Wanneer ben je jarig?"
+],
+"bg_alt_en": [
+"Кога е рожденият ви ден?"
 ],
 "grammar": [
 "present"
@@ -21704,6 +22487,9 @@
 "en_loose": [
 "You've got blood on your finger.",
 "You have blood on your finger."
+],
+"bg_alt_en": [
+"Има кръв на пръста ви."
 ],
 "grammar": [
 "present"
@@ -21853,6 +22639,9 @@
 "Will you show me around the apartment?",
 "Will you show me around the flat?"
 ],
+"bg_alt_en": [
+"Ще ми покажете ли апартамента?"
+],
 "grammar": [
 "future"
 ]
@@ -21968,6 +22757,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Welcome! The room is on the top floor."
+],
+"bg_alt_en": [
+"Заповядай! Стаята е на последния етаж."
 ],
 "grammar": [
 "present",
@@ -22122,6 +22914,10 @@
 "en_loose": [
 "No problem, you helped me as well."
 ],
+"bg_alt_en": [
+"Няма защо, вие също ми помогнахте.",
+"Няма защо, и вие ми помогнахте."
+],
 "grammar": [
 "present",
 "aorist"
@@ -22268,6 +23064,10 @@
 "Let me see the wound on your hand.",
 "Show me the injury on your hand."
 ],
+"bg_alt_en": [
+"Покажете ми раната на ръката си.",
+"Покажете ми раната на ръката."
+],
 "grammar": [
 "imperative"
 ]
@@ -22381,6 +23181,9 @@
 "en_loose": [
 "Take your jacket, otherwise you'll be cold."
 ],
+"bg_alt_en": [
+"Вземете си якето, иначе ще ви стане студено."
+],
 "grammar": [
 "future",
 "imperative"
@@ -22446,6 +23249,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "I hope you come to the wedding."
+],
+"bg_alt_en": [
+"Надявам се, че ще дойдете на сватбата."
 ],
 "grammar": [
 "present",
@@ -22523,6 +23329,9 @@
 "I'll call you when I finish.",
 "I'll call you after I'm done."
 ],
+"bg_alt_en": [
+"Ще ви се обадя, след като свърша."
+],
 "grammar": [
 "present",
 "future"
@@ -22557,6 +23366,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Освен хляб, купете и мляко."
+],
 "grammar": [
 "imperative"
 ]
@@ -22663,6 +23475,9 @@
 "Your nails are really long.",
 "Your fingernails are really long."
 ],
+"bg_alt_en": [
+"Ноктите ви са много дълги."
+],
 "grammar": [
 "present"
 ]
@@ -22759,6 +23574,9 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Медицинската сестра ще ти направи инжекция."
+],
 "grammar": [
 "future"
 ]
@@ -22976,6 +23794,9 @@
 "en_loose": [
 "Draw the curtains, please."
 ],
+"bg_alt_en": [
+"Затворете завесите, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -23181,6 +24002,9 @@
 ],
 "en_loose": [
 "You should still see a doctor."
+],
+"bg_alt_en": [
+"Все пак трябва да отидете на лекар."
 ],
 "grammar": [
 "present",
@@ -23393,6 +24217,10 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Преди да излезете, затворете прозорците.",
+"Затворете прозорците, преди да излезете."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -23612,6 +24440,9 @@
 "clothes"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Обувките ви са под леглото."
+],
 "grammar": [
 "present"
 ]
@@ -23860,6 +24691,9 @@
 "en_loose": [
 "OK, so you're not coming."
 ],
+"bg_alt_en": [
+"Ясно, значи не идвате."
+],
 "grammar": [
 "present"
 ]
@@ -23892,6 +24726,9 @@
 "source": "present-batch-2026-10",
 "en_loose": [
 "So you are the new neighbour, then?"
+],
+"bg_alt_en": [
+"Значи, вие сте новият съсед?"
 ],
 "grammar": [
 "present"
@@ -24033,6 +24870,9 @@
 ],
 "en_loose": [
 "Don't eat so fast, it's bad for your stomach."
+],
+"bg_alt_en": [
+"Не яжте бързо, лошо е за стомаха."
 ],
 "grammar": [
 "present",
@@ -24364,6 +25204,9 @@
 "Bring the big salad bowl.",
 "Get the big bowl for the salad."
 ],
+"bg_alt_en": [
+"Донесете голямата купа за салатата."
+],
 "grammar": [
 "imperative"
 ]
@@ -24394,6 +25237,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Why are you lying down on the carpet?"
+],
+"bg_alt_en": [
+"Защо лежите на килима?"
 ],
 "grammar": [
 "present"
@@ -24464,6 +25310,9 @@
 "future"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Докато вие готвите, аз ще измия чиниите."
+],
 "grammar": [
 "present",
 "future"
@@ -24697,6 +25546,9 @@
 "Get some mushrooms and carrots for the soup.",
 "Get mushrooms and carrots for the soup."
 ],
+"bg_alt_en": [
+"Купете гъби и моркови за супата."
+],
 "grammar": [
 "imperative"
 ]
@@ -24836,6 +25688,9 @@
 "Would you like some ayran or juice?",
 "Would you like ayran or some juice?"
 ],
+"bg_alt_en": [
+"Искаш ли айрян или сок?"
+],
 "grammar": [
 "present"
 ]
@@ -24875,6 +25730,9 @@
 "Get two bottles of ayran from the fridge.",
 "Get two bottles of ayran out of the refrigerator."
 ],
+"bg_alt_en": [
+"Донесете две бутилки айрян от хладилника."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -24909,6 +25767,9 @@
 "en_loose": [
 "Put the glasses on the kitchen shelf.",
 "Put the cups on the kitchen shelf."
+],
+"bg_alt_en": [
+"Сложете чашите на рафта в кухнята."
 ],
 "grammar": [
 "imperative"
@@ -24946,6 +25807,9 @@
 "I saw your girlfriend at the café.",
 "I ran into your girlfriend at the café.",
 "I bumped into your girlfriend in the café."
+],
+"bg_alt_en": [
+"Срещнах приятелката ви в кафенето."
 ],
 "grammar": [
 "aorist"
@@ -25295,6 +26159,9 @@
 "Would you like pork or beef?",
 "Would you like pork or veal?"
 ],
+"bg_alt_en": [
+"Искаш ли свинско или телешко?"
+],
 "grammar": [
 "present"
 ]
@@ -25370,6 +26237,9 @@
 "Don't take the lift, take the stairs.",
 "Don't take the elevator, go up the stairs."
 ],
+"bg_alt_en": [
+"Не използвайте асансьора, качете се по стълбите."
+],
 "grammar": [
 "imperative"
 ]
@@ -25441,6 +26311,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Go up the stairs, the lift is out of order."
+],
+"bg_alt_en": [
+"Качете се по стълбите, асансьорът не работи."
 ],
 "grammar": [
 "present",
@@ -25580,6 +26453,10 @@
 "en_loose": [
 "Do you know how to swim?"
 ],
+"bg_alt_en": [
+"Можете ли да плувате?",
+"Вие можете ли да плувате?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -25693,6 +26570,10 @@
 "Bravo! You speak really well.",
 "Great job! You speak very well."
 ],
+"bg_alt_en": [
+"Браво! Говорите много добре.",
+"Браво! Вие говорите много добре."
+],
 "grammar": [
 "present"
 ]
@@ -25703,7 +26584,9 @@
 "nl": "Goed zo! Je bent heel snel!",
 "nl_alt": [],
 "bg_alt": [
-"Браво! Ти си много бърз!"
+"Браво! Ти си много бърз!",
+"Браво! Много си бърза!",
+"Браво! Ти си много бърза!"
 ],
 "en_alt": [
 "Bravo! You're very fast!",
@@ -25729,6 +26612,10 @@
 "Well done! You're really quick!",
 "Great job! You're very fast!",
 "Bravo! You're really fast!"
+],
+"bg_alt_en": [
+"Браво! Много сте бързи!",
+"Браво! Вие сте много бързи!"
 ],
 "grammar": [
 "present"
@@ -25967,6 +26854,9 @@
 "nl_loose": [
 "Hou je van olijven en paprika in de salade?",
 "Vind je olijven en paprika lekker in de salade?"
+],
+"bg_alt_en": [
+"Обичате ли маслини и чушки в салатата?"
 ],
 "grammar": [
 "present"
@@ -26607,6 +27497,9 @@
 "en_loose": [
 "Would you make me a sandwich?"
 ],
+"bg_alt_en": [
+"Ще ми направите ли един сандвич?"
+],
 "grammar": [
 "future",
 "numeral"
@@ -26748,6 +27641,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Сложете ножа и вилицата до чинията."
+],
 "grammar": [
 "imperative"
 ]
@@ -26816,6 +27712,9 @@
 ],
 "en_loose": [
 "Put your bag by the door."
+],
+"bg_alt_en": [
+"Оставете чантата си до вратата."
 ],
 "grammar": [
 "imperative"
@@ -26922,6 +27821,9 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Вземай по едно хапче след закуска и след вечеря."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -26935,7 +27837,9 @@
 "Na de griep voel ik me zwak."
 ],
 "bg_alt": [
-"След грипа се чувствам слаб."
+"След грипа се чувствам слаб.",
+"Чувствам се слаба след грипа.",
+"След грипа се чувствам слаба."
 ],
 "en_alt": [
 "I'm feeling weak after the flu.",
@@ -27029,6 +27933,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Пийте по едно хапче след обяд и след вечеря."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -27100,6 +28007,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Трябва да пиеш хапчетата след вечеря."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -27330,6 +28240,9 @@
 "Your nails are dirty, go and wash your hands.",
 "Your nails are dirty, go wash your hands."
 ],
+"bg_alt_en": [
+"Ноктите ви са мръсни, измийте си ръцете."
+],
 "grammar": [
 "present",
 "imperative"
@@ -27505,6 +28418,9 @@
 "en_loose": [
 "I find it hard to understand you when you speak quickly."
 ],
+"bg_alt_en": [
+"Трудно ми е да ви разбирам, когато говорите бързо."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -27660,6 +28576,9 @@
 "Do you want a pizza or a sausage sandwich?",
 "Would you like a pizza or a sausage sandwich?"
 ],
+"bg_alt_en": [
+"Искате ли пица или сандвич с наденица?"
+],
 "grammar": [
 "present"
 ]
@@ -27772,6 +28691,9 @@
 "en_loose": [
 "Add a little lemon to the tea.",
 "Add some lemon to the tea."
+],
+"bg_alt_en": [
+"Сложете малко лимон в чая."
 ],
 "grammar": [
 "imperative"
@@ -28026,6 +28948,9 @@
 "Bring a sweater, it's chilly.",
 "Grab a sweater, it's chilly."
 ],
+"bg_alt_en": [
+"Вземете си пуловер, хладно е."
+],
 "grammar": [
 "present",
 "imperative"
@@ -28103,6 +29028,9 @@
 "en_loose": [
 "Your blouse is really pretty.",
 "Your blouse is really beautiful."
+],
+"bg_alt_en": [
+"Блузата ви е много красива."
 ],
 "grammar": [
 "present"
@@ -28273,6 +29201,9 @@
 "en_loose": [
 "Stop pushing your brother!"
 ],
+"bg_alt_en": [
+"Не бутайте брат си!"
+],
 "grammar": [
 "imperative"
 ]
@@ -28310,6 +29241,9 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "— Sorry dat ik je een duw gaf. — Het geeft niet."
+],
+"bg_alt_en": [
+"— Извинявайте, че ви бутнах. — Няма нищо."
 ],
 "grammar": [
 "present",
@@ -28411,6 +29345,9 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Je moet niet met volle mond praten!"
+],
+"bg_alt_en": [
+"Не говорете с пълна уста!"
 ],
 "grammar": [
 "imperative"
@@ -28518,6 +29455,9 @@
 "Wrap a scarf around your neck, otherwise you'll get cold.",
 "Put a scarf around your neck, otherwise you'll feel cold."
 ],
+"bg_alt_en": [
+"Сложете си шал около врата, иначе ще ви стане студено."
+],
 "grammar": [
 "future",
 "imperative"
@@ -28587,6 +29527,10 @@
 "Could you give me a bowl for the strawberries, please?",
 "Pass me a bowl for the strawberries, please.",
 "Hand me a bowl for the strawberries, please."
+],
+"bg_alt_en": [
+"Дайте ми една купа за ягодите, моля.",
+"Дайте ми купа за ягодите, моля."
 ],
 "grammar": [
 "imperative",
@@ -28659,6 +29603,9 @@
 "Add a little olive oil to the salad.",
 "Add some olive oil to the salad.",
 "Pour a little olive oil on the salad."
+],
+"bg_alt_en": [
+"Сложете малко зехтин на салатата."
 ],
 "grammar": [
 "imperative"
@@ -28814,6 +29761,10 @@
 "Do you take tea with honey and lemon?",
 "Do you have tea with honey and lemon?"
 ],
+"bg_alt_en": [
+"Пиете ли чай с мед и лимон?",
+"Вие пиете ли чай с мед и лимон?"
+],
 "grammar": [
 "present"
 ]
@@ -28850,6 +29801,9 @@
 "Can you explain to me how I can get to the hospital?",
 "Could you explain how to get to the hospital?",
 "Can you explain how to get to the hospital?"
+],
+"bg_alt_en": [
+"Можеш ли да ми обясниш как да стигна до болницата?"
 ],
 "grammar": [
 "present",
@@ -28889,6 +29843,9 @@
 "Could you explain what this dish is?",
 "Can you explain what this dish is?"
 ],
+"bg_alt_en": [
+"Можеш ли да ми обясниш какво е това ястие?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -28924,6 +29881,9 @@
 "I don't understand, could you explain it?",
 "I don't understand, can you explain that?"
 ],
+"bg_alt_en": [
+"Не разбирам, можеш ли да обясниш?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -28955,6 +29915,10 @@
 "question"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Извини, къде е аптеката?",
+"Извинявай, къде е аптеката?"
+],
 "grammar": [
 "present",
 "imperative"
@@ -28988,6 +29952,9 @@
 "question"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Извинявайте, къде е тоалетната?"
+],
 "grammar": [
 "present",
 "imperative"
@@ -29048,6 +30015,9 @@
 "en_loose": [
 "Which drinks do you have?"
 ],
+"bg_alt_en": [
+"Какви напитки имаш?"
+],
 "grammar": [
 "present"
 ]
@@ -29087,6 +30057,10 @@
 "What sugar-free drinks do you have?",
 "Which drinks do you have without sugar?",
 "Which sugar-free drinks do you have?"
+],
+"bg_alt_en": [
+"Какви напитки имаш без захар?",
+"Какви напитки без захар имаш?"
 ],
 "grammar": [
 "present"
@@ -29154,6 +30128,10 @@
 "negative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Не можете да промените света.",
+"Вие не можете да промените света."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -29441,6 +30419,9 @@
 "Your boots are dirty, don't come in with them on!",
 "Your boots are dirty, don't come in in them!"
 ],
+"bg_alt_en": [
+"Ботушите ви са мръсни, не влизайте с тях!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -29576,6 +30557,10 @@
 "There's ice cream on your lips.",
 "There's some ice cream on your lips."
 ],
+"bg_alt_en": [
+"Имате сладолед по устните.",
+"Вие имате сладолед по устните."
+],
 "grammar": [
 "present"
 ]
@@ -29687,6 +30672,9 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Имаш ли този пуловер в по-голям размер?"
+],
 "grammar": [
 "present",
 "comparative"
@@ -29721,6 +30709,9 @@
 "What size are you?",
 "What size do you take?",
 "Which size do you wear?"
+],
+"bg_alt_en": [
+"Какъв размер носиш?"
 ],
 "grammar": [
 "present"
@@ -29760,6 +30751,9 @@
 "en_loose": [
 "Do you have this in a bigger size?",
 "Do you have this in a larger size?"
+],
+"bg_alt_en": [
+"Имаш ли по-голям размер?"
 ],
 "grammar": [
 "present",
@@ -29904,6 +30898,9 @@
 "Eet geen snoep voor de lunch!",
 "Geen snoep eten voor de lunch!"
 ],
+"bg_alt_en": [
+"Не яжте бонбони преди обяд!"
+],
 "grammar": [
 "imperative"
 ]
@@ -29941,6 +30938,10 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Geef het kind geen snoep."
+],
+"bg_alt_en": [
+"Не давайте бонбони на детето.",
+"Не давайте на детето бонбони."
 ],
 "grammar": [
 "imperative"
@@ -30175,6 +31176,9 @@
 "en_loose": [
 "It's not complicated, let me show you."
 ],
+"bg_alt_en": [
+"Не е сложно, ще ви покажа."
+],
 "grammar": [
 "present",
 "future"
@@ -30322,6 +31326,10 @@
 "en_loose": [
 "There's chocolate on your lips."
 ],
+"bg_alt_en": [
+"Имате шоколад по устните.",
+"Имате шоколад по устните си."
+],
 "grammar": [
 "present"
 ]
@@ -30462,6 +31470,10 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Обещавам да ви помогна.",
+"Аз обещавам да ви помогна."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -30531,6 +31543,9 @@
 ],
 "en_loose": [
 "Throw me the key out of the window!"
+],
+"bg_alt_en": [
+"Хвърлете ми ключа през прозореца!"
 ],
 "grammar": [
 "imperative"
@@ -30603,6 +31618,9 @@
 "source": "present-batch-2026-10",
 "nl_loose": [
 "Dank jullie wel voor het eten."
+],
+"bg_alt_en": [
+"Благодаря ти за вечерята."
 ],
 "grammar": [
 "present"
@@ -30702,6 +31720,9 @@
 "negative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Не бягайте по коридора!"
+],
 "grammar": [
 "imperative"
 ]
@@ -30983,6 +32004,10 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Следвай ме, моля.",
+"Моля, следвай ме."
+],
 "grammar": [
 "imperative"
 ]
@@ -31049,6 +32074,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Wear your scarf and gloves, it's cold."
+],
+"bg_alt_en": [
+"Сложете си шала и ръкавиците, студено е."
 ],
 "grammar": [
 "present",
@@ -31823,6 +32851,9 @@
 "Fasten your seatbelt, we're leaving.",
 "Buckle up, we're leaving."
 ],
+"bg_alt_en": [
+"Сложете си колана, тръгваме."
+],
 "grammar": [
 "present",
 "imperative"
@@ -31896,6 +32927,10 @@
 "Which country do you come from?",
 "What country do you come from?"
 ],
+"bg_alt_en": [
+"От коя държава си?",
+"От коя страна си?"
+],
 "grammar": [
 "present"
 ]
@@ -31967,6 +33002,10 @@
 "en_loose": [
 "We are inviting you all to our wedding.",
 "We invite you all to our wedding."
+],
+"bg_alt_en": [
+"Каним те на сватбата си.",
+"Ние те каним на сватбата си."
 ],
 "grammar": [
 "present"
@@ -32187,6 +33226,9 @@
 "How much do you make a month?",
 "How much do you make per month?"
 ],
+"bg_alt_en": [
+"Колко печелите на месец?"
+],
 "grammar": [
 "present"
 ]
@@ -32256,6 +33298,9 @@
 "en_loose": [
 "Say hello to your mum from me.",
 "Say hello to your mom for me."
+],
+"bg_alt_en": [
+"Поздравете майка си от мен."
 ],
 "grammar": [
 "imperative"
@@ -32361,6 +33406,9 @@
 ],
 "en_loose": [
 "Do you enjoy living in a big city?"
+],
+"bg_alt_en": [
+"Харесва ли ви да живеете в голям град?"
 ],
 "grammar": [
 "present",
@@ -32496,6 +33544,9 @@
 ],
 "en_loose": [
 "Thank you for a lovely evening."
+],
+"bg_alt_en": [
+"Благодаря ви за хубавата вечер."
 ],
 "grammar": [
 "present"
@@ -32644,6 +33695,10 @@
 "en_loose": [
 "I'll wait for you outside the pharmacy at five.",
 "I'll be waiting for you outside the pharmacy at five."
+],
+"bg_alt_en": [
+"Ще ви чакам пред аптеката в пет.",
+"В пет ще ви чакам пред аптеката."
 ],
 "grammar": [
 "future",
@@ -32868,6 +33923,9 @@
 "en_loose": [
 "Grandpa has chest pain, call an ambulance!"
 ],
+"bg_alt_en": [
+"Дядо има болки в гърдите, извикай линейка!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -32944,6 +34002,9 @@
 "I'd like to congratulate you on your wedding.",
 "I want to wish you congratulations on the wedding."
 ],
+"bg_alt_en": [
+"Искам да те поздравя за сватбата."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -32982,6 +34043,10 @@
 "Why are you fighting again?",
 "Why are you having an argument again?"
 ],
+"bg_alt_en": [
+"Защо спориш пак?",
+"Защо пак спориш?"
+],
 "grammar": [
 "present"
 ]
@@ -33019,6 +34084,10 @@
 "en_loose": [
 "I don't want to have an argument with you.",
 "I don't want to have a quarrel with you."
+],
+"bg_alt_en": [
+"Не искам да споря с вас.",
+"Аз не искам да споря с вас."
 ],
 "grammar": [
 "present",
@@ -33519,6 +34588,10 @@
 "nl_loose": [
 "Rijd wat langzamer, alsjeblieft!"
 ],
+"bg_alt_en": [
+"Карайте по-бавно, моля!",
+"Моля, карайте по-бавно!"
+],
 "grammar": [
 "imperative",
 "comparative"
@@ -33622,6 +34695,9 @@
 "present"
 ],
 "source": "present-batch-2026-10",
+"bg_alt_en": [
+"Знаеш ли къде е магазинът?"
+],
 "grammar": [
 "present"
 ]
@@ -33752,6 +34828,9 @@
 "Trek aan de deur, niet duwen.",
 "Trek de deur open, niet duwen."
 ],
+"bg_alt_en": [
+"Дръпнете вратата, не я бутайте."
+],
 "grammar": [
 "imperative"
 ]
@@ -33826,6 +34905,9 @@
 "Open the curtains to let in the sun.",
 "Open the curtains to let the sunshine in."
 ],
+"bg_alt_en": [
+"Отворете завесите, за да влезе слънцето."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -33893,6 +34975,9 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "De zon schijnt fel, ga niet naar buiten zonder pet."
+],
+"bg_alt_en": [
+"Слънцето е силно, не излизайте без шапка."
 ],
 "grammar": [
 "present",
@@ -34071,6 +35156,9 @@
 "en_loose": [
 "Tell me what has happened."
 ],
+"bg_alt_en": [
+"Разкажете ми какво се случи."
+],
 "grammar": [
 "imperative",
 "aorist"
@@ -34137,6 +35225,9 @@
 ],
 "en_loose": [
 "Don't forget your umbrella!"
+],
+"bg_alt_en": [
+"Не забравяйте чадъра!"
 ],
 "grammar": [
 "imperative"
@@ -34397,6 +35488,9 @@
 "en_loose": [
 "It's all fine, don't be afraid."
 ],
+"bg_alt_en": [
+"Всичко е наред, не се страхувайте."
+],
 "grammar": [
 "present",
 "imperative"
@@ -34588,6 +35682,9 @@
 "en_loose": [
 "What interests you?"
 ],
+"bg_alt_en": [
+"От какво се интересувате?"
+],
 "grammar": [
 "present"
 ]
@@ -34619,6 +35716,9 @@
 "en_loose": [
 "Do you take an interest in nature?",
 "Do you have an interest in nature?"
+],
+"bg_alt_en": [
+"Интересуваш ли се от природата?"
 ],
 "grammar": [
 "present"
@@ -34799,6 +35899,10 @@
 "en_loose": [
 "I've waited for you a whole hour!"
 ],
+"bg_alt_en": [
+"Чаках ви цял час!",
+"Цял час ви чаках!"
+],
 "grammar": [
 "aorist"
 ]
@@ -34829,6 +35933,9 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Колко часа на ден работите?"
+],
 "grammar": [
 "present",
 "numeral"
@@ -34869,6 +35976,10 @@
 "question"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Имате ли час при зъболекаря в четвъртък?",
+"В четвъртък имате ли час при зъболекаря?"
+],
 "grammar": [
 "present"
 ]
@@ -35182,6 +36293,9 @@
 "en_loose": [
 "Could you show me the way?"
 ],
+"bg_alt_en": [
+"Можеш ли да ми покажеш пътя?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -35222,6 +36336,9 @@
 ],
 "en_loose": [
 "Hurry up and get dressed, the train leaves in ten minutes."
+],
+"bg_alt_en": [
+"Облечете се бързо, влакът тръгва след десет минути."
 ],
 "grammar": [
 "present",
@@ -35510,6 +36627,9 @@
 "Drive slower, the road is narrow.",
 "Drive more slowly, the road is narrow."
 ],
+"bg_alt_en": [
+"Карайте по-бавно, улицата е тясна."
+],
 "grammar": [
 "present",
 "imperative",
@@ -35580,6 +36700,10 @@
 "polite"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Извини, колко струва този пръстен?",
+"Извинявай, колко струва този пръстен?"
+],
 "grammar": [
 "present",
 "imperative"
@@ -35721,6 +36845,9 @@
 "I was reminded of you when I saw this ring.",
 "Seeing this ring, I thought of you."
 ],
+"bg_alt_en": [
+"Сетих се за вас, когато видях този пръстен."
+],
 "grammar": [
 "aorist"
 ]
@@ -35793,6 +36920,10 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Praat alstublieft wat langzamer, ik begrijp het niet."
+],
+"bg_alt_en": [
+"Говори по-бавно, моля, не разбирам.",
+"Моля, говори по-бавно, не разбирам."
 ],
 "grammar": [
 "present",
@@ -36015,6 +37146,10 @@
 "en_loose": [
 "Is this passport yours?"
 ],
+"bg_alt_en": [
+"Това твоят паспорт ли е?",
+"Твоят паспорт ли е това?"
+],
 "grammar": [
 "present"
 ]
@@ -36044,6 +37179,9 @@
 ],
 "en_loose": [
 "Remember your passport!"
+],
+"bg_alt_en": [
+"Не забравяйте паспорта си!"
 ],
 "grammar": [
 "imperative"
@@ -36111,6 +37249,9 @@
 "Wait just a second!",
 "Hang on a second!"
 ],
+"bg_alt_en": [
+"Чакайте една секунда!"
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -36148,6 +37289,9 @@
 "en_loose": [
 "Leave your luggage on the bed.",
 "Leave the bags on the bed."
+],
+"bg_alt_en": [
+"Оставете багажа върху леглото."
 ],
 "grammar": [
 "imperative"
@@ -36199,7 +37343,9 @@
 "bg": "Изобщо не съм сигурна, че е той.",
 "nl": "Ik ben er helemaal niet zeker van dat hij het is.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Изобщо не съм сигурен, че е той."
+],
 "en_alt": [
 "I'm not sure at all that it's him.",
 "I'm not at all sure that it's him.",
@@ -36376,6 +37522,9 @@
 "en_loose": [
 "Get fruit and vegetables from the market."
 ],
+"bg_alt_en": [
+"Купете плодове и зеленчуци от пазара."
+],
 "grammar": [
 "imperative"
 ]
@@ -36440,6 +37589,9 @@
 "en_loose": [
 "Could I count on you?"
 ],
+"bg_alt_en": [
+"Може ли да разчитам на вас?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -36502,6 +37654,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Please don't drive so fast."
+],
+"bg_alt_en": [
+"Моля ви да не карате толкова бързо."
 ],
 "grammar": [
 "present",
@@ -36572,6 +37727,9 @@
 "question"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Умеете ли да плувате?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -36641,6 +37799,9 @@
 "en_loose": [
 "Do you still remember that day in the mountains?",
 "Remember that day in the mountains?"
+],
+"bg_alt_en": [
+"Спомняте ли си онзи ден в планината?"
 ],
 "grammar": [
 "present"
@@ -36889,6 +38050,10 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Вместо такси вземете метрото.",
+"Вземете метрото вместо такси."
+],
 "grammar": [
 "imperative"
 ]
@@ -36991,6 +38156,9 @@
 "en_loose": [
 "Can you speak English? — Yes, but only a little."
 ],
+"bg_alt_en": [
+"Говориш ли английски? — Да, но само малко."
+],
 "grammar": [
 "present"
 ]
@@ -37024,6 +38192,10 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Excuse me, I don't understand. Can you speak English?"
+],
+"bg_alt_en": [
+"Извини, не разбирам. Говориш ли английски?",
+"Извинявай, не разбирам. Говориш ли английски?"
 ],
 "grammar": [
 "present",
@@ -37098,6 +38270,10 @@
 "Grab a bite and pour yourself some tea.",
 "Have a snack and pour yourself some tea."
 ],
+"bg_alt_en": [
+"Хапнете си нещо и си налейте чай.",
+"Хапнете нещо и си налейте чай."
+],
 "grammar": [
 "imperative"
 ]
@@ -37134,6 +38310,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "The bottle is empty, go and get another one."
+],
+"bg_alt_en": [
+"Бутилката е празна, донесете още една."
 ],
 "grammar": [
 "present",
@@ -37185,7 +38364,9 @@
 "bg": "— Свободна ли си в събота? — Не, заета съм.",
 "nl": "— Ben je zaterdag vrij? — Nee, ik heb het druk.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"— Свободен ли си в събота? — Не, зает съм."
+],
 "en_alt": [
 "— Are you available on Saturday? — No, I'm busy.",
 "— Are you free Saturday? — No, I'm busy.",
@@ -37208,6 +38389,10 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "— Heb je zaterdag tijd? — Nee, ik heb het druk."
+],
+"bg_alt_en": [
+"— Свободни ли сте в събота? — Не, заета съм.",
+"— Свободни ли сте в събота? — Не, зает съм."
 ],
 "grammar": [
 "present"
@@ -37800,6 +38985,10 @@
 "en_loose": [
 "Bring an umbrella, it will rain this afternoon."
 ],
+"bg_alt_en": [
+"Вземете чадър, следобед ще има дъжд.",
+"Вземете чадър, защото следобед ще има дъжд."
+],
 "grammar": [
 "future",
 "imperative"
@@ -37834,6 +39023,9 @@
 "time"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Ще ви се обадя следобед."
+],
 "grammar": [
 "future"
 ]
@@ -37869,6 +39061,9 @@
 "en_loose": [
 "Don't worry, we'll be fine.",
 "Don't worry, we'll sort it out."
+],
+"bg_alt_en": [
+"Не се притеснявайте, ще се справим."
 ],
 "grammar": [
 "future",
@@ -38020,6 +39215,9 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Благодаря, приятен ден и на теб!"
+],
 "grammar": [
 "present"
 ]
@@ -38157,6 +39355,9 @@
 "polite"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Имаш ли специално меню за деца?"
+],
 "grammar": [
 "present"
 ]
@@ -38191,6 +39392,9 @@
 "en_loose": [
 "How long do you boil the eggs?"
 ],
+"bg_alt_en": [
+"Колко минути варите яйцата?"
+],
 "grammar": [
 "present"
 ]
@@ -38224,6 +39428,9 @@
 "en_loose": [
 "Do you often go to see plays?",
 "Do you go to the theater a lot?"
+],
+"bg_alt_en": [
+"Често ли ходиш на театър?"
 ],
 "grammar": [
 "present"
@@ -38374,6 +39581,9 @@
 "There's ice on the road, so drive slowly.",
 "There's ice on the road, go slowly."
 ],
+"bg_alt_en": [
+"По пътя има лед, карайте бавно."
+],
 "grammar": [
 "present",
 "imperative"
@@ -38443,6 +39653,9 @@
 "feelings"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"— Как е баба ви? — Всичко е наред, не се притеснявайте."
+],
 "grammar": [
 "present",
 "imperative"
@@ -38684,6 +39897,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Хапнете още малко!"
+],
 "grammar": [
 "imperative"
 ]
@@ -38715,6 +39931,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Налейте ми още малко вино."
+],
 "grammar": [
 "imperative"
 ]
@@ -38792,6 +40011,9 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "— Mag ik de rekening? — Alstublieft. Fijne dag!"
+],
+"bg_alt_en": [
+"— Сметката, моля. — Заповядай. Приятен ден!"
 ],
 "grammar": [
 "present",
@@ -39072,6 +40294,9 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Denk niet meer aan het verleden."
+],
+"bg_alt_en": [
+"Не мислете за миналото."
 ],
 "grammar": [
 "imperative"
@@ -39715,6 +40940,9 @@
 "Everything is possible if you believe in it.",
 "Anything is possible if you believe in it."
 ],
+"bg_alt_en": [
+"Всичко е възможно, ако вярвате."
+],
 "grammar": [
 "present"
 ]
@@ -39753,6 +40981,9 @@
 "en_loose": [
 "Would you like to have lunch at that bar over there?",
 "Would you like to have lunch at that bar?"
+],
+"bg_alt_en": [
+"Искате ли да обядваме в онзи бар?"
 ],
 "grammar": [
 "present",
@@ -39827,6 +41058,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Сложете новите обувки в кутията."
+],
 "grammar": [
 "imperative"
 ]
@@ -40024,6 +41258,10 @@
 "polite"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Колко харчиш на месец за храна?",
+"Колко харчиш за храна на месец?"
+],
 "grammar": [
 "present"
 ]
@@ -40256,6 +41494,10 @@
 "Tidy your room before you leave.",
 "Tidy up your room before you go out."
 ],
+"bg_alt_en": [
+"Почистете си стаята, преди да излезете.",
+"Почистете стаята си, преди да излезете."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -40386,7 +41628,9 @@
 "nl_alt": [
 "Ik vind dat je helemaal gelijk hebt."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Мисля, че си напълно права."
+],
 "en_alt": [
 "I think you're entirely right.",
 "I think you're totally right.",
@@ -40411,6 +41655,9 @@
 "en_loose": [
 "I think you're absolutely right.",
 "I believe you're completely right."
+],
+"bg_alt_en": [
+"Мисля, че сте напълно прави."
 ],
 "grammar": [
 "present"
@@ -40672,6 +41919,10 @@
 "en_loose": [
 "Excuse me, which way is the exit to the parking lot?"
 ],
+"bg_alt_en": [
+"Извини, къде е изходът към паркинга?",
+"Извинявай, къде е изходът към паркинга?"
+],
 "grammar": [
 "present",
 "imperative"
@@ -40712,6 +41963,10 @@
 "Put on your sneakers, we're going running in the park.",
 "Put on your running shoes, we're going running in the park.",
 "Put on your trainers, we're going running in the park."
+],
+"bg_alt_en": [
+"Обуйте си маратонките, ще тичаме в парка.",
+"Обуйте маратонките си, ще тичаме в парка."
 ],
 "grammar": [
 "future",
@@ -40790,6 +42045,9 @@
 "en_loose": [
 "Turn the air conditioner on, it's really hot."
 ],
+"bg_alt_en": [
+"Пуснете климатика, много е горещо."
+],
 "grammar": [
 "present",
 "imperative"
@@ -40863,6 +42121,9 @@
 "negative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Не пускай децата сами на плажа."
+],
 "grammar": [
 "imperative"
 ]
@@ -40898,6 +42159,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Close the window, the flies and mosquitoes are getting in."
+],
+"bg_alt_en": [
+"Затворете прозореца, влизат мухи и комари."
 ],
 "grammar": [
 "present",
@@ -41020,6 +42284,10 @@
 "en_loose": [
 "You spend a lot of money on Christmas presents."
 ],
+"bg_alt_en": [
+"Много харчите за подаръци за Коледа.",
+"Харчите много за подаръци за Коледа."
+],
 "grammar": [
 "present"
 ]
@@ -41134,6 +42402,9 @@
 "I looked for you everywhere, where have you been?",
 "I've been looking everywhere for you, where were you?"
 ],
+"bg_alt_en": [
+"Търсих ви навсякъде, къде бяхте?"
+],
 "grammar": [
 "aorist"
 ]
@@ -41181,7 +42452,9 @@
 "nl_alt": [
 "Kan jij zwemmen? — Nee, dat heb ik nooit geleerd."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Умееш ли да плуваш? — Не, никога не съм се учила."
+],
 "en_alt": [
 "Do you know how to swim? — No, I've never learned.",
 "Can you swim? — No, I've never learned how."
@@ -41205,6 +42478,10 @@
 "Can you swim? — No, I never learned to.",
 "Do you know how to swim? — No, I never learned.",
 "Can you swim? — No, I never learned how."
+],
+"bg_alt_en": [
+"Умеете ли да плувате? — Не, никога не съм се учил.",
+"Умеете ли да плувате? — Не, никога не съм се учила."
 ],
 "grammar": [
 "present",
@@ -41318,6 +42595,10 @@
 "– What are you up to? – I'm ironing my shirts.",
 "– What are you up to? – Ironing my shirts."
 ],
+"bg_alt_en": [
+"– Какво правите? – Гладя ризите си.",
+"– Какво правите? – Гладя си ризите."
+],
 "grammar": [
 "present"
 ]
@@ -41414,7 +42695,8 @@
 ],
 "bg_alt": [
 "Откъде си купил тази раница? – Подарък е от баща ми.",
-"Къде си купила тази раница? – Подарък е от баща ми."
+"Къде си купила тази раница? – Подарък е от баща ми.",
+"Откъде си купила тази раница? – Подарък е от баща ми."
 ],
 "en_alt": [
 "Where did you buy this rucksack? – It's a present from my father.",
@@ -41445,6 +42727,10 @@
 "Where did you get this backpack? – It's a gift from my father.",
 "Where did you buy this backpack? – It's a present from my dad.",
 "Where did you buy this backpack? – It's a gift from my dad."
+],
+"bg_alt_en": [
+"Къде сте купили тази раница? – Подарък е от баща ми.",
+"Откъде сте купили тази раница? – Подарък е от баща ми."
 ],
 "grammar": [
 "present",
@@ -41598,6 +42884,9 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Maak me wakker zodra we in de haven aankomen."
+],
+"bg_alt_en": [
+"Събудете ме, когато пристигнем на пристанището."
 ],
 "grammar": [
 "present",
@@ -41908,6 +43197,9 @@
 "Incidentally, have you seen the new fountain on the square?",
 "By the way, have you seen the new fountain in the square?"
 ],
+"bg_alt_en": [
+"Впрочем, видяхте ли новия фонтан на площада?"
+],
 "grammar": [
 "aorist"
 ]
@@ -41993,7 +43285,9 @@
 "Ik zal mijn rugzak wel ergens in de bus hebben laten liggen."
 ],
 "bg_alt": [
-"Сигурно съм забравил раницата си някъде в автобуса."
+"Сигурно съм забравил раницата си някъде в автобуса.",
+"Сигурно съм оставила раницата си някъде в автобуса.",
+"Сигурно съм забравила раницата си някъде в автобуса."
 ],
 "en_alt": [
 "I must have left my rucksack somewhere on the bus.",
@@ -42209,6 +43503,9 @@
 "en_loose": [
 "Did you ever see a real bear?"
 ],
+"bg_alt_en": [
+"Виждали ли сте някога истинска мечка?"
+],
 "grammar": [
 "perfect"
 ]
@@ -42275,6 +43572,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Извадете подаръка от кутията!"
+],
 "grammar": [
 "imperative"
 ]
@@ -42359,6 +43659,10 @@
 "modal"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Прането е готово, можете да го извадите от пералнята.",
+"Прането е готово, може да го извадите от пералнята."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -42474,6 +43778,9 @@
 "Have you washed the sheets and towels yet?",
 "Have you already washed the sheets and the towels?"
 ],
+"bg_alt_en": [
+"Изпрахте ли вече чаршафите и кърпите?"
+],
 "grammar": [
 "aorist"
 ]
@@ -42513,6 +43820,9 @@
 "en_loose": [
 "Are you sure the address is accurate?"
 ],
+"bg_alt_en": [
+"Сигурни ли сте, че адресът е верен?"
+],
 "grammar": [
 "present"
 ]
@@ -42551,6 +43861,10 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Wil je me het adres van het hotel sturen?"
+],
+"bg_alt_en": [
+"Изпратете ми адреса на хотела, моля.",
+"Моля, изпратете ми адреса на хотела."
 ],
 "grammar": [
 "imperative"
@@ -42634,6 +43948,10 @@
 "en_loose": [
 "We have a lot in common."
 ],
+"bg_alt_en": [
+"Ние с вас имаме много общо.",
+"С вас имаме много общо."
+],
 "grammar": [
 "present"
 ]
@@ -42646,7 +43964,9 @@
 "– Hoe gaat het? – Zo-zo, ik heb het heel druk.",
 "– Hoe gaat het? – Het gaat wel, ik heb het erg druk."
 ],
-"bg_alt": [],
+"bg_alt": [
+"– Как върви? – Горе-долу, много съм заета."
+],
 "en_alt": [
 "– How are things? – So-so, I'm very busy.",
 "– How are things going? – So-so, I'm very busy."
@@ -42707,6 +44027,9 @@
 "Don't ride your bike on the sidewalk!",
 "Don't ride your bicycle on the sidewalk!",
 "Don't ride your bike on the pavement!"
+],
+"bg_alt_en": [
+"Не карайте колелото по тротоара!"
 ],
 "grammar": [
 "imperative"
@@ -43003,6 +44326,10 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Извадете торбите от колата, моля.",
+"Моля, извадете торбите от колата."
+],
 "grammar": [
 "imperative"
 ]
@@ -43610,6 +44937,9 @@
 "en_loose": [
 "Take off your shoes and put on some slippers."
 ],
+"bg_alt_en": [
+"Свалете си обувките и обуйте чехлите."
+],
 "grammar": [
 "imperative"
 ]
@@ -43647,6 +44977,10 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Свалете си шапката, когато влизате в църквата.",
+"Свалете шапката си, когато влизате в църквата."
+],
 "grammar": [
 "present",
 "imperative"
@@ -43685,6 +45019,10 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Wil je de koffer van de plank halen?"
+],
+"bg_alt_en": [
+"Свалете куфара от рафта, моля.",
+"Моля, свалете куфара от рафта."
 ],
 "grammar": [
 "imperative"
@@ -43759,6 +45097,9 @@
 ],
 "en_loose": [
 "Don't touch the glass with your dirty fingers!"
+],
+"bg_alt_en": [
+"Не докосвайте стъклото с мръсни пръсти!"
 ],
 "grammar": [
 "imperative"
@@ -44022,6 +45363,10 @@
 "nl_loose": [
 "Wilt u het monument alstublieft niet aanraken?"
 ],
+"bg_alt_en": [
+"Моля, не докосвай паметника.",
+"Не докосвай паметника, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -44223,6 +45568,10 @@
 "Sit down, please, the doctor will be here shortly.",
 "Please sit down, the doctor will be here in a moment."
 ],
+"bg_alt_en": [
+"Седни, моля, лекарят ще дойде след малко.",
+"Моля, седни, лекарят ще дойде след малко."
+],
 "grammar": [
 "future",
 "imperative"
@@ -44338,6 +45687,10 @@
 "future"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Утре ще ви върна ключовете.",
+"Ще ви върна ключовете утре."
+],
 "grammar": [
 "future"
 ]
@@ -44411,6 +45764,9 @@
 "Zet de motor af, we moeten lang wachten.",
 "Doe de motor uit, we zullen lang moeten wachten."
 ],
+"bg_alt_en": [
+"Изгасете мотора, ще чакаме дълго."
+],
 "grammar": [
 "future",
 "imperative"
@@ -44445,6 +45801,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Не забравяйте да изгасите огъня, преди да тръгнем."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -44480,6 +45839,9 @@
 "habit"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Гасите ли лампите, когато излизате?"
+],
 "grammar": [
 "present"
 ]
@@ -45118,6 +46480,10 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Все още ли работите в банката?",
+"Още ли работите в банката?"
+],
 "grammar": [
 "present"
 ]
@@ -45279,6 +46645,10 @@
 "Don't go so fast, there's ice on the road!",
 "Don't drive that fast, there's ice on the road!",
 "Don't drive so fast, the road is icy!"
+],
+"bg_alt_en": [
+"Не карайте с такава скорост, на пътя има лед!",
+"Не карайте толкова бързо, на пътя има лед!"
 ],
 "grammar": [
 "present",
@@ -45741,6 +47111,10 @@
 "Could you fix the bottom shelf?",
 "Could you repair the bottom shelf?"
 ],
+"bg_alt_en": [
+"Можете ли да поправите долния рафт?",
+"Може ли да поправите долния рафт?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -45895,6 +47269,10 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "All the best, and say hello to your mum!"
+],
+"bg_alt_en": [
+"Всичко хубаво и поздрави на майка ви!",
+"Поздрави на майка ви и всичко хубаво!"
 ],
 "grammar": [
 "present"
@@ -46269,6 +47647,9 @@
 "wishes"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Надявам се скоро да оздравеете."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -46305,6 +47686,10 @@
 "future"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Ще оздравеете скоро, не се притеснявайте.",
+"Скоро ще оздравеете, не се притеснявайте."
+],
 "grammar": [
 "future",
 "imperative"
@@ -46385,6 +47770,9 @@
 "en_loose": [
 "Come here and let me give you a hug!",
 "Come here, let me give you a hug!"
+],
+"bg_alt_en": [
+"Елате да ви прегърна!"
 ],
 "grammar": [
 "da-clause",
@@ -46593,6 +47981,10 @@
 "nl_loose": [
 "Zonder visum komen jullie het land niet in."
 ],
+"bg_alt_en": [
+"Без виза не можеш да влезеш в страната.",
+"Не можеш да влезеш в страната без виза."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -46704,6 +48096,9 @@
 "Do you have pets? – Yes, we have a dog.",
 "Do you have any pets? – Yes, we have a dog."
 ],
+"bg_alt_en": [
+"Имаш ли домашни любимци? – Да, едно куче."
+],
 "grammar": [
 "present",
 "numeral"
@@ -46739,6 +48134,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Сложете тежкия куфар в багажника."
+],
 "grammar": [
 "imperative"
 ]
@@ -46813,6 +48211,9 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Вземете палатката от багажника."
+],
 "grammar": [
 "imperative"
 ]
@@ -46972,7 +48373,9 @@
 "Weet jij zeker dat dit de juiste richting naar de waterval is?",
 "Ben je er zeker van dat dit de goede richting naar de waterval is?"
 ],
-"bg_alt": [],
+"bg_alt": [
+"Сигурна ли си, че това е правилната посока към водопада?"
+],
 "en_alt": [
 "Are you sure that this is the correct direction to the waterfall?",
 "Are you sure this is the right direction for the waterfall?",
@@ -46998,6 +48401,9 @@
 "Are you sure this is the right way to the waterfall?",
 "Are you certain this is the right way to the waterfall?",
 "Are you sure this is the correct way to the waterfall?"
+],
+"bg_alt_en": [
+"Сигурни ли сте, че това е правилната посока към водопада?"
 ],
 "grammar": [
 "present"
@@ -47115,6 +48521,10 @@
 "en_loose": [
 "Give me a piece of paper, please.",
 "Please give me a piece of paper."
+],
+"bg_alt_en": [
+"Дайте ми един лист хартия, моля.",
+"Моля, дайте ми един лист хартия."
 ],
 "grammar": [
 "imperative",
@@ -47269,6 +48679,9 @@
 "Take care! Give my love to your parents.",
 "Take care! Best wishes to your parents."
 ],
+"bg_alt_en": [
+"Пазете се! Много поздрави на родителите ви."
+],
 "grammar": [
 "imperative"
 ]
@@ -47305,6 +48718,9 @@
 ],
 "en_loose": [
 "Take care and give me a call!"
+],
+"bg_alt_en": [
+"Пазете се и ми се обаждайте!"
 ],
 "grammar": [
 "imperative"
@@ -47346,6 +48762,9 @@
 "en_loose": [
 "Cut two slices of cheese for the salad.",
 "Slice two pieces of cheese for the salad."
+],
+"bg_alt_en": [
+"Отрежете две парчета сирене за салатата."
 ],
 "grammar": [
 "imperative",
@@ -47463,6 +48882,10 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "What is your favourite subject at school?"
+],
+"bg_alt_en": [
+"Кой предмет в училище харесвате най-много?",
+"Кой предмет харесвате най-много в училище?"
 ],
 "grammar": [
 "present",
@@ -47770,6 +49193,9 @@
 "question"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Колко струва билетът? – Питай на касата."
+],
 "grammar": [
 "present",
 "imperative"
@@ -48122,6 +49548,10 @@
 "It's good to see you! Welcome!",
 "It's nice to see you! Welcome!"
 ],
+"bg_alt_en": [
+"Радвам се да те видя! Добре дошъл!",
+"Радвам се да те видя! Добре дошла!"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -48158,6 +49588,10 @@
 "en_loose": [
 "Welcome to our house! Come in!",
 "Welcome to our house! Come on in!"
+],
+"bg_alt_en": [
+"Добре дошъл в нашия дом! Влизай!",
+"Добре дошла в нашия дом! Влизай!"
 ],
 "grammar": [
 "present",
@@ -48307,6 +49741,9 @@
 "Sit in the shade, it's really hot.",
 "Go and sit in the shade, it's very hot."
 ],
+"bg_alt_en": [
+"Седнете на сянка, много е горещо."
+],
 "grammar": [
 "present",
 "imperative"
@@ -48378,6 +49815,9 @@
 "What's new? – Nothing much, and you?",
 "What's new? – Not much, and you?",
 "Anything new? – Nothing special, and you?"
+],
+"bg_alt_en": [
+"Какво ново? – Нищо особено, а вие?"
 ],
 "grammar": [
 "present"
@@ -48494,6 +49934,9 @@
 "What will you have? — One shopska salad, please.",
 "What would you like? — A shopska salad, please."
 ],
+"bg_alt_en": [
+"Какво ще поръчаш? — Една шопска салата, моля."
+],
 "grammar": [
 "present",
 "future",
@@ -48532,6 +49975,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Order and pay at the counter."
+],
+"bg_alt_en": [
+"Поръчай и плати на касата."
 ],
 "grammar": [
 "imperative"
@@ -49257,6 +50703,9 @@
 "en_loose": [
 "Write your name on the last line of the sheet."
 ],
+"bg_alt_en": [
+"Напишете името си на долната линия на листа."
+],
 "grammar": [
 "imperative"
 ]
@@ -49327,6 +50776,9 @@
 "Don't touch the candle, it's lit!",
 "Don't touch the candle, it's alight!"
 ],
+"bg_alt_en": [
+"Не докосвайте свещта, гори!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -49395,6 +50847,10 @@
 "imperative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Моля, запалете свещите на тортата.",
+"Запалете свещите на тортата, моля."
+],
 "grammar": [
 "imperative"
 ]
@@ -49938,6 +51394,9 @@
 "Don't drive that fast in the dark!",
 "Don't drive so fast when it's dark!"
 ],
+"bg_alt_en": [
+"Не карайте с такава скорост в тъмнината!"
+],
 "grammar": [
 "imperative"
 ]
@@ -50173,6 +51632,9 @@
 "Hold the rope with both hands!",
 "Grab the rope with two hands!"
 ],
+"bg_alt_en": [
+"Хванете въжето с двете ръце!"
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -50354,6 +51816,9 @@
 "en_loose": [
 "Why are you crying? What has happened?"
 ],
+"bg_alt_en": [
+"Защо плачете? Какво се случи?"
+],
 "grammar": [
 "present",
 "aorist"
@@ -50477,6 +51942,9 @@
 "en_loose": [
 "Do you know yet whether it's a boy or a girl?"
 ],
+"bg_alt_en": [
+"Знаеш ли вече пола на бебето?"
+],
 "grammar": [
 "present"
 ]
@@ -50554,6 +52022,9 @@
 "en_loose": [
 "In that case, there's no reason for you to worry."
 ],
+"bg_alt_en": [
+"В такъв случай нямате причина да се притеснявате."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -50596,6 +52067,10 @@
 "First count to ten, then go looking!",
 "First count to ten, then start searching!",
 "Count to ten first, then go and look!"
+],
+"bg_alt_en": [
+"Първо бройте до десет, после търсете!",
+"Първо бройте до десет и после търсете!"
 ],
 "grammar": [
 "imperative",
@@ -50790,6 +52265,10 @@
 "Give me a ring when you get there.",
 "Give me a call when you get there."
 ],
+"bg_alt_en": [
+"Звъннете ми, когато стигнете.",
+"Обадете ми се, когато стигнете."
+],
 "grammar": [
 "present",
 "imperative"
@@ -50980,6 +52459,9 @@
 "I ate half of the cake, but I saved a piece for you.",
 "I ate half the cake, but I saved you a slice.",
 "I ate half the cake but left you a slice."
+],
+"bg_alt_en": [
+"Изядох половината торта, но ви оставих едно парче."
 ],
 "grammar": [
 "aorist",
@@ -51213,6 +52695,10 @@
 "phrase"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Весела Коледа на вас и на семейството ви!",
+"Весела Коледа на вас и семейството ви!"
+],
 "grammar": [
 "present"
 ]
@@ -51253,6 +52739,10 @@
 ],
 "en_loose": [
 "Look up! An eagle is flying overhead."
+],
+"bg_alt_en": [
+"Погледнете нагоре! Над нас лети орел.",
+"Погледнете нагоре! Орел лети над нас."
 ],
 "grammar": [
 "present",
@@ -51529,7 +53019,9 @@
 "Ik ben geboren in februari, mijn zus in juli."
 ],
 "bg_alt": [
-"Аз съм роден през февруари, а сестра ми — през юли."
+"Аз съм роден през февруари, а сестра ми — през юли.",
+"Родена съм през февруари, а сестра ми — през юли.",
+"Аз съм родена през февруари, а сестра ми — през юли."
 ],
 "en_alt": [
 "I was born in February and my sister was born in July.",
@@ -51753,6 +53245,10 @@
 "What level is your English?",
 "What level of English do you have?"
 ],
+"bg_alt_en": [
+"Какво е нивото ви по английски?",
+"Какво е вашето ниво по английски?"
+],
 "grammar": [
 "present"
 ]
@@ -51867,6 +53363,9 @@
 "en_loose": [
 "Do you happen to know the address of the national museum?",
 "Do you know what the address of the national museum is?"
+],
+"bg_alt_en": [
+"Знаеш ли адреса на националния музей?"
 ],
 "grammar": [
 "present"
@@ -51991,6 +53490,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Look at the timetable and the route of the bus."
+],
+"bg_alt_en": [
+"Проверете разписанието и маршрута на автобуса."
 ],
 "grammar": [
 "imperative"
@@ -52138,6 +53640,9 @@
 "Lock the door, I'll wait for you downstairs.",
 "Lock up, I'm waiting for you downstairs."
 ],
+"bg_alt_en": [
+"Заключете вратата, чакам ви долу."
+],
 "grammar": [
 "present",
 "imperative"
@@ -52173,6 +53678,10 @@
 "en_loose": [
 "Stop lying to me, I know the truth.",
 "Don't tell me lies, I know the truth."
+],
+"bg_alt_en": [
+"Не ме лъжете, знам истината.",
+"Не ме лъжете, аз знам истината."
 ],
 "grammar": [
 "present",
@@ -52212,6 +53721,9 @@
 "I rely on you, I trust you fully.",
 "I'm counting on you, I trust you fully.",
 "I count on you, I trust you completely."
+],
+"bg_alt_en": [
+"Разчитам на вас, имам ви пълно доверие."
 ],
 "grammar": [
 "present"
@@ -52417,6 +53929,10 @@
 "At the intersection turn left, then go straight ahead.",
 "Turn left at the crossroads, then go straight on."
 ],
+"bg_alt_en": [
+"На кръстовището върви наляво, после направо.",
+"Върви наляво на кръстовището, после направо."
+],
 "grammar": [
 "imperative"
 ]
@@ -52455,6 +53971,9 @@
 "Go straight ahead to the traffic lights and then turn left.",
 "Walk straight on to the traffic lights and then turn left.",
 "Walk straight ahead to the traffic light and then turn left."
+],
+"bg_alt_en": [
+"Върви направо до светофара и после наляво."
 ],
 "grammar": [
 "imperative"
@@ -52529,6 +54048,9 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Не гледайте назад към миналото, мислете за бъдещето."
+],
 "grammar": [
 "imperative"
 ]
@@ -52560,6 +54082,10 @@
 "negative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Не разбрах шегата ви.",
+"Не разбрах вашата шега."
+],
 "grammar": [
 "aorist"
 ]
@@ -52593,6 +54119,9 @@
 "past"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Не е ваша вина, че закъсняхме."
+],
 "grammar": [
 "present",
 "aorist"
@@ -52603,7 +54132,9 @@
 "bg": "Честито! Чух, че си завършил университета.",
 "nl": "Gefeliciteerd! Ik heb gehoord dat je bent afgestudeerd.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Честито! Чух, че си завършила университета."
+],
 "en_alt": [
 "Congratulations! I heard that you graduated from university.",
 "Congratulations! I heard you finished university.",
@@ -52631,6 +54162,9 @@
 "en_loose": [
 "Congratulations! I've heard you've finished university.",
 "Congratulations! I hear you've graduated from university."
+],
+"bg_alt_en": [
+"Честито! Чух, че сте завършили университета."
 ],
 "grammar": [
 "aorist",
@@ -52673,6 +54207,10 @@
 "en_loose": [
 "What's the reason for your trip?"
 ],
+"bg_alt_en": [
+"Каква е целта на твоето пътуване?",
+"Каква е целта на пътуването ти?"
+],
 "grammar": [
 "present"
 ]
@@ -52703,6 +54241,9 @@
 "negative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Не гледайте назад, гледайте напред!"
+],
 "grammar": [
 "imperative"
 ]
@@ -52758,7 +54299,9 @@
 "Ik ben nog niet aan het lokale klimaat gewend."
 ],
 "bg_alt": [
-"Все още не съм свикнал с местния климат."
+"Все още не съм свикнал с местния климат.",
+"Още не съм свикнала с местния климат.",
+"Все още не съм свикнала с местния климат."
 ],
 "en_alt": [
 "I haven't got used to the local climate yet.",
@@ -52896,6 +54439,9 @@
 ],
 "en_loose": [
 "Stop arguing, it was just a joke!"
+],
+"bg_alt_en": [
+"Не се карай, това беше само шега!"
 ],
 "grammar": [
 "imperative",
@@ -53120,6 +54666,10 @@
 "en_loose": [
 "It's not your fault, we all make mistakes sometimes."
 ],
+"bg_alt_en": [
+"Не е ваша вината, всеки греши понякога.",
+"Вината не е ваша, всеки греши понякога."
+],
 "grammar": [
 "present"
 ]
@@ -53149,6 +54699,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Could you keep a secret?"
+],
+"bg_alt_en": [
+"Можете ли да пазите тайна?"
 ],
 "grammar": [
 "present",
@@ -53267,6 +54820,10 @@
 "This is your last chance to make a change.",
 "It's your last chance to change."
 ],
+"bg_alt_en": [
+"Това е последният ви шанс за промяна.",
+"Това е вашият последен шанс за промяна."
+],
 "grammar": [
 "present"
 ]
@@ -53302,6 +54859,9 @@
 "en_loose": [
 "Tell me the truth, do I stand a chance?",
 "Tell me the truth, do I have any chance?"
+],
+"bg_alt_en": [
+"Кажете ми истината, имам ли шанс?"
 ],
 "grammar": [
 "present",
@@ -53676,6 +55236,9 @@
 "I don't understand, could you repeat that more slowly?",
 "I don't understand, could you say that again more slowly?"
 ],
+"bg_alt_en": [
+"Не разбирам, можеш ли да повториш по-бавно?"
+],
 "grammar": [
 "present",
 "da-clause",
@@ -53719,6 +55282,9 @@
 "What is your last name? Could you repeat it?",
 "What is your surname? Could you say it again?",
 "What is your family name? Could you repeat it?"
+],
+"bg_alt_en": [
+"Каква е фамилията ти? Можеш ли да я повториш?"
 ],
 "grammar": [
 "present",
@@ -53912,6 +55478,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "Can you remember when we met?"
+],
+"bg_alt_en": [
+"Спомняте ли си кога се запознахме?"
 ],
 "grammar": [
 "present",
@@ -54259,6 +55828,9 @@
 "en_loose": [
 "Enjoy your meal! I hope you'll enjoy it."
 ],
+"bg_alt_en": [
+"Добър апетит! Надявам се да ти хареса."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -54298,6 +55870,9 @@
 "Why are you crying? Is it that you miss Mum?",
 "Why are you crying? Do you miss your mother?"
 ],
+"bg_alt_en": [
+"Защо плачете? Липсва ли ви мама?"
+],
 "grammar": [
 "present"
 ]
@@ -54325,6 +55900,9 @@
 "feelings"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Истината е, че ми липсвате."
+],
 "grammar": [
 "present"
 ]
@@ -54527,6 +56105,9 @@
 "Have you noticed any changes in his character?",
 "Did you notice any changes in his character?"
 ],
+"bg_alt_en": [
+"Забелязахте ли някаква промяна в характера му?"
+],
 "grammar": [
 "aorist"
 ]
@@ -54566,6 +56147,9 @@
 ],
 "en_loose": [
 "What's the point of money if you have no freedom?"
+],
+"bg_alt_en": [
+"Каква полза от парите, ако нямате свобода?"
 ],
 "grammar": [
 "present"
@@ -54756,6 +56340,9 @@
 "en_loose": [
 "Happy birthday! This is a little present for you.",
 "Happy birthday! Here's a little present."
+],
+"bg_alt_en": [
+"Честит рожден ден! Ето ви малък подарък."
 ],
 "grammar": [
 "present"
@@ -54991,6 +56578,9 @@
 ],
 "en_loose": [
 "What kind of coffee do you like best?"
+],
+"bg_alt_en": [
+"Какъв вид кафе предпочиташ?"
 ],
 "grammar": [
 "present"
@@ -55436,6 +57026,9 @@
 "Press here and the door opens.",
 "Push here and the door opens."
 ],
+"bg_alt_en": [
+"Натиснете тук и вратата ще се отвори."
+],
 "grammar": [
 "future",
 "imperative"
@@ -55472,6 +57065,9 @@
 "nl_loose": [
 "Duw harder, anders krijg je de koffer niet dicht.",
 "Druk wat harder, anders gaat de koffer niet dicht."
+],
+"bg_alt_en": [
+"Натиснете по-силно, иначе куфарът няма да се затвори."
 ],
 "grammar": [
 "future",
@@ -55769,6 +57365,9 @@
 "This is a good chance for you to learn a foreign language.",
 "It's a good chance to learn a foreign language."
 ],
+"bg_alt_en": [
+"Това е добра възможност да научите чужд език."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -55808,6 +57407,9 @@
 "Have you got any plans for the weekend?",
 "Do you have any plans for this weekend?"
 ],
+"bg_alt_en": [
+"Имате ли някакъв план за уикенда?"
+],
 "grammar": [
 "present"
 ]
@@ -55845,6 +57447,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "What a pity you can't come with us."
+],
+"bg_alt_en": [
+"Жалко, че не можете да дойдете с нас."
 ],
 "grammar": [
 "present",
@@ -55971,6 +57576,11 @@
 "en_loose": [
 "In this situation I need you to help me."
 ],
+"bg_alt_en": [
+"В тази ситуация имам нужда от вашата помощ.",
+"В тази ситуация се нуждая от вашата помощ.",
+"В тази ситуация имам нужда от помощта ви."
+],
 "grammar": [
 "present"
 ]
@@ -56041,6 +57651,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Breathe slowly and take your time."
+],
+"bg_alt_en": [
+"Дишай бавно и не бързай."
 ],
 "grammar": [
 "imperative"
@@ -56193,6 +57806,9 @@
 "en_loose": [
 "Sorry, wrong number.",
 "Sorry, I've got the wrong number."
+],
+"bg_alt_en": [
+"Извинявайте, сгреших номера."
 ],
 "grammar": [
 "imperative",
@@ -56454,6 +58070,9 @@
 "What are you up to? Do you want to go out for dinner?",
 "What are you doing? Do you want to go out for dinner?"
 ],
+"bg_alt_en": [
+"Какво правите? Искате ли да вечеряме навън?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -56575,6 +58194,10 @@
 "You look very much like your dad, especially when you laugh.",
 "You look a lot like your dad, especially when you laugh."
 ],
+"bg_alt_en": [
+"Приличате много на баща си, особено когато се смеете.",
+"Много приличате на баща си, особено когато се смеете."
+],
 "grammar": [
 "present"
 ]
@@ -56611,6 +58234,9 @@
 "source": "gap-batch-2026-10",
 "en_loose": [
 "Your character is very much like your father's."
+],
+"bg_alt_en": [
+"По характер много приличате на баща си."
 ],
 "grammar": [
 "present"
@@ -56831,6 +58457,9 @@
 "You deserve a rest after all that work.",
 "You deserve a break after all that work."
 ],
+"bg_alt_en": [
+"Заслужавате почивка след толкова работа."
+],
 "grammar": [
 "present"
 ]
@@ -56869,6 +58498,9 @@
 "en_loose": [
 "Don't compare the children, each of them has their own personality.",
 "Don't compare the children, each has their own personality."
+],
+"bg_alt_en": [
+"Не сравнявайте децата, всяко има свой характер."
 ],
 "grammar": [
 "present",
@@ -57100,6 +58732,9 @@
 "What is this called in Dutch?",
 "What is that called in Dutch?"
 ],
+"bg_alt_en": [
+"Как наричаш това на холандски?"
+],
 "grammar": [
 "present"
 ]
@@ -57109,7 +58744,9 @@
 "bg": "Изглеждаш съвсем различен с очила!",
 "nl": "Met een bril zie je er totaal anders uit!",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Изглеждаш съвсем различна с очила!"
+],
 "en_alt": [
 "You look totally different with glasses!",
 "You look completely different in glasses!",
@@ -57135,6 +58772,9 @@
 ],
 "en_loose": [
 "You look completely different wearing glasses!"
+],
+"bg_alt_en": [
+"Изглеждате съвсем различни с очила!"
 ],
 "grammar": [
 "present"
@@ -57171,6 +58811,9 @@
 "Your new dress looks very nice.",
 "Your new dress looks really nice.",
 "Your new dress looks great."
+],
+"bg_alt_en": [
+"Новата ви рокля изглежда много добре."
 ],
 "grammar": [
 "present"
@@ -57253,6 +58896,10 @@
 "Could you translate this sentence to Dutch?",
 "Would you be able to translate this sentence into Dutch?"
 ],
+"bg_alt_en": [
+"Можеш ли да преведеш това изречение на холандски?",
+"Може ли да преведеш това изречение на холандски?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -57293,6 +58940,10 @@
 "Could you please repeat the sentence?",
 "Would you repeat the sentence, please?",
 "Could you say the sentence again, please?"
+],
+"bg_alt_en": [
+"Можеш ли да повториш изречението, моля?",
+"Може ли да повториш изречението, моля?"
 ],
 "grammar": [
 "present",
@@ -57505,6 +59156,9 @@
 "Congratulations on your new job! I wish you every success.",
 "Congratulations on the new job! Wishing you success."
 ],
+"bg_alt_en": [
+"Честито за новата работа! Пожелавам ви успех."
+],
 "grammar": [
 "present"
 ]
@@ -57655,6 +59309,9 @@
 "en_loose": [
 "Don't rush like that, you'll get tired."
 ],
+"bg_alt_en": [
+"Не бързайте толкова, ще се изморите."
+],
 "grammar": [
 "future",
 "imperative"
@@ -57738,6 +59395,10 @@
 "en_loose": [
 "Happy New Year! Wishing you good health and lots of happiness."
 ],
+"bg_alt_en": [
+"Честита Нова година! Пожелавам ви много здраве и щастие.",
+"Честита Нова година! Пожелавам ви много щастие и здраве."
+],
 "grammar": [
 "present"
 ]
@@ -57769,6 +59430,9 @@
 "en_loose": [
 "Happy New Year! I wish you good health and happiness.",
 "Happy New Year! Wishing you health and happiness."
+],
+"bg_alt_en": [
+"Честита Нова година! Пожелавам ви здраве и щастие."
 ],
 "grammar": [
 "present"
@@ -57884,6 +59548,9 @@
 "Are you starting a new job tomorrow? Good luck and all the best!",
 "You're starting a new job tomorrow? Every success and good luck!",
 "You're starting a new job tomorrow? Good luck and success!"
+],
+"bg_alt_en": [
+"Утре започвате нова работа? Успех и късмет!"
 ],
 "grammar": [
 "present"
@@ -58032,6 +59699,9 @@
 "I'll give you a loan, but only on one condition.",
 "I'll lend you some money, but on one condition."
 ],
+"bg_alt_en": [
+"Ще ви дам заем, но при едно условие."
+],
 "grammar": [
 "future",
 "numeral"
@@ -58072,6 +59742,9 @@
 "Let me know if you need a loan.",
 "If you need a loan, just tell me."
 ],
+"bg_alt_en": [
+"Ако имате нужда от заем, кажете ми."
+],
 "grammar": [
 "present",
 "imperative"
@@ -58110,6 +59783,9 @@
 "en_loose": [
 "Do you have any experience with this kind of work?",
 "Have you got any experience with this kind of work?"
+],
+"bg_alt_en": [
+"Имате ли опит с такава работа?"
 ],
 "grammar": [
 "present"
@@ -58347,6 +60023,12 @@
 "Don't go in the cave alone, it's dangerous!",
 "Do not go into the cave by yourselves, it's dangerous!"
 ],
+"bg_alt_en": [
+"Не влизай сам в пещерата, има опасност!",
+"Не влизай сама в пещерата, има опасност!",
+"Не влизай в пещерата сам, има опасност!",
+"Не влизай в пещерата сама, има опасност!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -58495,6 +60177,9 @@
 "en_loose": [
 "Thank you for your care and attention.",
 "Thank you for your attention and care."
+],
+"bg_alt_en": [
+"Благодаря ти за грижата и вниманието."
 ],
 "grammar": [
 "present"
@@ -58729,6 +60414,9 @@
 "I've got your letter. I miss you a lot!",
 "I got your letter. I miss you so much!"
 ],
+"bg_alt_en": [
+"Получих писмото ви. Много ми липсвате!"
+],
 "grammar": [
 "present",
 "aorist"
@@ -58845,6 +60533,9 @@
 "en_loose": [
 "My personal life is not your concern."
 ],
+"bg_alt_en": [
+"Личният ми живот не е ваша работа."
+],
 "grammar": [
 "present"
 ]
@@ -58878,6 +60569,9 @@
 "source": "gap-batch-2026-10",
 "nl_loose": [
 "Dat is een persoonlijke brief, niet lezen!"
+],
+"bg_alt_en": [
+"Това е лично писмо, не го четете!"
 ],
 "grammar": [
 "present",
@@ -58913,6 +60607,10 @@
 "en_loose": [
 "Could you give me an example?",
 "Can you give an example?"
+],
+"bg_alt_en": [
+"Можете ли да ми дадете пример?",
+"Може ли да ми дадете пример?"
 ],
 "grammar": [
 "present",
@@ -59146,6 +60844,10 @@
 "imperative"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Внимавайте! Под камъка има змия.",
+"Внимавайте! Има змия под камъка."
+],
 "grammar": [
 "present",
 "imperative"
@@ -59186,6 +60888,9 @@
 "en_loose": [
 "Be careful and don't wander far from the group!",
 "Be careful and don't stray far from the group!"
+],
+"bg_alt_en": [
+"Внимавайте и не отивайте далеч от групата!"
 ],
 "grammar": [
 "imperative"
@@ -59267,6 +60972,9 @@
 "I've prepared tarator for you. Bon appetit!",
 "I've made you tarator. Bon appetit!",
 "I've prepared you some tarator. Enjoy your meal!"
+],
+"bg_alt_en": [
+"Приготвих ти таратор. Добър апетит!"
 ],
 "grammar": [
 "present",
@@ -59581,7 +61289,9 @@
 "Wauw, wat ben jij gegroeid! Je lijkt op je grootvader.",
 "Tjonge, wat ben je groot geworden! Je lijkt op je opa."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Леле, колко си пораснала! Приличаш на дядо си."
+],
 "en_alt": [
 "Wow, how much you've grown! You look like your grandfather.",
 "Wow, you've grown so much! You look like your grandpa.",
@@ -59605,6 +61315,9 @@
 "exclamation"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Леле, колко сте пораснали! Приличате на дядо си."
+],
 "grammar": [
 "present",
 "perfect"
@@ -59717,6 +61430,9 @@
 "negative"
 ],
 "source": "gap-batch-2026-10",
+"bg_alt_en": [
+"Не говорете толкова високо, бебето спи."
+],
 "grammar": [
 "present",
 "imperative"
@@ -60040,6 +61756,9 @@
 "Why don't you say anything when I ask you something important?",
 "Why do you say nothing when I ask you something important?"
 ],
+"bg_alt_en": [
+"Защо мълчите, когато ви питам нещо важно?"
+],
 "grammar": [
 "present"
 ]
@@ -60163,6 +61882,9 @@
 "en_loose": [
 "Could you drive me to the airport at six?",
 "Could you take me to the airport at six?"
+],
+"bg_alt_en": [
+"Можете ли да ме закарате до летището в шест?"
 ],
 "grammar": [
 "present",
@@ -60535,6 +62257,9 @@
 "nl_loose": [
 "Kun je je voorstellen hoe blij ze was?"
 ],
+"bg_alt_en": [
+"Представяте ли си колко щастлива беше тя?"
+],
 "grammar": [
 "present",
 "aorist"
@@ -60643,6 +62368,10 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"На светофара завий надясно.",
+"Завий надясно на светофара."
+],
 "grammar": [
 "imperative"
 ]
@@ -60725,6 +62454,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "What score did you get on the exam?"
+],
+"bg_alt_en": [
+"Каква оценка получихте на изпита?"
 ],
 "grammar": [
 "aorist"
@@ -60882,6 +62614,9 @@
 "I'm sorry for not calling you earlier.",
 "I'm sorry I didn't call you sooner."
 ],
+"bg_alt_en": [
+"Извинявам се, че не ти се обадих по-рано."
+],
 "grammar": [
 "present",
 "aorist",
@@ -61033,6 +62768,9 @@
 "The driver will collect you from the airport.",
 "The driver will pick you up from the airport."
 ],
+"bg_alt_en": [
+"Шофьорът ще те посрещне на летището."
+],
 "grammar": [
 "future"
 ]
@@ -61148,6 +62886,9 @@
 "future"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Таксито ще те закара до хотела за двадесет евро."
+],
 "grammar": [
 "future",
 "numeral"
@@ -61486,6 +63227,9 @@
 "past"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Той се обърна и тихо каза: „Простете ми.“"
+],
 "grammar": [
 "imperative",
 "aorist"
@@ -61611,6 +63355,10 @@
 "en_loose": [
 "If you want advice, consult a lawyer."
 ],
+"bg_alt_en": [
+"Ако искате съвет, говорете с адвокат.",
+"Ако искате съвет, говорете с някой адвокат."
+],
 "grammar": [
 "present",
 "imperative"
@@ -61727,7 +63475,9 @@
 "bg": "Защо мълчиш? Ядосан ли си?",
 "nl": "Waarom zwijg je? Ben je boos?",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Защо мълчиш? Ядосана ли си?"
+],
 "en_alt": [
 "Why are you quiet? Are you angry?",
 "Why are you keeping quiet? Are you angry?",
@@ -61753,6 +63503,9 @@
 "en_loose": [
 "Why aren't you saying anything? Are you angry?",
 "Why are you so quiet? Are you angry?"
+],
+"bg_alt_en": [
+"Защо мълчите? Ядосани ли сте?"
 ],
 "grammar": [
 "present"
@@ -61891,6 +63644,9 @@
 "present"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Колкото повече учите, толкова повече знаете."
+],
 "grammar": [
 "present"
 ]
@@ -62103,6 +63859,9 @@
 "question"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Еха! Живееш на шестия етаж без асансьор?"
+],
 "grammar": [
 "present",
 "numeral"
@@ -62134,6 +63893,9 @@
 "question"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Еха! Наистина ли сте на шестдесет?"
+],
 "grammar": [
 "present",
 "numeral"
@@ -62169,6 +63931,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Is this really your fourth coffee of the day?"
+],
+"bg_alt_en": [
+"Наистина ли това е четвъртото ви кафе днес?"
 ],
 "grammar": [
 "present",
@@ -62763,6 +64528,9 @@
 "Be patient, the repairman will be here shortly.",
 "Be patient, the repairman is coming in a moment."
 ],
+"bg_alt_en": [
+"Имай търпение, майсторът идва след малко."
+],
 "grammar": [
 "present",
 "imperative"
@@ -62828,6 +64596,9 @@
 "question"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Имате ли молив или химикалка?"
+],
 "grammar": [
 "present"
 ]
@@ -62864,6 +64635,9 @@
 "This pen doesn't belong to anyone, take it.",
 "This pen belongs to no one, take it.",
 "This pen belongs to nobody, take it."
+],
+"bg_alt_en": [
+"Тази химикалка е ничия, вземете я."
 ],
 "grammar": [
 "present",
@@ -63218,6 +64992,9 @@
 "present"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Както знаеш, директорът е болен."
+],
 "grammar": [
 "present"
 ]
@@ -63270,7 +65047,9 @@
 "Ik ben niet naar het werk gekomen omdat ik ziek was."
 ],
 "bg_alt": [
-"Не дойдох на работа, защото бях болен."
+"Не дойдох на работа, защото бях болен.",
+"Не дойдох на работа, понеже бях болна.",
+"Не дойдох на работа, защото бях болна."
 ],
 "en_alt": [
 "I didn't come to work because I was sick.",
@@ -63453,6 +65232,10 @@
 "nl_loose": [
 "Eerst wachten, dan de straat oversteken."
 ],
+"bg_alt_en": [
+"Първо изчакайте, после пресечете улицата.",
+"Първо изчакайте, а после пресечете улицата."
+],
 "grammar": [
 "imperative"
 ]
@@ -63487,6 +65270,9 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "Eerst kalmeren, dan praten we."
+],
+"bg_alt_en": [
+"Първо се успокойте, после ще говорим."
 ],
 "grammar": [
 "future",
@@ -63759,6 +65545,9 @@
 "en_loose": [
 "Please write your name in capital letters."
 ],
+"bg_alt_en": [
+"Напиши името си с големи букви."
+],
 "grammar": [
 "imperative"
 ]
@@ -64018,6 +65807,9 @@
 "Do your homework first, then you can play.",
 "First do your homework, after that you can play."
 ],
+"bg_alt_en": [
+"Първо си направете домашното, после ще играете."
+],
 "grammar": [
 "future",
 "imperative"
@@ -64129,6 +65921,9 @@
 "Forgive me, I've forgotten about my promise.",
 "Forgive me, I forgot what I promised."
 ],
+"bg_alt_en": [
+"Простете ми, забравих обещанието си."
+],
 "grammar": [
 "imperative",
 "aorist"
@@ -64142,7 +65937,9 @@
 "Als je dorst hebt, drink dan zoveel je wilt.",
 "Heb je dorst, drink dan zoveel je wilt."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Ако си жадна, пий колкото искаш."
+],
 "en_alt": [
 "If you're thirsty, drink as much as you want to."
 ],
@@ -64162,6 +65959,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "If you're thirsty, drink as much as you like."
+],
+"bg_alt_en": [
+"Ако сте жадни, пийте колкото искате."
 ],
 "grammar": [
 "present",
@@ -64284,7 +66084,9 @@
 "nl_alt": [
 "Wanneer ik boos ben, helpt muziek me te kalmeren."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Когато съм ядосана, музиката ми помага да се успокоя."
+],
 "en_alt": [
 "When I'm angry, music helps me to calm down.",
 "When I am angry, music helps me calm myself down.",
@@ -64423,6 +66225,10 @@
 "en_loose": [
 "Clean up your room, as I told you.",
 "Clean your room like I told you."
+],
+"bg_alt_en": [
+"Подредете стаята си, както ви казах.",
+"Подредете си стаята, както ви казах."
 ],
 "grammar": [
 "imperative",
@@ -64622,6 +66428,10 @@
 ],
 "en_loose": [
 "Turn right at the second crossing."
+],
+"bg_alt_en": [
+"На второто кръстовище завий надясно.",
+"Завий надясно на второто кръстовище."
 ],
 "grammar": [
 "imperative",
@@ -65261,7 +67071,9 @@
 "nl": "Vermijd suiker om gezond te zijn.",
 "nl_alt": [],
 "bg_alt": [
-"Избягвай захарта, за да си здрав."
+"Избягвай захарта, за да си здрав.",
+"За да си здрава, избягвай захарта.",
+"Избягвай захарта, за да си здрава."
 ],
 "en_alt": [],
 "en": "To be healthy, avoid sugar.",
@@ -65288,6 +67100,10 @@
 "If you want to be healthy, avoid sugar.",
 "Avoid sugar if you want to be healthy.",
 "If you want to stay healthy, avoid sugar."
+],
+"bg_alt_en": [
+"За да сте здрави, избягвайте захарта.",
+"Избягвайте захарта, за да сте здрави."
 ],
 "grammar": [
 "da-clause",
@@ -65360,6 +67176,9 @@
 "Please read the text on page six.",
 "Read the text on page number six."
 ],
+"bg_alt_en": [
+"Прочети текста на страница шест."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -65400,6 +67219,9 @@
 "First mix the eggs and the sugar, then add the butter.",
 "First mix the eggs with the sugar, and then add the butter.",
 "First combine the eggs with the sugar, then add the butter."
+],
+"bg_alt_en": [
+"Първо смесете яйцата със захарта, после сложете маслото."
 ],
 "grammar": [
 "imperative"
@@ -65666,6 +67488,9 @@
 "A beer, please – a cold one, if you don't mind.",
 "One beer, please – make it a cold one, please."
 ],
+"bg_alt_en": [
+"Една бира, моля – студена, ако обичаш."
+],
 "grammar": [
 "present",
 "numeral"
@@ -65741,6 +67566,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Изключете компютъра, преди да излезете."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -65777,6 +67605,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Децата са гладни, стоплете им супата."
+],
 "grammar": [
 "present",
 "imperative"
@@ -65851,6 +67682,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Fry the onion and put in the meat."
+],
+"bg_alt_en": [
+"Изпържи лука и добави месото."
 ],
 "grammar": [
 "imperative"
@@ -66081,6 +67915,9 @@
 "en_loose": [
 "I'd like a kilo of tomatoes, please."
 ],
+"bg_alt_en": [
+"Един килограм домати, ако обичаш."
+],
 "grammar": [
 "present",
 "numeral"
@@ -66193,6 +68030,9 @@
 "Remember to save the file!",
 "Make sure you save the file!"
 ],
+"bg_alt_en": [
+"Не забравяйте да запазите файла!"
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -66234,6 +68074,9 @@
 ],
 "en_loose": [
 "How much are your utility bills in the summer?"
+],
+"bg_alt_en": [
+"Колко плащаш за режийни през лятото?"
 ],
 "grammar": [
 "present"
@@ -66466,6 +68309,9 @@
 "en_loose": [
 "Add a pinch of salt and stir slowly."
 ],
+"bg_alt_en": [
+"Добавете малко сол и бъркайте бавно."
+],
 "grammar": [
 "imperative"
 ]
@@ -66499,6 +68345,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Бъркайте супата, докато се топли."
+],
 "grammar": [
 "present",
 "imperative"
@@ -66660,6 +68509,10 @@
 "Would you be able to do me a favour?",
 "Could you do me a favour, please?"
 ],
+"bg_alt_en": [
+"Би ли ми направил една услуга?",
+"Би ли ми направила една услуга?"
+],
 "grammar": [
 "conditional"
 ]
@@ -66697,6 +68550,9 @@
 "en_loose": [
 "Make the child some bread with honey.",
 "Put some honey on bread for the child."
+],
+"bg_alt_en": [
+"Намажете на детето хляб с мед."
 ],
 "grammar": [
 "imperative"
@@ -66773,6 +68629,9 @@
 "Turn the radio on, I want to listen to the news.",
 "Turn on the radio, I want to listen to the news.",
 "Turn on the radio – I'd like to hear the news."
+],
+"bg_alt_en": [
+"Включете радиото, искам да чуя новините."
 ],
 "grammar": [
 "present",
@@ -67386,6 +69245,9 @@
 "The discount depends on how much is bought.",
 "How much discount you get depends on how much you buy."
 ],
+"bg_alt_en": [
+"Отстъпката зависи от това колко купуваш."
+],
 "grammar": [
 "present"
 ]
@@ -67463,6 +69325,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Please download the app to your phone."
+],
+"bg_alt_en": [
+"Изтегли приложението на телефона си."
 ],
 "grammar": [
 "imperative"
@@ -67543,6 +69408,9 @@
 "Please put your name on the form.",
 "Would you please write your name on the form."
 ],
+"bg_alt_en": [
+"Напиши името си във формуляра, ако обичаш."
+],
 "grammar": [
 "present",
 "imperative"
@@ -67584,6 +69452,10 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "The form can be obtained from the municipality."
+],
+"bg_alt_en": [
+"Формуляра можеш да вземеш от общината.",
+"Можеш да вземеш формуляра от общината."
 ],
 "grammar": [
 "present",
@@ -67737,6 +69609,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Избършете масата, преди да сложите чиниите."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -67815,6 +69690,9 @@
 "Keep the receipt if you wish to return the garment.",
 "Hold on to the receipt if you want to return the item of clothing."
 ],
+"bg_alt_en": [
+"Запази касовата бележка, ако искаш да върнеш дрехата."
+],
 "grammar": [
 "present",
 "da-clause",
@@ -67854,6 +69732,9 @@
 "en_loose": [
 "Delete that message before he sees it.",
 "Delete this message before he gets to see it."
+],
+"bg_alt_en": [
+"Изтрийте това съобщение, преди да го види."
 ],
 "grammar": [
 "da-clause",
@@ -67897,6 +69778,9 @@
 "I sent you a message, but you didn't respond.",
 "I texted you, but you didn't answer me."
 ],
+"bg_alt_en": [
+"Пратих ви съобщение, но не ми отговорихте."
+],
 "grammar": [
 "aorist"
 ]
@@ -67937,6 +69821,9 @@
 "Let's say you don't have to work tomorrow – what will you do?",
 "Suppose you don't have work tomorrow – what will you do?",
 "Let's say you're off work tomorrow – what will you do?"
+],
+"bg_alt_en": [
+"Да речем, че утре нямате работа – какво ще правите?"
 ],
 "grammar": [
 "present",
@@ -68019,6 +69906,9 @@
 "en_loose": [
 "I will get in touch with you as soon as I have an answer.",
 "I'll get back to you as soon as I get an answer."
+],
+"bg_alt_en": [
+"Ще се свържа с теб веднага щом получа отговор."
 ],
 "grammar": [
 "present",
@@ -68352,6 +70242,9 @@
 "I think you've given me the wrong change.",
 "I think you've given me back the wrong change."
 ],
+"bg_alt_en": [
+"Мисля, че ми върна грешно ресто."
+],
 "grammar": [
 "present",
 "aorist"
@@ -68505,6 +70398,9 @@
 "Email me the file.",
 "Please send me the file by email."
 ],
+"bg_alt_en": [
+"Прати ми файла по имейл."
+],
 "grammar": [
 "imperative"
 ]
@@ -68577,6 +70473,9 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "U moet zich registreren om de video te kunnen zien."
+],
+"bg_alt_en": [
+"Трябва да се регистрираш, за да гледаш видеото."
 ],
 "grammar": [
 "present",
@@ -68660,6 +70559,9 @@
 "Would you buy a few kilos of oranges?",
 "Will you get a few kilos of oranges?"
 ],
+"bg_alt_en": [
+"Ще купите ли няколко килограма портокали?"
+],
 "grammar": [
 "future",
 "numeral"
@@ -68737,6 +70639,9 @@
 "Why are you so surprised? I've told you, haven't I?",
 "Why are you so surprised? I told you."
 ],
+"bg_alt_en": [
+"Защо сте толкова учудени? Нали ви казах."
+],
 "grammar": [
 "present",
 "aorist"
@@ -68811,6 +70716,9 @@
 "en_loose": [
 "Don't get upset about such a silly mistake.",
 "Don't get annoyed about such a stupid mistake."
+],
+"bg_alt_en": [
+"Не се ядосвайте за такава глупава грешка."
 ],
 "grammar": [
 "imperative"
@@ -69234,6 +71142,9 @@
 "Are you free on the ninth? Have a look at the calendar.",
 "Are you free on the ninth? Look in the calendar."
 ],
+"bg_alt_en": [
+"Свободни ли сте на девети? Проверете в календара."
+],
 "grammar": [
 "present",
 "imperative",
@@ -69288,7 +71199,9 @@
 "nl_alt": [
 "Ik heb de film gedownload, maar nog niet bekeken."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Изтеглих филма, но още не съм го гледала."
+],
 "en_alt": [
 "I downloaded the movie, but I haven't watched it yet.",
 "I downloaded the film but haven't watched it yet."
@@ -69358,6 +71271,10 @@
 "Would you mind turning off your phone during the film?",
 "Would you please switch off your phone during the film?",
 "Could you switch off your phone during the film?"
+],
+"bg_alt_en": [
+"Би ли изключил телефона си по време на филма?",
+"Би ли изключила телефона си по време на филма?"
 ],
 "grammar": [
 "conditional"
@@ -69432,6 +71349,9 @@
 "I have left a note for you: water the flowers!",
 "I left you a note: water the plants!",
 "I left you a note saying: water the flowers!"
+],
+"bg_alt_en": [
+"Оставих ви бележка: полейте цветята!"
 ],
 "grammar": [
 "imperative",
@@ -69772,6 +71692,9 @@
 "Fry the meat separately from the potatoes.",
 "Fry the meat and the potatoes separately from each other."
 ],
+"bg_alt_en": [
+"Изпържи месото и картофите отделно."
+],
 "grammar": [
 "imperative"
 ]
@@ -69891,6 +71814,9 @@
 "Don't stare at the screen for so long, or you'll get a headache.",
 "Don't look at the screen for so long, you'll have a headache."
 ],
+"bg_alt_en": [
+"Не гледайте толкова дълго в екрана, ще ви боли главата."
+],
 "grammar": [
 "future",
 "imperative"
@@ -69930,6 +71856,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Hi, I have a reservation for two nights under the name Petrov."
+],
+"bg_alt_en": [
+"Здравей, имам резервация за две нощи на име Петров."
 ],
 "grammar": [
 "present",
@@ -69972,6 +71901,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Walk down the street until the third crossing."
+],
+"bg_alt_en": [
+"Върви надолу по улицата до третото кръстовище."
 ],
 "grammar": [
 "imperative",
@@ -70156,6 +72088,9 @@
 "polite"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Между другото, трябва ми и твоят подпис."
+],
 "grammar": [
 "present"
 ]
@@ -70235,6 +72170,10 @@
 "negative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"По време на обаждането никога не давай личните си данни.",
+"Никога не давай личните си данни по време на обаждането."
+],
 "grammar": [
 "imperative"
 ]
@@ -70276,6 +72215,9 @@
 "en_loose": [
 "Put the meeting in your calendar.",
 "Put the appointment in your calendar."
+],
+"bg_alt_en": [
+"Запишете срещата в календара си."
 ],
 "grammar": [
 "imperative"
@@ -70355,6 +72297,10 @@
 "I'm sorry I was rude, I didn't mean to hurt you.",
 "Sorry that I was rude, I didn't mean to hurt you."
 ],
+"bg_alt_en": [
+"Извинявайте, че бях груб, не исках да ви нараня.",
+"Извинявайте, че бях груба, не исках да ви нараня."
+],
 "grammar": [
 "da-clause",
 "imperative",
@@ -70393,6 +72339,9 @@
 "en_loose": [
 "Be kind with people, don't be rude.",
 "Be kind to others, don't be rude."
+],
+"bg_alt_en": [
+"Бъдете мили с хората, не бъдете груби."
 ],
 "grammar": [
 "imperative"
@@ -70736,6 +72685,9 @@
 "en_loose": [
 "I need some advice from you about the renovation."
 ],
+"bg_alt_en": [
+"Имам нужда от вашия съвет за ремонта."
+],
 "grammar": [
 "present"
 ]
@@ -71044,6 +72996,10 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "— Excuse me, where's the toilet? — Up the stairs."
+],
+"bg_alt_en": [
+"— Извини, къде е тоалетната? — Горе, по стълбите.",
+"— Извинявай, къде е тоалетната? — Горе, по стълбите."
 ],
 "grammar": [
 "present"
@@ -71388,6 +73344,10 @@
 "Which sport do you do in the winter?",
 "What sport do you play in winter?"
 ],
+"bg_alt_en": [
+"Какъв спорт тренирате през зимата?",
+"Какъв спорт тренирате зимата?"
+],
 "grammar": [
 "present"
 ]
@@ -71483,7 +73443,9 @@
 "nl_alt": [
 "Ik durf het hem niet te vertellen; zo moedig ben ik niet."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Не смея да му кажа, не съм толкова смела."
+],
 "en_alt": [
 "I don't dare to tell him, I'm not that brave.",
 "I dare not tell him, I'm not so brave.",
@@ -71698,7 +73660,9 @@
 "bg": "Не бъди мързелив, упражнявай граматиката всеки ден.",
 "nl": "Wees niet lui, oefen elke dag de grammatica.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Не бъди мързелива, упражнявай граматиката всеки ден."
+],
 "en_alt": [
 "Don't be lazy, practise grammar every day.",
 "Don't be lazy, practise the grammar daily.",
@@ -71725,6 +73689,9 @@
 "en_loose": [
 "Don't be lazy, do your grammar exercises every day.",
 "Don't be lazy, practise your grammar every day."
+],
+"bg_alt_en": [
+"Не бъдете мързеливи, упражнявайте граматиката всеки ден."
 ],
 "grammar": [
 "imperative"
@@ -71887,6 +73854,9 @@
 "en_loose": [
 "The menu, please. Do you have anything meat-free?",
 "The menu, please. Is there anything without meat?"
+],
+"bg_alt_en": [
+"Менюто, моля. Имаш ли нещо без месо?"
 ],
 "grammar": [
 "present"
@@ -72299,6 +74269,9 @@
 "en_loose": [
 "A smile can completely change your mood."
 ],
+"bg_alt_en": [
+"Една усмивка може да промени цялото ви настроение."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -72365,6 +74338,9 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "Kijk even naar buiten, het gaat waarschijnlijk regenen."
+],
+"bg_alt_en": [
+"Погледнете навън, вероятно ще вали."
 ],
 "grammar": [
 "future",
@@ -72559,6 +74535,9 @@
 "polite"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Имаш ли фреш от портокали?"
+],
 "grammar": [
 "present"
 ]
@@ -72680,6 +74659,10 @@
 "Get two litres of milk and a bun.",
 "Get two litres of milk and a roll."
 ],
+"bg_alt_en": [
+"Купете два литра мляко и една кифла.",
+"Купете два литра мляко и кифла."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -72718,6 +74701,9 @@
 "polite"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Имаш ли кифли със сирене?"
+],
 "grammar": [
 "present"
 ]
@@ -72797,6 +74783,9 @@
 "en_loose": [
 "Don't yell! I want some peace and quiet."
 ],
+"bg_alt_en": [
+"Не крещете! Искам малко тишина."
+],
 "grammar": [
 "present",
 "imperative"
@@ -72829,6 +74818,9 @@
 ],
 "en_loose": [
 "What do I owe you for the ticket?"
+],
+"bg_alt_en": [
+"Колко ви дължа за билета?"
 ],
 "grammar": [
 "present"
@@ -72865,6 +74857,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "I owe you a hundred euros."
+],
+"bg_alt_en": [
+"Сумата, която ви дължа, е сто евро."
 ],
 "grammar": [
 "present",
@@ -72908,6 +74903,10 @@
 "What appetiser would you recommend with the rakia?",
 "What snack would you recommend with the rakia?",
 "What meze would you recommend with the rakia?"
+],
+"bg_alt_en": [
+"Какво мезе препоръчваш към ракията?",
+"Какво мезе ще препоръчаш към ракията?"
 ],
 "grammar": [
 "present"
@@ -72987,6 +74986,9 @@
 "I can't upload the picture, have a look at the settings.",
 "I can't upload the photo, look at the settings."
 ],
+"bg_alt_en": [
+"Не мога да кача снимката, проверете настройките."
+],
 "grammar": [
 "present",
 "da-clause",
@@ -73024,6 +75026,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Close the envelope and send it."
+],
+"bg_alt_en": [
+"Залепете плика и го изпратете."
 ],
 "grammar": [
 "imperative"
@@ -73101,6 +75106,9 @@
 "negative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Не подписвайте нищо, това може да е измама."
+],
 "grammar": [
 "present",
 "da-clause",
@@ -73366,6 +75374,9 @@
 "I recommend that you catch the early train.",
 "I recommend that you take the early train."
 ],
+"bg_alt_en": [
+"Съветвам ви да хванете ранния влак."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -73568,6 +75579,9 @@
 "Don't eat so many crisps, you'll spoil your appetite.",
 "Don't eat so many chips, you'll spoil your appetite."
 ],
+"bg_alt_en": [
+"Не яжте толкова чипс, ще ви мине апетитът."
+],
 "grammar": [
 "future",
 "imperative"
@@ -73682,6 +75696,9 @@
 "I'm ashamed of forgetting your birthday.",
 "I'm ashamed of having forgotten your birthday.",
 "I'm embarrassed that I forgot your birthday."
+],
+"bg_alt_en": [
+"Срам ме е, че забравих рождения ви ден."
 ],
 "grammar": [
 "present",
@@ -73925,6 +75942,11 @@
 "Do you want a piece of bread with salami?",
 "Would you like a piece of bread with salami?"
 ],
+"bg_alt_en": [
+"Искате ли една филия със салам?",
+"Искате ли филия със салам?",
+"Вие искате ли една филия със салам?"
+],
 "grammar": [
 "present",
 "numeral"
@@ -74088,6 +76110,10 @@
 "Would you like to join the game?",
 "Do you want to join the game?"
 ],
+"bg_alt_en": [
+"Искаш ли да участваш в играта?",
+"Ти искаш ли да участваш в играта?"
+],
 "grammar": [
 "present",
 "da-clause"
@@ -74124,6 +76150,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Хвърлете монета във фонтана и си пожелайте нещо."
+],
 "grammar": [
 "imperative"
 ]
@@ -74164,6 +76193,9 @@
 "— They're testing us in history tomorrow. — I wish you luck!",
 "— Tomorrow we'll be tested on history. — I wish you luck!"
 ],
+"bg_alt_en": [
+"— Утре ще ни изпитват по история. — Желая ви успех!"
+],
 "grammar": [
 "present",
 "future"
@@ -74202,6 +76234,9 @@
 "en_loose": [
 "What can I get you for dessert?",
 "What will you have for dessert?"
+],
+"bg_alt_en": [
+"Какво желаеш за десерт?"
 ],
 "grammar": [
 "present"
@@ -74344,6 +76379,9 @@
 "polite"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Можеш да кандидатстваш до десети май."
+],
 "grammar": [
 "present",
 "da-clause",
@@ -74387,6 +76425,10 @@
 "We live on the tenth floor, please ring the intercom.",
 "We live on the tenth floor, ring us on the intercom.",
 "We're on the tenth floor, ring the intercom."
+],
+"bg_alt_en": [
+"Живеем на десетия етаж, позвъни на домофона.",
+"Ние живеем на десетия етаж, позвъни на домофона."
 ],
 "grammar": [
 "present",
@@ -74467,6 +76509,10 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Сложете ядките в торбичка.",
+"Сложете ядките в една торбичка."
+],
 "grammar": [
 "imperative"
 ]
@@ -74583,6 +76629,9 @@
 "I feel ashamed, I've forgotten your name day.",
 "Shame on me, I forgot your name day.",
 "I'm embarrassed, I forgot your name day."
+],
+"bg_alt_en": [
+"Срам ме е, забравих имения ви ден."
 ],
 "grammar": [
 "present",
@@ -74703,6 +76752,10 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Сложете буркана със сладко на най-горния рафт.",
+"Сложете буркана със сладкото на най-горния рафт."
+],
 "grammar": [
 "imperative",
 "comparative"
@@ -74739,6 +76792,9 @@
 "en_loose": [
 "Put a label with your name on the jar.",
 "Put a label with your name onto the jar."
+],
+"bg_alt_en": [
+"Залепете етикет с името си на буркана."
 ],
 "grammar": [
 "imperative"
@@ -74903,6 +76959,10 @@
 "Combine the flour with the water and make a dough.",
 "Mix the flour with the water and make a dough out of it."
 ],
+"bg_alt_en": [
+"Смесете брашното с водата и направете тесто.",
+"Смесете брашното с вода и направете тесто."
+],
 "grammar": [
 "imperative"
 ]
@@ -75058,6 +77118,10 @@
 "en_loose": [
 "There's sauce on your shirt, here's a napkin.",
 "You've got sauce on your shirt, have a napkin."
+],
+"bg_alt_en": [
+"Имате сос на ризата, ето ви салфетка.",
+"Имате сос на ризата си, ето ви салфетка."
 ],
 "grammar": [
 "present"
@@ -76139,7 +78203,8 @@
 "Welke specerij heb je in de soep gedaan? Erg lekker!"
 ],
 "bg_alt": [
-"Каква подправка сложи в супата? Много вкусно!"
+"Каква подправка сложи в супата? Много вкусно!",
+"Каква подправка си сложила в супата? Много вкусно!"
 ],
 "en_alt": [],
 "en": "What spice have you put in the soup? It's very tasty!",
@@ -76164,6 +78229,10 @@
 "What spice did you put in the soup? It's delicious!",
 "What spice did you put in the soup? It's really tasty!",
 "What spice did you add to the soup? Very tasty!"
+],
+"bg_alt_en": [
+"Каква подправка сте сложили в супата? Много вкусно!",
+"Каква подправка сложихте в супата? Много вкусно!"
 ],
 "grammar": [
 "present",
@@ -76395,6 +78464,9 @@
 "The microwave isn't working – check if the plug is in the socket.",
 "The microwave doesn't work – check whether the lead is plugged into the socket."
 ],
+"bg_alt_en": [
+"Микровълновата не работи – проверете дали кабелът е в контакта."
+],
 "grammar": [
 "present",
 "imperative"
@@ -76510,6 +78582,9 @@
 ],
 "en_loose": [
 "Don't be angry with me, I didn't mean to do it."
+],
+"bg_alt_en": [
+"Не ми се сърдете, не го направих нарочно."
 ],
 "grammar": [
 "imperative",
@@ -76628,6 +78703,9 @@
 "en_loose": [
 "I admit I was wrong – forgive me."
 ],
+"bg_alt_en": [
+"Признавам, че сгреших – извинявайте."
+],
 "grammar": [
 "present",
 "imperative",
@@ -76699,6 +78777,10 @@
 "en_loose": [
 "If the tiredness won't go away, call a doctor.",
 "If the tiredness persists, call a doctor."
+],
+"bg_alt_en": [
+"Ако умората не минава, обади се на лекар.",
+"Обади се на лекар, ако умората не минава."
 ],
 "grammar": [
 "present",
@@ -76847,6 +78929,10 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Обърнете пържолите след пет минути.",
+"След пет минути обърнете пържолите."
+],
 "grammar": [
 "imperative",
 "numeral"
@@ -76960,6 +79046,9 @@
 "What do you recommend as a side dish with the chop?",
 "What do you recommend as a side dish with the steak?"
 ],
+"bg_alt_en": [
+"Какво ще препоръчаш като гарнитура към пържолата?"
+],
 "grammar": [
 "future"
 ]
@@ -76995,6 +79084,9 @@
 "Stir the spices into the cream.",
 "Mix the cream and the spices.",
 "Mix the cream together with the spices."
+],
+"bg_alt_en": [
+"Разбъркайте сметаната с подправките."
 ],
 "grammar": [
 "imperative"
@@ -77184,6 +79276,10 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "Wil je een pakje ham en brood kopen?"
+],
+"bg_alt_en": [
+"Купете един пакет шунка и хляб, моля.",
+"Моля ви, купете един пакет шунка и хляб."
 ],
 "grammar": [
 "imperative",
@@ -77451,6 +79547,12 @@
 "Excuse me, is it far to the pool?",
 "Excuse me, is the swimming pool a long way away?"
 ],
+"bg_alt_en": [
+"Извини, далече ли е басейнът?",
+"Извини, басейнът далече ли е?",
+"Извинявай, далече ли е басейнът?",
+"Извинявай, басейнът далече ли е?"
+],
 "grammar": [
 "present"
 ]
@@ -77681,6 +79783,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Включете прахосмукачката в контакта до вратата."
+],
 "grammar": [
 "imperative"
 ]
@@ -77790,6 +79895,10 @@
 "question"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Къде живеете? – Близо до спирката на маршрутката.",
+"Къде живеете? – Близо до спирката на маршрутките."
+],
 "grammar": [
 "present"
 ]
@@ -77932,6 +80041,9 @@
 "What do you recommend – pancakes or cake?",
 "Which do you recommend – pancakes or cake?"
 ],
+"bg_alt_en": [
+"Какво ще препоръчаш – палачинки или торта?"
+],
 "grammar": [
 "future"
 ]
@@ -77964,6 +80076,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Обърнете палачинката, преди да изгори!"
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -77997,6 +80112,9 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "Laat een beetje boter smelten voor de pannenkoeken."
+],
+"bg_alt_en": [
+"Стопете малко масло за палачинките."
 ],
 "grammar": [
 "imperative"
@@ -78135,6 +80253,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Сложете минералната вода в количката."
+],
 "grammar": [
 "imperative"
 ]
@@ -78246,6 +80367,9 @@
 "en_loose": [
 "Delicious! How do you make the courgettes?"
 ],
+"bg_alt_en": [
+"Много вкусно! Как приготвяте тиквичките?"
+],
 "grammar": [
 "present"
 ]
@@ -78283,6 +80407,10 @@
 "en_loose": [
 "You've moved, haven't you? Where do you live now?",
 "You've moved, right? Where are you living now?"
+],
+"bg_alt_en": [
+"Преместихте се, нали? Къде живеете сега?",
+"Вие се преместихте, нали? Къде живеете сега?"
 ],
 "grammar": [
 "present",
@@ -78393,6 +80521,9 @@
 "I regret not believing you.",
 "I'm sorry for not believing you."
 ],
+"bg_alt_en": [
+"Съжалявам, че не ви повярвах."
+],
 "grammar": [
 "present",
 "aorist"
@@ -78429,6 +80560,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Кранът в банята е счупен – обадете се на хазяина."
+],
 "grammar": [
 "present",
 "imperative",
@@ -78616,6 +80750,10 @@
 "Are you allergic to antibiotics?",
 "Do you have any allergies to antibiotics?",
 "Are you allergic to any antibiotics?"
+],
+"bg_alt_en": [
+"Имаш ли алергия към антибиотици?",
+"Ти имаш ли алергия към антибиотици?"
 ],
 "grammar": [
 "present"
@@ -78952,6 +81090,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Свалете капака, преди да сложите купата в микровълновата."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -78989,6 +81130,9 @@
 "Put a lid on the pot while the pasta is cooking.",
 "Cover the pot with a lid while the macaroni is cooking.",
 "Put a lid on the pan while the pasta is cooking."
+],
+"bg_alt_en": [
+"Сложете капак на тенджерата, докато макароните се варят."
 ],
 "grammar": [
 "present",
@@ -79209,6 +81353,9 @@
 "Late dinners aren't a good idea if you're on a diet.",
 "A late dinner is not a good idea when you're on a diet.",
 "Having a late dinner isn't a good idea if you're on a diet."
+],
+"bg_alt_en": [
+"Късната вечеря не е добра идея, ако сте на диета."
 ],
 "grammar": [
 "present"
@@ -79595,6 +81742,9 @@
 "en_loose": [
 "Use the scissors to open the package."
 ],
+"bg_alt_en": [
+"Отворете пакета с ножицата."
+],
 "grammar": [
 "imperative"
 ]
@@ -79662,6 +81812,10 @@
 "If the pain is severe, call a doctor.",
 "If the pain is severe, phone a doctor.",
 "If the pain is serious, call the doctor."
+],
+"bg_alt_en": [
+"Ако болката е сериозна, обади се на лекар.",
+"Обади се на лекар, ако болката е сериозна."
 ],
 "grammar": [
 "present",
@@ -79740,6 +81894,9 @@
 "Sorry, I didn't mean to insult you – it wasn't on purpose.",
 "Sorry, I didn't mean to offend you – I didn't do it on purpose.",
 "I'm sorry, I didn't mean to offend you – it wasn't deliberate."
+],
+"bg_alt_en": [
+"Извинявайте, не исках да ви обидя – не беше нарочно."
 ],
 "grammar": [
 "da-clause",
@@ -80129,6 +82286,10 @@
 "Reception can print your tickets.",
 "They can print your tickets for you at reception."
 ],
+"bg_alt_en": [
+"На рецепцията могат да отпечатат билетите ти.",
+"Могат да отпечатат билетите ти на рецепцията."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -80274,6 +82435,10 @@
 "question"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Откъде сте? – Аз съм от Холандия.",
+"Вие откъде сте? – Аз съм от Холандия."
+],
 "grammar": [
 "present"
 ]
@@ -80308,6 +82473,10 @@
 "negative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Откъде сте? Не сте българин, нали?",
+"Откъде сте? Вие не сте българин, нали?"
+],
 "grammar": [
 "present"
 ]
@@ -80419,6 +82588,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "At customs they ask you how much currency you have with you."
+],
+"bg_alt_en": [
+"На митницата питат колко валута носиш."
 ],
 "grammar": [
 "present"
@@ -81370,6 +83542,9 @@
 "Press the button and the door opens.",
 "Push the button and the door opens."
 ],
+"bg_alt_en": [
+"Натиснете копчето и вратата ще се отвори."
+],
 "grammar": [
 "future",
 "imperative"
@@ -81612,6 +83787,9 @@
 "en_loose": [
 "I'll give you a call later, when I'm done."
 ],
+"bg_alt_en": [
+"Ще ви се обадя по-късно, когато приключа."
+],
 "grammar": [
 "present",
 "future",
@@ -81653,6 +83831,10 @@
 "It's thundering and pouring with rain, take a raincoat.",
 "It's thundering and raining hard, bring a raincoat.",
 "There's thunder and it's raining hard, take a raincoat."
+],
+"bg_alt_en": [
+"Гърми и вали силно, вземете си дъждобран.",
+"Гърми и вали силно, вземете дъждобран."
 ],
 "grammar": [
 "present",
@@ -81811,6 +83993,9 @@
 ],
 "en_loose": [
 "Do you have anything smaller? I don't have any change."
+],
+"bg_alt_en": [
+"Имаш ли дребни? Нямам ресто."
 ],
 "grammar": [
 "present"
@@ -82052,6 +84237,9 @@
 "Don't trust anyone who promises easy money.",
 "Don't trust those who promise easy money."
 ],
+"bg_alt_en": [
+"Не се доверявайте на хора, които обещават лесни пари."
+],
 "grammar": [
 "present",
 "imperative"
@@ -82091,6 +84279,9 @@
 "Never trust strangers on the internet.",
 "Don't trust people you don't know on the internet."
 ],
+"bg_alt_en": [
+"Не се доверявайте на непознати в интернет."
+],
 "grammar": [
 "imperative"
 ]
@@ -82126,6 +84317,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Pack the underwear and socks in the suitcase."
+],
+"bg_alt_en": [
+"Сложете бельото и чорапите в куфара."
 ],
 "grammar": [
 "imperative"
@@ -82650,6 +84844,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Режете лука на дъската, не на масата."
+],
 "grammar": [
 "imperative"
 ]
@@ -82920,6 +85117,9 @@
 "What's your job? – I work as a teacher at the university.",
 "What do you do for a living? – I'm a lecturer at the university."
 ],
+"bg_alt_en": [
+"Какво работите? – Работя като преподавател в университета."
+],
 "grammar": [
 "present"
 ]
@@ -82960,6 +85160,10 @@
 ],
 "en_loose": [
 "What's your job now? Are you still working as a cashier?"
+],
+"bg_alt_en": [
+"Какво работите сега? Още ли сте касиер?",
+"Сега какво работите? Още ли сте касиер?"
 ],
 "grammar": [
 "present"
@@ -83228,6 +85432,9 @@
 "en_loose": [
 "Fill the kettle and make some tea for everyone."
 ],
+"bg_alt_en": [
+"Напълнете чайника и направете чай за всички."
+],
 "grammar": [
 "imperative"
 ]
@@ -83302,6 +85509,9 @@
 "Have you seen the goal? That footballer is wonderful!",
 "Did you see the goal? This footballer is fantastic!",
 "Did you see the goal? That footballer is fantastic!"
+],
+"bg_alt_en": [
+"Видяхте ли гола? Този футболист е чудесен!"
 ],
 "grammar": [
 "present",
@@ -83738,7 +85948,9 @@
 "Ik sloeg de training over, want ik was ziek.",
 "Ik heb de training gemist omdat ik ziek was."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Пропуснах тренировката, защото бях болна."
+],
 "en_alt": [
 "I missed training because I was sick.",
 "I skipped practice because I was ill.",
@@ -83908,6 +86120,9 @@
 "What is your occupation, if it's not a secret?",
 "What is your job, if it's not a secret?"
 ],
+"bg_alt_en": [
+"С какво се занимаваш, ако не е тайна?"
+],
 "grammar": [
 "present"
 ]
@@ -83919,7 +86134,9 @@
 "nl_alt": [
 "Ik doe al aan zwemmen sinds ik klein was."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Занимавам се с плуване от малка."
+],
 "en_alt": [
 "I've been doing swimming since I was a child.",
 "I've been swimming since I was a kid.",
@@ -84023,6 +86240,9 @@
 ],
 "en_loose": [
 "Don't worry, we'll get through everything together."
+],
+"bg_alt_en": [
+"Не се тревожете, заедно ще се справим с всичко."
 ],
 "grammar": [
 "future",
@@ -84335,6 +86555,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "I'm cold, can you give me another blanket?"
+],
+"bg_alt_en": [
+"Студено ми е, дайте ми още една завивка."
 ],
 "grammar": [
 "present",
@@ -84783,6 +87006,9 @@
 "How long have you been learning Bulgarian? – For a year.",
 "How long have you been learning Bulgarian? – I've been learning Bulgarian for a year now."
 ],
+"bg_alt_en": [
+"Колко време учите български? – Уча български от една година."
+],
 "grammar": [
 "present",
 "numeral"
@@ -84857,6 +87083,9 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "Hoe lang ben je in de sportschool?"
+],
+"bg_alt_en": [
+"Колко време прекарвате във фитнеса?"
 ],
 "grammar": [
 "present"
@@ -85050,6 +87279,9 @@
 "en_loose": [
 "Why did you break up with Maria? – I fell for someone else."
 ],
+"bg_alt_en": [
+"Защо се раздели с Мария? – Влюбих се в друга."
+],
 "grammar": [
 "aorist"
 ]
@@ -85096,6 +87328,9 @@
 "It's very noisy and I didn't hear you. Say it again.",
 "There's a lot of noise and I couldn't hear you. Say it again."
 ],
+"bg_alt_en": [
+"Има много шум и не ви чух. Кажете го още веднъж."
+],
 "grammar": [
 "present",
 "imperative",
@@ -85141,6 +87376,10 @@
 "Try again, this time you'll succeed.",
 "Try again, this time you'll manage.",
 "Try again, you'll do it this time."
+],
+"bg_alt_en": [
+"Опитайте още веднъж, този път ще успеете.",
+"Опитайте пак, този път ще успеете."
 ],
 "grammar": [
 "future",
@@ -85260,6 +87499,10 @@
 "I respect your opinion, but I don't think the same way.",
 "I respect your opinion, but I see it differently."
 ],
+"bg_alt_en": [
+"Уважавам мнението ви, но мисля различно.",
+"Уважавам вашето мнение, но мисля различно."
+],
 "grammar": [
 "present"
 ]
@@ -85303,7 +87546,9 @@
 "nl_alt": [
 "Pardon, hoe oud ben je? Je ziet er erg jong uit."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Извинявай, на колко години си? Изглеждаш много млад."
+],
 "en_alt": [
 "Excuse me, how old are you? You look very young."
 ],
@@ -85329,6 +87574,9 @@
 "Sorry, how old are you? You look really young.",
 "Excuse me, how old are you? You look really young.",
 "Sorry, how old are you? You look so young."
+],
+"bg_alt_en": [
+"Извинявайте, на колко години сте? Изглеждате много млади."
 ],
 "grammar": [
 "present",
@@ -85445,6 +87693,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Your coat is hanging on the coat rack by the door."
+],
+"bg_alt_en": [
+"Палтото ви е на закачалката до вратата."
 ],
 "grammar": [
 "present"
@@ -85999,6 +88250,10 @@
 "For diabetes you need to see a specialist.",
 "You need to see a specialist for your diabetes."
 ],
+"bg_alt_en": [
+"За диабета трябва да отидете при специалист.",
+"Трябва да отидете при специалист за диабета."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -86359,6 +88614,9 @@
 "How old are you? – Five. Would you like to see my toys?",
 "How old are you? – I'm five. Would you like to see my toys?"
 ],
+"bg_alt_en": [
+"На колко години си? – На пет. Искате ли да видите играчките ми?"
+],
 "grammar": [
 "present",
 "da-clause",
@@ -86628,6 +88886,9 @@
 "No smoking here, put out your cigarette.",
 "Smoking is not allowed here, put out your cigarette."
 ],
+"bg_alt_en": [
+"Тук не се пуши, изгасете цигарата."
+],
 "grammar": [
 "present",
 "imperative"
@@ -86667,6 +88928,9 @@
 "Put on your raincoat, there's a strong wind outside.",
 "Put your raincoat on, there's a strong wind outside.",
 "Wear your raincoat, there's a strong wind blowing outside."
+],
+"bg_alt_en": [
+"Сложете си дъждобрана, навън духа силен вятър."
 ],
 "grammar": [
 "present",
@@ -86851,6 +89115,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Внимавайте, реката тук е дълбока и опасна."
+],
 "grammar": [
 "present",
 "imperative"
@@ -87002,6 +89269,10 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Внимавайте, в гората има кърлежи.",
+"Внимавайте, има кърлежи в гората."
+],
 "grammar": [
 "present",
 "imperative"
@@ -87258,6 +89529,9 @@
 "en_loose": [
 "Don't forget to buy toilet paper and bandages."
 ],
+"bg_alt_en": [
+"Не забравяйте да купите тоалетна хартия и пластири."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -87376,6 +89650,10 @@
 "Hi, I'm Ivan. What's your name?",
 "Hi, my name is Ivan. And what's your name?"
 ],
+"bg_alt_en": [
+"Здравейте, аз съм Иван. А вие как се казвате?",
+"Здравейте, Иван съм. А вие как се казвате?"
+],
 "grammar": [
 "present"
 ]
@@ -87491,6 +89769,9 @@
 "Do you think everything in life is a matter of fate?",
 "Do you believe that everything in life is down to fate?"
 ],
+"bg_alt_en": [
+"Вярвате ли, че всичко в живота е въпрос на съдба?"
+],
 "grammar": [
 "present"
 ]
@@ -87528,6 +89809,9 @@
 "Take the broom and put the rubbish in the bin.",
 "Get the broom and throw the trash in the bin.",
 "Grab the broom and throw the rubbish in the bin."
+],
+"bg_alt_en": [
+"Вземете метлата и хвърлете боклука в коша."
 ],
 "grammar": [
 "imperative"
@@ -87567,6 +89851,9 @@
 "Remind me to empty the bin.",
 "Remind me to empty the rubbish bin.",
 "Remind me to take out the trash."
+],
+"bg_alt_en": [
+"Напомнете ми да изхвърля боклука от коша."
 ],
 "grammar": [
 "da-clause",
@@ -88029,6 +90316,9 @@
 "Are you okay? Your cheeks are on fire.",
 "Are you feeling okay? Your cheeks are burning."
 ],
+"bg_alt_en": [
+"Добре ли сте? Бузите ви горят."
+],
 "grammar": [
 "present"
 ]
@@ -88136,6 +90426,9 @@
 "You always win against me at chess!",
 "You always win against me in chess!",
 "You beat me at chess every time!"
+],
+"bg_alt_en": [
+"Винаги ме побеждавате на шах!"
 ],
 "grammar": [
 "present"
@@ -88429,6 +90722,10 @@
 "en_loose": [
 "What's your hobby? – I love sport."
 ],
+"bg_alt_en": [
+"Какво е хобито ви? – Обичам да спортувам.",
+"Какво е вашето хоби? – Обичам да спортувам."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -88707,6 +91004,9 @@
 "en_loose": [
 "Why is there a plaster on your forehead?",
 "Why do you have a bandage on your forehead?"
+],
+"bg_alt_en": [
+"Защо имате пластир на челото?"
 ],
 "grammar": [
 "present"
@@ -89094,6 +91394,10 @@
 "Pass me the bill, please.",
 "Give me the invoice, please."
 ],
+"bg_alt_en": [
+"Подайте ми фактурата, моля.",
+"Моля, подайте ми фактурата."
+],
 "grammar": [
 "imperative"
 ]
@@ -89175,6 +91479,9 @@
 "Bring your swimsuit and your flip-flops; we're going to the beach.",
 "Take your swimsuit and flip-flops, we're off to the beach.",
 "Get your swimsuit and flip-flops; we're going to the beach."
+],
+"bg_alt_en": [
+"Вземете си банския и джапанките, отиваме на плаж."
 ],
 "grammar": [
 "present",
@@ -89323,6 +91630,9 @@
 "negative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Не дразнете кучето, хапе!"
+],
 "grammar": [
 "present",
 "imperative"
@@ -89430,6 +91740,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Put the mop in the bucket of water."
+],
+"bg_alt_en": [
+"Сложете парцала в кофата с вода."
 ],
 "grammar": [
 "imperative"
@@ -89586,6 +91899,9 @@
 "Are you OK? Stay still, I'm going to call an ambulance.",
 "Are you okay? Keep still, I'll call an ambulance."
 ],
+"bg_alt_en": [
+"Добре ли сте? Не мърдайте, ще извикам линейка."
+],
 "grammar": [
 "present",
 "future",
@@ -89620,6 +91936,10 @@
 "Is that man you know married?",
 "Is that acquaintance of yours married?",
 "Is this acquaintance of yours married?"
+],
+"bg_alt_en": [
+"Женен ли е вашият познат?",
+"Вашият познат женен ли е?"
 ],
 "grammar": [
 "present"
@@ -89698,6 +92018,9 @@
 ],
 "en_loose": [
 "Without a vignette you're not allowed to drive on the motorway."
+],
+"bg_alt_en": [
+"Без винетка не можете да шофирате по магистралата."
 ],
 "grammar": [
 "present",
@@ -89814,6 +92137,9 @@
 "Step on the brake, there's a pedestrian!",
 "Hit the brakes, there's a pedestrian!",
 "Step on the brakes, there's a pedestrian!"
+],
+"bg_alt_en": [
+"Натиснете спирачката, има пешеходец!"
 ],
 "grammar": [
 "present",
@@ -90044,6 +92370,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Прочетете инструкцията на кафемашината, преди да я включите."
+],
 "grammar": [
 "da-clause",
 "imperative"
@@ -90193,6 +92522,9 @@
 "en_loose": [
 "What's your favourite hobby?",
 "Which hobby do you enjoy the most?"
+],
+"bg_alt_en": [
+"Кое хоби ви харесва най-много?"
 ],
 "grammar": [
 "present",
@@ -90385,6 +92717,9 @@
 "question"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Какво има? Виждам тъга в очите ви."
+],
 "grammar": [
 "present"
 ]
@@ -90422,6 +92757,9 @@
 "source": "gap2-batch-2026-10",
 "nl_loose": [
 "Geef me een uur voor vertrek een seintje."
+],
+"bg_alt_en": [
+"Напомнете ми час преди тръгването."
 ],
 "grammar": [
 "imperative"
@@ -90464,6 +92802,10 @@
 ],
 "en_loose": [
 "Check that you have a vignette before setting off."
+],
+"bg_alt_en": [
+"Преди тръгване проверете дали имате винетка.",
+"Проверете дали имате винетка преди тръгване."
 ],
 "grammar": [
 "present",
@@ -90589,6 +92931,9 @@
 "en_loose": [
 "Please leave the application in the director's office.",
 "Leave your application in the director's office."
+],
+"bg_alt_en": [
+"Остави заявлението в кабинета на директора."
 ],
 "grammar": [
 "imperative"
@@ -91022,7 +93367,9 @@
 "bg": "След смяната съм толкова уморен, че не мога да мръдна.",
 "nl": "Na de dienst ben ik zo moe dat ik me niet kan bewegen.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"След смяната съм толкова уморена, че не мога да мръдна."
+],
 "en_alt": [
 "I'm so tired after the shift that I can't move.",
 "After the shift I'm so tired I can't move."
@@ -91326,6 +93673,9 @@
 "Keep still while I tie your hair up.",
 "Stay still while I tie up your hair."
 ],
+"bg_alt_en": [
+"Не мърдайте, докато ви връзвам косата."
+],
 "grammar": [
 "present",
 "imperative"
@@ -91366,6 +93716,9 @@
 "Tie your shoelaces or you'll fall!",
 "Tie your shoes, or you'll fall over!"
 ],
+"bg_alt_en": [
+"Вържете си обувките, ще паднете!"
+],
 "grammar": [
 "future",
 "imperative"
@@ -91398,6 +93751,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "Sign the delivery note."
+],
+"bg_alt_en": [
+"Подпишете разписката за доставката."
 ],
 "grammar": [
 "imperative"
@@ -91514,6 +93870,9 @@
 "imperative"
 ],
 "source": "gap2-batch-2026-10",
+"bg_alt_en": [
+"Чистете паркета само с парцал и малко вода."
+],
 "grammar": [
 "imperative"
 ]
@@ -91828,7 +94187,9 @@
 "bg": "Днес ти си на волана – аз съм уморен.",
 "nl": "Vandaag zit jij achter het stuur – ik ben moe.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"Днес ти си на волана – аз съм уморена."
+],
 "en_alt": [
 "You're behind the wheel today – I'm tired.",
 "Today you're behind the wheel – I'm tired.",
@@ -91855,6 +94216,10 @@
 "en_loose": [
 "Today you're driving – I'm tired.",
 "Today you're the driver – I'm tired."
+],
+"bg_alt_en": [
+"Днес вие сте на волана – аз съм уморен.",
+"Днес вие сте на волана – аз съм уморена."
 ],
 "grammar": [
 "present"
@@ -91889,6 +94254,9 @@
 "What's your name and what nationality are you?",
 "What's your name and nationality?",
 "What are you called and what nationality are you?"
+],
+"bg_alt_en": [
+"Как се казваш и каква е твоята националност?"
 ],
 "grammar": [
 "present"
@@ -91932,6 +94300,10 @@
 ],
 "en_loose": [
 "Enter your name and nationality in the application."
+],
+"bg_alt_en": [
+"В заявлението напиши име и националност.",
+"Напиши име и националност в заявлението."
 ],
 "grammar": [
 "imperative"
@@ -92039,6 +94411,9 @@
 "source": "gap2-batch-2026-10",
 "en_loose": [
 "What's going on? Why are you reacting like that?"
+],
+"bg_alt_en": [
+"Какво има? Защо реагирате така?"
 ],
 "grammar": [
 "present"
@@ -92168,7 +94543,9 @@
 "Ik stel je verontschuldiging op prijs, maar ik ben nog boos."
 ],
 "bg_alt": [
-"Оценявам извинението ти, но съм още ядосан."
+"Оценявам извинението ти, но съм още ядосан.",
+"Оценявам извинението ти, но още съм ядосана.",
+"Оценявам извинението ти, но съм още ядосана."
 ],
 "en_alt": [
 "I appreciate your apology, but I'm still mad.",
@@ -92192,6 +94569,12 @@
 "en_loose": [
 "I appreciate the apology, but I'm still angry.",
 "I appreciate the apology, but I'm still mad."
+],
+"bg_alt_en": [
+"Оценявам извинението ви, но още съм ядосан.",
+"Оценявам извинението ви, но съм още ядосан.",
+"Оценявам извинението ви, но още съм ядосана.",
+"Оценявам извинението ви, но съм още ядосана."
 ],
 "grammar": [
 "present"
@@ -92275,6 +94658,9 @@
 "I sincerely sympathize with you over your terrible loss.",
 "I deeply sympathize with you in your great loss."
 ],
+"bg_alt_en": [
+"Съчувствам ти от сърце за тежката загуба."
+],
 "grammar": [
 "present"
 ]
@@ -92313,6 +94699,9 @@
 "I'm sorry for your loss. When is the funeral?",
 "I'm very sorry. When is the funeral?",
 "I'm sorry. When is the funeral?"
+],
+"bg_alt_en": [
+"Съчувствам ви. Кога е погребението?"
 ],
 "grammar": [
 "present"
@@ -92548,6 +94937,9 @@
 "en_loose": [
 "I told you it would turn out like this!",
 "I warned you this would happen!"
+],
+"bg_alt_en": [
+"Предупредих ви, че ще стане така!"
 ],
 "grammar": [
 "future",
@@ -92971,6 +95363,9 @@
 "If you don't pay your taxes on time, you'll be fined.",
 "If you fail to pay your taxes on time, you will get a fine."
 ],
+"bg_alt_en": [
+"Ако не платите данъците навреме, ще получите глоба."
+],
 "grammar": [
 "present",
 "future"
@@ -93175,6 +95570,10 @@
 "So you mean it's my fault?",
 "In other words, you're saying it's my fault?",
 "So what you're saying is that I'm to blame?"
+],
+"bg_alt_en": [
+"Тоест искате да кажете, че аз съм виновен?",
+"Тоест искате да кажете, че аз съм виновна?"
 ],
 "grammar": [
 "present",
@@ -93600,6 +95999,9 @@
 "I'm jealous of you because you can work from the beach.",
 "I'm envious that you can work from the beach."
 ],
+"bg_alt_en": [
+"Завиждам ви, че можете да работите от плажа."
+],
 "grammar": [
 "present",
 "da-clause"
@@ -93943,6 +96345,10 @@
 "Don't let me down this time.",
 "This time, don't let me down."
 ],
+"bg_alt_en": [
+"Не ме разочаровайте този път.",
+"Този път не ме разочаровайте."
+],
 "grammar": [
 "imperative"
 ]
@@ -94129,6 +96535,9 @@
 "polite"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Наслаждавай се на гледката и на хубавото време!"
+],
 "grammar": [
 "imperative"
 ]
@@ -94439,6 +96848,9 @@
 "I'm sick of hearing your complaints every day.",
 "I'm sick and tired of listening to your complaints every day."
 ],
+"bg_alt_en": [
+"Омръзна ми да слушам оплакванията ви всеки ден."
+],
 "grammar": [
 "da-clause",
 "aorist"
@@ -94479,6 +96891,9 @@
 "It seems you forgot to turn off the hob.",
 "Looks like you forgot to switch off the stove.",
 "I think you forgot to turn off the burner."
+],
+"bg_alt_en": [
+"Май сте забравили да изключите котлона."
 ],
 "grammar": [
 "da-clause",
@@ -94696,6 +97111,9 @@
 "en_loose": [
 "Do you treat your friends like this?",
 "Do you treat your friends like that?"
+],
+"bg_alt_en": [
+"Така ли се отнасяте към приятелите си?"
 ],
 "grammar": [
 "present"
@@ -95101,6 +97519,9 @@
 "en_loose": [
 "Don't be upset, I was just joking."
 ],
+"bg_alt_en": [
+"Не се сърдете, просто се шегувах."
+],
 "grammar": [
 "imperative",
 "imperfect"
@@ -95174,6 +97595,10 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "Je maakt je te druk om kleinigheden."
+],
+"bg_alt_en": [
+"Прекалено много се тревожите за дребни неща.",
+"Тревожите се прекалено много за дребни неща."
 ],
 "grammar": [
 "present"
@@ -95367,6 +97792,9 @@
 "source": "generated-2026-10",
 "nl_loose": [
 "In het huwelijk moet je water bij de wijn doen."
+],
+"bg_alt_en": [
+"В брака трябва да правите компромиси."
 ],
 "grammar": [
 "present",
@@ -95587,6 +98015,10 @@
 "You may not publish the photo without my consent.",
 "You can't publish the photo without my permission.",
 "You're not allowed to publish the photo without my consent."
+],
+"bg_alt_en": [
+"Не можеш да публикуваш снимката без съгласието ми.",
+"Не можеш да публикуваш снимката без моето съгласие."
 ],
 "grammar": [
 "present",
@@ -95816,6 +98248,9 @@
 "I don't mean you, I mean your brother.",
 "I'm not referring to you, I mean your brother."
 ],
+"bg_alt_en": [
+"Нямам предвид вас, говоря за брат ви."
+],
 "grammar": [
 "present"
 ]
@@ -95851,6 +98286,10 @@
 "source": "generated-2026-10",
 "en_loose": [
 "I'm sick and tired of your excuses!"
+],
+"bg_alt_en": [
+"Писна ми от вашите извинения!",
+"Писна ми от извиненията ви!"
 ],
 "grammar": [
 "aorist"
@@ -96191,6 +98630,9 @@
 "modal"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Можете ли да докажете, че сте били вкъщи?"
+],
 "grammar": [
 "present",
 "da-clause",
@@ -96307,6 +98749,10 @@
 "Never give up, even if it's hard.",
 "Never give up, even when things are hard.",
 "Never give up, even if it's difficult."
+],
+"bg_alt_en": [
+"Никога не се предавайте, дори когато е трудно.",
+"Никога не се предавайте, даже когато е трудно."
 ],
 "grammar": [
 "present",
@@ -96809,7 +99255,8 @@
 ],
 "bg_alt": [
 "Уверена ли си, че вратата е заключена?",
-"Сигурен ли си, че вратата е заключена?"
+"Сигурен ли си, че вратата е заключена?",
+"Сигурна ли си, че вратата е заключена?"
 ],
 "en_alt": [
 "Are you sure that the door is locked?",
@@ -96830,6 +99277,10 @@
 "question"
 ],
 "source": "generated-2026-10",
+"bg_alt_en": [
+"Уверени ли сте, че вратата е заключена?",
+"Сигурни ли сте, че вратата е заключена?"
+],
 "grammar": [
 "present",
 "passive"
@@ -96905,6 +99356,9 @@
 "source": "generated-2026-10",
 "en_loose": [
 "You should install the new version of the program."
+],
+"bg_alt_en": [
+"Трябва да инсталирате новата версия на програмата."
 ],
 "grammar": [
 "present",
@@ -97053,6 +99507,9 @@
 "en_loose": [
 "It's getting colder, dress warmly.",
 "It's getting cold, wear something warm."
+],
+"bg_alt_en": [
+"Застудява, облечете си нещо топло."
 ],
 "grammar": [
 "present",
@@ -97246,6 +99703,10 @@
 "I'm not convinced by your arguments.",
 "Your arguments failed to convince me."
 ],
+"bg_alt_en": [
+"Аргументите ви не ме убедиха.",
+"Вашите аргументи не ме убедиха."
+],
 "grammar": [
 "aorist"
 ]
@@ -97318,6 +99779,9 @@
 "You speak Bulgarian with hardly any accent.",
 "You speak Bulgarian almost accent-free.",
 "You speak Bulgarian practically without an accent."
+],
+"bg_alt_en": [
+"Говорите български почти без акцент."
 ],
 "grammar": [
 "present"

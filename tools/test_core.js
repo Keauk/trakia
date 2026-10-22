@@ -241,6 +241,11 @@ t('D-011 English normalisation and languages', () => {
   assert.deepEqual(C.parseKey('B017|bg2nl'), { id: 'B017', dir: 'bg2nl', lang: 'nl', toBg: false });
   const s = { id: 'x', bg: 'Да.', bg_alt: ['Да, да.'], nl: 'Ja.', nl_alt: ['Jawel.'], en: 'Yes.', en_alt: ['Yeah.'] };
   assert.deepEqual(C.acceptedFor(s, 'bg2en'), ['Yes.', 'Yeah.']); assert.deepEqual(C.acceptedFor(s, 'en2bg'), ['Да.', 'Да, да.']); assert.deepEqual(C.acceptedFor(s, 'bg2nl'), ['Ja.', 'Jawel.']);
+  // D-018: the other "you" form only for the English prompt ("Do you have…" leaves ти/вие open, "Hebben jullie…" does not)
+  const y = { id: 'y', bg: 'Имате ли момче или момиче?', bg_alt: [], bg_alt_en: ['Имаш ли момче или момиче?'], nl: 'Hebben jullie een jongen of een meisje?', nl_alt: [], en: 'Do you have a boy or a girl?', en_alt: [] };
+  assert.equal(C.check('Имаш ли момче или момиче?', C.acceptedFor(y, 'en2bg'), 'bg').result, 'correct');
+  assert.deepEqual(C.acceptedFor(y, 'nl2bg'), ['Имате ли момче или момиче?']);
+  assert.ok(C.vocabulary([y]).bg.has('имаш'), 'English-only answers feed the word-form vocabulary');
   const S = [{ id: 'a', max_rank: 10 }, { id: 'b', max_rank: 20 }];
   assert.deepEqual(C.cardKeys(S[0], {}, { lang: 'en', directions: 'gated' }), ['a|bg2en']);
   assert.deepEqual(C.cardKeys(S[0], { 'a|bg2en': { box: 1 } }, { lang: 'en', directions: 'gated' }), ['a|bg2en', 'a|en2bg']);
