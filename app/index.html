@@ -41,7 +41,7 @@ button{font:inherit}
 .badge.warn{background:var(--almost-bg);color:var(--ink)}
 .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:12px}
 .meta .spacer{flex:1}
-.prompt{font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.3;margin:8px 0 12px;font-weight:600;letter-spacing:.005em}
+.prompt{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif;font-size:28px;line-height:1.35;margin:8px 0 12px;font-weight:500;letter-spacing:.01em}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
 .chip{font-size:13px;background:var(--almost-bg);border-radius:8px;padding:2px 8px}
 input[type=text],textarea,select,input[type=number]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
@@ -53,7 +53,7 @@ input.ok{border-color:var(--ok)}input.almost{border-color:var(--almost)}input.ba
 .verdict.correct{background:var(--ok-bg)}.verdict.almost{background:var(--almost-bg)}.verdict.wrong{background:var(--bad-bg)}
 .verdict small{font-weight:500;font-size:13px;color:var(--ink2)}
 .label{margin:10px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.expected{font-family:Georgia,'Times New Roman',serif;font-size:21px;margin:0}
+.expected{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif;font-size:21px;margin:0;font-weight:500}
 .diff{font-size:17px;margin:4px 0;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
 .diff del{color:var(--del);background:var(--bad-bg);text-decoration:line-through;border-radius:3px}
 .diff ins{color:var(--ins);background:var(--ok-bg);text-decoration:none;border-radius:3px}
@@ -110,7 +110,7 @@ input[type=range]{width:100%}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--bg)}
-@media (max-width:480px){.prompt{font-size:24px}.card{padding:14px 14px 12px}main{padding:10px}#answer{font-size:18px}}
+@media (max-width:480px){.prompt{font-size:25px}.card{padding:14px 14px 12px}main{padding:10px}#answer{font-size:18px}}
 </style>
 </head>
 <body>
