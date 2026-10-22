@@ -210,7 +210,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
       <input type="text" id="lib-search" placeholder="search…" style="flex:1;min-width:140px">
     </div>
     <p class="tiny" id="lib-count"></p>
-    <p class="tiny">The two right columns show each direction's <b>review box</b> (0 = again now … 8 = mastered) and when it is next due. "–" = not practised yet. Tap a row for details.</p>
+    <p class="tiny">The two right columns show each direction's <b>stability</b> (how many days until recall drops to 90 %; "learning" while a card is in its first short steps) and when it is next due. "–" = not practised yet. Tap a row for details.</p>
     <table id="lib-table" class="fixed"></table>
     <div class="row"><button class="btn small" id="lib-more" hidden>Show more</button></div>
   </div>
@@ -249,6 +249,14 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
     </div>
   </div>
   <div class="card">
+    <h2>Scheduling (FSRS)</h2>
+    <div class="field"><label for="set-retention">Desired retention</label>
+      <div class="inline"><input type="number" id="set-retention" min="0.80" max="0.95" step="0.01"><span class="tiny" id="retention-help"></span></div>
+      <div class="help">The recall probability the scheduler aims for at review time. 0.90 is the FSRS default; above it the number of reviews per remembered sentence rises steeply, below it you see sentences less often but forget more. Changing it only affects future scheduling.</div></div>
+    <div class="field"><label for="set-maxivl">Longest interval (days)</label><div class="inline"><input type="number" id="set-maxivl" min="7" max="3650" step="1"></div></div>
+    <p class="tiny">Each card has a stability (days until recall drops to 90 %) and a difficulty, updated from your own answers with the FSRS-6 algorithm Anki uses. New and lapsed cards go through short steps first: 10 min, 1 h, then days. Correct = Good, almost = Hard (or Good / Again by the rule below), wrong = Again.</p>
+  </div>
+  <div class="card">
     <h2>Session</h2>
     <div class="field"><label for="set-dirs">Directions</label>
       <select id="set-dirs">
@@ -273,7 +281,7 @@ kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:
         <option value="lenient">Lenient — always holds the card in its box</option>
         <option value="strict">Strict — always scheduled as wrong</option>
       </select>
-      <div class="help">Staged: on a card in box 0–2 a near miss counts as correct, up to the number of free passes below (typos and word-order misses counted separately). In boxes 3–5 the card keeps its box. From box 6 a clean answer is required, otherwise the card lapses. The verdict always still says "almost" and shows the exact diff.</div></div>
+      <div class="help">Staged: on a young card (still in the learning steps, or stability under a day) a near miss counts as correct, up to the number of free passes below (typos and word-order misses counted separately). On an established card (stability 1–7 days) it counts as Hard. On a mature card (stability 7 days or more) a clean answer is required, otherwise the card lapses. The verdict always still says "almost" and shows the exact diff.</div></div>
     <div class="field"><label for="set-passes">Free passes per card (staged mode)</label><div class="inline"><input type="number" id="set-passes" min="0" max="10"></div></div>
     <div class="toggle"><input type="checkbox" id="set-bag"><div>Bulgarian word order is free<div class="help">Same words in another order counts as <b>almost</b>.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-punct"><div>Strict punctuation<div class="help">Off: punctuation and quotes are ignored.</div></div></div>
@@ -309,9 +317,10 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, strictPunct: false, strictYi: false, stripAccents: true, translit: false, theme: 'auto' };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
+(function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
 let userAlts = LS.get('userAlts', {});
 let userSentences = LS.get('userSentences', {});
 let deleted = LS.get('deleted', []);
@@ -338,6 +347,7 @@ function onlyHere(s) { return (s.lemmas || []).map(x => C.normalise(x.split('#')
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
 function applyTheme() { document.documentElement.dataset.theme = settings.theme === 'auto' ? '' : settings.theme; }
 function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(d * 24) + ' h'; return (d < 10 ? d.toFixed(1) : Math.round(d)) + ' d'; }
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
 
 // ---------- tabs ----------
@@ -429,7 +439,7 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome) {
   $('answer-actions').hidden = true; $('feedback').hidden = false;
   const v = $('verdict'); v.className = 'verdict ' + r.result;
   const how = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'order' ? 'same words, different order' : '';
-  const rule = !outcome ? '' : outcome.rule === 'free-pass' ? ` · counted as correct (free pass ${outcome.used} of ${outcome.passes} on a young card)` : outcome.rule === 'lapse' ? ' · this card is mature, so it goes back for review' : outcome.rule === 'strict' ? ' · strict mode: scheduled as wrong' : ' · card keeps its box';
+  const rule = !outcome ? '' : outcome.rule === 'free-pass' ? ` · counted as correct (free pass ${outcome.used} of ${outcome.passes} on a young card)` : outcome.rule === 'lapse' ? ' · this card is mature, so it goes back for review' : outcome.rule === 'strict' ? ' · strict mode: scheduled as wrong' : ' · counted as Hard';
   const why = r.result === 'almost' ? `<small>${how}${session.free ? '' : rule}</small>` : r.reason === 'skip' ? '<small>shown</small>' : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
   v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + ' ' + why;
   $('expected').textContent = r.expected || accepted[0];
@@ -452,7 +462,7 @@ function next() {
   const item = session.queue[session.i];
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
   progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
-  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0]);
+  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0]);
   if (log.length > 20000) log = log.slice(-15000);
   save.progress(); save.log();
   session.counts[p.result]++;
@@ -464,7 +474,7 @@ function endSession() {
   const c = session.counts, total = c.correct + c.almost + c.wrong;
   $('session-run').hidden = true; $('session-done').hidden = false;
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
-  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.free ? ' Free practice does not move cards forward, only back.' : '') : 'No answers recorded.';
+  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
   session = null;
 }
 
@@ -482,21 +492,26 @@ function renderStats() {
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);
   $('chart-table').innerHTML = '<tr><th>day</th><th>✓</th><th>≈</th><th>✗</th></tr>' + days.map(d => `<tr><td>${d.k}</td><td>${d.v[2]}</td><td>${d.v[1]}</td><td>${d.v[0]}</td></tr>`).join('');
-  // progress per direction
+  // progress per direction: stability bands
   let html = '';
+  const elig = SENT.filter(s => C.eligible(s, settings)).length;
   for (const dir of ['bg2nl', 'nl2bg']) {
-    const boxes = new Array(9).fill(0); let seen = 0, mastered = 0;
-    for (const k in progress) if (k.endsWith('|' + dir) && SENT_BY_ID.has(k.split('|')[0])) { const b = progress[k].box; boxes[b]++; seen++; if (b >= 8) mastered++; }
-    const elig = SENT.filter(s => C.eligible(s, settings)).length;
-    html += `<p style="margin:6px 0 2px"><b>${dir === 'bg2nl' ? 'Bulgarian → Dutch' : 'Dutch → Bulgarian'}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${boxes.slice(5).reduce((a, b) => a + b, 0)} known · ${mastered} mastered</span></p>`;
-    html += `<div class="bar">${['var(--bad)', 'var(--almost)', 'var(--almost)', 'var(--almost)', 'var(--almost)', 'var(--ok)', 'var(--ok)', 'var(--ok)', 'var(--accent)'].map((c, i) => `<i style="width:${elig ? 100 * boxes[i] / elig : 0}%;background:${c}"></i>`).join('')}</div>`;
-    html += `<div class="boxes">${boxes.map((n, i) => `<div><b>${n}</b>box ${i}</div>`).join('')}</div>`;
+    const bands = [0, 0, 0, 0]; let seen = 0, dueN = 0, recallSum = 0, recallN = 0;
+    for (const k in progress) if (k.endsWith('|' + dir) && SENT_BY_ID.has(k.split('|')[0])) {
+      const p = progress[k]; seen++;
+      if (p.state !== 'review') bands[0]++; else if (p.s < 7) bands[1]++; else if (p.s < 30) bands[2]++; else bands[3]++;
+      if (p.due <= now) { dueN++; if (p.state === 'review') { recallSum += C.recallNow(p, now, settings); recallN++; } }
+    }
+    const avg = recallN ? Math.round(100 * recallSum / recallN) + ' %' : '–';
+    html += `<p style="margin:6px 0 2px"><b>${dir === 'bg2nl' ? 'Bulgarian → Dutch' : 'Dutch → Bulgarian'}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${dueN} due now · predicted recall of due cards ${avg}</span></p>`;
+    html += `<div class="bar">${['var(--almost)', 'var(--ok)', 'var(--ok)', 'var(--accent)'].map((c, i) => `<i style="width:${elig ? 100 * bands[i] / elig : 0}%;background:${c};opacity:${i === 1 ? .6 : 1}"></i>`).join('')}</div>`;
+    html += `<div class="boxes" style="grid-template-columns:repeat(4,1fr)">${['learning', '< 7 d', '7–30 d', '≥ 30 d'].map((l, i) => `<div><b>${bands[i]}</b>${l}</div>`).join('')}</div>`;
   }
-  html += '<p class="tiny">Boxes: 0 = again now · 1 = 10 min · 2 = 1 h · 3 = 6 h · 4 = 1 day · 5 = 3 d · 6 = 7 d · 7 = 16 d · 8 = 35 d (mastered)</p>';
+  html += '<p class="tiny">Stability = days until the predicted chance of recalling the sentence drops to 90 %. "Learning" cards are in their short first steps (10 min, 1 h). Scheduling is FSRS-6 with your desired retention (Settings).</p>';
   $('stats-progress').innerHTML = html;
   // hardest
-  const hard = Object.entries(progress).filter(([k, p]) => p.lapses > 0 && SENT_BY_ID.has(k.split('|')[0])).sort((a, b) => b[1].lapses - a[1].lapses || a[1].box - b[1].box).slice(0, 20);
-  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:62px"><col style="width:56px"><col style="width:40px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>box</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); return `<tr><td>${esc(dir === 'bg2nl' ? s.bg : s.nl)}</td><td>${dir === 'bg2nl' ? 'BG→NL' : 'NL→BG'}</td><td>${p.lapses}</td><td>${p.box}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
+  const hard = Object.entries(progress).filter(([k, p]) => p.lapses > 0 && SENT_BY_ID.has(k.split('|')[0])).sort((a, b) => b[1].lapses - a[1].lapses || (a[1].s || 0) - (b[1].s || 0)).slice(0, 20);
+  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:62px"><col style="width:56px"><col style="width:60px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>stab.</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); return `<tr><td>${esc(dir === 'bg2nl' ? s.bg : s.nl)}</td><td>${dir === 'bg2nl' ? 'BG→NL' : 'NL→BG'}</td><td>${p.lapses}</td><td>${p.state === 'review' ? fmtDays(p.s) : 'learn'}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
   $('btn-drill').disabled = !hard.length; $('btn-drill').onclick = () => { showTab('practise'); startSession({ keys: hard.map(h => h[0]) }); };
 }
 function drawChart(days) {
@@ -541,7 +556,7 @@ function renderLibrary(reset) {
   });
   rows.sort((a, b) => (a.max_rank == null ? 1e9 : a.max_rank) - (b.max_rank == null ? 1e9 : b.max_rank) || a.id.localeCompare(b.id));
   $('lib-count').textContent = rows.length + ' sentences';
-  const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; const due = p.due <= now ? 'due' : fmtAgo(p.due - now); const cls = p.box === 0 ? 'b0' : p.box < 5 ? 'b1' : p.box < 8 ? 'b5' : 'b8'; return `<span class="badge ${cls}" title="box ${p.box}, ${p.due <= now ? 'due now' : 'due in ' + due}">${p.box}<small> · ${due}</small></span>`; };
+  const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; const due = p.due <= now ? 'due' : fmtAgo(p.due - now); const m = C.maturity(p); const learning = p.state !== 'review'; const cls = learning && (p.step || 0) === 0 ? 'b0' : m === 'young' ? 'b1' : m === 'established' ? 'b5' : 'b8'; const label = learning ? (p.state === 'relearning' ? 'relearn' : 'learning') : fmtDays(p.s); return `<span class="badge ${cls}" title="${learning ? p.state + ' step ' + (p.step || 0) : 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1)}; ${p.due <= now ? 'due now' : 'due in ' + due}">${label}<small> · ${due}</small></span>`; };
   const head = '<tr><th>rank</th><th>sentence</th><th>BG→NL</th><th>NL→BG</th></tr>';
   $('lib-table').innerHTML = '<colgroup><col style="width:46px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="nl">${esc(s.nl)}</span></td><td>${status(s, 'bg2nl')}</td><td>${status(s, 'nl2bg')}</td></tr>`).join('');
   $('lib-more').hidden = rows.length <= libShown;
@@ -554,7 +569,7 @@ $('lib-table').addEventListener('click', e => {
   const s = SENT_BY_ID.get(tr.dataset.id); if (!s) return;
   const ua = ['bg2nl', 'nl2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d === 'bg2nl' ? 'NL' : 'BG'}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
-  const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: box ${p.box}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
+  const pr = ['bg2nl', 'nl2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${d === 'bg2nl' ? 'BG→NL' : 'NL→BG'}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
   det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
   det.querySelector('[data-act=reset]').onclick = () => { delete progress[s.id + '|bg2nl']; delete progress[s.id + '|nl2bg']; save.progress(); renderLibrary(false); toast('Progress reset'); };
@@ -600,14 +615,15 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
-function afterSettingChange(key) { if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank; }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-dirs', 'directions'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
+function afterSettingChange(key) { if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank; }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
   $('rank-help').textContent = `${elig} of ${SENT.length} sentences eligible.` + (next ? ` Next unlock at word ${next.max_rank} (${WORD_BY_RANK.get(next.max_rank)?.bg || ''}).` : '');
 }
-function renderSettings() { writers.forEach(w => w()); renderRankHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s => Math.max(1, Math.round(s / o.factor * (Math.pow(o.retention, 1 / o.decay) - 1))); $('retention-help').textContent = `a card with 10 days of stability comes back after ${ivl(10)} d, with 60 days after ${ivl(60)} d`; }
+function renderSettings() { writers.forEach(w => w()); renderRankHelp(); renderRetentionHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return; e.target.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
