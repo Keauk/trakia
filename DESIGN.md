@@ -48,6 +48,7 @@ trakia/
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe)
   tools/build_data.py          data/*.json -> app/data.js (run after any data change)
   tools/test_core.js           unit tests for app/core.js  (node tools/test_core.js)
+  tools/check_decisions.py     checks decisions/D-*.md against decisions/TEMPLATE.md and the README table
   tools/SENTENCE_BRIEF.md      the brief the sentence-writing agents followed
   app/index.html           the trainer UI (single file: markup, CSS, UI script)
   app/core.js              pure logic: normalise, check, diff, translit, scheduling, import parsing

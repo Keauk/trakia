@@ -60,7 +60,7 @@ agent time plus the same validation and review pipeline as the original 999 (abo
 wall-clock with reviews). Risk: weighted random can surprise a learner who expects "next word in
 Anki order"; keep the rank chips under the prompt so new words are always visible.
 
-## Implementation notes (as built)
+## As built
 **Session mixing** (`core.js`)
 - New cards: unlocked NL→BG cards of sentences already seen fill up to half of `newPerSession` first
   (lowest rank first). The remaining slots are a weighted random sample without replacement over the

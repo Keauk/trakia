@@ -38,6 +38,9 @@ add little compared with production reviews of the same sentence.
 ~50 lines plus tests. Risk: learners who mainly want reading practice; the setting covers that.
 Depends on D-001 only for the "known" threshold wording; can ship on the Leitner boxes first.
 
+## As built
+Not started.
+
 ## Open questions
 - Should retirement be permanent or time-boxed (e.g. one recognition review every 60 days)?
 - Should "Bulgarian → Dutch only" mode still exist once production focus exists?

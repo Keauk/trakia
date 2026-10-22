@@ -52,11 +52,19 @@ tab, with small drills on exactly those forms, shortens the loop between forgett
 - UI: a fifth tab "Grammar"; cards as `<details>` blocks; the drill runs inside the existing practice
   card with a "Grammar drill" badge and no direction badge.
 
-## Decisions taken
-- Grammar-only: no single-word vocabulary drills (Anki covers words).
-- Drill answers get their own line on the Stats tab; they never enter the daily sentence accuracy.
+## Acceptance criteria
+- Stage-1 and stage-2 cards complete and reviewed; stage 3–4 cards may follow when the learner reaches them.
+- Every table row of a paradigm can be produced as a drill prompt and its answer passes `check()`.
+- A 15-item drill runs end to end on the phone with correct / almost / wrong verdicts and shows a summary.
+- Drill results never appear in the sentence review queue or the stability stats.
+- Unit tests for the drill generator (coverage of all pronouns, stage filtering, weighting of weak forms).
 
-## As built (2026-10-22)
+## Effort and risks
+Content for stages 1–2 about one evening plus review; tab and drills another evening. Risk: content
+errors are high-impact, so the review pass is not optional. Keep tables small; the reference is a
+reminder, not a grammar book.
+
+## As built
 - `data/grammar.json`: 17 cards (11 for stage 1, 2 for stage 2, 2 for stage 3, 2 for stage 4) with
   tables, notes and up to three example sentence ids chosen from the dataset by pattern; plus the
   paradigms: 18 present-tense verbs, 15 aorist, 10 imperfect, 15 л-participles, 18 imperatives, long
@@ -79,19 +87,12 @@ tab, with small drills on exactly those forms, shortens the loop between forgett
   forms, weighting of weak forms, single-table drills; the headless UI test runs a drill end to end.
 - Content review: one model pass over every form; findings applied (see the commit).
 
-## Acceptance criteria
-- Stage-1 and stage-2 cards complete and reviewed; stage 3–4 cards may follow when the learner reaches them.
-- Every table row of a paradigm can be produced as a drill prompt and its answer passes `check()`.
-- A 15-item drill runs end to end on the phone with correct / almost / wrong verdicts and shows a summary.
-- Drill results never appear in the sentence review queue or the stability stats.
-- Unit tests for the drill generator (coverage of all pronouns, stage filtering, weighting of weak forms).
-
-## Effort and risks
-Content for stages 1–2 about one evening plus review; tab and drills another evening. Risk: content
-errors are high-impact, so the review pass is not optional. Keep tables small; the reference is a
-reminder, not a grammar book.
+### Decisions taken
+- Grammar-only: no single-word vocabulary drills (Anki covers words).
+- Drill answers get their own line on the Stats tab; they never enter the daily sentence accuracy.
 
 ## Open questions
-- Should drills also cover Dutch → Bulgarian single words (vocabulary), or stay grammar-only? (Anki
-  covers words; proposal: grammar-only.)
-- Weight drills into the daily stats as answers, or keep a separate "drill" line?
+- ~~Should drills also cover Dutch → Bulgarian single words (vocabulary), or stay grammar-only?~~
+  Grammar-only; Anki covers words.
+- ~~Weight drills into the daily stats as answers, or keep a separate "drill" line?~~ A separate
+  line on the Stats tab; drills never enter the daily sentence accuracy.

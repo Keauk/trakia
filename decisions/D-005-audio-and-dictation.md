@@ -45,6 +45,9 @@ Text-to-speech, which the Web Speech API (`speechSynthesis`) exposes to an insta
 ~150 lines; one evening plus phone testing. Risks: voice availability varies by device; the dictation
 direction adds review load (mitigated by D-004-style retirement of recognition cards).
 
+## As built
+Not started.
+
 ## Open questions
 - Should dictation replace BG→NL for mature sentences rather than add a third card?
 - Record the learner's own voice for comparison? (Out of scope; note for later.)

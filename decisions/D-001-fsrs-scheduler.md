@@ -54,7 +54,7 @@ Keep the minute-granular feel with explicit learning steps before FSRS takes ove
 About 250 lines in `core.js` plus tests; one evening. Risks: subtle maths bugs (mitigated by reference
 vectors); the first weeks after migration will feel different because intervals change.
 
-## Implementation notes (as built)
+## As built
 - `core.js` ports **py-fsrs 6.3.2** (FSRS-6, 21 parameters, the version Anki ships): `fsrsReview(card,
   rating, now, opts, rand)` mirrors `Scheduler.review_card` including learning/relearning steps,
   same-day short-term stability, whole-day review intervals, the maximum interval and py-fsrs's fuzz

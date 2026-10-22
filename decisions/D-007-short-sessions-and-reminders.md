@@ -45,6 +45,9 @@ Session size: ~30 lines. Badge and .ics: ~40 lines. Periodic sync with the Index
 lines and the riskiest part (browser support is limited to Chromium on Android and depends on the
 site engagement score). Do tiers 1–2 first and treat tier 3 as optional.
 
+## As built
+Not started.
+
 ## Open questions
 - Is 20 answers the right default, or should it be time-based (stop offering after 8 minutes)?
 - Should the badge count due cards in both directions or only production cards (D-004)?

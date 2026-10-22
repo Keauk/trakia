@@ -58,6 +58,9 @@ Correct     Тя има лице   на дете.
 changes can pair the wrong words; keep the LCS on normalised tokens and fall back to "all differ"
 marking when the alignment is poor (fewer than half the words match).
 
+## As built
+Not started.
+
 ## Open questions
 - Keep a tiny "show character diff" toggle for those who want the old view? (Proposal: no.)
 - Label language: "You typed / Correct" in English like the rest of the app, or Dutch?

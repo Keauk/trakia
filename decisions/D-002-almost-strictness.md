@@ -42,7 +42,7 @@ Thresholds become settings with these defaults so a learner can keep the lenient
 Small: ~40 lines plus tests. Risk: feeling punitive on long sentences where a single typo is likely;
 the diff and the honest verdict text mitigate that, and the typo tolerance setting still applies.
 
-## Implementation notes (as built)
+## As built
 - `core.js`: `ALMOST = {youngMaxBox: 2, matureMinBox: 6}`, `almostOutcome(p, reason, settings)` returns
   `{rating, rule}` with rules `free-pass` / `hold` / `lapse` / `strict`; `applyResult` takes `reason`
   and `settings` and consumes a free pass only outside free practice. Counters `almosts` (typos) and

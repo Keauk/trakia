@@ -48,6 +48,9 @@ correct" answer could be rated Hard rather than Good.
 ~150 lines plus tests; two evenings. Risk: a wrong explanation is worse than none, so every note kind
 needs a precise trigger and the fallback is silence, never a guess.
 
+## As built
+Not started.
+
 ## Open questions
 - Should "Unsure + correct" be rated down, or only reported? (Start with reporting only.)
 - Do we want the notes in Dutch for the learner, or keep the app in English?

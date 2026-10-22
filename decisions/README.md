@@ -1,8 +1,10 @@
 # Decision log
 
-One file per work item. Status is one of **proposed → accepted → in progress → done / rejected**.
-Each file follows the same shape: context (why), proposal (what), design notes (how, tied to the
-current code), acceptance criteria (how we know it is done), effort and risks, open questions.
+One record per feature; `CLAUDE.md` in the repository root says what counts as a feature and when
+a record is written. Every record follows `TEMPLATE.md`: a status line, then the sections Context,
+Proposal, Design notes, Acceptance criteria, Effort and risks, As built, Open questions, always in
+that order. Status is one of **proposed → accepted → in progress → done / rejected** and must match
+the table below; `python3 tools/check_decisions.py` verifies the structure and the table.
 
 | id | title | area | status |
 |----|-------|------|--------|

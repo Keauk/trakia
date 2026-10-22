@@ -7,8 +7,8 @@ See [DESIGN.md](DESIGN.md) for the design and how to run it.
 data/words.json        word list exported from the Anki deck (ordered by Rank = study order)
 data/grammar.json      grammar reference tables and drill paradigms (Grammar tab)
 data/sentences.json    practice sentences with Dutch translations, alternatives and max_rank (reviewed twice; see data/REVIEW_CHANGES.md)
-tools/                 export_anki_words.py, validate_sentences.py, build_data.py, publish.sh, tests
-decisions/             work items / decision log, one file per item (see decisions/README.md)
+tools/                 export_anki_words.py, validate_sentences.py, build_data.py, check_decisions.py, publish.sh, tests
+decisions/             decision log, one record per feature (see decisions/README.md and CLAUDE.md)
 app/                   the PWA: index.html (UI), core.js (logic), data.js (generated bundle), sw.js, manifest.json
 ```
 
@@ -26,6 +26,7 @@ file also works on the laptop.
 ```bash
 npm install                                   # once: jsdom for the headless UI test
 npm test                                      # unit tests (incl. FSRS reference vectors) + headless UI test
+python3 tools/check_decisions.py              # every decisions/D-*.md follows TEMPLATE.md and is in the table
 python3 tools/build_data.py                   # regenerate app/data.js after editing data/*.json
 python3 tools/export_anki_words.py deck.apkg  # refresh data/words.json from a new Anki export
 ```

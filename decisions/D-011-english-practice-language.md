@@ -44,12 +44,20 @@ spelling).
 - The gating rule (NL→BG after BG→NL) becomes "X→BG after BG→X" for the assigned language.
 - Stats: per-direction blocks show both languages when both have cards.
 
-## Decisions taken
-- Mixed ships in the first version (a stable split by sentence id, no stored assignment).
-- The Library follows the selected language; Stats shows every direction that has cards, plus the
-  current language's directions.
+## Acceptance criteria
+- Every sentence has 1–3 `en_alt` entries and a reviewed `en`.
+- With the setting on English, a full session runs BG → EN and EN → BG with the same verdicts; "I'm"
+  and "I am" are both correct; "colour" and "color" are both correct.
+- Switching Dutch → English → Dutch keeps both sets of progress intact (test with export/import).
+- Imports with an `en_alt` column round-trip through export.
 
-## As built (2026-10-22)
+## Effort and risks
+Data pass: one agent round (~18 agents × 150 sentences), about an hour of wall-clock. Code: ~120
+lines plus tests, one evening. Risk: the English review is model-written like the Dutch; the "My
+answer was correct" button remains the correction channel. Mixed mode adds a little complexity; it
+can ship after the two plain modes.
+
+## As built
 - Data: 18 reviewers × ~150 sentences; `en` corrected on 48 sentences (calques, dropped objects,
   reporting-verb tense, register), 5394 alternatives added (2614 sentences have 1–3 `en_alt`, 42 very
   short ones have none because no meaningfully different correct wording exists). Changes listed in
@@ -66,19 +74,13 @@ spelling).
 - Bundle: `app/data.js` is now 1.8 MB (the alternatives added ~260 KB); splitting it is still the
   next step before another large batch.
 
-## Acceptance criteria
-- Every sentence has 1–3 `en_alt` entries and a reviewed `en`.
-- With the setting on English, a full session runs BG → EN and EN → BG with the same verdicts; "I'm"
-  and "I am" are both correct; "colour" and "color" are both correct.
-- Switching Dutch → English → Dutch keeps both sets of progress intact (test with export/import).
-- Imports with an `en_alt` column round-trip through export.
-
-## Effort and risks
-Data pass: one agent round (~18 agents × 150 sentences), about an hour of wall-clock. Code: ~120
-lines plus tests, one evening. Risk: the English review is model-written like the Dutch; the "My
-answer was correct" button remains the correction channel. Mixed mode adds a little complexity; it
-can ship after the two plain modes.
+### Decisions taken
+- Mixed ships in the first version (a stable split by sentence id, no stored assignment).
+- The Library follows the selected language; Stats shows every direction that has cards, plus the
+  current language's directions.
 
 ## Open questions
-- Ship *Mixed* in the first version, or Dutch / English only?
-- Should the Stats and Library default to showing both languages, or only the selected one?
+- ~~Ship *Mixed* in the first version, or Dutch / English only?~~ Mixed shipped in the first
+  version (a stable split by sentence id).
+- ~~Should the Stats and Library default to showing both languages, or only the selected one?~~
+  The Library follows the selected language; Stats shows every direction that has cards.
