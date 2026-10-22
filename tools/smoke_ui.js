@@ -9,8 +9,7 @@ window.HTMLCanvasElement.prototype.getContext = () => null;   // no canvas in js
 window.confirm = () => true;
 // jsdom's Blob has no text()/arrayBuffer(); real browsers do
 window.Blob.prototype.text = function () { return new Promise(r => { const fr = new window.FileReader(); fr.onload = () => r(fr.result); fr.readAsText(this); }); }; window.URL.createObjectURL = () => 'blob:x'; window.URL.revokeObjectURL = () => {};
-for (const f of ['data.js', 'core.js']) window.eval(fs.readFileSync(path.join(APP, f), 'utf8'));
-window.eval(html.match(/<script>([\s\S]*)<\/script>/)[1]);
+for (const f of ['data.js', 'core.js', 'ui.js']) window.eval(fs.readFileSync(path.join(APP, f), 'utf8'));
 const $ = id => document.getElementById(id);
 const type = (v, key) => { $('answer').value = v; $('answer').dispatchEvent(new window.Event('input')); $('answer').dispatchEvent(new window.KeyboardEvent('keydown', { key: key || 'Enter' })); };
 const C = window.TrakiaCore;
