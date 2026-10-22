@@ -6,7 +6,9 @@
 "nl_alt": [
 "Amsterdam is mijn thuis."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Моят дом е в Амстердам."
+],
 "en": "My home is in Amsterdam.",
 "lemmas": [
 "дом",
@@ -22,7 +24,9 @@
 "grammar": [
 "present"
 ],
-"en_alt": []
+"en_alt": [
+"Amsterdam is my home."
+]
 },
 {
 "id": "A099",
