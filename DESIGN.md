@@ -260,7 +260,7 @@ same behaviour as on the phone.
 Suggested `index.html` structure (all in one file, ~900 lines total when finished):
 
 ```
-<header> wordmark · tabs (a bottom tab bar on phones, D-015) · deck position
+<header> wordmark · tabs (a bottom tab bar on phones, D-015) · deck position · light/dark switch (D-016)
 <main id=practise>  prompt card (sentence, direction badge, new-word tooltips)
                     <input> or <textarea> + on-screen helper keys
                     session progress bar (one segment per card)

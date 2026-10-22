@@ -31,6 +31,15 @@ header{position:sticky;top:0;z-index:5;background:var(--header);border-bottom:1p
 h1{font:700 24px/1.2 var(--serif);margin:0;color:var(--ink)}
 #hdr-rank{font:400 12px var(--mono);color:var(--faint);white-space:nowrap}
 nav{display:flex;gap:2px;background:var(--nav-track);padding:3px;border-radius:10px}
+.hright{display:flex;align-items:center;gap:10px}
+/* light/dark switch (D-016): a moon in light mode, a sun in dark mode */
+.theme-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer}
+.theme-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.theme-btn .i-sun{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .theme-btn .i-sun{display:block}:root:not([data-theme=light]) .theme-btn .i-moon{display:none}}
+:root[data-theme=dark] .theme-btn .i-sun{display:block}:root[data-theme=dark] .theme-btn .i-moon{display:none}
+@media (hover:hover){.theme-btn:hover{color:var(--ink);background:var(--nav-track)}}
+.theme-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 nav button{background:none;border:0;padding:7px 14px;border-radius:7px;font:500 13px/1.4 var(--sans);color:var(--muted);cursor:pointer}
 @media (hover:hover){nav button:hover{color:var(--ink)}}
 nav button.active{background:var(--nav-active);color:var(--ink);box-shadow:var(--nav-active-shadow)}
@@ -175,12 +184,15 @@ nav button.active{background:none;box-shadow:none;color:var(--tab-active)}
 main{padding:12px 12px calc(var(--tabbar-h) + 20px)}
 .card{padding:18px}
 body.running header{position:static;background:none;border:0}
-body.running .hrow{padding:0}body.running h1,body.running #hdr-rank{display:none}
+body.running .hrow{padding:0}body.running h1,body.running .hright{display:none}
+.theme-btn{width:44px;height:44px}
+.hright .theme-btn{margin:-10px -12px -10px -6px}
 body.running main{padding-top:0;padding-bottom:calc(var(--tabbar-h) + 96px)}
 .run-top{display:flex;align-items:center;gap:10px;margin:0 -12px;padding:8px 12px 8px 6px}
 .icon-btn{flex:none;width:44px;height:44px;background:none;border:0;color:var(--faint);font:400 20px var(--sans);cursor:pointer}
 .segs{gap:3px}
-.count{padding-right:8px}
+.count{padding-right:0}
+.run-top .theme-btn{margin-right:-8px}
 .run-card{margin-top:12px}
 .run-body{padding:20px 18px;gap:14px}
 .chip{font-size:11px}
@@ -216,7 +228,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <button data-tab="library">Library</button>
       <button data-tab="settings">Settings</button>
     </nav>
-    <span id="hdr-rank"></span>
+    <div class="hright"><span id="hdr-rank"></span><button class="theme-btn" id="btn-theme" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button></div>
   </div>
 </header>
 <main>
@@ -239,6 +251,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <button class="icon-btn" id="btn-quit-m" aria-label="End session">✕</button>
       <div class="segs" id="segs-m" role="progressbar" aria-label="Session progress"></div>
       <span class="count" id="counter-m"></span>
+      <button class="theme-btn" id="btn-theme-m" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
     </div>
     <div class="run-meta d-only">
       <div class="chips-row" id="chips-d"><span id="dir-badge" class="chip solid"></span><span id="free-badge" class="chip" hidden>Free practice</span><span id="retry-badge" class="chip" hidden>Retry</span></div>

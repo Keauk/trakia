@@ -92,6 +92,15 @@ assert.match($('lib-count').textContent, /^\d+ sentences/);
 $('lib-filter').value = 'seen'; $('lib-filter').dispatchEvent(new window.Event('change'));
 assert.equal($('lib-count').textContent, '5 sentences');   // four cards above plus the Enter-key check
 document.querySelector('nav button[data-tab=settings]').click();
+// D-016: the top-bar switch flips light/dark, stores it and keeps the Settings select in step (jsdom has no dark system scheme)
+assert.equal($('btn-theme').getAttribute('aria-label'), 'Switch to dark mode');
+$('btn-theme').click();
+assert.equal(document.documentElement.dataset.theme, 'dark'); assert.equal($('set-theme').value, 'dark');
+assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).theme, 'dark');
+assert.equal($('btn-theme-m').getAttribute('aria-label'), 'Switch to light mode');
+$('btn-theme-m').click();
+assert.equal(document.documentElement.dataset.theme, 'light'); assert.equal($('set-theme').value, 'light');
+assert.equal(document.querySelector('meta[name=theme-color]').getAttribute('content'), '#ffffff');
 assert.equal($('set-rank').value, '102');
 $('set-rank').value = '600'; $('set-rank').dispatchEvent(new window.Event('input'));
 assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 600);

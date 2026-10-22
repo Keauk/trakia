@@ -23,6 +23,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-012](D-012-collapsible-alternatives.md) | Collapse the "Also accepted" list behind a subtle toggle | feedback UI | done |
 | [D-014](D-014-stricter-answers-and-loose-tier.md) | Accept fewer loose translations, mark the looser ones, stop counting wrong word forms as typos | checking / data | done |
 | [D-015](D-015-practise-screen-redesign.md) | Restyle the app after the practise-screen design: palette, type, progress bar, phone tab bar, word highlights | look / feedback UI | done |
+| [D-016](D-016-theme-switch.md) | Switch between light and dark mode from the top bar | top bar | done |
 
 Suggested order for the open items: D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

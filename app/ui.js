@@ -53,12 +53,24 @@ function countLemmas(list) { const m = new Map(); for (const s of list) for (con
 function onlyHere(s) { return (s.lemmas || []).map(x => C.normalise(x.split('#')[0], 'bg')).filter(l => !C.STOP.has(l) && LEMMA_COUNT.get(l) === 1); }
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
+const darkQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+/** is the dark palette showing (forced, or System on a dark device)? */
+const isDark = () => settings.theme === 'dark' || (settings.theme !== 'light' && !!darkQuery && darkQuery.matches);
 function applyTheme() {
   const t = settings.theme === 'auto' ? '' : settings.theme;
   document.documentElement.dataset.theme = t;
   // the browser bar takes the header colour: per scheme when the theme is System, the forced one otherwise
   document.querySelectorAll('meta[name=theme-color]').forEach(m => m.setAttribute('content', (t || m.getAttribute('data-scheme')) === 'dark' ? '#16171a' : '#ffffff'));
+  const label = isDark() ? 'Switch to light mode' : 'Switch to dark mode';   // the icon itself is chosen by CSS
+  for (const id of ['btn-theme', 'btn-theme-m']) { const b = $(id); b.setAttribute('aria-label', label); b.title = label; }
 }
+// light/dark switch in the top bar (D-016): stores the opposite of what is showing; Settings → Theme can go back to System
+function toggleTheme() { settings.theme = isDark() ? 'light' : 'dark'; save.settings(); applyTheme(); $('set-theme').value = settings.theme; }
+for (const id of ['btn-theme', 'btn-theme-m']) {
+  $(id).addEventListener('click', toggleTheme);
+  $(id).addEventListener('mousedown', e => e.preventDefault());   // keep the focus (and the phone keyboard) in the answer field
+}
+if (darkQuery) darkQuery.addEventListener('change', applyTheme);
 const LANG_NAME = { nl: 'Dutch', en: 'English' }, LANG_CODE = { nl: 'NL', en: 'EN' };
 function dirLabel(dir) { const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
 function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, text: s[L] || s.nl, alts: s[L + '_alt'] || [] }; }
