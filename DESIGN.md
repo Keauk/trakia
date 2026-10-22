@@ -130,15 +130,21 @@ Three layers, in order:
 2. **Exact match** against the primary answer, the `*_alt` list, and your own accepted answers
    (`userAlts`). → *Correct*. Then against the *looser* translations `nl_loose` / `en_loose`
    (D-014): natural but drifting from the Bulgarian in tense, number or structure. → *Correct*
-   with a "≈ looser" tag; the expected line then shows the closest exact answer with a diff.
+   with a "≈ looser" tag; the expected line then shows the closest exact answer, highlighted
+   against what was typed.
 3. **Near miss**: Damerau-Levenshtein distance to the closest accepted answer. If
    `distance ≤ max(1, round(0.08 × length))` (≈ one typo per 12 characters) → *Almost*: shown as
    correct with the differing characters highlighted, counts as correct for scheduling but does
    not advance the box. (D-002 has since staged this by card maturity.) A near miss that is really a
    different word form (Sunday/Sundays, книга/книгата, in/on, a missing or extra word; "real word"
    = it occurs in the corpus) is *Wrong*, not *Almost* (D-014, setting *A wrong word form is an
-   error*). Above that → *Wrong*: the expected answer is shown with a character diff
-   (inline `<ins>/<del>` from a simple LCS diff) and the alternatives are listed.
+   error*). Above that → *Wrong*, and the alternatives are listed behind a toggle.
+
+The result bar (D-015) shows the verdict in its colour (green correct, amber almost, red wrong,
+blue "→ Answer" after *Don't know*) and the expected sentence with the words that differ from the
+typed answer highlighted (`wordMarks`: word-level LCS, case-sensitive, surrounding punctuation
+ignored). The typed answer stays visible in the read-only field directly above it. This replaced
+the earlier inline `<ins>/<del>` character diff.
 
 After a *Wrong* there is always a **"My answer was correct"** button. It adds your typed answer to
 `userAlts` for that sentence+direction, re-scores the attempt as correct, and the alternative is
@@ -254,11 +260,11 @@ same behaviour as on the phone.
 Suggested `index.html` structure (all in one file, ~900 lines total when finished):
 
 ```
-<header> tabs: Practise · Stats · Library · Settings
+<header> wordmark · tabs (a bottom tab bar on phones, D-015) · deck position
 <main id=practise>  prompt card (sentence, direction badge, new-word tooltips)
                     <input> or <textarea> + on-screen helper keys
-                    feedback panel (correct / almost / wrong + diff + alternatives + "I was right")
-                    session progress bar
+                    session progress bar (one segment per card)
+                    result bar (correct / almost / wrong / revealed + word highlights + alternatives + "I was right")
 <main id=stats>     numbers + 1 canvas chart + hardest list
 <main id=library>   table of sentences with filter (eligible / all / tag), import/export buttons
 <main id=settings>  rank slider, tolerance, direction mix, new per session, strictness toggles

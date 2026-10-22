@@ -29,6 +29,20 @@ t('diff', () => {
   const d = C.diff('ik kocht brod', 'ik kocht brood');
   assert.deepEqual(d, [['eq', 'ik kocht bro'], ['ins', 'o'], ['eq', 'd']]);
 });
+t('wordMarks (D-015)', () => {
+  const marked = (typed, exp) => C.wordMarks(typed, exp).filter(x => x.miss).map(x => x.w);
+  // case-sensitive, trailing punctuation ignored: an accepted lower-case answer still marks the capital
+  assert.deepEqual(marked('Do you work on sunday', 'Do you work on Sunday?'), ['Sunday?']);
+  assert.deepEqual(marked('Do you work on Sunday', 'Do you work on Sunday?'), []);
+  // a missing word marks only that word (no cascade as with a positional comparison)
+  assert.deepEqual(marked('Do you work Sunday?', 'Do you work on Sunday?'), ['on']);
+  assert.deepEqual(marked('Do you really work on Sunday?', 'Do you work on Sunday?'), []);
+  assert.deepEqual(marked('Where’s the station', "Where's the station?"), []);
+  assert.deepEqual(marked('', 'Къде е гарата?'), ['Къде', 'е', 'гарата?']);
+  assert.deepEqual(marked('Къде е гара', '„Къде е гарата?“ — пита той.'), ['гарата?“', 'пита', 'той.']);
+  // the words come back unchanged, so joining them restores the sentence
+  assert.equal(C.wordMarks('x', 'Ik kocht  brood.').map(x => x.w).join(' '), 'Ik kocht brood.');
+});
 t('translit', () => {
   assert.equal(C.translit('Kupih hlyab i mlyako'), 'Купих хляб и мляко');
   assert.equal(C.translit('Shte dojda s priyatel. Zdravej!'), 'Ще дойда с приятел. Здравей!');

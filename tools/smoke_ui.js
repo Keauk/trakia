@@ -21,25 +21,38 @@ assert.match($('hdr-rank').textContent, /word 102/);
 $('btn-start').click();
 assert.equal($('session-run').hidden, false);
 assert.equal($('dir-badge').textContent, 'BG → NL');
+// D-015: one progress segment per card, current one marked; chips mirrored for phones; phone layout flag
+const qLen = +$('counter').textContent.split(' of ')[1];
+assert.equal($('counter').textContent, '1 of ' + qLen); assert.equal($('counter-m').textContent, '1/' + qLen);
+assert.equal($('segs').children.length, qLen); assert.equal($('segs').children[0].className, 'cur');
+assert.ok($('chips-m').textContent.includes('BG → NL') && !$('chips-m').querySelector('[id]'), 'chips mirrored without ids');
+assert.ok(document.body.classList.contains('running'));
+assert.equal($('run-card').dataset.state, 'idle');
 const id = (() => { const txt = $('prompt').textContent; return window.TRAKIA_DATA.sentences.find(s => s.bg === txt); })();
 assert.ok(id, 'prompt is a bundled sentence');
 // exact answer -> correct
 type(id.nl);
 assert.match($('verdict').className, /correct/);
+assert.equal($('run-card').dataset.state, 'correct'); assert.equal($('verdict').textContent, '✓ Correct');
+assert.equal($('expected').querySelector('mark'), null, 'exact answer: nothing highlighted'); assert.equal($('verdict-note').textContent, '');
 assert.equal($('btn-accept').hidden, true);
 type('', 'Enter'); // next
+assert.equal($('segs').children[0].className, 'done'); assert.equal($('segs').children[1].className, 'cur');
 // second card: one typo -> almost
 const s2 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
 const longest = s2.nl.split(/\s+/).sort((a, b) => b.length - a.length)[0];
 const typo = s2.nl.replace(longest, longest[0] + (longest[1] === 'q' ? 'x' : 'q') + longest.slice(2));  // one letter replaced by q, so it is no real word (D-014)
 type(typo);
 assert.match($('verdict').className, /almost/, 'typo counts as almost: ' + $('verdict').textContent);
-assert.ok($('diff').innerHTML.includes('<ins>'), 'diff shows the missing char');
+assert.equal($('run-card').dataset.state, 'almost');
+assert.ok($('expected').querySelector('mark'), 'the misspelt word is highlighted'); assert.match($('verdict-note').textContent, /character/);
+assert.equal($('expected').textContent, s2.nl, 'highlighting keeps the sentence text');
 type('', 'Enter');
 // third card: nonsense -> wrong, then accept my answer -> correct and stored
 const s3 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
 type('dit is helemaal fout');
 assert.match($('verdict').className, /wrong/);
+assert.equal($('run-card').dataset.state, 'wrong'); assert.equal($('verdict-note').textContent, 'Differences highlighted');
 assert.equal($('btn-accept').hidden, false);
 $('btn-accept').click();
 assert.match($('verdict').className, /correct/);
@@ -47,17 +60,28 @@ assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.userAlts'))[s3.i
 type('', 'Enter');
 // fourth: don't know -> wrong and re-queued
 const s4 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
-const before = $('counter').textContent.split(' / ')[1];
+const before = $('counter').textContent.split(' of ')[1];
 $('btn-dontknow').click();
 assert.match($('verdict').className, /wrong/);
+assert.equal($('run-card').dataset.state, 'revealed'); assert.equal($('verdict').textContent, '→ Answer');
+assert.equal($('expected').querySelector('mark'), null, 'a revealed answer has no highlights');
 $('btn-next').click();
-assert.equal(+$('counter').textContent.split(' / ')[1], +before + 1, 'wrong card appended for retry');
+assert.equal(+$('counter').textContent.split(' of ')[1], +before + 1, 'wrong card appended for retry');
+assert.equal($('segs').children.length, +before + 1, 'the retry adds a segment');
 // progress persisted
 const prog = JSON.parse(window.localStorage.getItem('trakia.progress'));
 assert.equal(prog[id.id + '|bg2nl'].box, 1); assert.equal(prog[s2.id + '|bg2nl'].box, 1); assert.equal(prog[s3.id + '|bg2nl'].box, 1); assert.equal(prog[s4.id + '|bg2nl'].box, 0);
 // end session, check summary
+// Enter in the answer field checks and stops there (it used to reach the document handler and skip the result)
+$('answer').value = 'iets'; $('answer').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+assert.equal($('feedback').hidden, false, 'Enter shows the result');
+document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, repeat: true }));
+assert.equal($('feedback').hidden, false, 'a held Enter does not continue');
+document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+assert.equal($('feedback').hidden, true, 'the next Enter continues');
 $('btn-quit').click();
 assert.equal($('session-done').hidden, false);
+assert.ok(!document.body.classList.contains('running'));
 assert.match($('done-stats').textContent, /correct/);
 // stats + library + settings tabs render without throwing
 document.querySelector('nav button[data-tab=stats]').click();
@@ -66,7 +90,7 @@ assert.ok($('hardest').textContent.length > 0);
 document.querySelector('nav button[data-tab=library]').click();
 assert.match($('lib-count').textContent, /^\d+ sentences/);
 $('lib-filter').value = 'seen'; $('lib-filter').dispatchEvent(new window.Event('change'));
-assert.equal($('lib-count').textContent, '4 sentences');
+assert.equal($('lib-count').textContent, '5 sentences');   // four cards above plus the Enter-key check
 document.querySelector('nav button[data-tab=settings]').click();
 assert.equal($('set-rank').value, '102');
 $('set-rank').value = '600'; $('set-rank').dispatchEvent(new window.Event('input'));
@@ -127,7 +151,7 @@ document.querySelector('nav button[data-tab=practise]').click();
 $('btn-home').click();
 $('btn-gdrill').click();
 assert.equal($('session-run').hidden, false); assert.equal($('dir-badge').textContent, 'Grammar drill');
-assert.equal($('counter').textContent, '1 / 15');
+assert.equal($('counter').textContent, '1 of 15');
 // answer the first item correctly using the generated answer, the second wrongly
 const drillItems = Object.fromEntries(C.drillItems(window.TRAKIA_DATA.grammar, 5).map(it => [it.prompt + '|' + it.hint, it]));
 let it = drillItems[$('prompt').textContent + '|' + $('newwords').textContent];
@@ -169,10 +193,12 @@ assert.equal($('session-run').hidden, false);
 assert.equal($('dir-badge').textContent, 'BG → EN', 'first English card is BG → EN');
 const sEn = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
 assert.ok(sEn, 'prompt is a sentence');
-assert.equal($('answer').placeholder, 'Enter translation');
-type(sEn.en);
-assert.match($('verdict').className, /correct/, 'English primary accepted: ' + $('verdict').textContent);
-assert.match($('gloss').textContent, /^NL: /, 'third language shown as gloss');
+assert.equal($('answer').placeholder, 'Type the English translation');
+// an accepted answer in lower case still highlights the capitals it lacks (D-015)
+type(sEn.en.toLowerCase());
+assert.match($('verdict').className, /correct/, 'English primary accepted in lower case: ' + $('verdict').textContent);
+if (/\p{Lu}/u.test(sEn.en)) { assert.ok($('expected').querySelector('mark'), 'case difference highlighted'); assert.equal($('verdict-note').textContent, 'Accepted — small differences highlighted'); }
+assert.match($('gloss').textContent, /^NL .+ · rank \d+/, 'third language and rank shown as gloss: ' + $('gloss').textContent);
 type('', 'Enter');
 // a contraction / spelling variant of the next English answer is still correct
 const sEn2 = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
@@ -185,13 +211,14 @@ sEn3.en_loose = ['Something rather loosely rendered.'];
 type('Something rather loosely rendered');
 assert.match($('verdict').className, /correct/, 'loose answer accepted: ' + $('verdict').textContent);
 assert.ok($('verdict').querySelector('.loose-tag'), 'loose tag shown');
-assert.equal($('expected-label').textContent, 'Closer to the Bulgarian');
+assert.equal($('expected-label').hidden, false); assert.equal($('expected-label').textContent, 'Closer to the Bulgarian');
 assert.ok([sEn3.en].concat(sEn3.en_alt || []).includes($('expected').textContent), 'closer is an exact answer: ' + $('expected').textContent);
-assert.ok($('diff').innerHTML.includes('<ins>'), 'diff against the closer answer');
+assert.ok($('expected').querySelector('mark'), 'closer answer highlighted against what was typed');
 assert.ok([...$('alts').querySelectorAll('li.loose')].length === 0, 'the typed loose answer is not listed again');
 delete sEn3.en_loose;
 type('', 'Enter');
-assert.equal($('expected-label').textContent, 'Closer to the Bulgarian', 'label is only reset on the next verdict');
+type('zzz qqq');
+assert.equal($('expected-label').hidden, true, 'an ordinary verdict hides the label again');
 $('btn-quit').click();
 const progEn = JSON.parse(window.localStorage.getItem('trakia.progress'));
 assert.ok(Object.keys(progEn).some(k => k.endsWith('|bg2en')), 'English cards stored under their own keys');

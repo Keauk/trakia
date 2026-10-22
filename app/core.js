@@ -194,6 +194,29 @@
     return ops;
   }
 
+  /**
+   * Word highlights for the expected line of the result bar (D-015): the words of `expected`, each with
+   * miss = true when a word-level LCS against `typed` leaves it unmatched. Case-sensitive (an accepted
+   * "sunday" still marks "Sunday"); leading and trailing punctuation is ignored, ’ counts as '.
+   * @param {string} typed @param {string} expected @returns {{w: string, miss: boolean}[]}
+   */
+  function wordMarks(typed, expected) {
+    const key = w => w.replace(/’/g, "'").replace(/^[^\p{L}\p{N}\p{M}]+|[^\p{L}\p{N}\p{M}]+$/gu, '');
+    const words = (expected || '').split(/\s+/).filter(Boolean), b = words.map(key);
+    const a = (typed || '').split(/\s+/).filter(Boolean).map(key).filter(Boolean);
+    const m = a.length, n = b.length, L = [];
+    for (let i = 0; i <= m; i++) L[i] = new Int16Array(n + 1);
+    for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--)
+      L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const hit = new Array(n).fill(false);
+    for (let i = 0, j = 0; i < m && j < n;) {
+      if (a[i] === b[j]) { hit[j] = true; i++; j++; }
+      else if (L[i + 1][j] >= L[i][j + 1]) i++;
+      else j++;
+    }
+    return words.map((w, j) => ({ w, miss: !hit[j] && b[j] !== '' }));
+  }
+
   // Latin -> Cyrillic phonetic transliteration (longest match first)
   const TR_MULTI = [['sht', 'щ'], ['sh', 'ш'], ['ch', 'ч'], ['zh', 'ж'], ['yu', 'ю'], ['ya', 'я'], ['yo', 'ьо'], ['ju', 'ю'], ['ja', 'я']];
   const TR_ONE = { a: 'а', b: 'б', v: 'в', w: 'в', g: 'г', d: 'д', e: 'е', z: 'з', i: 'и', j: 'й', k: 'к', l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', r: 'р', s: 'с', t: 'т', u: 'у', f: 'ф', h: 'х', x: 'ь', c: 'ц', y: 'ъ', q: 'я' };
@@ -659,6 +682,6 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, wordSlips, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, wordSlips, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

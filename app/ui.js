@@ -53,7 +53,12 @@ function countLemmas(list) { const m = new Map(); for (const s of list) for (con
 function onlyHere(s) { return (s.lemmas || []).map(x => C.normalise(x.split('#')[0], 'bg')).filter(l => !C.STOP.has(l) && LEMMA_COUNT.get(l) === 1); }
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
-function applyTheme() { document.documentElement.dataset.theme = settings.theme === 'auto' ? '' : settings.theme; }
+function applyTheme() {
+  const t = settings.theme === 'auto' ? '' : settings.theme;
+  document.documentElement.dataset.theme = t;
+  // the browser bar takes the header colour: per scheme when the theme is System, the forced one otherwise
+  document.querySelectorAll('meta[name=theme-color]').forEach(m => m.setAttribute('content', (t || m.getAttribute('data-scheme')) === 'dark' ? '#16171a' : '#ffffff'));
+}
 const LANG_NAME = { nl: 'Dutch', en: 'English' }, LANG_CODE = { nl: 'NL', en: 'EN' };
 function dirLabel(dir) { const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
 function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, text: s[L] || s.nl, alts: s[L + '_alt'] || [] }; }
@@ -66,7 +71,7 @@ function renderAlts(list, loose) {
   q(el, 'ul').innerHTML = list.map(a => `<li>${esc(a)}</li>`).join('') + (loose || []).map(a => `<li class="loose" title="accepted, but looser than the Bulgarian">≈ ${esc(a)}</li>`).join('');
   el.open = LS.get('altsOpen', false) === true;
 }
-function fitAnswer() { const a = $('answer'); a.style.height = 'auto'; a.style.height = a.scrollHeight + 'px'; }
+function fitAnswer() { const a = $('answer'); a.style.height = 'auto'; a.style.height = (a.scrollHeight + a.offsetHeight - a.clientHeight) + 'px'; }
 function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(d * 24) + ' h'; return (d < 10 ? d.toFixed(1) : Math.round(d)) + ' d'; }
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
@@ -77,8 +82,12 @@ function showTab(name) {
   /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   if (name === 'practise') renderHome(); if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
-  window.scrollTo(0, 0);
+  syncRunning(); window.scrollTo(0, 0);
 }
+// phones: while a text field has focus the on-screen keyboard is up, so the tab bar steps aside (CSS, D-015)
+const isTypingField = el => el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && /^(text|search|number)$/.test(el.type));
+document.addEventListener('focusin', e => document.body.classList.toggle('typing', isTypingField(e.target)));
+document.addEventListener('focusout', () => setTimeout(() => document.body.classList.toggle('typing', isTypingField(document.activeElement)), 0));
 
 // ---------- practise ----------
 let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,wrong}, pending}
@@ -111,6 +120,32 @@ function startSession(opts) {
 }
 function cardOf(item) { const [id, dir] = item.key.split('|'); return { id, dir, s: SENT_BY_ID.get(id) }; }
 
+// ---------- practise card chrome (D-015) ----------
+const VERDICT = { correct: '✓ Correct', almost: '≈ Almost', wrong: '✕ Not quite', revealed: '→ Answer' };
+/** colour state of the card, answer border and result bar: idle, correct, almost, wrong or revealed */
+function setState(st) { $('run-card').dataset.state = st; }
+/** body.running while a session is on screen: phones then swap the top bar for the session row */
+function syncRunning() { document.body.classList.toggle('running', !!session && !$('session-run').hidden && $('tab-practise').classList.contains('active')); }
+const narrow = () => typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches;
+/** one segment per queued card (done / current / to do); a long queue becomes one continuous bar */
+function renderProgress() {
+  const n = session.queue.length, i = session.i;
+  const html = n <= 30 ? session.queue.map((_, k) => `<i class="${k < i ? 'done' : k === i ? 'cur' : ''}"></i>`).join('')
+    : /** @type {[string, number][]} */ ([['done', i], ['cur', 1], ['', n - i - 1]]).filter(x => x[1] > 0).map(([c, f]) => `<i class="${c}" style="flex:${f}"></i>`).join('');
+  for (const id of ['segs', 'segs-m']) { const el = $(id); el.innerHTML = html; el.setAttribute('aria-valuemin', '0'); el.setAttribute('aria-valuemax', String(n)); el.setAttribute('aria-valuenow', String(i)); }
+  $('counter').textContent = `${i + 1} of ${n}`; $('counter-m').textContent = `${i + 1}/${n}`;
+}
+/** direction / free practice / retry chips: above the card on wide screens, inside it on phones */
+function renderChips(label, free, retry) {
+  $('dir-badge').textContent = label; $('free-badge').hidden = !free; $('retry-badge').hidden = !retry;
+  $('chips-m').innerHTML = $('chips-d').innerHTML.replace(/ id="[^"]*"/g, '');
+}
+/** the expected sentence, with the words that differ from what was typed highlighted */
+function renderExpected(text, typed, highlight) {
+  $('expected').innerHTML = highlight ? C.wordMarks(typed, text).map(x => x.miss ? `<mark>${esc(x.w)}</mark>` : esc(x.w)).join(' ') : esc(text);
+}
+const missCount = (typed, text) => C.wordMarks(typed, text).filter(x => x.miss).length;
+
 // ---------- grammar drills (D-009) ----------
 function startDrill(cardFilter) {
   const items = C.buildDrill(GRAMMAR, settings, drills, 15, Math.random, cardFilter);
@@ -122,11 +157,10 @@ function startDrill(cardFilter) {
 function renderDrillCard() {
   const item = session.queue[session.i].item;
   session.pending = null;
-  $('counter').textContent = (session.i + 1) + ' / ' + session.queue.length;
-  $('dir-badge').textContent = 'Grammar drill'; $('free-badge').hidden = true; $('retry-badge').hidden = true;
+  renderProgress(); renderChips('Grammar drill', false, false); setState('idle'); syncRunning();
   $('prompt').textContent = item.prompt; $('prompt').lang = 'bg';
   $('newwords').innerHTML = `<span class="hint">${esc(item.hint)}</span>`;
-  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = 'bg'; inp.placeholder = 'Въведи формата';
+  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.lang = 'bg'; inp.placeholder = 'Въведи формата';
   $('translit-preview').hidden = !settings.translit; $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
@@ -136,14 +170,14 @@ function checkDrill(giveUp) {
   const typed = giveUp ? '' : (settings.translit ? C.translit($('answer').value) : $('answer').value);
   const r = giveUp ? { result: 'wrong', expected: item.answers[0], t: '', a: C.normalise(item.answers[0], 'bg', settings), reason: 'skip' } : C.check(typed, item.answers, 'bg', Object.assign({}, settings, { bagOfWords: false, vocab: VOCAB.bg }));
   session.pending = { result: r.result, typed, key: item.id };
-  const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
+  const state = giveUp ? 'revealed' : r.result, shown = r.expected || item.answers[0], highlight = !giveUp && missCount(typed, shown) > 0;
+  $('answer').disabled = true; setState(state);
   $('answer-actions').hidden = true; $('feedback').hidden = false;
-  const v = $('verdict'); v.className = 'verdict ' + r.result;
-  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + (r.reason === 'typo' ? ` <small>${r.dist} character${r.dist > 1 ? 's' : ''} off</small>` : r.reason === 'form' ? ` <small>${slipText(r.slips)}</small>` : r.reason === 'skip' ? ' <small>shown</small>' : '');
-  $('expected-label').textContent = 'Expected';
-  $('expected').textContent = r.expected || item.answers[0];
-  $('diff').innerHTML = r.result !== 'correct' && r.t && r.a ? C.diff(r.t, r.a).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join('') : '';
-  const others = item.answers.filter(a => a !== (r.expected || item.answers[0]));
+  const v = $('verdict'); v.className = 'verdict ' + r.result; v.textContent = VERDICT[state];
+  $('verdict-note').innerHTML = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'form' ? slipText(r.slips) : giveUp ? '' : r.result === 'wrong' ? 'Differences highlighted' : highlight ? 'Accepted — small differences highlighted' : '';
+  $('expected-label').hidden = true;
+  renderExpected(shown, typed, highlight);
+  const others = item.answers.filter(a => a !== shown);
   renderAlts(others);
   const card = GRAMMAR.cards.find(c => c.id === item.card);
   $('gloss').innerHTML = card ? `See: <a href="#" data-gcard="${esc(card.id)}">${esc(card.title)}</a>` : '';
@@ -180,15 +214,14 @@ function renderCard() {
   const item = session.queue[session.i], { dir, s } = cardOf(item), K = C.parseKey(item.key);
   if (!s) { session.i++; return renderCard(); }
   session.pending = null;
-  $('counter').textContent = (session.i + 1) + ' / ' + session.queue.length;
-  $('dir-badge').textContent = dirLabel(dir);
-  $('free-badge').hidden = !session.free; $('retry-badge').hidden = !item.retry;
+  renderProgress(); renderChips(dirLabel(dir), session.free, !!item.retry); setState('idle'); syncRunning();
   $('prompt').textContent = K.toBg ? (s[K.lang] || s.nl) : s.bg;
   $('prompt').lang = K.toBg ? K.lang : 'bg';
   const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
-  $('newwords').innerHTML = chips ? '<span class="tiny" style="align-self:center">new:</span>' + chips : '';
-  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.className = ''; inp.lang = K.toBg ? 'bg' : K.lang;
-  inp.placeholder = K.toBg ? 'Въведи превод' : 'Enter translation';
+  $('newwords').innerHTML = chips ? '<span class="tiny">new:</span>' + chips : '';
+  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.lang = K.toBg ? 'bg' : K.lang;
+  const L = LANG_NAME[K.lang] || 'Dutch';
+  inp.placeholder = K.toBg ? 'Въведи превод' : narrow() ? `Type in ${L}` : `Type the ${L} translation`;
   $('translit-preview').hidden = !(settings.translit && K.toBg); $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
   setTimeout(() => inp.focus(), 50);
@@ -196,13 +229,24 @@ function renderCard() {
 function toBgCard() { const it = session && session.queue[session.i]; return !!(it && !session.drill && C.parseKey(it.key).toBg); }
 function typedValue() { const v = $('answer').value; return settings.translit && toBgCard() ? C.translit(v) : v; }
 $('answer').addEventListener('input', () => { if (!session || session.drill) return; if (settings.translit && toBgCard()) $('translit-preview').textContent = C.translit($('answer').value); });
-$('answer').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!session) return; if (session.pending) next(); else checkAnswer(false); } });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && session && session.pending && document.activeElement !== $('answer')) { e.preventDefault(); next(); } });
+// Enter checks, and continues once the result shows. The field's own handler stops the event, so the
+// document handler below cannot see the same keypress again after checking disables the field; a held key does not repeat.
+$('answer').addEventListener('keydown', e => { if (e.key !== 'Enter') return; e.preventDefault(); e.stopPropagation(); if (e.repeat || !session) return; if (session.pending) next(); else checkAnswer(false); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || !session || !session.pending || e.repeat) return;
+  const a = document.activeElement;   // other buttons, the alternatives toggle and links keep their own Enter
+  if (a && a !== $('btn-next') && a !== $('answer') && a.matches('button, summary, a, input, select, textarea')) return;
+  e.preventDefault(); next();
+});
+// Check and Don't know do not take the focus from the answer field: on a phone that would close the keyboard,
+// bring the tab bar back and move the button away under the finger before the tap lands
+$('answer-actions').addEventListener('mousedown', e => e.preventDefault());
 $('btn-check').addEventListener('click', () => checkAnswer(false));
 $('btn-dontknow').addEventListener('click', () => checkAnswer(true));
 $('btn-next').addEventListener('click', next);
 $('btn-accept').addEventListener('click', acceptMine);
 $('btn-quit').addEventListener('click', endSession);
+$('btn-quit-m').addEventListener('click', endSession);
 $('btn-start').addEventListener('click', () => startSession());
 $('btn-free').addEventListener('click', () => startSession({ free: true }));
 $('btn-gdrill').addEventListener('click', () => startDrill());
@@ -226,32 +270,34 @@ function slipText(slips) {
   return 'different word form: ' + (slips || []).map(([t, a]) => !t ? `missing “${esc(a)}”` : !a ? `extra “${esc(t)}”` : `${esc(t)} → ${esc(a)}`).join(' · ');
 }
 function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
-  const inp = $('answer'); inp.disabled = true; inp.className = r.result === 'correct' ? 'ok' : r.result === 'almost' ? 'almost' : 'bad';
+  const K = C.parseKey(session.queue[session.i].key), lang = K.toBg ? 'bg' : K.lang, typed = session.pending ? session.pending.typed : '';
+  const state = giveUp ? 'revealed' : r.result;
+  $('answer').disabled = true; setState(state);
   $('answer-actions').hidden = true; $('feedback').hidden = false;
+  // a looser translation (D-014) is accepted, but the expected line shows the closest exact one, highlighted against what was typed
+  const closer = r.loose && r.closer && r.result !== 'wrong' ? r.closer : '';
+  let shown = closer || r.expected || accepted[0];
+  // several accepted answers can normalise alike (contractions, case): show the one closest to the typed words
+  if (r.result === 'correct' && !closer) { const same = accepted.filter(a => C.normalise(a, lang, settings) === r.a); if (same.length > 1) shown = same.reduce((b, a) => missCount(typed, a) < missCount(typed, b) ? a : b); }
+  const highlight = !giveUp && missCount(typed, shown) > 0;
   const v = $('verdict'); v.className = 'verdict ' + r.result;
+  v.innerHTML = VERDICT[state] + (r.loose && r.result !== 'wrong' ? ' <span class="loose-tag" title="Accepted, but this translation is looser than the Bulgarian. The line below is closer.">≈ looser</span>' : '');
   const how = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'order' ? 'same words, different order' : '';
   const rule = !outcome ? '' : outcome.rule === 'free-pass' ? ` · counted as correct (free pass ${outcome.used} of ${outcome.passes} on a young card)` : outcome.rule === 'lapse' ? ' · this card is mature, so it goes back for review' : outcome.rule === 'strict' ? ' · strict mode: scheduled as wrong' : ' · counted as Hard';
-  const why = r.result === 'almost' ? `<small>${how}${session.free ? '' : rule}</small>` : r.reason === 'skip' ? '<small>shown</small>' : r.reason === 'form' ? `<small>${slipText(r.slips)}</small>` : r.result === 'wrong' && r.dist < Infinity ? `<small>${r.dist} characters off</small>` : '';
-  // a looser translation (D-014) is accepted, but the expected line shows the closest exact one and the diff against it
-  const closer = r.loose && r.closer && r.result !== 'wrong' ? r.closer : '';
-  const tag = r.loose && r.result !== 'wrong' ? ' <span class="loose-tag" title="Accepted, but this translation is looser than the Bulgarian. The line below is closer.">≈ looser</span>' : '';
-  v.innerHTML = (r.result === 'correct' ? '✓ Correct' : r.result === 'almost' ? '≈ Almost' : '✗ Wrong') + tag + ' ' + why;
-  $('expected-label').textContent = closer ? 'Closer to the Bulgarian' : 'Expected';
-  $('expected').textContent = closer || r.expected || accepted[0];
-  const d = $('diff'), cmpTo = closer ? C.normalise(closer, C.parseKey(session.queue[session.i].key).lang, settings) : r.a;
-  if ((r.result !== 'correct' || closer) && r.t && cmpTo) d.innerHTML = C.diff(r.t, cmpTo).map(([op, txt]) => op === 'eq' ? esc(txt) : op === 'del' ? `<del>${esc(txt)}</del>` : `<ins>${esc(txt)}</ins>`).join(''); else d.innerHTML = '';
-  const shown = closer || r.expected || accepted[0];
+  $('verdict-note').innerHTML = r.result === 'almost' ? how + (session.free ? '' : rule) : r.reason === 'form' ? slipText(r.slips) : giveUp || closer ? '' : r.result === 'wrong' ? 'Differences highlighted' : highlight ? 'Accepted — small differences highlighted' : '';
+  $('expected-label').hidden = !closer;
+  renderExpected(shown, typed, highlight);
   renderAlts(accepted.filter(a => a !== shown), (loose || []).filter(a => a !== shown && a !== r.expected));
-  const K2 = C.parseKey(session.queue[session.i].key); const third = K2.lang === 'en' ? (s.nl ? 'NL: ' + s.nl : '') : (s.en ? 'EN: ' + s.en : '');
-  $('gloss').textContent = third + (s.max_rank ? '   · rank ' + s.max_rank : '') + (s.rank_estimated ? ' ≈' : '');
+  const third = K.lang === 'en' ? (s.nl ? 'NL ' + s.nl : '') : (s.en ? 'EN ' + s.en : '');
+  $('gloss').textContent = [third, s.max_rank ? 'rank ' + s.max_rank + (s.rank_estimated ? ' ≈' : '') : ''].filter(Boolean).join(' · ');
   $('btn-accept').hidden = r.result === 'correct' || giveUp;
   setTimeout(() => $('btn-next').focus(), 30);
 }
 function acceptMine() {
   const p = session.pending; if (!p || !p.typed.trim()) return;
   (userAlts[p.key] = userAlts[p.key] || []).push(p.typed.trim()); save.userAlts(); VOCAB = buildVocab();
-  p.result = 'correct'; $('verdict').className = 'verdict correct'; $('verdict').innerHTML = '✓ Accepted as correct <small>added to your accepted answers</small>';
-  $('answer').className = 'ok'; $('btn-accept').hidden = true; toast('Saved as an accepted answer');
+  p.result = 'correct'; setState('correct'); $('verdict').className = 'verdict correct'; $('verdict').textContent = '✓ Accepted as correct'; $('verdict-note').textContent = 'added to your accepted answers';
+  $('btn-accept').hidden = true; toast('Saved as an accepted answer');
 }
 function next() {
   const p = session.pending; if (!p) return;
@@ -275,7 +321,7 @@ function endSession() {
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
   $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
   $('btn-again').textContent = session.drill ? 'Drill again' : 'Practise again';
-  session = null;
+  session = null; syncRunning();
 }
 
 // ---------- grammar tab ----------
@@ -335,7 +381,7 @@ function renderStats() {
     }
     const avg = recallN ? Math.round(100 * recallSum / recallN) + ' %' : '–';
     html += `<p style="margin:6px 0 2px"><b>${dirLabel(dir).replace('BG', 'Bulgarian').replace('NL', 'Dutch').replace('EN', 'English')}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${dueN} due now · predicted recall of due cards ${avg}</span></p>`;
-    html += `<div class="bar">${['var(--almost)', 'var(--ok)', 'var(--ok)', 'var(--accent)'].map((c, i) => `<i style="width:${elig ? 100 * bands[i] / elig : 0}%;background:${c};opacity:${i === 1 ? .6 : 1}"></i>`).join('')}</div>`;
+    html += `<div class="bar">${['var(--almost)', 'var(--correct)', 'var(--correct)', 'var(--primary)'].map((c, i) => `<i style="width:${elig ? 100 * bands[i] / elig : 0}%;background:${c};opacity:${i === 1 ? .6 : 1}"></i>`).join('')}</div>`;
     html += `<div class="boxes" style="grid-template-columns:repeat(4,1fr)">${['learning', '< 7 d', '7–30 d', '≥ 30 d'].map((l, i) => `<div><b>${bands[i]}</b>${l}</div>`).join('')}</div>`;
   }
   html += '<p class="tiny">Stability = days until the predicted chance of recalling the sentence drops to 90 %. "Learning" cards are in their short first steps (10 min, 1 h). Scheduling is FSRS-6 with your desired retention (Settings).</p>';
@@ -351,15 +397,15 @@ function drawChart(days) {
   const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
   const padL = 28, padB = 22, padT = 8, iw = W - padL - 6, ih = H - padB - padT;
   const max = Math.max(5, ...days.map(d => d.v[0] + d.v[1] + d.v[2]));
-  ctx.clearRect(0, 0, W, H); ctx.font = '11px system-ui'; ctx.fillStyle = col('--muted'); ctx.strokeStyle = col('--line'); ctx.lineWidth = 1;
+  ctx.clearRect(0, 0, W, H); ctx.font = '11px ' + col('--sans'); ctx.fillStyle = col('--faint'); ctx.strokeStyle = col('--line'); ctx.lineWidth = 1;
   const steps = max <= 10 ? 5 : 4;
   for (let i = 0; i <= steps; i++) { const y = padT + ih - ih * i / steps, val = Math.round(max * i / steps); ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - 6, y); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(String(val), padL - 6, y + 4); }
-  const bw = iw / days.length, gap = Math.min(8, bw * .3), colors = [col('--bad'), col('--almost'), col('--ok')];
+  const bw = iw / days.length, gap = Math.min(8, bw * .3), colors = [col('--wrong'), col('--almost'), col('--correct')];
   /** @type {NonNullable<AppElement['_bars']>} */ const bars = []; cv._bars = bars;
   days.forEach((d, i) => {
     const x = padL + i * bw + gap / 2, w = bw - gap; let y = padT + ih; const tot = d.v[0] + d.v[1] + d.v[2];
     [2, 1, 0].forEach(sc => { const h = ih * d.v[sc] / max; if (h > 0) { ctx.fillStyle = colors[sc]; ctx.fillRect(x, y - h, w, Math.max(0, h - 2)); y -= h; } });
-    if (i % 2 === 1 || days.length < 8) { ctx.fillStyle = col('--muted'); ctx.textAlign = 'center'; ctx.fillText(d.label, x + w / 2, H - 6); }
+    if (i % 2 === 1 || days.length < 8) { ctx.fillStyle = col('--faint'); ctx.textAlign = 'center'; ctx.fillText(d.label, x + w / 2, H - 6); }
     bars.push({ x, w, d, tot });
   });
   /** @param {MouseEvent | TouchEvent} e */
@@ -392,7 +438,7 @@ function renderLibrary(reset) {
   $('lib-count').textContent = rows.length + ' sentences';
   const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; const due = p.due <= now ? 'due' : fmtAgo(p.due - now); const m = C.maturity(p); const learning = p.state !== 'review'; const cls = learning && (p.step || 0) === 0 ? 'b0' : m === 'young' ? 'b1' : m === 'established' ? 'b5' : 'b8'; const label = learning ? (p.state === 'relearning' ? 'relearn' : 'learning') : fmtDays(p.s); return `<span class="badge ${cls}" title="${learning ? p.state + ' step ' + (p.step || 0) : 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1)}; ${p.due <= now ? 'due now' : 'due in ' + due}">${label}<small> · ${due}</small></span>`; };
   const head = `<tr><th>rank</th><th>sentence</th><th>BG→${settings.lang === 'mixed' ? 'X' : LANG_CODE[settings.lang] || 'NL'}</th><th>${settings.lang === 'mixed' ? 'X' : LANG_CODE[settings.lang] || 'NL'}→BG</th></tr>`;
-  $('lib-table').innerHTML = '<colgroup><col style="width:46px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => (() => { const o = otherText(s); return `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></td><td>${status(s, 'bg2' + o.lang)}</td><td>${status(s, o.lang + '2bg')}</td></tr>`; })()).join('');
+  $('lib-table').innerHTML = '<colgroup><col style="width:56px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => (() => { const o = otherText(s); return `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></td><td>${status(s, 'bg2' + o.lang)}</td><td>${status(s, o.lang + '2bg')}</td></tr>`; })()).join('');
   $('lib-more').hidden = rows.length <= libShown;
 }
 $('lib-table').addEventListener('click', e => {

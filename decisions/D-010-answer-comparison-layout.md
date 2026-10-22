@@ -1,6 +1,6 @@
 # D-010: Show "you typed" and "correct" as two aligned lines instead of an inline diff
 
-Status: proposed · Created: 2026-10-22 · Area: feedback UI (`index.html`: `showFeedback`, `checkDrill`), `core.js` (`diff`)
+Status: rejected (2026-10-22) · Created: 2026-10-22 · Area: feedback UI (`index.html`: `showFeedback`, `checkDrill`), `core.js` (`diff`)
 
 ## Context
 After a wrong or almost answer the app shows the expected sentence and, under it, a single line with
@@ -59,8 +59,16 @@ changes can pair the wrong words; keep the LCS on normalised tokens and fall bac
 marking when the alignment is poor (fewer than half the words match).
 
 ## As built
-Not started.
+- Not built. Closed on 2026-10-22 because D-015 covers most of it: the answer field stays visible
+  and read-only directly above the expected sentence, the interleaved strike-through diff is gone,
+  and the words that differ are highlighted in the expected sentence (`core.js: wordMarks`, a
+  word-level LCS).
+- What D-015 does not do: mark the differing words on the typed line as well, show a gap marker for
+  a missing word, or mark the letters inside a changed word. If those are wanted later, they get a
+  new record that builds on `wordMarks`.
 
 ## Open questions
-- Keep a tiny "show character diff" toggle for those who want the old view? (Proposal: no.)
-- Label language: "You typed / Correct" in English like the rest of the app, or Dutch?
+- ~~Keep a tiny "show character diff" toggle for those who want the old view? (Proposal: no.)~~ No:
+  D-015 removed the character diff without a toggle.
+- ~~Label language: "You typed / Correct" in English like the rest of the app, or Dutch?~~ Moot: the
+  D-015 result bar has no line labels.
