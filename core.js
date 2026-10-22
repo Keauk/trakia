@@ -9,13 +9,23 @@
 
   const PUNCT = /[.,!?;:…«»"“”„'’‘`\-–—()\[\]\/]/g;
 
+  // English leniency (D-011): contractions and British/American spelling pairs are treated as equal
+  const EN_CONTR = { "i'm": 'i am', "you're": 'you are', "we're": 'we are', "they're": 'they are', "he's": 'he is', "she's": 'she is', "it's": 'it is', "that's": 'that is', "there's": 'there is', "here's": 'here is', "what's": 'what is', "where's": 'where is', "who's": 'who is', "how's": 'how is', "let's": 'let us',
+    "i've": 'i have', "you've": 'you have', "we've": 'we have', "they've": 'they have', "i'll": 'i will', "you'll": 'you will', "he'll": 'he will', "she'll": 'she will', "it'll": 'it will', "we'll": 'we will', "they'll": 'they will',
+    "i'd": 'i would', "you'd": 'you would', "he'd": 'he would', "she'd": 'she would', "we'd": 'we would', "they'd": 'they would',
+    "don't": 'do not', "doesn't": 'does not', "didn't": 'did not', "can't": 'cannot', "can not": 'cannot', "won't": 'will not', "wouldn't": 'would not', "couldn't": 'could not', "shouldn't": 'should not', "mustn't": 'must not', "isn't": 'is not', "aren't": 'are not', "wasn't": 'was not', "weren't": 'were not', "haven't": 'have not', "hasn't": 'has not', "hadn't": 'had not' };
+  const EN_SPELL = { colour: 'color', colours: 'colors', favourite: 'favorite', neighbour: 'neighbor', neighbours: 'neighbors', travelling: 'traveling', travelled: 'traveled', centre: 'center', theatre: 'theater', grey: 'gray', realise: 'realize', realised: 'realized', organise: 'organize', organised: 'organized', apologise: 'apologize', programme: 'program', metre: 'meter', metres: 'meters', litre: 'liter', litres: 'liters', catalogue: 'catalog', dialogue: 'dialog', mum: 'mom', pyjamas: 'pajamas', aeroplane: 'airplane', kerb: 'curb', tyre: 'tire', tyres: 'tires', licence: 'license', practise: 'practice', defence: 'defense', jewellery: 'jewelry', cosy: 'cozy', okay: 'ok', flavour: 'flavor', honour: 'honor', humour: 'humor', labour: 'labor', behaviour: 'behavior', cancelled: 'canceled', modelling: 'modeling', whisky: 'whiskey', storey: 'story', doughnut: 'donut', cheque: 'check' };
+  const EN_CONTR_RX = new RegExp('\\b(' + Object.keys(EN_CONTR).map(k => k.replace(/'/g, "['’]")).join('|') + ')\\b', 'g');
   function normalise(s, lang, opt) {
     opt = opt || {};
     s = (s || '').normalize('NFC').toLowerCase().trim();
     if (!opt.strictYi) s = s.replace(/ѝ/g, 'и');
     if (lang === 'nl' && opt.stripAccents !== false) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    if (lang === 'en') s = s.replace(EN_CONTR_RX, m => EN_CONTR[m.replace(/’/g, "'")]);
     if (!opt.strictPunct) s = s.replace(PUNCT, ' ');
-    return s.replace(/\s+/g, ' ').trim();
+    s = s.replace(/\s+/g, ' ').trim();
+    if (lang === 'en') s = s.split(' ').map(w => EN_SPELL[w] || w).join(' ');
+    return s;
   }
 
   // optimal string alignment distance (Levenshtein + adjacent transposition)
@@ -311,13 +321,33 @@
 
   function shuffle(arr, rand) { rand = rand || Math.random; for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
 
-  /** directions that exist for a sentence under the current settings */
+  /** the practice language ('nl' | 'en') for a sentence: the setting, or for 'mixed' a stable split by id */
+  function langFor(id, settings) {
+    const l = settings && settings.lang;
+    if (l === 'en') return 'en';
+    if (l === 'mixed') { let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return (h & 1) ? 'en' : 'nl'; }
+    return 'nl';
+  }
+  /** directions that exist for a sentence under the current settings: 'bg2<lang>' and '<lang>2bg' (gated) */
   function cardKeys(s, progress, settings) {
-    const dirs = settings.directions || 'gated', ks = [];
-    if (dirs !== 'nl2bg') ks.push(s.id + '|bg2nl');
-    if (dirs === 'both' || dirs === 'nl2bg') ks.push(s.id + '|nl2bg');
-    else if (dirs === 'gated') { const p = progress[s.id + '|bg2nl']; if (p && p.box >= 1) ks.push(s.id + '|nl2bg'); }
+    const dirs = settings.directions || 'gated', ks = [], L = langFor(s.id, settings);
+    const rec = s.id + '|bg2' + L, prod = s.id + '|' + L + '2bg';
+    if (dirs !== 'nl2bg') ks.push(rec);
+    if (dirs === 'both' || dirs === 'nl2bg') ks.push(prod);
+    else if (dirs === 'gated') { const p = progress[rec]; if (p && p.box >= 1) ks.push(prod); }
     return ks;
+  }
+  /** split a card key into {id, dir, lang, toBg}: 'B017|nl2bg' -> {id:'B017', dir:'nl2bg', lang:'nl', toBg:true} */
+  function parseKey(key) {
+    const i = key.lastIndexOf('|'), id = key.slice(0, i), dir = key.slice(i + 1);
+    const toBg = dir.endsWith('2bg'), lang = toBg ? dir.slice(0, -3) : dir.slice(3);
+    return { id, dir, lang, toBg };
+  }
+  /** accepted answers for a card: the other-language sentence (+ alternatives) or the Bulgarian */
+  function acceptedFor(s, dir) {
+    const k = parseKey('x|' + dir);
+    if (k.toBg) return [s.bg].concat(s.bg_alt || []);
+    return [s[k.lang] || ''].concat(s[k.lang + '_alt'] || []).filter(Boolean);
   }
 
   // function words ignored by the "no shared word between consecutive cards" rule (D-003)
@@ -402,7 +432,7 @@
     const candidates = [];
     for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (!progress[k]) candidates.push({ k, rank: s.max_rank == null ? Infinity : s.max_rank });
     // unlocked production cards (NL->BG of a sentence already seen) come first, up to half the new slots
-    const prod = shuffle(candidates.filter(c => c.k.endsWith('|nl2bg') && progress[c.k.replace('|nl2bg', '|bg2nl')]), rand).sort((x, y) => x.rank - y.rank).slice(0, Math.ceil(nNew / 2));
+    const prod = shuffle(candidates.filter(c => { const k = parseKey(c.k); return k.toBg && progress[k.id + '|bg2' + k.lang]; }), rand).sort((x, y) => x.rank - y.rank).slice(0, Math.ceil(nNew / 2));
     const taken = new Set(prod.map(c => c.k)), rest = candidates.filter(c => !taken.has(c.k)), slots = nNew - prod.length;
     let fresh;
     if (settings.newOrder === 'strict') {
@@ -469,7 +499,7 @@
     const s = {
       id: String(row.id || '').trim() || hashId(String(row.bg).trim()),
       bg: String(row.bg || '').trim(), nl: String(row.nl || '').trim(),
-      nl_alt: split(row.nl_alt, '|'), bg_alt: split(row.bg_alt, '|'),
+      nl_alt: split(row.nl_alt, '|'), bg_alt: split(row.bg_alt, '|'), en_alt: split(row.en_alt, '|'),
       en: String(row.en || '').trim(), lemmas: split(row.lemmas, ','), tags: split(row.tags, ','),
       source: row.source || 'import',
     };
@@ -531,6 +561,6 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, interleave, weightedSample, normalise, distance, check, diff, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
