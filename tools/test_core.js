@@ -43,6 +43,23 @@ t('wordMarks (D-015)', () => {
   // the words come back unchanged, so joining them restores the sentence
   assert.equal(C.wordMarks('x', 'Ik kocht  brood.').map(x => x.w).join(' '), 'Ik kocht brood.');
 });
+t('wordMarks: extra typed words (D-019)', () => {
+  const line = (typed, exp) => C.wordMarks(typed, exp).map(x => x.extra ? `-${x.w}-` : x.miss ? `[${x.w}]` : x.w).join(' ');
+  // an extra word sits where it was typed, without its punctuation; nothing else is marked
+  assert.equal(line('Do you really work on Sunday?', 'Do you work on Sunday?'), 'Do you -really- work on Sunday?');
+  assert.equal(line('So, do you work on Sunday', 'do you work on Sunday?'), '-So- do you work on Sunday?');
+  assert.equal(line('Do you work on Sunday? please', 'Do you work on Sunday?'), 'Do you work on Sunday? -please-');
+  assert.equal(line('Аз купих хляб и и мляко', 'Аз купих хляб и мляко.'), 'Аз купих хляб и -и- мляко.');
+  // a substituted word is shown by the missing word alone, also when more words were typed in its place
+  assert.equal(line('Do you work at Sunday', 'Do you work on Sunday?'), 'Do you work [on] Sunday?');
+  assert.equal(line('Do you work at the Sunday', 'Do you work on Sunday?'), 'Do you work [on] Sunday?');
+  assert.equal(line('dit is helemaal fout', 'Ik kocht brood.'), '[Ik] [kocht] [brood.]');
+  // a moved word: marked where it belongs, struck where it was typed
+  assert.equal(line('хляб купих и мляко', 'Купих хляб и мляко.'), '[Купих] хляб -купих- и мляко.');
+  // a punctuation-only token in the gap is not a missing word; the typed one stays an extra
+  assert.equal(line('Ja echt zegt hij', 'Ja — zegt hij'), 'Ja -echt- — zegt hij');
+  assert.equal(line('', 'Ja.'), '[Ja.]');
+});
 t('translit', () => {
   assert.equal(C.translit('Kupih hlyab i mlyako'), 'Купих хляб и мляко');
   assert.equal(C.translit('Shte dojda s priyatel. Zdravej!'), 'Ще дойда с приятел. Здравей!');

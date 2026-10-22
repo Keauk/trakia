@@ -152,11 +152,12 @@ function renderChips(label, free, retry) {
   $('dir-badge').textContent = label; $('free-badge').hidden = !free; $('retry-badge').hidden = !retry;
   $('chips-m').innerHTML = $('chips-d').innerHTML.replace(/ id="[^"]*"/g, '');
 }
-/** the expected sentence, with the words that differ from what was typed highlighted */
+/** the expected sentence, with the words that differ from what was typed highlighted and extra typed words struck through */
 function renderExpected(text, typed, highlight) {
-  $('expected').innerHTML = highlight ? C.wordMarks(typed, text).map(x => x.miss ? `<mark>${esc(x.w)}</mark>` : esc(x.w)).join(' ') : esc(text);
+  $('expected').innerHTML = highlight ? C.wordMarks(typed, text).map(x => x.extra ? `<del title="extra word">${esc(x.w)}</del>` : x.miss ? `<mark>${esc(x.w)}</mark>` : esc(x.w)).join(' ') : esc(text);
 }
-const missCount = (typed, text) => C.wordMarks(typed, text).filter(x => x.miss).length;
+/** highlighted words: missing from the typed answer, or typed in excess (D-019) */
+const markCount = (typed, text) => C.wordMarks(typed, text).filter(x => x.miss || x.extra).length;
 
 // ---------- grammar drills (D-009) ----------
 function startDrill(cardFilter) {
@@ -182,7 +183,7 @@ function checkDrill(giveUp) {
   const typed = giveUp ? '' : (settings.translit ? C.translit($('answer').value) : $('answer').value);
   const r = giveUp ? { result: 'wrong', expected: item.answers[0], t: '', a: C.normalise(item.answers[0], 'bg', settings), reason: 'skip' } : C.check(typed, item.answers, 'bg', Object.assign({}, settings, { bagOfWords: false, vocab: VOCAB.bg }));
   session.pending = { result: r.result, typed, key: item.id };
-  const state = giveUp ? 'revealed' : r.result, shown = r.expected || item.answers[0], highlight = !giveUp && missCount(typed, shown) > 0;
+  const state = giveUp ? 'revealed' : r.result, shown = r.expected || item.answers[0], highlight = !giveUp && markCount(typed, shown) > 0;
   $('answer').disabled = true; setState(state);
   $('answer-actions').hidden = true; $('feedback').hidden = false;
   const v = $('verdict'); v.className = 'verdict ' + r.result; v.textContent = VERDICT[state];
@@ -290,8 +291,8 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   const closer = r.loose && r.closer && r.result !== 'wrong' ? r.closer : '';
   let shown = closer || r.expected || accepted[0];
   // several accepted answers can normalise alike (contractions, case): show the one closest to the typed words
-  if (r.result === 'correct' && !closer) { const same = accepted.filter(a => C.normalise(a, lang, settings) === r.a); if (same.length > 1) shown = same.reduce((b, a) => missCount(typed, a) < missCount(typed, b) ? a : b); }
-  const highlight = !giveUp && missCount(typed, shown) > 0;
+  if (r.result === 'correct' && !closer) { const same = accepted.filter(a => C.normalise(a, lang, settings) === r.a); if (same.length > 1) shown = same.reduce((b, a) => markCount(typed, a) < markCount(typed, b) ? a : b); }
+  const highlight = !giveUp && markCount(typed, shown) > 0;
   const v = $('verdict'); v.className = 'verdict ' + r.result;
   v.innerHTML = VERDICT[state] + (r.loose && r.result !== 'wrong' ? ' <span class="loose-tag" title="Accepted, but this translation is looser than the Bulgarian. The line below is the exact translation.">≈ looser</span>' : '');
   const how = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'order' ? 'same words, different order' : '';

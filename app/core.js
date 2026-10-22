@@ -198,23 +198,37 @@
    * Word highlights for the expected line of the result bar (D-015): the words of `expected`, each with
    * miss = true when a word-level LCS against `typed` leaves it unmatched. Case-sensitive (an accepted
    * "sunday" still marks "Sunday"); leading and trailing punctuation is ignored, ’ counts as '.
-   * @param {string} typed @param {string} expected @returns {{w: string, miss: boolean}[]}
+   * A typed word with no counterpart is inserted where it was typed, as { extra: true } (D-019), but only
+   * when no expected word in that gap is missing: a substituted word is shown by the missing one alone.
+   * @param {string} typed @param {string} expected @returns {{w: string, miss: boolean, extra?: boolean}[]}
    */
   function wordMarks(typed, expected) {
-    const key = w => w.replace(/’/g, "'").replace(/^[^\p{L}\p{N}\p{M}]+|[^\p{L}\p{N}\p{M}]+$/gu, '');
+    const strip = w => w.replace(/^[^\p{L}\p{N}\p{M}]+|[^\p{L}\p{N}\p{M}]+$/gu, ''), key = w => strip(w.replace(/’/g, "'"));
     const words = (expected || '').split(/\s+/).filter(Boolean), b = words.map(key);
-    const a = (typed || '').split(/\s+/).filter(Boolean).map(key).filter(Boolean);
+    const tw = (typed || '').split(/\s+/).filter(Boolean).filter(w => key(w)), a = tw.map(key);
     const m = a.length, n = b.length, L = [];
     for (let i = 0; i <= m; i++) L[i] = new Int16Array(n + 1);
     for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--)
       L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
-    const hit = new Array(n).fill(false);
+    /** @type {[number, number][]} matched (typed, expected) index pairs, closed by an end sentinel */
+    const pairs = [];
     for (let i = 0, j = 0; i < m && j < n;) {
-      if (a[i] === b[j]) { hit[j] = true; i++; j++; }
+      if (a[i] === b[j]) { pairs.push([i, j]); i++; j++; }
       else if (L[i + 1][j] >= L[i][j + 1]) i++;
       else j++;
     }
-    return words.map((w, j) => ({ w, miss: !hit[j] && b[j] !== '' }));
+    pairs.push([m, n]);
+    /** @type {{w: string, miss: boolean, extra?: boolean}[]} */
+    const out = [];
+    let pi = 0, pj = 0;
+    for (const [mi, mj] of pairs) {
+      const gap = words.slice(pj, mj).map((w, k) => ({ w, miss: b[pj + k] !== '' }));
+      if (!gap.some(x => x.miss)) out.push(...tw.slice(pi, mi).map(w => ({ w: strip(w), miss: false, extra: true })));
+      out.push(...gap);
+      if (mj < n) out.push({ w: words[mj], miss: false });
+      pi = mi + 1; pj = mj + 1;
+    }
+    return out;
   }
 
   // Latin -> Cyrillic phonetic transliteration (longest match first)

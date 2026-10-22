@@ -73,8 +73,12 @@ const prog = JSON.parse(window.localStorage.getItem('trakia.progress'));
 assert.equal(prog[id.id + '|bg2nl'].box, 1); assert.equal(prog[s2.id + '|bg2nl'].box, 1); assert.equal(prog[s3.id + '|bg2nl'].box, 1); assert.equal(prog[s4.id + '|bg2nl'].box, 0);
 // end session, check summary
 // Enter in the answer field checks and stops there (it used to reach the document handler and skip the result)
-$('answer').value = 'iets'; $('answer').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+const s5 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
+$('answer').value = 'qqq ' + s5.nl; $('answer').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 assert.equal($('feedback').hidden, false, 'Enter shows the result');
+// D-019: an extra typed word is struck through in the expected line, the sentence itself unmarked
+assert.equal($('expected').querySelector('del')?.textContent, 'qqq', 'the extra word is shown struck through');
+assert.equal($('expected').querySelector('mark'), null); assert.equal($('expected').textContent, 'qqq ' + s5.nl);
 document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, repeat: true }));
 assert.equal($('feedback').hidden, false, 'a held Enter does not continue');
 document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
