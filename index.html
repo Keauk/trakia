@@ -97,12 +97,7 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .note{font:400 13px/1.4 var(--sans);color:var(--muted)}
 .notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;font:400 13px/1.45 var(--sans);color:var(--ink-2)}
 .notes li::before{content:'· ';color:var(--faint)}
-.judge{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:-4px;font:400 12px/1.4 var(--sans);color:var(--faint)}
-.judge span{margin-right:2px}
-.judge button{background:var(--chip-bg);color:var(--muted);border:1px solid var(--chip-border);border-radius:999px;padding:3px 11px;font:500 12px/1.4 var(--sans);cursor:pointer}
-.judge button[aria-pressed=true]{background:var(--chip-solid-bg);color:var(--chip-solid-fg);border-color:transparent}
-.judge button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-.run-card[data-state]:not([data-state=idle]) .judge{display:none}
+
 .loose-tag{font:600 12px/1.4 var(--sans);color:var(--ink-2);border:1px solid currentColor;border-radius:999px;padding:0 7px;opacity:.8}
 .expected{font:500 22px/1.35 var(--sans);color:var(--ink);margin:0;overflow-wrap:anywhere}
 .expected mark{background:var(--diff);color:inherit;border-radius:4px;padding:0 2px;margin:0 -2px}
@@ -276,7 +271,6 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <div id="newwords" class="newwords"></div>
         <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Type the translation"></textarea>
         <p id="translit-preview" class="preview" hidden></p>
-        <div class="judge" id="judge"><span>How sure are you?</span><button type="button" data-j="1" aria-pressed="false">Sure</button><button type="button" data-j="2" aria-pressed="false">Unsure</button></div>
         <div class="actions" id="answer-actions">
           <button class="btn" id="btn-dontknow">Don't know</button>
           <button class="btn primary" id="btn-check">Check<span class="d-only"> ↵</span></button>
@@ -324,7 +318,6 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
   <div class="card">
     <h2>Today</h2>
     <div class="stats" id="stats-today"></div>
-    <p class="muted" id="calibration" hidden></p>
   </div>
   <div class="card">
     <h2>Last 14 days</h2>
