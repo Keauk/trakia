@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1 };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, newPerSession: 10, maxDue: 40, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55 };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -515,8 +515,8 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme')];
-function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-new', 'newPerSession', 'num'), bind('set-maxdue', 'maxDue', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num')];
+function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
@@ -524,7 +524,7 @@ function renderRankHelp() {
 }
 function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s => Math.max(1, Math.round(s / o.factor * (Math.pow(o.retention, 1 / o.decay) - 1))); $('retention-help').textContent = `a card with 10 days of stability comes back after ${ivl(10)} d, with 60 days after ${ivl(60)} d`; }
 function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your Anki position fit this stage.`; }
-function renderSettings() { writers.forEach(w => w()); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+function renderSettings() { writers.forEach(w => w()); renderWallpaperFields(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
@@ -542,4 +542,73 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 }
 $('btn-update').addEventListener('click', () => location.reload());
 window.addEventListener('resize', () => { if ($('tab-stats').classList.contains('active')) renderStats(); });
+
+// ---------- wallpaper (D-023) ----------
+/** IndexedDB for files that are too big for localStorage: database trakia, store media */
+function mediaDb() {
+  return new Promise((res, rej) => {
+    if (typeof indexedDB === 'undefined') return rej(new Error('no IndexedDB'));
+    const r = indexedDB.open('trakia', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('media');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+/** @param {string} key @param {Blob | null} blob */
+async function mediaPut(key, blob) { const db = await mediaDb(); return new Promise((res, rej) => { const tx = db.transaction('media', 'readwrite'); if (blob) tx.objectStore('media').put(blob, key); else tx.objectStore('media').delete(key); tx.oncomplete = () => res(undefined); tx.onerror = () => rej(tx.error); }); }
+/** @param {string} key @returns {Promise<Blob | null>} */
+async function mediaGet(key) { try { const db = await mediaDb(); return await new Promise((res, rej) => { const r = db.transaction('media').objectStore('media').get(key); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); }); } catch (e) { return null; } }
+
+// a Doom-style fire: heat rises from the bottom row and cools at random on the way up
+const FIRE = { w: 120, h: 72, timer: /** @type {ReturnType<typeof setInterval> | null} */ (null), heat: /** @type {Uint8Array | null} */ (null) };
+// the Doom fire palette: black, dark red, orange, yellow, near white; low heat fades to transparent
+const FIRE_PALETTE = [[7, 7, 7], [31, 7, 7], [47, 15, 7], [71, 15, 7], [87, 23, 7], [103, 31, 7], [111, 35, 7], [127, 39, 7], [143, 47, 7], [159, 47, 7], [175, 63, 7], [191, 71, 7], [199, 71, 7], [223, 79, 7], [223, 87, 7], [223, 87, 7], [215, 95, 7], [215, 95, 7], [215, 103, 15], [207, 111, 15], [207, 119, 15], [207, 127, 15], [207, 135, 23], [199, 135, 23], [199, 143, 23], [199, 151, 27], [191, 159, 27], [191, 159, 31], [191, 167, 31], [191, 167, 31], [191, 175, 39], [183, 175, 39], [183, 183, 39], [183, 183, 47], [207, 207, 111], [223, 223, 159], [239, 239, 199]];
+function fireStart() {
+  const c = /** @type {HTMLCanvasElement} */ (document.getElementById('wp-fire')); c.hidden = false;
+  const ctx = c.getContext && c.getContext('2d'); if (!ctx || FIRE.timer) return;   // no canvas in the headless test
+  const { w, h } = FIRE, heat = FIRE.heat || (FIRE.heat = new Uint8Array(w * h)), img = ctx.createImageData(w, h), px = img.data;
+  for (let x = 0; x < w; x++) heat[(h - 1) * w + x] = 36;
+  const step = () => {
+    for (let y = 1; y < h; y++) for (let x = 0; x < w; x++) {
+      const src = y * w + x, r = Math.random(), dst = src - w + (r > .66 ? 1 : r > .33 ? 0 : -1);
+      if (dst >= 0 && dst < w * h) heat[dst] = Math.max(0, heat[src] - Math.floor(Math.random() * 4));   // cools by 0–3 per row: flames reach about a third up, with ragged tips
+    }
+    for (let x = 0; x < w; x++) heat[(h - 1) * w + x] = Math.random() > .85 ? 30 : 36;   // a flickering base
+    for (let i = 0; i < w * h; i++) { const q = heat[i], [r, g, b] = FIRE_PALETTE[q]; px[i * 4] = r; px[i * 4 + 1] = g; px[i * 4 + 2] = b; px[i * 4 + 3] = q < 6 ? Math.round(q * 42) : 255; }
+    ctx.putImageData(img, 0, 0);
+  };
+  FIRE.timer = setInterval(step, 1000 / 24);
+}
+function fireStop() { if (FIRE.timer) clearInterval(FIRE.timer); FIRE.timer = null; $('wp-fire').hidden = true; }
+let wpObjectUrl = '';
+/** show the chosen wallpaper: the fire, the stored file, the URL, or nothing */
+async function applyWallpaper() {
+  const wp = $('wallpaper'), v = /** @type {HTMLVideoElement} */ (document.getElementById('wp-video')), kind = settings.wallpaper || 'none';
+  document.documentElement.style.setProperty('--wp-dim', String((settings.wallpaperDim == null ? 55 : settings.wallpaperDim) / 100));
+  const hidden = typeof document.hidden === 'boolean' && document.hidden;
+  renderWallpaperFields();
+  fireStop(); try { v.pause(); } catch (e) { /* no media in the headless test */ } v.hidden = true;
+  if (kind === 'fire') { wp.hidden = false; if (!hidden) fireStart(); }
+  else if (kind === 'video') {
+    const blob = await mediaGet('wallpaper');
+    if (settings.wallpaper !== 'video') return;   // changed while loading
+    if (wpObjectUrl) { URL.revokeObjectURL(wpObjectUrl); wpObjectUrl = ''; }
+    const src = blob ? (wpObjectUrl = URL.createObjectURL(blob)) : (settings.wallpaperUrl || '').trim();
+    wp.hidden = !src; v.hidden = !src;
+    if (src) { if (v.getAttribute('src') !== src) v.src = src; if (!hidden) { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } }
+  } else wp.hidden = true;
+}
+async function renderWallpaperFields() {
+  $('wp-video-fields').hidden = settings.wallpaper !== 'video';
+  $('wp-dim-val').textContent = (settings.wallpaperDim == null ? 55 : settings.wallpaperDim) + ' %';
+  const blob = settings.wallpaper === 'video' ? await mediaGet('wallpaper') : null;
+  $('wp-file-name').textContent = blob ? `a chosen file (${Math.round(blob.size / 1048576 * 10) / 10} MB)` : 'no file chosen';
+  $('wp-file-clear').hidden = !blob;
+}
+$('wp-file').addEventListener('change', async e => {
+  const input = /** @type {HTMLInputElement} */ (e.target), file = input.files && input.files[0]; if (!file) return; input.value = '';
+  try { await mediaPut('wallpaper', file); settings.wallpaper = 'video'; save.settings(); $('set-wallpaper').value = 'video'; applyWallpaper(); toast('Wallpaper set'); } catch (err) { toast('Could not store the video on this device'); }
+});
+$('wp-file-clear').addEventListener('click', async () => { await mediaPut('wallpaper', null); applyWallpaper(); toast('Wallpaper file removed'); });
+document.addEventListener('visibilitychange', () => { if (settings.wallpaper && settings.wallpaper !== 'none') applyWallpaper(); });
+applyWallpaper();
 })();

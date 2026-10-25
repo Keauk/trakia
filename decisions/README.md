@@ -30,6 +30,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-020](D-020-combined-alternatives.md) | Accept every correct combination of the listed alternatives | data / tooling | done |
 | [D-021](D-021-quieter-result-and-keyboard-blocks.md) | A quieter result panel, and blocks of cards per keyboard instead of a switch on every card | feedback UI / session builder | done |
 | [D-022](D-022-like-obicham-haresvam.md) | Accept харесвам next to обичам when the translation says "like" | data / brief | done |
+| [D-023](D-023-wallpaper.md) | A moving wallpaper behind the app: a built-in fireplace or the learner's own video | look | done |
 
 Suggested order for the open items: D-006 (explanations), D-005 (audio),
 D-004 (production focus), D-007 (sessions and reminders).

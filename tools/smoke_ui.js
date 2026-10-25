@@ -134,6 +134,20 @@ $('answer').value = 'iets\n'; $('answer').dispatchEvent(new window.InputEvent('i
 assert.equal($('feedback').hidden, false, 'line break from the keyboard submits the answer');
 assert.ok(!/\n/.test($('answer').value), 'no newline left in the field');
 $('btn-quit').click(); $('btn-home').click();
+// --- D-023: wallpaper
+document.querySelector('nav button[data-tab=settings]').click();
+assert.equal($('wallpaper').hidden, true, 'no wallpaper by default'); assert.equal($('wp-video-fields').hidden, true);
+$('set-wallpaper').value = 'fire'; $('set-wallpaper').dispatchEvent(new window.Event('input'));
+assert.equal($('wallpaper').hidden, false, 'fireplace shows the wallpaper layer'); assert.equal($('wp-fire').hidden, false);
+$('set-wallpaper-dim').value = '20'; $('set-wallpaper-dim').dispatchEvent(new window.Event('input'));
+assert.equal(document.documentElement.style.getPropertyValue('--wp-dim'), '0.2', 'dim applied as a CSS variable'); assert.equal($('wp-dim-val').textContent, '20 %');
+$('set-wallpaper').value = 'video'; $('set-wallpaper').dispatchEvent(new window.Event('input'));
+$('set-wallpaper-url').value = 'https://example.org/loop.mp4'; $('set-wallpaper-url').dispatchEvent(new window.Event('input'));
+assert.equal($('wp-video-fields').hidden, false, 'video fields shown');
+$('set-wallpaper').value = 'none'; $('set-wallpaper').dispatchEvent(new window.Event('input'));
+assert.equal($('wp-fire').hidden, true, 'fire stopped');
+assert.deepEqual([JSON.parse(window.localStorage.getItem('trakia.settings')).wallpaper, JSON.parse(window.localStorage.getItem('trakia.settings')).wallpaperUrl, JSON.parse(window.localStorage.getItem('trakia.settings')).wallpaperDim], ['none', 'https://example.org/loop.mp4', 20], 'settings stored');
+document.querySelector('nav button[data-tab=practise]').click();
 // --- D-012: collapsible alternatives; D-021: every card starts collapsed, the accept button under the toggle
 document.querySelector('nav button[data-tab=practise]').click();
 $('btn-home').click(); $('btn-start').click();
