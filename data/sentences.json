@@ -5350,7 +5350,9 @@
 "nl": "Ik hou van eieren als ontbijt.",
 "nl_alt": [],
 "bg_alt": [
-"Аз обичам яйца за закуска."
+"Аз обичам яйца за закуска.",
+"Харесвам яйца за закуска.",
+"Аз харесвам яйца за закуска."
 ],
 "en_alt": [
 "I love eggs for breakfast."
@@ -6933,7 +6935,9 @@
 "nl": "Ik hou van thee. En jij?",
 "nl_alt": [],
 "bg_alt": [
-"Обичам чай. А ти?"
+"Обичам чай. А ти?",
+"Аз харесвам чай. А ти?",
+"Харесвам чай. А ти?"
 ],
 "en_alt": [
 "I love tea. And you?",
@@ -6964,7 +6968,9 @@
 ],
 "bg_alt_en": [
 "Аз обичам чай. А вие?",
-"Обичам чай. А вие?"
+"Обичам чай. А вие?",
+"Аз харесвам чай. А вие?",
+"Харесвам чай. А вие?"
 ],
 "grammar": [
 "present"
@@ -7064,7 +7070,9 @@
 "nl_alt": [
 "Houden jullie van wijn?"
 ],
-"bg_alt": [],
+"bg_alt": [
+"Харесвате ли вино?"
+],
 "en_alt": [
 "Do you love wine?"
 ],
@@ -7088,7 +7096,8 @@
 "Are you fond of wine?"
 ],
 "bg_alt_en": [
-"Обичаш ли вино?"
+"Обичаш ли вино?",
+"Харесваш ли вино?"
 ],
 "grammar": [
 "present"
@@ -8326,7 +8335,9 @@
 "Ik vind koffie met melk niet lekker."
 ],
 "bg_alt": [
-"Аз не обичам кафе с мляко."
+"Аз не обичам кафе с мляко.",
+"Не харесвам кафе с мляко.",
+"Аз не харесвам кафе с мляко."
 ],
 "en_alt": [
 "I do not like coffee with milk."
@@ -8402,7 +8413,9 @@
 "nl_alt": [
 "Hou jij van thee met melk?"
 ],
-"bg_alt": [],
+"bg_alt": [
+"Харесваш ли чай с мляко?"
+],
 "en_alt": [
 "Do you love tea with milk?"
 ],
@@ -8431,7 +8444,8 @@
 "Do you like your tea with milk in it?"
 ],
 "bg_alt_en": [
-"Обичате ли чай с мляко?"
+"Обичате ли чай с мляко?",
+"Харесвате ли чай с мляко?"
 ],
 "grammar": [
 "present"
@@ -8555,7 +8569,9 @@
 "nl_alt": [
 "Mijn vrouw lust geen witte kaas."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Жена ми не харесва сирене."
+],
 "en_alt": [
 "My wife dislikes white cheese."
 ],
@@ -13639,7 +13655,9 @@
 "Houd je van appels of bananen?",
 "Hou je van appels of van bananen?"
 ],
-"bg_alt": [],
+"bg_alt": [
+"Харесваш ли ябълки или банани?"
+],
 "en_alt": [
 "Do you love apples or bananas?"
 ],
@@ -13660,7 +13678,8 @@
 "Vind je appels of bananen lekker?"
 ],
 "bg_alt_en": [
-"Обичате ли ябълки или банани?"
+"Обичате ли ябълки или банани?",
+"Харесвате ли ябълки или банани?"
 ],
 "grammar": [
 "present"
@@ -14364,7 +14383,9 @@
 "Ik houd niet van veel peper.",
 "Ik heb niet graag veel peper."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Не харесвам много пипер."
+],
 "en_alt": [
 "I don't like much pepper.",
 "I don't like lots of pepper."
@@ -24806,7 +24827,9 @@
 "nl_alt": [
 "Ik lust geen bonen, maar ik eet ze toch."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Не харесвам боб, но все пак го ям."
+],
 "en_alt": [
 "I don't like beans, but I still eat them.",
 "I don't like beans, but I eat them all the same.",
@@ -27119,7 +27142,9 @@
 "bg": "Бебето обича да спи по корем.",
 "nl": "De baby slaapt graag op zijn buik.",
 "nl_alt": [],
-"bg_alt": [],
+"bg_alt": [
+"На бебето му харесва да спи по корем."
+],
 "en_alt": [
 "The baby likes sleeping on its stomach.",
 "The baby likes to sleep on its belly.",
@@ -27749,7 +27774,9 @@
 "nl_alt": [
 "Hou je van olijven en paprika's in de salade?"
 ],
-"bg_alt": [],
+"bg_alt": [
+"Харесваш ли маслини и чушки в салатата?"
+],
 "en_alt": [
 "Do you like olives and peppers in your salad?",
 "Do you like olives and peppers in salad?",
@@ -27778,7 +27805,8 @@
 "Houd je van olijven en paprika in de salade?"
 ],
 "bg_alt_en": [
-"Обичате ли маслини и чушки в салатата?"
+"Обичате ли маслини и чушки в салатата?",
+"Харесвате ли маслини и чушки в салатата?"
 ],
 "grammar": [
 "present"
@@ -40349,7 +40377,9 @@
 "nl_alt": [
 "Ik houd niet van kou; ik geef de voorkeur aan hitte."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Не харесвам студа, предпочитам горещината."
+],
 "en_alt": [
 "I don't like cold, I prefer heat.",
 "I don't love the cold, I prefer the heat.",
@@ -65482,7 +65512,9 @@
 "nl_alt": [
 "Na het avondeten lopen we graag langs de oever van de rivier."
 ],
-"bg_alt": [],
+"bg_alt": [
+"След вечеря ни харесва да се разхождаме по брега на реката."
+],
 "en_alt": [
 "After dinner we like to stroll along the riverbank.",
 "After dinner we like walking along the bank of the river.",
@@ -78009,7 +78041,9 @@
 "nl": "Ik bespreek niet graag religie en politiek.",
 "nl_alt": [],
 "bg_alt": [
-"Аз не обичам да обсъждам религия и политика."
+"Аз не обичам да обсъждам религия и политика.",
+"Не ми харесва да обсъждам религия и политика.",
+"На мен не ми харесва да обсъждам религия и политика."
 ],
 "en_alt": [
 "I don't like to discuss religion and politics.",
@@ -89688,7 +89722,9 @@
 "nl": "Ik spreek een beetje Bulgaars, maar ik praat graag met de mensen.",
 "nl_alt": [],
 "bg_alt": [
-"Аз говоря малко български, но обичам да разговарям с хората."
+"Аз говоря малко български, но обичам да разговарям с хората.",
+"Говоря малко български, но ми харесва да разговарям с хората.",
+"Аз говоря малко български, но ми харесва да разговарям с хората."
 ],
 "en_alt": [
 "I speak a little Bulgarian, but I love talking to people.",
@@ -91259,7 +91295,9 @@
 "nl_alt": [
 "Ik lig 's avonds graag in bad."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Вечер ми харесва да лежа във ваната."
+],
 "en_alt": [
 "In the evenings I like lying in the bath.",
 "I like to lie in the bathtub in the evening.",
@@ -97754,7 +97792,9 @@
 "Wat is jouw hobby? – Ik houd van sporten."
 ],
 "bg_alt": [
-"Какво е твоето хоби? – Обичам да спортувам."
+"Какво е твоето хоби? – Обичам да спортувам.",
+"Какво е хобито ти? – Харесва ми да спортувам.",
+"Какво е твоето хоби? – Харесва ми да спортувам."
 ],
 "en_alt": [
 "What's your hobby? – I like playing sports.",
@@ -97783,7 +97823,9 @@
 ],
 "bg_alt_en": [
 "Какво е хобито ви? – Обичам да спортувам.",
-"Какво е вашето хоби? – Обичам да спортувам."
+"Какво е вашето хоби? – Обичам да спортувам.",
+"Какво е хобито ви? – Харесва ми да спортувам.",
+"Какво е вашето хоби? – Харесва ми да спортувам."
 ],
 "grammar": [
 "present",

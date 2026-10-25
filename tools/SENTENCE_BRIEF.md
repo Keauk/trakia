@@ -40,6 +40,11 @@ highest rank of the words they use, so the learner only sees sentences built fro
      "platteland" / "dorp" gives four answers, not two. `node tools/find_combinations.js --ids
      <ids>` lists the mixtures that are still missing. Add only the ones that are good sentences:
      a mixture can lose a verb particle or mix ти and вие.
+   - **обичам / харесвам (D-022).** When the Bulgarian uses *обичам* for a general taste and the
+     translation says "like" (Dutch "houden van", "graag"), also list the *харесвам* form of every
+     Bulgarian answer: *Обичам чай* → *Харесвам чай*, and for an activity *Обичам да чета* →
+     *Харесва ми да чета* (never *харесвам да*). Not for "love", for people, for plants or
+     animals, or the other way round for *харесвам* about one specific thing.
    - **Exact vs looser vs wrong (D-014, made stricter by D-017).** Judge every alternative against
      the Bulgarian, not against the primary. The test: a teacher marking a translation exercise.
      *Exact* (`nl_alt`, `en_alt`): full marks with no comment. That covers what the target language
