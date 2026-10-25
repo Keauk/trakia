@@ -95,6 +95,11 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .status{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px}
 .verdict{font:700 15px/1.4 var(--sans);color:var(--st)}
 .note{font:400 13px/1.4 var(--sans);color:var(--muted)}
+.wallpaper{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+.wallpaper canvas,.wallpaper video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wallpaper canvas{filter:blur(1.5px) saturate(1.1)}
+.wallpaper::after{content:'';position:absolute;inset:0;background:var(--bg);opacity:var(--wp-dim,.55)}
+@media (prefers-reduced-motion:reduce){.wallpaper{display:none}}
 .notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;font:400 13px/1.45 var(--sans);color:var(--ink-2)}
 .notes li::before{content:'· ';color:var(--faint)}
 
@@ -224,6 +229,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
 </style>
 </head>
 <body>
+<div id="wallpaper" class="wallpaper" hidden><canvas id="wp-fire" width="120" height="72"></canvas><video id="wp-video" muted loop playsinline preload="auto" hidden></video></div>
 <header>
   <div class="hrow">
     <h1>Тракия</h1>
@@ -460,6 +466,17 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <h2>Typing</h2>
     <div class="toggle"><input type="checkbox" id="set-translit"><div>Latin keyboard for Bulgarian<div class="help">Type <i>kupih hlyab</i>, the Cyrillic preview is what gets checked. sh=ш ch=ч zh=ж sht=щ yu=ю ya=я y=ъ j=й x=ь c=ц q=я</div></div></div>
     <div class="field"><label for="set-theme">Theme</label><select id="set-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+  </div>
+  <div class="card">
+    <h2>Wallpaper</h2>
+    <div class="field"><label for="set-wallpaper">Moving background behind the cards</label>
+      <select id="set-wallpaper"><option value="none">None</option><option value="fire">Fireplace</option><option value="video">My video</option></select></div>
+    <div class="field" id="wp-video-fields">
+      <div class="row" style="margin-top:0"><label class="btn" for="wp-file">Choose a video…</label><input type="file" id="wp-file" accept="video/mp4,video/webm,video/*" hidden><span class="help" id="wp-file-name"></span><button class="link-btn" id="wp-file-clear" hidden>remove</button></div>
+      <label for="set-wallpaper-url" style="display:block;margin-top:12px">Or a direct video link (.mp4 / .webm)</label><input type="url" id="set-wallpaper-url" placeholder="https://…/loop.mp4" style="width:100%">
+      <div class="help">A short loop of a few megabytes works best. A chosen file stays on this device and takes precedence over the link. Film clips are copyrighted: use a clip you own or a free stock loop.</div></div>
+    <div class="field"><label for="set-wallpaper-dim">Dim <span class="tiny" id="wp-dim-val"></span></label><input type="range" id="set-wallpaper-dim" min="0" max="90" step="5">
+      <div class="help">The wallpaper pauses while the app is hidden, and is not shown when your system asks for reduced motion.</div></div>
   </div>
   <div class="card">
     <h2>Danger zone</h2>

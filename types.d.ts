@@ -30,6 +30,8 @@ interface Settings {
   strictPunct: boolean; strictYi: boolean; stripAccents: boolean; strictForms: boolean; translit: boolean; theme: string;
   /** cards in a row on one keyboard before switching (D-021); 1 alternates every card */
   dirRun: number;
+  /** moving background (D-023): 'none' | 'fire' | 'video', a direct video URL, and the overlay opacity 0–90 */
+  wallpaper: string; wallpaperUrl: string; wallpaperDim: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 
