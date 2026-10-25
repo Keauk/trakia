@@ -148,6 +148,39 @@ t('buildSession (strict order)', () => {
   s = C.buildSession([S[0]], { 'a|bg2nl': { box: 2, due: now + 1e9 }, 'a|nl2bg': { box: 1, due: now + 1e9 } }, { rank: 100, directions: 'both' }, now, () => 0.5);
   assert.equal(s.free, true); assert.deepEqual(s.queue, ['a|nl2bg', 'a|bg2nl']);
 });
+t('D-006 explain', () => {
+  const vocab = new Set(['детето', 'е', 'в', 'легло', 'леглото', 'хляб', 'хляба', 'хлябът', 'купих', 'мляко', 'ям', 'изям', 'супата', 'искам', 'да', 'и', 'новия', 'новият', 'нов', 'апартамент']);
+  const aspects = C.aspectPairs([{ rank: 1, bg: 'ям', en: 'eat', pos: 'verb', forms: 'ям / изям' }, { rank: 2, bg: 'знам', en: 'know', pos: 'verb', forms: 'знам / зная' }, { rank: 3, bg: 'съм', en: 'be', pos: 'verb', forms: 'съм / бъда' }, { rank: 4, bg: 'събувам', en: 'take off', pos: 'verb', forms: 'събувам / събуя (се)' }]);
+  const n = (t, a, lang) => C.explain(C.normalise(t, lang || 'bg'), C.normalise(a, lang || 'bg'), lang || 'bg', { vocab, aspects }).map(x => x.note);
+  // article: missing, extra, full vs short; the bare form must be a known word
+  assert.deepEqual(n('Детето е в легло.', 'Детето е в леглото.'), ['missing definite article: легло → леглото']);
+  assert.deepEqual(n('Детето е в леглото.', 'Детето е в легло.'), ['no article here: леглото → легло']);
+  assert.deepEqual(n('Купих хляба.', 'Купих хлябът.'), ['the full article -ът, because the noun is the subject: хляба → хлябът']);
+  assert.deepEqual(n('Хлябът е в леглото.', 'Хляба е в леглото.'), ['the short article -а, because the noun is not the subject: хлябът → хляба']);
+  assert.deepEqual(n('Купих новия апартамент.', 'Купих новият апартамент.'), ['the full article -ият, because the noun is the subject: новия → новият'], 'adjective article');
+  // aspect, from the deck's verb pairs; spelling variants and съм are not pairs
+  assert.deepEqual(n('Искам да ям супата.', 'Искам да изям супата.'), ['aspect: a single completed action takes the perfective изям, not ям']);
+  assert.deepEqual(n('Искам да изям супата.', 'Искам да ям супата.'), ['aspect: an ongoing or repeated action takes the imperfective ям, not изям']);
+  assert.equal(aspects.get('знам'), undefined); assert.equal(aspects.get('съм'), undefined); assert.deepEqual(aspects.get('събуя'), { other: 'събувам', perfective: true });
+  // clitic order: only when the other words keep their order
+  assert.deepEqual(n('Ми харесва.', 'Харесва ми.'), ['word order: short words like ми, се and ли stand right after the first stressed word']);
+  assert.deepEqual(n('Мляко купих.', 'Купих мляко.'), [], 'plain word order gets no note (the verdict already says so)');
+  // spelling and a missing or extra word
+  assert.deepEqual(n('Купих млеко.', 'Купих мляко.'), ['spelling: млеко → мляко']);
+  assert.deepEqual(n('Купих хляб мляко.', 'Купих хляб и мляко.'), ['missing word: и']);
+  assert.deepEqual(n('Купих и хляб и мляко.', 'Купих хляб и мляко.'), ['extra word: и']);
+  assert.deepEqual(n('Ik heb brood gekoqht.', 'Ik heb brood gekocht.', 'nl'), ['spelling: gekoqht → gekocht']);
+  // silence: a correct answer, a wholly different one, an English word form (D-014 names it already), an unknown bare form
+  assert.deepEqual(n('Купих мляко.', 'Купих мляко.'), []);
+  assert.deepEqual(n('Котката спи.', 'Кучето лае силно днес.'), []);
+  assert.deepEqual(n('Do you work on Sundays?', 'Do you work on Sunday?', 'en'), []);
+  assert.deepEqual(n('Купих маса.', 'Купих масата.'), [], 'маса is not in this vocabulary, so no article note');
+  // at most three notes, and the pair travels with the note
+  const many = C.explain('а б в г д е ж з', 'а х в у д и ж о', 'bg', { vocab, aspects }); assert.ok(many.length <= 3); assert.deepEqual(many[0].pair, ['б', 'х']);
+  // alignWords keeps wordSlips as it was
+  assert.deepEqual(C.wordSlips('купих хляба', 'купих хляб', vocab, 'bg'), [['хляба', 'хляб']]);
+  assert.deepEqual(C.alignWords('твоята кола', 'твоя та кола'), [['твоята', 'твоя та'], ['кола', 'кола']]);
+});
 t('D-021 keyboard blocks', () => {
   // twelve sentences with no shared words; L = typed in Dutch/English, C = typed in Bulgarian
   const ids = 'abcdefghijkl'.split(''), byId = new Map(ids.map((id, i) => [id, { id, lemmas: ['дума' + i] }]));

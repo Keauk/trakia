@@ -23,7 +23,7 @@ let progress = LS.get('progress', {});
 let userAlts = LS.get('userAlts', {});
 let userSentences = LS.get('userSentences', {});
 let deleted = LS.get('deleted', []);
-let log = LS.get('log', []);            // [ts, key, score 2|1|0, free 0|1]
+let log = LS.get('log', []);            // [ts, key, score 2|1|0, free 0|1, effective score, rating, judgement 0|1|2 (D-006)]
 let sessions = LS.get('sessions', []);  // [startTs]
 let drills = LS.get('drills', {});       // {itemId: {ok, bad, last}}
 let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
@@ -31,7 +31,7 @@ const save = {
   settings: () => LS.set('settings', settings), progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
   userSentences: () => LS.set('userSentences', userSentences), deleted: () => LS.set('deleted', deleted), log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog),
 };
-const WORDS = DATA.words, WIDX = C.wordIndex(WORDS), GRAMMAR = DATA.grammar;
+const WORDS = DATA.words, WIDX = C.wordIndex(WORDS), GRAMMAR = DATA.grammar, ASPECTS = C.aspectPairs(WORDS);
 const WORD_BY_RANK = new Map(WORDS.map(w => [w.rank, w]));
 
 function allSentences() {
@@ -225,7 +225,7 @@ function renderCard() {
   if (session.drill) return renderDrillCard();
   const item = session.queue[session.i], { dir, s } = cardOf(item), K = C.parseKey(item.key);
   if (!s) { session.i++; return renderCard(); }
-  session.pending = null;
+  session.pending = null; setJudgement(0);
   renderProgress(); renderChips(dirLabel(dir), session.free, !!item.retry); setState('idle'); syncRunning();
   $('prompt').textContent = K.toBg ? (s[K.lang] || s.nl) : s.bg;
   $('prompt').lang = K.toBg ? K.lang : 'bg';
@@ -257,6 +257,12 @@ $('btn-check').addEventListener('click', () => checkAnswer(false));
 $('btn-dontknow').addEventListener('click', () => checkAnswer(true));
 $('btn-next').addEventListener('click', next);
 $('btn-accept').addEventListener('click', acceptMine);
+/** the Sure / Unsure toggles under the answer field (D-006): 0 none, 1 sure, 2 unsure */
+function setJudgement(j) {
+  if (session) session.judgement = j;
+  $('judge').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(+(b.dataset.j || 0) === j && j > 0)));
+}
+$('judge').addEventListener('click', e => { const b = closest(e, 'button'); if (!b || !session || session.pending) return; const j = +(b.dataset.j || 0); setJudgement(session.judgement === j ? 0 : j); $('answer').focus(); });
 $('btn-quit').addEventListener('click', endSession);
 $('btn-quit-m').addEventListener('click', endSession);
 $('btn-start').addEventListener('click', () => startSession());
@@ -274,7 +280,7 @@ function checkAnswer(giveUp) {
   const accepted = allAccepted(s, dir, key), loose = C.looseFor(s, dir);
   const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], lang, settings), reason: 'skip' } : C.check(typed, accepted, lang, Object.assign({}, settings, { vocab: VOCAB[lang] }), loose);
   const outcome = r.result === 'almost' ? C.almostOutcome(progress[key], r.reason, settings) : null;
-  session.pending = { result: r.result, typed, key, reason: r.reason, outcome };
+  session.pending = { result: r.result, typed, key, reason: r.reason, outcome, judgement: giveUp ? 0 : session.judgement || 0 };
   showFeedback(r, s, dir, accepted, giveUp, outcome, loose);
 }
 /** "different word form: sundays → sunday · missing: the" for the form slips of a D-014 check */
@@ -296,7 +302,11 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   v.innerHTML = VERDICT[state] + (r.loose && r.result !== 'wrong' ? ' <span class="loose-tag" title="Accepted, but this translation is looser than the Bulgarian. The line below is the exact translation.">≈ looser</span>' : '');
   const how = r.reason === 'typo' ? `${r.dist} character${r.dist > 1 ? 's' : ''} off` : r.reason === 'order' ? 'same words, different order' : '';
   const rule = !outcome ? '' : outcome.rule === 'free-pass' ? ` · counted as correct (free pass ${outcome.used} of ${outcome.passes} on a young card)` : outcome.rule === 'lapse' ? ' · this card is mature, so it goes back for review' : outcome.rule === 'strict' ? ' · strict mode: scheduled as wrong' : ' · counted as Hard';
-  $('verdict-note').innerHTML = r.result === 'almost' ? how + (session.free ? '' : rule) : r.reason === 'form' ? slipText(r.slips) : giveUp || closer ? '' : r.result === 'wrong' ? 'Differences highlighted' : highlight ? 'Accepted — small differences highlighted' : '';
+  // D-006: short explanations; a slip that a note explains leaves the plain "different word form" line
+  const notes = r.result === 'correct' || giveUp ? [] : C.explain(r.t, r.a, lang, { vocab: VOCAB[lang], aspects: ASPECTS });
+  const covered = new Set(notes.map(n => n.pair.join('\u0000'))), slips = (r.slips || []).filter(p => !covered.has(p.join('\u0000')));
+  $('notes').innerHTML = notes.map(n => `<li class="n-${n.kind}">${esc(n.note)}</li>`).join(''); $('notes').hidden = !notes.length;
+  $('verdict-note').innerHTML = r.result === 'almost' ? how + (session.free ? '' : rule) : r.reason === 'form' ? (slips.length ? slipText(slips) : '') : giveUp || closer ? '' : r.result === 'wrong' ? 'Differences highlighted' : highlight ? 'Accepted — small differences highlighted' : '';
   $('expected-label').hidden = !closer;
   renderExpected(shown, typed, highlight);
   renderAlts(accepted.filter(a => a !== shown), (loose || []).filter(a => a !== shown && a !== r.expected));
@@ -316,7 +326,7 @@ function next() {
   const item = session.queue[session.i];
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
   progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
-  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0]);
+  log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0, p.judgement || 0]);
   if (log.length > 20000) log = log.slice(-15000);
   save.progress(); save.log();
   session.counts[p.result]++;
@@ -372,6 +382,10 @@ function renderStats() {
   const ms = log.filter(l => dayKey(l[0]) === today).map(l => l[0]);
   let minutes = 0; for (let i = 1; i < ms.length; i++) { const gap = ms[i] - ms[i - 1]; if (gap < 5 * 60e3) minutes += gap; }
   $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streak, 'day streak');
+  // calibration (D-006): how often a "sure" or "unsure" answer was right, after ten judged answers
+  const judged = log.filter(l => l[6] === 1 || l[6] === 2), pct = j => { const xs = judged.filter(l => l[6] === j); return xs.length ? `${Math.round(100 * xs.filter(l => l[2] > 0).length / xs.length)} % of the time (${xs.length})` : 'never judged'; };
+  $('calibration').hidden = judged.length < 10;
+  $('calibration').textContent = judged.length < 10 ? '' : `When you said sure you were right ${pct(1)}; unsure: ${pct(2)}.`;
   // chart data
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);

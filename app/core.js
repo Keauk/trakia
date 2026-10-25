@@ -74,11 +74,12 @@
     return p >= 3 || (tw.length <= 3 && aw.length <= 3);
   }
   /**
-   * Align two normalised answers word by word and return the word-form slips as [typed, expected]
-   * pairs ('' for a missing or extra word). Missing or extra spaces are typos, not slips.
-   * @param {string} t @param {string} a @param {Set<string>} vocab @param {string} [lang] @returns {string[][]}
+   * Align two normalised answers word by word: every pair [typed, expected] in order, '' for a
+   * missing or extra word, and a glued pair ('твоята' against 'твоя та') where a space is missing
+   * or extra, which counts as a typo rather than a slip.
+   * @param {string} t @param {string} a @returns {string[][]}
    */
-  function wordSlips(t, a, vocab, lang) {
+  function alignWords(t, a) {
     const T = t.split(' '), A = a.split(' '), m = T.length, n = A.length;
     const sub = (x, y) => x === y ? 0 : distance(x, y) / Math.max(x.length, y.length);
     // x typed where y1 + y2 (or x1 + x2 where y) was expected: a missing or extra space, plus at most
@@ -99,13 +100,85 @@
     let i = m, j = n;
     while (i || j) {
       const v = d[i][j];
-      if (i && j && v === d[i - 1][j - 1] + sub(T[i - 1], A[j - 1])) { if (T[i - 1] !== A[j - 1] && formSlip(T[i - 1], A[j - 1], vocab, lang || '')) out.push([T[i - 1], A[j - 1]]); i--; j--; }
-      else if (i && j > 1 && v === d[i - 1][j - 2] + glued(T[i - 1], A[j - 2] + A[j - 1], A[j - 2], A[j - 1])) { i--; j -= 2; }
-      else if (i > 1 && j && v === d[i - 2][j - 1] + glued(T[i - 2] + T[i - 1], A[j - 1], T[i - 2], T[i - 1])) { i -= 2; j--; }
+      if (i && j && v === d[i - 1][j - 1] + sub(T[i - 1], A[j - 1])) { out.push([T[i - 1], A[j - 1]]); i--; j--; }
+      else if (i && j > 1 && v === d[i - 1][j - 2] + glued(T[i - 1], A[j - 2] + A[j - 1], A[j - 2], A[j - 1])) { out.push([T[i - 1], A[j - 2] + ' ' + A[j - 1]]); i--; j -= 2; }
+      else if (i > 1 && j && v === d[i - 2][j - 1] + glued(T[i - 2] + T[i - 1], A[j - 1], T[i - 2], T[i - 1])) { out.push([T[i - 2] + ' ' + T[i - 1], A[j - 1]]); i -= 2; j--; }
       else if (i && v === d[i - 1][j] + 1) { out.push([T[i - 1], '']); i--; }
       else { out.push(['', A[j - 1]]); j--; }
     }
     return out.reverse();
+  }
+  /**
+   * The word-form slips between two normalised answers as [typed, expected] pairs ('' for a missing
+   * or extra word). Missing or extra spaces are typos, not slips.
+   * @param {string} t @param {string} a @param {Set<string>} vocab @param {string} [lang] @returns {string[][]}
+   */
+  function wordSlips(t, a, vocab, lang) {
+    return alignWords(t, a).filter(([x, y]) => !x || !y || (x !== y && !x.includes(' ') && !y.includes(' ') && formSlip(x, y, vocab, lang || '')));
+  }
+
+  // ---------- explanations (D-006) ----------
+  const ARTICLES = ['ият', 'ия', 'ът', 'ят', 'та', 'то', 'те', 'а', 'я'];
+  const CLITICS = new Set(['ме', 'те', 'го', 'я', 'ни', 'ви', 'ги', 'ми', 'ти', 'му', 'ѝ', 'и', 'им', 'се', 'си', 'съм', 'е', 'сме', 'сте', 'са', 'ще', 'не', 'ли']);
+  /** the definite-article suffix of a normalised Bulgarian word, with the bare form, or null */
+  function article(w) {
+    for (const suf of ARTICLES) if (w.length > suf.length + 1 && w.endsWith(suf)) return { bare: w.slice(0, -suf.length), suf };
+    return null;
+  }
+  /**
+   * Verb aspect pairs from the deck's Forms column ("ям / изям"): each member maps to the other
+   * and whether it is the perfective (second) one. Spelling variants ("знам / зная") are skipped.
+   * @param {Word[]} words @returns {Map<string, {other: string, perfective: boolean}>}
+   */
+  function aspectPairs(words) {
+    const M = new Map();
+    for (const w of words || []) {
+      if (w.pos !== 'verb' || !/\//.test(w.forms || '')) continue;
+      const [a, b] = w.forms.split('/').slice(0, 2).map(x => normalise(x.replace(/\(.*?\)/g, '').replace(/(^| )се( |$)/g, ' '), 'bg'));
+      if (!a || !b || a === b || a === 'съм' || (a.length === b.length && a.slice(0, -1) === b.slice(0, -1))) continue;
+      if (!M.has(a)) M.set(a, { other: b, perfective: false });
+      if (!M.has(b)) M.set(b, { other: a, perfective: true });
+    }
+    return M;
+  }
+  /**
+   * Short notes on why a normalised answer t differs from the accepted answer a (D-006): article,
+   * aspect and clitic order for Bulgarian; spelling and a missing or extra word for every language.
+   * At most three, in sentence order; none for a wholly different answer. Every note carries the
+   * [typed, expected] pair it explains, so the caller can drop that pair from the plain slip list.
+   * @param {string} t @param {string} a @param {string} lang @param {{vocab?: Set<string>, aspects?: Map<string, {other: string, perfective: boolean}>}} ctx
+   * @returns {{kind: string, note: string, pair: string[]}[]}
+   */
+  function explain(t, a, lang, ctx) {
+    ctx = ctx || {}; const vocab = ctx.vocab || new Set(), bg = lang === 'bg';
+    if (!t || t === a) return [];
+    if (bg && sameBag(t, a)) {
+      // only clitics out of place: the other words stand in the same order on both sides
+      const rest = (/** @type {string} */ x) => x.split(' ').filter(w => !CLITICS.has(w)).join(' ');
+      return rest(t) === rest(a) ? [{ kind: 'clitic', note: 'word order: short words like ми, се and ли stand right after the first stressed word', pair: [t, a] }] : [];
+    }
+    const pairs = alignWords(t, a).filter(([x, y]) => x !== y);
+    if (pairs.length > 4 || pairs.length * 2 > a.split(' ').length) return [];
+    const out = [];
+    for (const [x, y] of pairs) {
+      if (out.length === 3) break;
+      if (!x) { out.push({ kind: 'missing', note: `missing word: ${y}`, pair: [x, y] }); continue; }
+      if (!y) { out.push({ kind: 'extra', note: `extra word: ${x}`, pair: [x, y] }); continue; }
+      if (x.includes(' ') || y.includes(' ')) continue;
+      if (bg) {
+        const ax = article(x), ay = article(y);
+        if (ay && ay.bare === x && vocab.has(x)) { out.push({ kind: 'article', note: `missing definite article: ${x} → ${y}`, pair: [x, y] }); continue; }
+        if (ax && ax.bare === y && vocab.has(y)) { out.push({ kind: 'article', note: `no article here: ${x} → ${y}`, pair: [x, y] }); continue; }
+        if (ax && ay && ax.bare === ay.bare && ax.suf !== ay.suf && /^(ът|ят|ият|а|я|ия)$/.test(ax.suf) && /^(ът|ят|ият|а|я|ия)$/.test(ay.suf)) {
+          const full = /т$/.test(ay.suf);
+          out.push({ kind: 'article', note: full ? `the full article -${ay.suf}, because the noun is the subject: ${x} → ${y}` : `the short article -${ay.suf}, because the noun is not the subject: ${x} → ${y}`, pair: [x, y] }); continue;
+        }
+        const asp = ctx.aspects && ctx.aspects.get(x);
+        if (asp && asp.other === y) { out.push({ kind: 'aspect', note: asp.perfective ? `aspect: an ongoing or repeated action takes the imperfective ${y}, not ${x}` : `aspect: a single completed action takes the perfective ${y}, not ${x}`, pair: [x, y] }); continue; }
+      }
+      if (distance(x, y) <= 2 && !formSlip(x, y, vocab, lang)) out.push({ kind: 'spelling', note: `spelling: ${x} → ${y}`, pair: [x, y] });
+    }
+    return out;
   }
 
   /**
@@ -736,6 +809,6 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, wordSlips, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
