@@ -421,7 +421,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <div class="inline"><input type="number" id="set-retention" min="0.80" max="0.95" step="0.01"><span class="tiny" id="retention-help"></span></div>
       <div class="help">The recall probability the scheduler aims for at review time. 0.90 is the FSRS default; above it the number of reviews per remembered sentence rises steeply, below it you see sentences less often but forget more. Changing it only affects future scheduling.</div></div>
     <div class="field"><label for="set-maxivl">Longest interval (days)</label><div class="inline"><input type="number" id="set-maxivl" min="7" max="3650" step="1"></div></div>
-    <p class="tiny">Each card has a stability (days until recall drops to 90 %) and a difficulty, updated from your own answers with the FSRS-6 algorithm Anki uses. New and lapsed cards go through short steps first: 10 min, 1 h, then days. Correct = Good, almost = Hard (or Good / Again by the rule below), wrong = Again.</p>
+    <p class="tiny">Each card has a stability (days until recall drops to 90 %) and a difficulty, updated from your own answers with the FSRS-6 algorithm Anki uses. A new card answered correctly goes straight to days; a missed or lapsed card comes back after 10 min. Correct = Good, almost = Hard (or Good / Again by the rule below), wrong = Again.</p>
   </div>
   <div class="card">
     <h2>Session</h2>
@@ -441,8 +441,10 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <div class="field"><label for="set-order">New sentence order</label>
       <select id="set-order"><option value="mixed">Mixed — random, favouring lower ranks (recommended)</option><option value="strict">Strict — always the lowest rank first</option></select>
       <div class="help">Mixed interleaves ranks and topics within a session, which is harder in the moment but retains better. Consecutive cards never share a word, and reviews are spread between new cards in both modes.</div></div>
-    <div class="field"><label for="set-new">New sentences per session</label><div class="inline"><input type="number" id="set-new" min="0" max="100"></div></div>
-    <div class="field"><label for="set-maxdue">Max reviews per session</label><div class="inline"><input type="number" id="set-maxdue" min="5" max="500"></div></div>
+    <div class="field"><label for="set-size">Cards per session</label><div class="inline"><input type="number" id="set-size" min="5" max="100"></div>
+      <div class="help">Every card in a session is a different sentence; a wrong answer comes back once at the end, on top of this number. A sentence you answered in the last 4 hours waits for a later session, so sessions in a row show new sentences.</div></div>
+    <div class="field"><label for="set-new">New cards per session (at most)</label><div class="inline"><input type="number" id="set-new" min="0" max="100"></div>
+      <div class="help">Reviews come first. While more reviews are due than fit in a session, it holds 2 new cards (1 in a session under 8 cards); once your reviews are done, new cards fill the free places, up to this number. The more you practise, the more new sentences you get, and reviews never pile up behind new ones.</div></div>
   </div>
   <div class="card">
     <h2>Answer checking</h2>
@@ -454,7 +456,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <option value="lenient">Lenient — always holds the card in its box</option>
         <option value="strict">Strict — always scheduled as wrong</option>
       </select>
-      <div class="help">Staged: on a young card (still in the learning steps, or stability under a day) a near miss counts as correct, up to the number of free passes below (typos and word-order misses counted separately). On an established card (stability 1–7 days) it counts as Hard. On a mature card (stability 7 days or more) a clean answer is required, otherwise the card lapses. The verdict always still says "almost" and shows the exact diff.</div></div>
+      <div class="help">Staged: on a young card (its first three answers, still in a learning step, or stability under a day) a near miss counts as correct, up to the number of free passes below (typos and word-order misses counted separately). On an established card (stability 1–7 days) it counts as Hard. On a mature card (stability 7 days or more) a clean answer is required, otherwise the card lapses. The verdict always still says "almost" and shows the exact diff.</div></div>
     <div class="field"><label for="set-passes">Free passes per card (staged mode)</label><div class="inline"><input type="number" id="set-passes" min="0" max="10"></div></div>
     <div class="toggle"><input type="checkbox" id="set-forms"><div>A wrong word form is an error, not a typo<div class="help">On: within the typo tolerance, typing another form of a word (Sunday → Sundays, книгата → книга), swapping two short words (in → on) or leaving out a whole word counts as <b>wrong</b>. Real typos, like swapped letters or a missing space, still count as <b>almost</b>.</div></div></div>
     <div class="toggle"><input type="checkbox" id="set-bag"><div>Bulgarian word order is free<div class="help">Same words in another order counts as <b>almost</b>.</div></div></div>
