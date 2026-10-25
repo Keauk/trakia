@@ -24,6 +24,7 @@ assert.equal($('dir-badge').textContent, 'BG → NL');
 // D-015: one progress segment per card, current one marked; chips mirrored for phones; phone layout flag
 const qLen = +$('counter').textContent.split(' of ')[1];
 assert.equal($('counter').textContent, '1 of ' + qLen); assert.equal($('counter-m').textContent, '1/' + qLen);
+assert.equal(qLen, 10, 'nothing due: a fresh learner gets newPerSession new cards (D-024)');
 assert.equal($('segs').children.length, qLen); assert.equal($('segs').children[0].className, 'cur');
 assert.ok($('chips-m').textContent.includes('BG → NL') && !$('chips-m').querySelector('[id]'), 'chips mirrored without ids');
 assert.ok(document.body.classList.contains('running'));
@@ -73,7 +74,8 @@ assert.equal(+$('counter').textContent.split(' of ')[1], +before + 1, 'wrong car
 assert.equal($('segs').children.length, +before + 1, 'the retry adds a segment');
 // progress persisted
 const prog = JSON.parse(window.localStorage.getItem('trakia.progress'));
-assert.equal(prog[id.id + '|bg2nl'].box, 1); assert.equal(prog[s2.id + '|bg2nl'].box, 1); assert.equal(prog[s3.id + '|bg2nl'].box, 1); assert.equal(prog[s4.id + '|bg2nl'].box, 0);
+// a first correct answer graduates the card (D-024); the miss stays in its learning step
+for (const x of [id, s2, s3]) assert.equal(prog[x.id + '|bg2nl'].state, 'review', x.id); assert.equal(prog[s4.id + '|bg2nl'].box, 0);
 // end session, check summary
 // Enter in the answer field checks and stops there (it used to reach the document handler and skip the result)
 const s5 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
@@ -112,13 +114,16 @@ assert.equal($('set-rank').value, '102');
 $('set-rank').value = '600'; $('set-rank').dispatchEvent(new window.Event('input'));
 assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 600);
 assert.match($('rank-help').textContent, /sentences eligible/);
-// gated direction: after a correct bg2nl answer the nl2bg card becomes available
+// gated direction: after a correct bg2nl answer the nl2bg card becomes available, once the sentence
+// has rested 4 hours (D-024)
+const realNow = Date.now; window.Date.now = () => realNow() + 5 * 3600e3;
 document.querySelector('nav button[data-tab=practise]').click();
 $('btn-home').click();
 $('btn-start').click();
 let sawReverse = false;
 for (let i = 0; i < 60 && !$('session-run').hidden; i++) { if ($('dir-badge').textContent === 'NL → BG') { sawReverse = true; break; } $('btn-dontknow').click(); $('btn-next').click(); }
-assert.ok(sawReverse, 'reverse direction card appeared in the next session');
+window.Date.now = realNow;
+assert.ok(sawReverse, 'reverse direction card appeared in a later session');
 // translit preview on a NL->BG card
 window.eval("window.__s = JSON.parse(localStorage.getItem('trakia.settings')); window.__s.translit = true; localStorage.setItem('trakia.settings', JSON.stringify(window.__s));");
 // (setting is read at card render; simulate via the checkbox)
@@ -253,10 +258,12 @@ $('btn-quit').click();
 const progEn = JSON.parse(window.localStorage.getItem('trakia.progress'));
 assert.ok(Object.keys(progEn).some(k => k.endsWith('|bg2en')), 'English cards stored under their own keys');
 assert.equal(Object.keys(progEn).filter(k => /\|(bg2nl|nl2bg)$/.test(k)).length, nlProgressBefore, 'Dutch progress untouched');
-// the English card unlocks its production card in the next session
+// the English card unlocks its production card in a session after the 4-hour rest (D-024)
+window.Date.now = () => realNow() + 5 * 3600e3;
 $('btn-home').click(); $('btn-start').click();
 let sawEnProd = false;
 for (let i = 0; i < 60 && !$('session-run').hidden; i++) { if ($('dir-badge').textContent === 'EN → BG') { sawEnProd = true; break; } $('btn-dontknow').click(); $('btn-next').click(); }
+window.Date.now = realNow;
 assert.ok(sawEnProd, 'EN → BG card appeared');
 assert.equal($('prompt').lang, 'en');
 $('btn-quit').click(); $('btn-home').click();

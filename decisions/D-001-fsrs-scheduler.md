@@ -60,7 +60,8 @@ vectors); the first weeks after migration will feel different because intervals 
   same-day short-term stability, whole-day review intervals, the maximum interval and py-fsrs's fuzz
   ranges. Two reference vectors from the py-fsrs test suite pass exactly (`test_review_card` interval
   history and `test_memo_state` stability/difficulty to 1e-4).
-- Steps: learning 1 min → 10 min → 1 h (a new card answered Good waits 10 min, then 1 h, then
+- Steps (replaced by D-024 on 2026-10-25 with a single 10-minute learning step, because steps shorter
+  than a session only fired in the next one): learning 1 min → 10 min → 1 h (a new card answered Good waits 10 min, then 1 h, then
   graduates to days; 1 min is only reached after Again, and the session re-queues such cards anyway),
   relearning 10 min. Ratings: correct → Good, almost → Hard, wrong → Again; the D-002 policy can turn
   an almost into Good (free pass) or Again (mature card). No Easy.

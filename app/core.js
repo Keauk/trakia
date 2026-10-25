@@ -336,7 +336,9 @@
   // 'review' | 'relearning' and a learning step. Short learning steps keep the minute-granular
   // behaviour; FSRS schedules whole days once a card graduates.
   const FSRS_PARAMS = [0.212, 1.2931, 2.3065, 8.2956, 6.4133, 0.8334, 3.0194, 0.001, 1.8722, 0.1666, 0.796, 1.4835, 0.0614, 0.2629, 1.6483, 0.6014, 1.8729, 0.5425, 0.0912, 0.0658, 0.1542];
-  const FSRS_DEFAULTS = { retention: 0.9, learningSteps: [1 * MIN, 10 * MIN, 60 * MIN], relearningSteps: [10 * MIN], maxInterval: 365, fuzz: true };
+  // one 10-minute step (D-024): a new card answered Good graduates at once; a miss waits 10 minutes.
+  // Steps shorter than a session only ever fired in the next session, so they repeated sentences.
+  const FSRS_DEFAULTS = { retention: 0.9, learningSteps: [10 * MIN], relearningSteps: [10 * MIN], maxInterval: 365, fuzz: true };
   const FUZZ_RANGES = [[2.5, 7.0, 0.15], [7.0, 20.0, 0.1], [20.0, Infinity, 0.05]];
   const AGAIN = 1, HARD = 2, GOOD = 3, EASY = 4;
   const clampD = d => Math.min(10, Math.max(1, d)), clampS = x => Math.max(0.001, x);
@@ -449,6 +451,7 @@
     if (!p) return 'young';
     if (p.s == null) { const b = p.box || 0; return b <= 2 ? 'young' : b >= 6 ? 'mature' : 'established'; }
     if (p.state !== 'review' || p.s < 1) return 'young';
+    if (p.first && p.reps < 3) return 'young';   // D-024: one Good graduates now, so the first three answers stay young
     return p.s >= 7 ? 'mature' : 'established';
   }
   /** current recall probability of a card (0 for cards in learning steps or never seen) */
@@ -489,6 +492,7 @@
       result = o.rating;
     } else delete p.lastRule;
     const rating = result === 'correct' ? GOOD : result === 'almost' ? HARD : AGAIN;
+    if (!p.reps && !p.first) p.first = now;                  // first answer ever: keeps the card young for three answers (D-024)
     p.reps += 1; p.last = p.last || 0;
     if (result === 'wrong') { p.lapses += 1; p.streak = 0; } else p.streak += 1;
     if (free && result !== 'wrong') { p.box = boxFromRecord(p); return p; }   // free practice never moves a card forward
@@ -653,40 +657,69 @@
     return out;
   }
 
+  /** a sentence answered less than REST ago is left out of the next session (D-024) */
+  const REST = 4 * H;
+  /** new cards every session gets even while reviews wait (D-024) */
+  const NEW_RESERVE = 2;
+  /** keep the first card of every sentence: 'a|bg2nl', 'a|nl2bg', 'b|bg2nl' -> 'a|bg2nl', 'b|bg2nl' */
+  function onePerSentence(keys) {
+    const seen = new Set();
+    return keys.filter(k => { const id = parseKey(k).id; if (seen.has(id)) return false; seen.add(id); return true; });
+  }
+
   /**
    * buildSession(sentences[], progress, settings, now, rand) -> {queue: [key], free: bool, nDue, nNew}
-   * Due cards (oldest first, capped) and new eligible cards are mixed into one queue (D-003):
-   * unlocked NL->BG cards fill up to half the new slots first; the rest are a weighted random pick
-   * favouring lower ranks (settings.newOrder 'mixed', default) or strictly lowest-rank-first ('strict'); consecutive cards never share a content word when
-   * avoidable, directions alternate (or come in keyboard blocks of settings.dirRun, D-021), and a due
-   * card never waits behind more than three new ones.
-   * If nothing is due or new: free practice over the weakest seen cards.
+   * A session holds settings.sessionSize cards (default 20, D-024), at most one per sentence. Reviews
+   * come first (most forgotten first): while more are due than fit, a session is reviews plus
+   * NEW_RESERVE new cards; once the due reviews all fit, new eligible cards fill the rest, at most
+   * settings.newPerSession (default 10). So the more you practise, the more new sentences you get,
+   * and new cards never outrun the reviews. Due cards top up when the new pool runs short. Unlocked NL->BG cards take
+   * up to half the new slots; the rest are a weighted random pick favouring lower ranks
+   * (settings.newOrder 'mixed', default) or strictly lowest-rank-first ('strict') (D-003).
+   * A sentence answered in the last REST is skipped: no new card for it, and no due card in its other
+   * direction; a card's own due time is left to the scheduler. Consecutive cards never share a content
+   * word when avoidable, directions alternate (or come in keyboard blocks of settings.dirRun, D-021),
+   * and a due card never waits behind more than three new ones.
+   * If nothing is due or new: free practice over the weakest seen cards, rested sentences first.
    */
   function buildSession(sentences, progress, settings, now, rand) {
     rand = rand || Math.random;
     const byId = new Map(sentences.map(s => [s.id, s]));
+    const size = settings.sessionSize == null ? 20 : settings.sessionSize;
+    const cap = Math.min(size, settings.newPerSession == null ? 10 : settings.newPerSession), reserve = Math.min(cap, NEW_RESERVE, Math.floor(size / 4));   // a tiny session stays mostly reviews
+    // when each sentence was last answered, per card, for the rest rule
+    /** @type {Map<string, [string, number][]>} */ const answered = new Map();
+    for (const k in progress) { const p = progress[k]; if (!p || !p.last) continue; const id = parseKey(k).id, list = answered.get(id); if (list) list.push([k, p.last]); else answered.set(id, [[k, p.last]]); }
+    const restsBut = (/** @type {string} */ id, /** @type {string} */ key) => (answered.get(id) || []).some(([k, t]) => k !== key && now - t < REST);
     const due = [];
     const elig = sentences.filter(s => eligible(s, settings));
     for (const s of sentences) for (const k of cardKeys(s, progress, settings)) {
       const p = progress[k];
-      if (p && p.due <= now) due.push({ k, due: p.due, r: recallNow(p, now, settings) });
+      if (p && p.due <= now && !restsBut(s.id, k)) due.push({ k, due: p.due, r: recallNow(p, now, settings) });
     }
     due.sort((x, y) => x.r - y.r || x.due - y.due);   // most forgotten first; learning-step cards (r = 0) lead
-    let dueKeys = due.slice(0, settings.maxDue || 40).map(x => x.k);
-    const nNew = settings.newPerSession == null ? 10 : settings.newPerSession;
+    const dueAll = onePerSentence(due.map(x => x.k)), dueIds = new Set(dueAll.map(k => parseKey(k).id));
+    let dueKeys = dueAll.slice(0, size - reserve);
     const candidates = [];
-    for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (!progress[k]) candidates.push({ k, rank: s.max_rank == null ? Infinity : s.max_rank });
+    for (const s of elig) {
+      if (dueIds.has(s.id) || restsBut(s.id, '')) continue;
+      const k = cardKeys(s, progress, settings).find(k => !progress[k]);
+      if (k) candidates.push({ k, rank: s.max_rank == null ? Infinity : s.max_rank });
+    }
+    // reviews first: while reviews wait beyond this session only the reserve is new; once they all fit, new cards fill the rest
+    const slots = dueAll.length > dueKeys.length ? reserve : Math.min(cap, size - dueKeys.length);
     // unlocked production cards (NL->BG of a sentence already seen) come first, up to half the new slots
-    const prod = shuffle(candidates.filter(c => { const k = parseKey(c.k); return k.toBg && progress[k.id + '|bg2' + k.lang]; }), rand).sort((x, y) => x.rank - y.rank).slice(0, Math.ceil(nNew / 2));
-    const taken = new Set(prod.map(c => c.k)), rest = candidates.filter(c => !taken.has(c.k)), slots = nNew - prod.length;
+    const prod = shuffle(candidates.filter(c => { const k = parseKey(c.k); return k.toBg && progress[k.id + '|bg2' + k.lang]; }), rand).sort((x, y) => x.rank - y.rank).slice(0, Math.ceil(slots / 2));
+    const taken = new Set(prod.map(c => c.k)), rest = candidates.filter(c => !taken.has(c.k)), left = slots - prod.length;
     let fresh;
     if (settings.newOrder === 'strict') {
-      fresh = shuffle(rest, rand).sort((x, y) => x.rank - y.rank).slice(0, slots);
+      fresh = shuffle(rest, rand).sort((x, y) => x.rank - y.rank).slice(0, left);
     } else {
       const R = Math.max(50, settings.rank || 0);
-      fresh = weightedSample(rest, slots, c => c.rank === Infinity ? 0.1 : 1 / (1 + Math.pow(c.rank / R, 2)), rand);
+      fresh = weightedSample(rest, left, c => c.rank === Infinity ? 0.1 : 1 / (1 + Math.pow(c.rank / R, 2)), rand);
     }
     fresh = prod.concat(fresh).map(c => c.k);
+    if (dueKeys.length + fresh.length < size) dueKeys = dueAll.slice(0, size - fresh.length);   // too few new cards: more reviews
     const run = settings.dirRun || 1;
     dueKeys = fullBlocks(dueKeys, fresh, run);
     let queue = spreadOut(interleave(dueKeys, fresh), byId, run), free = false;
@@ -694,8 +727,10 @@
       free = true;
       const seen = [];
       for (const s of elig) for (const k of cardKeys(s, progress, settings)) if (progress[k]) seen.push(k);
-      shuffle(seen, rand).sort((x, y) => boxFromRecord(progress[x]) - boxFromRecord(progress[y]));
-      queue = spreadOut(fullBlocks(seen.slice(0, settings.freeSize || 20), [], run), byId, run);
+      const resting = (/** @type {string} */ k) => restsBut(parseKey(k).id, '') ? 1 : 0;
+      shuffle(seen, rand).sort((x, y) => resting(x) - resting(y) || boxFromRecord(progress[x]) - boxFromRecord(progress[y]));
+      const n = settings.freeSize || (settings.sessionSize == null ? 20 : settings.sessionSize) || 20;
+      queue = spreadOut(fullBlocks(onePerSentence(seen).slice(0, n), [], run), byId, run);
     }
     return { queue, free, nDue: due.length, nNew: fresh.length };
   }
@@ -809,6 +844,6 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

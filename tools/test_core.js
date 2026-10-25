@@ -93,13 +93,20 @@ t('FSRS retrievability and retention', () => {
 });
 t('applyResult with FSRS learning steps', () => {
   const now = 1e12, r = () => 0.5, S = { almostPolicy: 'staged', almostFreePasses: 2 };
+  // D-024: one 10-minute learning step, so a first Good graduates straight to FSRS (at least a day)
   let p = C.applyResult(null, 'correct', now, false, r, null, S);
-  assert.equal(p.state, 'learning'); assert.equal(p.step, 1); assert.equal(p.due, now + 10 * 60e3); assert.equal(p.box, 1); assert.equal(p.rating, 3);
-  p = C.applyResult(p, 'correct', now + 10 * 60e3, false, r, null, S);
-  assert.equal(p.step, 2); assert.equal(p.due, now + 10 * 60e3 + 3600e3);
-  p = C.applyResult(p, 'correct', now + 70 * 60e3, false, r, null, S);
-  assert.equal(p.state, 'review'); assert.ok(p.due - p.last >= 86400e3, 'graduated to at least a day');
-  assert.ok(p.s > 2, 'stability grew: ' + p.s);
+  assert.equal(p.state, 'review', 'a first Good graduates'); assert.ok(p.due - p.last >= 86400e3, 'graduated to at least a day'); assert.equal(p.rating, 3);
+  assert.equal(p.first, now, 'the first answer is remembered for the daily new-card limit');
+  assert.ok(p.s > 2, 'stability: ' + p.s);
+  p = C.applyResult(p, 'correct', p.due, false, r, null, S); assert.equal(p.first, now, 'later answers keep the first time');
+  // a miss waits 10 minutes; the retry in the same session graduates on Good
+  p = C.applyResult(null, 'wrong', now, false, r, null, S); assert.equal(p.state, 'learning'); assert.equal(p.due, now + 10 * 60e3);
+  p = C.applyResult(p, 'correct', now + 60e3, false, r, null, S); assert.equal(p.state, 'review', 'a correct retry graduates');
+  // records stored under the old 1 min -> 10 min -> 1 h steps graduate on their next Good
+  for (const step of [1, 2]) assert.equal(C.applyResult({ s: 2.3, d: 5, state: 'learning', step, due: now, last: now - 600e3, reps: step }, 'correct', now, false, r, null, S).state, 'review', 'old step ' + step);
+  // the old steps stay available through settings.fsrs
+  p = C.applyResult(null, 'correct', now, false, r, null, Object.assign({ fsrs: { learningSteps: [60e3, 600e3, 3600e3] } }, S));
+  assert.equal(p.state, 'learning'); assert.equal(p.step, 1); assert.equal(p.due, now + 600e3);
   let good = { s: 5, d: 5, state: 'review', last: now - 5 * 86400e3, due: now }, bad = Object.assign({}, good);
   for (let i = 0; i < 5; i++) good = C.applyResult(good, 'correct', good.due, false, r, null, S);
   bad = C.applyResult(bad, 'wrong', now, false, r, null, S); assert.equal(bad.state, 'relearning'); assert.equal(bad.lapses, 1);
@@ -142,11 +149,14 @@ t('buildSession (strict order)', () => {
   assert.deepEqual(s.queue, ['a|bg2nl', 'b|bg2nl', 'd|bg2nl']); assert.equal(s.free, false);
   const prog = { 'a|bg2nl': { box: 1, due: now - 1 }, 'b|bg2nl': { box: 3, due: now + 1e9 } };
   s = C.buildSession(S, prog, Object.assign({}, strict, { newPerSession: 1 }), now, () => 0.5);
-  assert.deepEqual(s.queue, ['a|bg2nl', 'a|nl2bg']);  // due first, then the gated reverse card unlocks (lowest rank first)
+  // D-024: a's reverse card waits while a is due (one card per sentence); the one new place goes to b's unlocked reverse card
+  assert.deepEqual(s.queue, ['a|bg2nl', 'b|nl2bg']);
+  s = C.buildSession(S, prog, Object.assign({}, strict, { newPerSession: 10, sessionSize: 2 }), now, () => 0.5);
+  assert.deepEqual(s.queue, ['a|bg2nl', 'b|nl2bg'], 'sessionSize caps the session: one due, one new');
   s = C.buildSession(S, prog, Object.assign({}, strict, { directions: 'bg2nl' }), now + 2e9, () => 0.5);
   assert.deepEqual(s.queue, ['a|bg2nl', 'b|bg2nl', 'd|bg2nl']);  // both due: oldest due first, then new
   s = C.buildSession([S[0]], { 'a|bg2nl': { box: 2, due: now + 1e9 }, 'a|nl2bg': { box: 1, due: now + 1e9 } }, { rank: 100, directions: 'both' }, now, () => 0.5);
-  assert.equal(s.free, true); assert.deepEqual(s.queue, ['a|nl2bg', 'a|bg2nl']);
+  assert.equal(s.free, true); assert.deepEqual(s.queue, ['a|nl2bg'], 'free practice: the weakest card, one per sentence (D-024)');
 });
 t('D-006 explain', () => {
   const vocab = new Set(['детето', 'е', 'в', 'легло', 'леглото', 'хляб', 'хляба', 'хлябът', 'купих', 'мляко', 'ям', 'изям', 'супата', 'искам', 'да', 'и', 'новия', 'новият', 'нов', 'апартамент']);
@@ -208,12 +218,12 @@ t('D-021 keyboard blocks', () => {
   assert.deepEqual(C.fullBlocks(due, [], 1), due, 'run 1 changes nothing');
   assert.deepEqual(C.fullBlocks(['d1|bg2nl'], ['n1|bg2nl', 'n2|bg2nl', 'n3|bg2nl', 'n4|bg2nl', 'n5|bg2nl'], 4), ['d1|bg2nl'], 'too few due cards to fill: keep them');
   assert.deepEqual(C.fullBlocks(['d1|bg2nl', 'd2|bg2nl'], ['n1|nl2bg'], 4), ['d1|bg2nl', 'd2|bg2nl'], 'less than one block: keep');
-  // buildSession: due reviews of both kinds, blocks of 4, full
-  const S = ids.map((id, i) => ({ id, bg: 'б' + id, nl: 'n' + id, max_rank: i + 1, lemmas: ['дума' + i] }));
-  const prog = {}; ids.forEach((id, i) => { prog[id + '|bg2nl'] = { box: 2, due: 1e12 - 1e6 * (i + 1) }; if (i < 7) prog[id + '|nl2bg'] = { box: 2, due: 1e12 - 1e6 * (i + 1) }; });
+  // buildSession: due reviews of both kinds, blocks of 4, full; 19 sentences because a session holds one card per sentence (D-024)
+  const S = 'abcdefghijklmnopqrs'.split('').map((id, i) => ({ id, bg: 'б' + id, nl: 'n' + id, max_rank: i + 1, lemmas: ['дума' + i] }));
+  const prog = {}; S.forEach(({ id }, i) => { prog[id + '|bg2nl'] = { box: 2, due: i < 12 ? 1e12 - 1e6 * (i + 1) : 2e12 }; if (i >= 12) prog[id + '|nl2bg'] = { box: 2, due: 1e12 - 1e6 * (i + 1) }; });
   const q = C.buildSession(S, prog, { rank: 100, newPerSession: 0, directions: 'both', dirRun: 4 }, 1e12, () => 0.5).queue;
   assert.equal(q.length, 16, '12 Latin + 7 Cyrillic reviews → 12 + 4: ' + q.length);
-  assert.equal(pattern(q), 'LLLLCCCCLLLLLLLL');
+  assert.equal(pattern(q), 'CCCCLLLLLLLLLLLL', 'the Cyrillic reviews are the most overdue, so their block leads');
   assert.equal(C.buildSession(S, prog, { rank: 100, newPerSession: 0, directions: 'both' }, 1e12, () => 0.5).queue.length, 19, 'without blocks all 19 reviews');
 });
 t('D-003 interleave and spreadOut', () => {
@@ -242,18 +252,18 @@ t('D-003 mixed new-card selection', () => {
   // 60 sentences, ranks 10..600, learner at 300 with tolerance 300 -> all eligible
   const S = []; for (let i = 1; i <= 60; i++) S.push({ id: 's' + i, max_rank: i * 10, lemmas: ['w' + i] });
   let seed = 7; const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
-  const s = C.buildSession(S, {}, { rank: 300, tolerance: 300, newPerSession: 10, directions: 'bg2nl' }, 1e12, rand);
+  const s = C.buildSession(S, {}, { rank: 300, tolerance: 300, sessionSize: 10, newPerSession: 10, directions: 'bg2nl' }, 1e12, rand);
   assert.equal(s.queue.length, 10);
   const ranks = s.queue.map(k => +k.split('|')[0].slice(1) * 10);
   assert.ok(Math.max(...ranks) - Math.min(...ranks) >= 295, 'spread covers at least half the range: ' + ranks.join(','));
   const lowHalf = ranks.filter(r => r <= 300).length;
   assert.ok(lowHalf >= 5, 'lower ranks preferred: ' + ranks.join(','));
   // strict mode: exactly the ten lowest
-  const st = C.buildSession(S, {}, { rank: 300, tolerance: 300, newPerSession: 10, directions: 'bg2nl', newOrder: 'strict' }, 1e12, rand);
+  const st = C.buildSession(S, {}, { rank: 300, tolerance: 300, sessionSize: 10, newPerSession: 10, directions: 'bg2nl', newOrder: 'strict' }, 1e12, rand);
   assert.deepEqual(st.queue.map(k => +k.split('|')[0].slice(1) * 10).sort((a, b) => a - b), [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   // due cards are mixed in, not all first: with 6 due and 10 new, the 5th card is not due
   const prog = {}; for (let i = 50; i <= 55; i++) prog['s' + i + '|bg2nl'] = { box: 2, due: 1e12 - i };
-  const m = C.buildSession(S, prog, { rank: 300, tolerance: 300, newPerSession: 10, directions: 'bg2nl', newOrder: 'strict' }, 1e12, rand);
+  const m = C.buildSession(S, prog, { rank: 300, tolerance: 300, sessionSize: 16, newPerSession: 10, directions: 'bg2nl', newOrder: 'strict' }, 1e12, rand);
   assert.equal(m.queue.length, 16); assert.equal(m.nDue, 6);
   const dueIdx = m.queue.map((k, i) => prog[k] ? i : -1).filter(i => i >= 0);
   assert.ok(dueIdx[dueIdx.length - 1] < 15, 'due cards are spread through the session: ' + dueIdx.join(','));
@@ -263,14 +273,45 @@ t('D-003 unlocked production cards come first', () => {
   const S = []; for (let i = 1; i <= 40; i++) S.push({ id: 's' + i, max_rank: i * 10, lemmas: ['w' + i] });
   let seed = 3; const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
   const prog = { 's30|bg2nl': { box: 1, due: 2e12 }, 's31|bg2nl': { box: 1, due: 2e12 }, 's32|bg2nl': { box: 1, due: 2e12 } };
-  const s = C.buildSession(S, prog, { rank: 400, newPerSession: 6, directions: 'gated' }, 1e12, rand);
+  const s = C.buildSession(S, prog, { rank: 400, sessionSize: 6, newPerSession: 6, directions: 'gated' }, 1e12, rand);
   const nl2bg = s.queue.filter(k => k.endsWith('|nl2bg'));
   assert.deepEqual(nl2bg.sort(), ['s30|nl2bg', 's31|nl2bg', 's32|nl2bg']);
   assert.equal(s.queue.length, 6);
   // at most half the slots: 5 unlocked, 4 new slots -> 2 production cards
   const prog5 = {}; for (let i = 20; i <= 24; i++) prog5['s' + i + '|bg2nl'] = { box: 1, due: 2e12 };
-  const s2 = C.buildSession(S, prog5, { rank: 400, newPerSession: 4, directions: 'gated', newOrder: 'strict' }, 1e12, rand);
+  const s2 = C.buildSession(S, prog5, { rank: 400, sessionSize: 4, newPerSession: 4, directions: 'gated', newOrder: 'strict' }, 1e12, rand);
   assert.deepEqual(s2.queue.filter(k => k.endsWith('|nl2bg')).sort(), ['s20|nl2bg', 's21|nl2bg']);
+});
+t('D-024 short sessions of different sentences', () => {
+  const S = []; for (let i = 1; i <= 40; i++) S.push({ id: 's' + i, max_rank: i, lemmas: ['w' + i] });
+  const now = 1e12, H = 3600e3, D = 86400e3, ids = q => q.map(k => C.parseKey(k).id), base = { rank: 100, directions: 'gated', newOrder: 'strict' };
+  // 30 sentences with both cards due: the session is capped at 20 and holds one card per sentence
+  const prog = {}; for (let i = 1; i <= 30; i++) for (const d of ['bg2nl', 'nl2bg']) prog['s' + i + '|' + d] = { s: 5, d: 5, state: 'review', box: 3, due: now - D, last: now - 6 * D, reps: 4 };
+  let q = C.buildSession(S, prog, base, now, () => 0.5).queue;
+  assert.equal(q.length, 20, 'default session size'); assert.equal(new Set(ids(q)).size, 20, 'every card a different sentence');
+  assert.equal(q.filter(k => !prog[k]).length, C.NEW_RESERVE, 'reviews first: more due than fit, so only the reserve of new cards');
+  assert.equal(C.buildSession(S, prog, Object.assign({ sessionSize: 15 }, base), now, () => 0.5).queue.length, 15);
+  // the due reviews all fit: new cards fill the free places, at most newPerSession
+  const few = {}; for (let i = 1; i <= 5; i++) few['s' + i + '|bg2nl'] = prog['s' + i + '|bg2nl'];
+  q = C.buildSession(S, few, base, now, () => 0.5).queue; assert.equal(q.length, 15, '5 reviews + 10 new'); assert.equal(q.filter(k => !few[k]).length, 10);
+  assert.equal(C.buildSession(S, few, Object.assign({ newPerSession: 20 }, base), now, () => 0.5).queue.length, 20, '5 reviews + 15 new fill the session');
+  // nothing due: newPerSession new cards
+  q = C.buildSession(S, {}, base, now, () => 0.5).queue; assert.equal(q.length, 10); assert.ok(q.every(k => k.endsWith('|bg2nl')));
+  // back to back: answer the first session, build the next 10 minutes later; no sentence comes back except a card missed twice
+  const after = {}, t1 = now + 10 * 60e3;
+  q.forEach((k, i) => { let p = C.applyResult(null, i ? 'correct' : 'wrong', now, false, () => 0.5, null, base); if (!i) p = C.applyResult(p, 'wrong', now + 60e3, false, () => 0.5, null, base); after[k] = p; });
+  const q2 = C.buildSession(S, after, base, t1 + 60e3, () => 0.5).queue, again = new Set(ids(q2).filter(id => ids(q).includes(id)));
+  assert.deepEqual([...again], [C.parseKey(q[0]).id], 'only the twice-missed sentence returns: ' + q2.join(','));
+  assert.ok(!q2.some(k => k.endsWith('|nl2bg')), 'no reverse card for a sentence answered minutes ago');
+  // four hours later the reverse cards unlock
+  assert.ok(C.buildSession(S, after, base, now + 4 * H + 1, () => 0.5).queue.some(k => k.endsWith('|nl2bg')), 'reverse cards after the rest');
+  // a due card waits while its other direction was answered in the last 4 hours; its own due time is the scheduler's business
+  const sib = { 's1|bg2nl': { s: 5, d: 5, state: 'review', box: 3, due: now + D, last: now - H, reps: 3 }, 's1|nl2bg': { s: 5, d: 5, state: 'review', box: 3, due: now - 1, last: now - 6 * D, reps: 3 } };
+  assert.ok(!C.buildSession(S, sib, base, now, () => 0.5).queue.includes('s1|nl2bg'), 'sibling rests');
+  assert.ok(C.buildSession(S, sib, base, now + 3 * H + 1, () => 0.5).queue.includes('s1|nl2bg'), 'sibling after 4 h');
+  // the Free practice button (sessionSize 0): one card per sentence, rested sentences first, freeSize cards
+  const fp = C.buildSession(S, Object.assign({}, prog, { 's31|bg2nl': { s: 5, d: 5, state: 'review', box: 3, due: now + D, last: now - 60e3, reps: 3 } }), Object.assign({}, base, { sessionSize: 0, freeSize: 12 }), now, () => 0.5);
+  assert.equal(fp.free, true); assert.equal(fp.queue.length, 12); assert.equal(new Set(ids(fp.queue)).size, 12); assert.ok(!fp.queue.includes('s31|bg2nl'), 'the sentence just answered comes last');
 });
 t('D-008 grammar stages', () => {
   const S = [{ id: 'a', max_rank: 10, grammar: ['present'] }, { id: 'b', max_rank: 10, grammar: ['aorist'] }, { id: 'c', max_rank: 10, grammar: ['present', 'future', 'numeral'] }, { id: 'd', max_rank: 10 }];
@@ -370,10 +411,12 @@ t('almostOutcome stages', () => {
 });
 t('applyResult with almost policy (FSRS)', () => {
   const now = 1e12, r = () => 0.5, S = { almostPolicy: 'staged', almostFreePasses: 2 };
-  // new card: two typos advance it through the learning steps, the third holds (Hard repeats the step)
-  let p = C.applyResult(null, 'almost', now, false, r, 'typo', S); assert.equal(p.step, 1); assert.equal(p.almosts, 1); assert.equal(p.rating, 3);
-  p = C.applyResult(p, 'almost', p.due, false, r, 'typo', S); assert.equal(p.step, 2); assert.equal(p.almosts, 2);
-  p = C.applyResult(p, 'almost', p.due, false, r, 'typo', S); assert.equal(p.step, 2); assert.equal(p.almosts, 2); assert.equal(p.lapses, 0); assert.equal(p.rating, 2);
+  // new card: the first two typos count as Good (free passes), the third as Hard; the card stays young
+  // for its first three answers although one Good graduates it (D-024)
+  let p = C.applyResult(null, 'almost', now, false, r, 'typo', S); assert.equal(p.state, 'review'); assert.equal(p.almosts, 1); assert.equal(p.rating, 3);
+  assert.equal(C.maturity(p), 'young', 'one answer: still young');
+  p = C.applyResult(p, 'almost', p.due, false, r, 'typo', S); assert.equal(p.almosts, 2); assert.equal(p.rating, 3);
+  p = C.applyResult(p, 'almost', p.due, false, r, 'typo', S); assert.equal(p.almosts, 2); assert.equal(p.lapses, 0); assert.equal(p.rating, 2);
   // mature card (legacy box 7 -> stability 16 d): an almost lapses it
   p = C.applyResult({ box: 7, due: now + 5e8, last: now - 16 * 86400e3 }, 'almost', now, false, r, 'typo', S);
   assert.equal(p.state, 'relearning'); assert.equal(p.due, now + 10 * 60e3); assert.equal(p.lapses, 1); assert.equal(p.rating, 1);
@@ -383,7 +426,7 @@ t('applyResult with almost policy (FSRS)', () => {
   p = C.applyResult({ box: 7, due: now + 5e8, last: now - 16 * 86400e3 }, 'almost', now, false, r, 'typo', { almostPolicy: 'lenient' }); assert.equal(p.state, 'review'); assert.equal(p.lapses, 0); assert.equal(p.rating, 2);
   p = C.applyResult({ box: 3, due: now, last: now - 3600e3 }, 'almost', now, false, r, 'typo', { almostPolicy: 'strict' }); assert.equal(p.lapses, 1); assert.equal(p.rating, 1);
   // no settings at all -> staged defaults
-  p = C.applyResult(null, 'almost', now, false, r, 'typo'); assert.equal(p.step, 1); assert.equal(p.almosts, 1);
+  p = C.applyResult(null, 'almost', now, false, r, 'typo'); assert.equal(p.rating, 3); assert.equal(p.almosts, 1);
 });
 t('D-014 loose tier', () => {
   const acc = ["My father fixed the car's trunk.", "My father repaired the car's trunk."], loose = ["My father has fixed the car's trunk.", "My father has repaired the car's trunk."];

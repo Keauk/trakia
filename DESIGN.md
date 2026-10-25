@@ -185,9 +185,13 @@ Intervals get ±10 % jitter so cards don't clump.
 
 **Session builder** (the "Practise" button):
 
-1. all cards with `due ≤ now`, oldest due first (capped at e.g. 40 per session; setting),
-2. then up to `newPerSession` (default 10) unseen sentences with `max_rank ≤ N + tolerance`,
-   lowest `max_rank` first with a random tie-break, so sentences unlock as Anki progresses,
+A session holds `sessionSize` cards (default 20), one per sentence, and skips a sentence answered
+in the last 4 hours (D-024):
+
+1. reviews first: cards with `due ≤ now`, most forgotten first; while more are due than fit, the
+   session is reviews plus 2 new cards,
+2. once the due reviews fit, unseen cards with `max_rank ≤ N + tolerance` fill the free places, at
+   most `newPerSession` (default 10); if fewer new cards are available, more due cards fill the session,
 3. if nothing is due and no new cards are left: **free practice** — a random mix of the lowest
    boxes; answers still update the record but never push `due` further out than it already is, so
    extra sessions never "waste" a review.
@@ -284,7 +288,7 @@ state = {
   sentences: {id: {...}},              // from sentences.json + imports
   progress: {"B017|nl2bg": {...}},     // §3.3
   userAlts: {"B017|nl2bg": ["..."]},
-  settings: {rank: 102, tolerance: 0, newPerSession: 10, maxDue: 40,
+  settings: {rank: 102, tolerance: 0, sessionSize: 20, newPerSession: 10,
              directions: "gated", strictPunct: false, strictYi: false,
              nearMiss: true, bagOfWords: true, translit: false},
   session: {queue: [...], i: 0, correct: 0, startedAt: ...}

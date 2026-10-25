@@ -24,7 +24,9 @@ interface TrakiaData { words: Word[]; sentences: Sentence[]; grammar: GrammarDat
 
 /** Learner settings (DEFAULTS in ui.js, persisted in localStorage). */
 interface Settings {
-  rank: number; tolerance: number; newPerSession: number; maxDue: number;
+  rank: number; tolerance: number; newPerSession: number;
+  /** cards per session before retries (D-024) */
+  sessionSize: number;
   directions: string; newOrder: string; lang: string; typoPct: number; bagOfWords: boolean;
   almostPolicy: string; almostFreePasses: number; retention: number; maxInterval: number; stage: number;
   strictPunct: boolean; strictYi: boolean; stripAccents: boolean; strictForms: boolean; translit: boolean; theme: string;
@@ -42,6 +44,8 @@ interface ProgressRecord {
   box: number; due: number; reps: number; lapses: number; streak: number; last: number;
   s?: number; d?: number; state?: 'learning' | 'review' | 'relearning'; step?: number; rating?: number;
   almosts?: number; orders?: number; lastRule?: string;
+  /** time of the first answer ever; the first three answers stay young (D-024) */
+  first?: number;
 }
 
 type Progress = Record<string, ProgressRecord>;

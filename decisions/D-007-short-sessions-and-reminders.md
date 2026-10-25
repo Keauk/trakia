@@ -9,9 +9,9 @@ plus 10 new cards, which is a 15–20 minute sitting. Distributed-practice resul
 currently nudges the learner to come back when cards are due.
 
 ## Proposal
-**Session size.** Default to a target of about 20 answers per session (`maxDue` 15, `newPerSession`
-5), show a "15 more due — continue?" button at the end instead of silently truncating, and show the
-elapsed time on the end screen. Keep the current caps available in Settings.
+**Session size.** D-024 now sets the session size (20 cards, one per sentence). What remains here:
+show a "15 more due — continue?" button at the end instead of silently truncating, and show the
+elapsed time on the end screen.
 
 **Reminders.** Three tiers, from certain to best-effort:
 1. **App badge** (Badging API, Android Chrome): when the app opens or a session ends, set the badge
@@ -49,5 +49,5 @@ site engagement score). Do tiers 1–2 first and treat tier 3 as optional.
 Not started.
 
 ## Open questions
-- Is 20 answers the right default, or should it be time-based (stop offering after 8 minutes)?
+- ~~Is 20 answers the right default, or should it be time-based (stop offering after 8 minutes)?~~ 20 cards, set by D-024 at the learner's request.
 - Should the badge count due cards in both directions or only production cards (D-004)?
