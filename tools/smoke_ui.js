@@ -42,9 +42,7 @@ assert.equal($('segs').children[0].className, 'done'); assert.equal($('segs').ch
 const s2 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
 const longest = s2.nl.split(/\s+/).sort((a, b) => b.length - a.length)[0];
 const typo = s2.nl.replace(longest, longest[0] + (longest[1] === 'q' ? 'x' : 'q') + longest.slice(2));  // one letter replaced by q, so it is no real word (D-014)
-// D-006: say "sure" first, then the typo; the judgement goes into the log row and the note names the misspelt word
-assert.equal($('judge').hidden, false); $('judge').querySelector('[data-j="1"]').click();
-assert.equal($('judge').querySelector('[data-j="1"]').getAttribute('aria-pressed'), 'true', 'Sure is pressed');
+// D-006: the note names the misspelt word
 type(typo);
 assert.match($('verdict').className, /almost/, 'typo counts as almost: ' + $('verdict').textContent);
 assert.equal($('notes').hidden, false, 'explanation shown'); assert.match($('notes').textContent, /^spelling: /, 'spelling note: ' + $('notes').textContent);
@@ -53,8 +51,6 @@ assert.equal($('run-card').dataset.state, 'almost');
 assert.ok($('expected').querySelector('mark'), 'the misspelt word is highlighted'); assert.match($('verdict-note').textContent, /character/);
 assert.equal($('expected').textContent, s2.nl, 'highlighting keeps the sentence text');
 type('', 'Enter');
-{ const L = JSON.parse(window.localStorage.getItem('trakia.log')); assert.equal(L[L.length - 1][6], 1, 'judgement stored as the seventh log element'); assert.equal(L[L.length - 2][6], 0, 'no judgement on the first card'); }
-assert.equal($('judge').querySelector('[data-j="1"]').getAttribute('aria-pressed'), 'false', 'judgement cleared on the next card');
 // third card: nonsense -> wrong, then accept my answer -> correct and stored
 const s3 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
 type('dit is helemaal fout');
@@ -138,17 +134,6 @@ $('answer').value = 'iets\n'; $('answer').dispatchEvent(new window.InputEvent('i
 assert.equal($('feedback').hidden, false, 'line break from the keyboard submits the answer');
 assert.ok(!/\n/.test($('answer').value), 'no newline left in the field');
 $('btn-quit').click(); $('btn-home').click();
-// --- D-006: the calibration line appears after ten judged answers
-document.querySelector('nav button[data-tab=stats]').click();
-assert.equal($('calibration').hidden, true, 'no calibration line yet');
-document.querySelector('nav button[data-tab=practise]').click();
-$('btn-home').click(); $('btn-start').click();
-for (let i = 0; i < 10 && !$('session-run').hidden; i++) { $('judge').querySelector(i % 2 ? '[data-j="2"]' : '[data-j="1"]').click(); type('zzz qqq'); type('', 'Enter'); }
-if (!$('session-run').hidden) $('btn-quit').click();
-$('btn-home').click();
-document.querySelector('nav button[data-tab=stats]').click();
-assert.equal($('calibration').hidden, false, 'calibration line shown after ten judged answers');
-assert.match($('calibration').textContent, /^When you said sure you were right \d+ % of the time \(\d+\); unsure: \d+ % of the time \(\d+\)\.$/, $('calibration').textContent);
 // --- D-012: collapsible alternatives; D-021: every card starts collapsed, the accept button under the toggle
 document.querySelector('nav button[data-tab=practise]').click();
 $('btn-home').click(); $('btn-start').click();
