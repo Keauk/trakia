@@ -300,7 +300,7 @@ const csv = 'bg,nl,nl_alt,lemmas\n"Дай ми хляб.",Geef me brood.,Geef mi
 const file = new window.File([csv], 'extra.csv', { type: 'text/csv' });
 const inp = $('import-file'); Object.defineProperty(inp, 'files', { value: [file] });
 inp.dispatchEvent(new window.Event('change'));
-setTimeout(() => {
+setTimeout(async () => {
   assert.match($('import-result').textContent, /2 added/);
   const us = JSON.parse(window.localStorage.getItem('trakia.userSentences'));
   const vals = Object.values(us);
@@ -312,5 +312,55 @@ setTimeout(() => {
   document.createElement = tag => { const el = origCreate(tag); if (tag === 'a') el.click = () => { downloaded = el.download; }; return el; };
   $('btn-export-progress').click();
   assert.match(downloaded, /^trakia-progress-/);
+
+  // D-025: sync through a secret gist, against an in-memory imitation of the GitHub API
+  const FILE = 'trakia-progress.json', TOKEN = 'github_pat_SECRET123', gists = {}; let made = 0;
+  const reply = (status, body) => ({ ok: status < 300, status, json: async () => body, text: async () => JSON.stringify(body) });
+  const view = id => ({ id, html_url: 'https://gist.github.com/' + id, files: { [FILE]: { filename: FILE, truncated: false, content: gists[id].content } } });
+  window.fetch = async (url, opts) => {
+    opts = opts || {}; const u = new URL(url), m = opts.method || 'GET';
+    assert.equal(u.host, 'api.github.com'); assert.equal(opts.cache, 'no-store');
+    if (opts.headers.Authorization !== 'Bearer ' + TOKEN) return reply(401, {});
+    if (u.pathname === '/gists' && m === 'GET') return reply(200, Object.keys(gists).map(view));
+    if (u.pathname === '/gists' && m === 'POST') { const b = JSON.parse(opts.body), id = 'g' + ++made; gists[id] = { public: b.public, content: b.files[FILE].content }; return reply(201, view(id)); }
+    const id = u.pathname.split('/')[2]; if (!gists[id]) return reply(404, {});
+    if (m === 'PATCH') gists[id].content = JSON.parse(opts.body).files[FILE].content;
+    return reply(200, view(id));
+  };
+  const tick = () => new Promise(r => setTimeout(r, 30));
+  document.querySelector('nav button[data-tab=settings]').click();
+  assert.equal($('sync-on').hidden, true); assert.match($('sync-status').textContent, /Not connected/);
+  // a refused token is not kept
+  $('sync-token').value = 'wrong'; $('btn-sync-connect').click(); await tick();
+  assert.match($('sync-status').textContent, /Could not connect: GitHub refused the token/);
+  assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.sync')), {}); assert.equal(made, 0);
+  // connecting creates a secret gist from this device's progress
+  const localKeys = Object.keys(JSON.parse(window.localStorage.getItem('trakia.progress'))).sort();
+  $('sync-token').value = TOKEN; $('btn-sync-connect').click(); await tick();
+  assert.equal(made, 1); assert.equal(gists.g1.public, false);
+  assert.ok(!gists.g1.content.includes(TOKEN), 'the token is not in the gist');
+  assert.deepEqual(Object.keys(JSON.parse(gists.g1.content).progress), localKeys);
+  assert.equal(JSON.parse(window.localStorage.getItem('trakia.sync')).gist, 'g1');
+  assert.equal($('sync-on').hidden, false); assert.match($('sync-status').textContent, /Synced just now/);
+  // another device practised a card, moved the Anki position and switched its theme
+  const other = JSON.parse(gists.g1.content), later = Date.now() + 1000;
+  other.progress['ZZ1|bg2nl'] = Object.assign({}, other.progress[localKeys[0]], { last: later });
+  other.settings = Object.assign({}, other.settings, { rank: 777, theme: 'dark' }); other.stamps = Object.assign({}, other.stamps, { settings: later });
+  other.log.push([later, 'ZZ1|bg2nl', 2]);
+  gists.g1.content = JSON.stringify(other);
+  const themeBefore = JSON.parse(window.localStorage.getItem('trakia.settings')).theme;
+  $('btn-sync-now').click(); await tick();
+  assert.ok(JSON.parse(window.localStorage.getItem('trakia.progress'))['ZZ1|bg2nl'], 'the other device\'s card arrived');
+  assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 777);
+  assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).theme, themeBefore, 'theme stays per device');
+  assert.equal($('set-rank').value, '777', 'the open Settings tab shows the new position');
+  // a device connecting later finds the same gist instead of making a second one
+  $('btn-sync-off').click(); assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.sync')), {});
+  $('sync-token').value = TOKEN; $('btn-sync-connect').click(); await tick();
+  assert.equal(made, 1); assert.equal(JSON.parse(window.localStorage.getItem('trakia.sync')).gist, 'g1');
+  // the export file holds no token either
+  let blob = null; window.URL.createObjectURL = b => { blob = b; return 'blob:x'; };
+  $('btn-export-progress').click();
+  const exported = await blob.text(); assert.ok(!exported.includes(TOKEN)); assert.equal(JSON.parse(exported).progress['ZZ1|bg2nl'].last, later);
   console.log('UI smoke test passed');
 }, 100);

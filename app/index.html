@@ -148,8 +148,8 @@ canvas{width:100%;height:180px;display:block}
 .chartwrap{position:relative}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
 /* forms */
-input[type=text],input[type=search],select,input[type=number]{width:100%;font:400 15px/1.4 var(--sans);padding:11px 14px;border:1.5px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--ink)}
-input[type=text]:focus,input[type=search]:focus,input[type=number]:focus,select:focus{outline:none;border-color:var(--primary)}
+input[type=text],input[type=search],input[type=password],select,input[type=number]{width:100%;font:400 15px/1.4 var(--sans);padding:11px 14px;border:1.5px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--ink)}
+input[type=text]:focus,input[type=search]:focus,input[type=password]:focus,input[type=number]:focus,select:focus{outline:none;border-color:var(--primary)}
 input[type=checkbox],input[type=range]{accent-color:var(--primary)}
 select,input[type=file]{max-width:100%}
 .field{margin-bottom:16px}
@@ -382,7 +382,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <label class="btn">Import progress <input type="file" id="import-progress" accept=".json" hidden></label>
       <button class="btn" id="btn-export-sentences">Export sentences</button>
     </div>
-    <p class="tiny">Progress export contains your answers, settings, accepted alternatives and imported sentences. Importing it on another device replaces that device's progress.</p>
+    <p class="tiny">Progress export contains your answers, settings, accepted alternatives and imported sentences. Importing it on another device merges it into that device's progress; nothing there is lost. With sync on (Settings) you do not need this.</p>
   </div>
 </section>
 
@@ -479,6 +479,20 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <div class="help">A short loop of a few megabytes works best. A chosen file stays on this device and takes precedence over the link. Film clips are copyrighted: use a clip you own or a free stock loop.</div></div>
     <div class="field"><label for="set-wallpaper-dim">Dim <span class="tiny" id="wp-dim-val"></span></label><input type="range" id="set-wallpaper-dim" min="0" max="90" step="5">
       <div class="help">The wallpaper pauses while the app is hidden, and is not shown when your system asks for reduced motion.</div></div>
+  </div>
+  <div class="card">
+    <h2>Sync between devices</h2>
+    <p class="muted">Keeps your progress, settings, accepted answers and imported sentences the same on all your devices, through a secret gist on your GitHub account. Theme, wallpaper and keyboard settings stay per device.</p>
+    <div id="sync-off">
+      <div class="field"><label for="sync-token">GitHub token</label><input type="password" id="sync-token" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+        <div class="help">On github.com: Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate. Under <b>Account permissions</b> give only <b>Gists: Read and write</b>. Paste the same token on every device. It is kept in this browser only, never in exports or the gist.</div></div>
+      <div class="row"><button class="btn" id="btn-sync-connect">Connect</button></div>
+    </div>
+    <div id="sync-on" hidden>
+      <div class="row" style="margin-top:0"><button class="btn" id="btn-sync-now">Sync now</button><button class="btn" id="btn-sync-off">Disconnect</button></div>
+      <p class="tiny">Syncs when the app opens, after every session, and when you switch away from it or back. On the first sync the progress of both sides is combined; for a sentence practised on both, the most recent answer counts.</p>
+    </div>
+    <p class="tiny" id="sync-status"></p>
   </div>
   <div class="card">
     <h2>Danger zone</h2>

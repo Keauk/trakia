@@ -116,8 +116,12 @@ is a **merge**: existing ids keep their progress, new ids are added, changed tex
 
 Stored as one JSON blob in `localStorage` under `trakia.progress` (1000 sentences × 2 directions ×
 ~150 bytes ≈ 300 KB; well under the 5 MB limit). Settings in `trakia.settings`, user-added accepted
-answers in `trakia.userAlts`. **Export / Import progress** buttons write/read a single JSON file so the
-laptop and the phone can be kept in sync manually (sync is deliberately out of scope).
+answers in `trakia.userAlts`. **Sync between devices** (D-025): with a GitHub token pasted in Settings,
+the app keeps a secret gist `trakia-progress.json` and merges it with the device's state on open,
+after every session and when the app is hidden or shown (`C.mergeSnapshots`: newest answer per card,
+histories combined, resets carried as timestamps; theme, wallpaper and keyboard settings stay per
+device). The token lives in `trakia.sync` and never enters a snapshot. **Export / Import progress**
+write/read the same snapshot as a file; importing merges too.
 
 ## 4. Core behaviours
 
@@ -239,7 +243,8 @@ Phone on the same Wi-Fi → Chrome → `http://<laptop-ip>:8080` → menu → *A
 With `manifest.json` + a service worker that caches `index.html`, `sentences.json`, `words.json`
 (and the SheetJS file) the installed app opens full-screen and works offline; the laptop server is
 only needed again when you ship a new version (bump `CACHE_VERSION` in `sw.js`). Progress lives in
-the phone's own browser storage; use Export/Import to copy it to the laptop.
+the phone's own browser storage; turn on sync in Settings (D-025), or use Export/Import, to share it
+with the laptop.
 
 **Option B — serve it on the phone itself:** install Termux, `pkg install python`, copy the folder,
 `python -m http.server`, open `http://localhost:8080`. Same PWA install step; no laptop needed.

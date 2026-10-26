@@ -50,6 +50,22 @@ interface ProgressRecord {
 
 type Progress = Record<string, ProgressRecord>;
 
+/** Everything that travels between devices: the export file and the synced gist (D-025). */
+interface Snapshot {
+  app: 'trakia'; version: number; exported?: string;
+  /** only the shared settings, see DEVICE_SETTINGS in core.js */
+  settings: Partial<Settings>;
+  progress: Progress; userAlts: Record<string, string[]>; userSentences: Record<string, Sentence>; deleted: string[];
+  log: (number | string)[][]; sessions: number[]; drills: Record<string, { ok: number; bad: number; last?: number }>; drillLog: (number | string)[][];
+  /** when the shared settings or the deleted list last changed here, and the last "Reset all progress" */
+  stamps: { settings?: number; deleted?: number; wiped?: number };
+  /** per-card resets: card key -> time */
+  cleared: Record<string, number>;
+}
+
+/** localStorage `trakia.sync`: kept out of every snapshot, so the token never leaves this browser. */
+interface SyncState { token?: string; gist?: string; url?: string; at?: number; error?: string }
+
 /** What `$()` in ui.js returns: an element with the form-control fields the UI reads and writes.
  *  Looser than the DOM's per-tag interfaces, but it keeps field names and value types checked. */
 interface AppElement extends HTMLElement {

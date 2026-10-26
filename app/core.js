@@ -844,6 +844,54 @@
     while (rest.length) { let i = rest.findIndex(it => !out.length || it.id.split(':')[1] !== out[out.length - 1].id.split(':')[1]); if (i < 0) i = 0; out.push(rest.splice(i, 1)[0]); }
     return out;
   }
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag };
+
+  // ---------- sync between devices (D-025) ----------
+  /** settings that belong to one device and never travel with a sync */
+  const DEVICE_SETTINGS = ['theme', 'wallpaper', 'wallpaperUrl', 'wallpaperDim', 'translit', 'dirRun'];
+  /** the settings that are synced, keys sorted. @type {(s: Partial<Settings>) => Partial<Settings>} */
+  function sharedSettings(s) { const out = {}; for (const k of Object.keys(s || {}).sort()) if (!DEVICE_SETTINGS.includes(k)) out[k] = s[k]; return out; }
+  /** copy of an object with its keys sorted, values mapped by f. @type {<T, U>(o: Record<string, T>, f: (v: T, k: string) => U | undefined) => Record<string, U>} */
+  function sortedMap(o, f) { const out = /** @type {Record<string, any>} */ ({}); for (const k of Object.keys(o).sort()) { const v = f(o[k], k); if (v !== undefined) out[k] = v; } return out; }
+  /** union of two event lists ([ts, key, …]) without duplicates, oldest first, events at or before `after` dropped */
+  function mergeEvents(a, b, after) {
+    const seen = new Map();
+    for (const e of (a || []).concat(b || [])) { const ts = Array.isArray(e) ? e[0] : e; if (ts > after) { const id = Array.isArray(e) ? ts + '|' + e[1] : String(ts); if (!seen.has(id)) seen.set(id, e); } }
+    return [...seen.values()].sort((x, y) => (Array.isArray(x) ? x[0] : x) - (Array.isArray(y) ? y[0] : y));
+  }
+  /** Merge two snapshots of the learner's state; neither side loses what the other lacks (see D-025 for the rules).
+   * Ties go to `remote`. Output keys are sorted, so equal states stringify identically.
+   * @param {Partial<Snapshot>} local @param {Partial<Snapshot>} remote @returns {Snapshot} */
+  function mergeSnapshots(local, remote) {
+    const L = local || {}, R = remote || {}, Ls = L.stamps || {}, Rs = R.stamps || {};
+    const stamps = { settings: Math.max(Ls.settings || 0, Rs.settings || 0), deleted: Math.max(Ls.deleted || 0, Rs.deleted || 0), wiped: Math.max(Ls.wiped || 0, Rs.wiped || 0) };
+    const wiped = stamps.wiped;
+    /** @type {Record<string, number>} */ const clearedAll = Object.assign({}, L.cleared);
+    const Rc = R.cleared || {}; for (const k in Rc) clearedAll[k] = Math.max(clearedAll[k] || 0, Rc[k]);
+    const cleared = sortedMap(clearedAll, ts => ts > wiped ? ts : undefined);
+    /** @type {Progress} */ const allCards = {};
+    for (const side of [L.progress || {}, R.progress || {}]) for (const k in side) {
+      const p = migrateRecord(side[k]); if (!p) continue;
+      const had = allCards[k]; if (!had || (p.last || 0) >= (had.last || 0)) allCards[k] = p;
+    }
+    const progress = sortedMap(allCards, (p, k) => (p.last || 0) > wiped && (p.last || 0) > (cleared[k] || 0) ? p : undefined);
+    /** @type {Record<string, {ok: number, bad: number, last?: number}>} */ const allDrills = {};
+    for (const side of [L.drills || {}, R.drills || {}]) for (const k in side) { const t = side[k], had = allDrills[k]; if (!had || (t.last || 0) >= (had.last || 0)) allDrills[k] = t; }
+    const drills = sortedMap(allDrills, t => (t.last || 0) > wiped ? t : undefined);
+    // accepted answers carry no timestamps: after a reset only the side(s) that saw the newest reset count
+    /** @type {Record<string, string[]>} */ const allAlts = {};
+    for (const [side, w] of /** @type {[Record<string, string[]>, number][]} */ ([[L.userAlts || {}, Ls.wiped || 0], [R.userAlts || {}, Rs.wiped || 0]])) if (w === wiped) for (const k in side) allAlts[k] = [...new Set((allAlts[k] || []).concat(side[k]))];
+    const userSentences = sortedMap(Object.assign({}, L.userSentences, R.userSentences), s => s);
+    const dl = Ls.deleted || 0, dr = Rs.deleted || 0;
+    const deleted = [...new Set(dl > dr ? L.deleted || [] : dr > dl ? R.deleted || [] : (L.deleted || []).concat(R.deleted || []))].sort();
+    const hasR = !!R.settings && Object.keys(R.settings).length > 0;
+    const settings = sharedSettings((Ls.settings || 0) > (Rs.settings || 0) || !hasR ? L.settings || {} : R.settings || {});
+    return {
+      app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
+      log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
+      stamps, cleared,
+    };
+  }
+
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

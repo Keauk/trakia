@@ -471,4 +471,48 @@ t('D-014 wrong word form is not a typo', () => {
   assert.equal(C.normalise("Werk jij op zondag? Is dit m'n fiets of jouw fiets?", 'nl'), 'werk je op zondag is dit mijn fiets of je fiets');
   assert.equal(C.check('Werk jij op zondag?', ['Werk je op zondag?'], 'nl', { vocab: V.nl }).result, 'correct');
 });
+t('mergeSnapshots: newer card wins, histories are combined, the gist wins a settings tie (D-025)', () => {
+  const rec = (last, reps) => ({ box: 1, due: last + 1, reps, lapses: 0, streak: 1, last, s: 1, d: 5, state: 'review' });
+  const big = { app: 'trakia', version: 1, settings: { rank: 400, stage: 3, theme: 'dark', translit: true }, progress: { 'A|bg2nl': rec(100, 5), 'B|bg2nl': rec(200, 3) },
+    userAlts: { 'A|bg2nl': ['x'] }, userSentences: { U1: { id: 'U1' } }, deleted: ['D1'], log: [[100, 'A|bg2nl', 2], [200, 'B|bg2nl', 1]], sessions: [90, 190], drills: { 'd1': { ok: 3, bad: 0, last: 150 } }, drillLog: [[150, 'd1', 2]] };
+  const small = { app: 'trakia', version: 1, settings: { rank: 102, stage: 1, theme: 'light' }, progress: { 'A|bg2nl': rec(300, 1), 'C|nl2bg': rec(50, 1) },
+    userAlts: { 'A|bg2nl': ['y', 'x'] }, deleted: ['D2'], log: [[300, 'A|bg2nl', 2], [100, 'A|bg2nl', 2]], sessions: [290], drills: { 'd1': { ok: 1, bad: 1, last: 100 } }, drillLog: [] };
+  const m = C.mergeSnapshots(small, big);    // the small device connects second: the gist holds the big device's state
+  assert.deepEqual(Object.keys(m.progress), ['A|bg2nl', 'B|bg2nl', 'C|nl2bg']);
+  assert.equal(m.progress['A|bg2nl'].last, 300, 'the most recent answer wins');
+  assert.deepEqual(m.log.map(e => e[0]), [100, 200, 300], 'logs combined without the duplicate');
+  assert.deepEqual(m.sessions, [90, 190, 290]);
+  assert.equal(m.drills.d1.ok, 3); assert.equal(m.drillLog.length, 1);
+  assert.deepEqual(m.userAlts['A|bg2nl'], ['x', 'y']);
+  assert.ok(m.userSentences.U1);
+  assert.deepEqual(m.deleted, ['D1', 'D2'], 'no deletion stamps on either side: union');
+  assert.deepEqual(m.settings, { rank: 400, stage: 3 }, 'tie goes to the gist; device settings are left out');
+  // a later settings change on this device wins over the gist
+  const m2 = C.mergeSnapshots(Object.assign({}, small, { stamps: { settings: 500 } }), big);
+  assert.equal(m2.settings.rank, 102);
+  // merging is idempotent and the order of the sides only matters for ties
+  assert.equal(JSON.stringify(C.mergeSnapshots(m, m)), JSON.stringify(m));
+  assert.equal(JSON.stringify(C.mergeSnapshots(small, m)), JSON.stringify(m), 'merging in something already contained changes nothing');
+  assert.deepEqual(Object.keys(C.mergeSnapshots(big, small).progress), Object.keys(m.progress));
+  // old records without FSRS fields are migrated
+  const old = C.mergeSnapshots({}, { progress: { 'Z|bg2nl': { box: 3, due: 9, reps: 2, lapses: 0, streak: 2, last: 8 } } });
+  assert.ok(old.progress['Z|bg2nl'].s > 0);
+});
+t('mergeSnapshots: resets travel with the sync (D-025)', () => {
+  const rec = last => ({ box: 1, due: last + 1, reps: 1, lapses: 0, streak: 1, last, s: 1, d: 5, state: 'review' });
+  const gist = { progress: { 'A|bg2nl': rec(100), 'B|bg2nl': rec(100) }, log: [[100, 'A|bg2nl', 2]], sessions: [90], userAlts: { 'A|bg2nl': ['x'] }, drills: { d: { ok: 1, bad: 0, last: 100 } } };
+  const wipedHere = { progress: { 'C|bg2nl': rec(300) }, log: [[300, 'C|bg2nl', 2]], sessions: [290], userAlts: { 'C|bg2nl': ['z'] }, stamps: { wiped: 200 } };
+  const m = C.mergeSnapshots(wipedHere, gist);
+  assert.deepEqual(Object.keys(m.progress), ['C|bg2nl'], 'only answers after the reset survive');
+  assert.deepEqual(m.log.map(e => e[0]), [300]); assert.deepEqual(m.sessions, [290]); assert.deepEqual(m.drills, {});
+  assert.deepEqual(m.userAlts, { 'C|bg2nl': ['z'] }, 'accepted answers from before the reset are gone');
+  assert.equal(m.stamps.wiped, 200);
+  // one card reset in the Library
+  const m2 = C.mergeSnapshots({ cleared: { 'A|bg2nl': 150 } }, gist);
+  assert.deepEqual(Object.keys(m2.progress), ['B|bg2nl']);
+  const m3 = C.mergeSnapshots(m2, { progress: { 'A|bg2nl': rec(160) } });
+  assert.ok(m3.progress['A|bg2nl'], 'answering again after the reset counts');
+  // restoring deleted sentences: the newer list wins
+  assert.deepEqual(C.mergeSnapshots({ deleted: [], stamps: { deleted: 50 } }, { deleted: ['D1'], stamps: { deleted: 10 } }).deleted, []);
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

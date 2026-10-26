@@ -27,9 +27,13 @@ let log = LS.get('log', []);            // [ts, key, score 2|1|0, free 0|1, effe
 let sessions = LS.get('sessions', []);  // [startTs]
 let drills = LS.get('drills', {});       // {itemId: {ok, bad, last}}
 let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
+/** @type {Snapshot['stamps']} */ let stamps = LS.get('stamps', {});   // when shared settings / the deleted list last changed, last full reset (D-025)
+/** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});   // per-card resets, so a sync does not bring them back
+let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
-  settings: () => LS.set('settings', settings), progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => LS.set('deleted', deleted), log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog),
+  settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
+  progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog),
 };
 const WORDS = DATA.words, WIDX = C.wordIndex(WORDS), GRAMMAR = DATA.grammar, ASPECTS = C.aspectPairs(WORDS);
 const WORD_BY_RANK = new Map(WORDS.map(w => [w.rank, w]));
@@ -97,7 +101,7 @@ function showTab(name) {
   syncRunning(); window.scrollTo(0, 0);
 }
 // phones: while a text field has focus the on-screen keyboard is up, so the tab bar steps aside (CSS, D-015)
-const isTypingField = el => el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && /^(text|search|number)$/.test(el.type));
+const isTypingField = el => el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && /^(text|search|number|password)$/.test(el.type));
 document.addEventListener('focusin', e => document.body.classList.toggle('typing', isTypingField(e.target)));
 document.addEventListener('focusout', () => setTimeout(() => document.body.classList.toggle('typing', isTypingField(document.activeElement)), 0));
 
@@ -341,7 +345,7 @@ function endSession() {
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
   $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
   $('btn-again').textContent = session.drill ? 'Drill again' : 'Practise again';
-  session = null; syncRunning();
+  session = null; syncRunning(); sync();
 }
 
 // ---------- grammar tab ----------
@@ -472,7 +476,7 @@ $('lib-table').addEventListener('click', e => {
   const pr = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${dirLabel(d)}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
   det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl ? `<div><b>NL</b> ${esc(s.nl)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${(s.en_alt || []).length ? `<div><b>EN also</b> ${s.en_alt.map(esc).join(' · ')}</div>` : ''}${(s.nl_loose || []).length ? `<div><b>NL looser</b> ${(s.nl_loose || []).map(esc).join(' · ')}</div>` : ''}${(s.en_loose || []).length ? `<div><b>EN looser</b> ${(s.en_loose || []).map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${(s.bg_alt_en || []).length ? `<div><b>BG also (EN prompt)</b> ${(s.bg_alt_en || []).map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
-  q(det, '[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) delete progress[s.id + '|' + d]; save.progress(); renderLibrary(false); toast('Progress reset'); };
+  q(det, '[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) { const k = s.id + '|' + d; if (progress[k]) cleared[k] = Date.now(); delete progress[k]; } LS.set('cleared', cleared); save.progress(); renderLibrary(false); toast('Progress reset'); };
   q(det, '[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
 });
 
@@ -496,13 +500,26 @@ $('import-file').addEventListener('change', async e => {
   } catch (err) { $('import-result').textContent = 'Import failed: ' + (err instanceof Error ? err.message : String(err)); }
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
-$('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', { app: 'trakia', version: 1, exported: new Date().toISOString(), settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog }));
+/** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared }; }
+/** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
+function applySnapshot(m) {
+  settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared;
+  sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared })) LS.set(k, v);
+  refreshSentences();
+  // redraw what is on screen, without leaving the tab or the session summary
+  const tab = document.querySelector('.tab.active');
+  if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLibrary(false); else if (tab && tab.id === 'tab-settings') renderSettings();
+  $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
+}
+$('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', Object.assign(snapshot(), { exported: new Date().toISOString() })));
 $('import-progress').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); if (j.app !== 'trakia') throw new Error('not a Trakia progress file');
-    if (!confirm('Replace all progress on this device with the file?')) return;
-    settings = Object.assign({}, DEFAULTS, j.settings || {}); progress = j.progress || {}; userAlts = j.userAlts || {}; userSentences = j.userSentences || {}; deleted = j.deleted || []; log = j.log || []; sessions = j.sessions || []; drills = j.drills || {}; drillLog = j.drillLog || [];
-    Object.values(save).forEach(f => f()); refreshSentences(); applyTheme(); renderHome(); toast('Progress imported');
+    if (!confirm('Merge the progress in this file into this device? Nothing on this device is lost; for a sentence practised in both, the most recent answer counts.')) return;
+    applySnapshot(C.mergeSnapshots(snapshot(), j)); toast('Progress merged'); sync();
   } catch (err) { toast('Import failed: ' + (err instanceof Error ? err.message : String(err))); }
 });
 $('btn-export-sentences').addEventListener('click', () => download('trakia-sentences.json', SENT.map(s => Object.assign({}, s, { nl_alt: s.nl_alt.concat(userAlts[s.id + '|bg2nl'] || []), en_alt: (s.en_alt || []).concat(userAlts[s.id + '|bg2en'] || []), bg_alt: s.bg_alt.concat(userAlts[s.id + '|nl2bg'] || []), bg_alt_en: (s.bg_alt_en || []).concat(userAlts[s.id + '|en2bg'] || []) }))));
@@ -524,16 +541,94 @@ function renderRankHelp() {
 }
 function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s => Math.max(1, Math.round(s / o.factor * (Math.pow(o.retention, 1 / o.decay) - 1))); $('retention-help').textContent = `a card with 10 days of stability comes back after ${ivl(10)} d, with 60 days after ${ivl(60)} d`; }
 function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your Anki position fit this stage.`; }
-function renderSettings() { writers.forEach(w => w()); renderWallpaperFields(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+function renderSettings() { writers.forEach(w => w()); renderWallpaperFields(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm('Delete all progress, accepted answers and statistics on this device?')) return; progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
 
+// ---------- sync between devices through a secret gist (D-025) ----------
+const GIST_FILE = 'trakia-progress.json';
+/** @type {SyncState} */ let syncState = LS.get('sync', {});
+let syncBusy = false, syncAgain = false;
+const saveSync = () => LS.set('sync', syncState);
+/** call the GitHub REST API with the stored token (only CORS-safe headers, never cached) */
+async function gh(path, method, body) {
+  const res = await fetch('https://api.github.com' + path, { method: method || 'GET', cache: 'no-store', body: body ? JSON.stringify(body) : undefined,
+    headers: body ? { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + syncState.token, 'Content-Type': 'application/json' } : { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + syncState.token } });
+  if (!res.ok) throw Object.assign(new Error(res.status === 401 ? 'GitHub refused the token (expired or revoked?)' : res.status === 403 ? 'the token may not use gists (it needs Gists: read and write)' : 'GitHub answered ' + res.status), { status: res.status });
+  return res.json();
+}
+/** the id of this account's Trakia gist, or null */
+async function findGist() {
+  for (let page = 1; page <= 10; page++) {
+    const list = await gh('/gists?per_page=100&page=' + page), hit = list.find(g => g.files && g.files[GIST_FILE]);
+    if (hit) return hit.id;
+    if (list.length < 100) break;
+  }
+  return null;
+}
+/** the snapshot stored in a gist; the API cuts files over 1 MB short, those are fetched in full from raw_url */
+async function readGist(id) {
+  const g = await gh('/gists/' + id), f = g.files && g.files[GIST_FILE];
+  syncState.url = g.html_url;
+  if (!f) return null;
+  let text = f.content;
+  if (f.truncated) { const r = await fetch(f.raw_url, { cache: 'no-store' }); if (!r.ok) throw new Error('could not read the full gist (' + r.status + ')'); text = await r.text(); }
+  const j = JSON.parse(text); if (j.app !== 'trakia') throw new Error('the gist does not hold Trakia progress');
+  return j;
+}
+/** merge this device with the gist, take over what is new and upload what the gist lacks. Never during a session. */
+async function sync(loud) {
+  if (!syncState.token || session) return;
+  if (syncBusy) { syncAgain = true; return; }
+  if (navigator.onLine === false) { if (loud) toast('Offline: syncs when you are back online'); return; }
+  syncBusy = true; renderSyncStatus('Syncing…');
+  try {
+    let id = syncState.gist, remote = null;
+    if (id) try { remote = await readGist(id); } catch (e) { if (!(e instanceof Error && 'status' in e && e.status === 404)) throw e; id = undefined; }
+    if (!id) { id = await findGist(); if (id) remote = await readGist(id); }
+    const merged = C.mergeSnapshots(snapshot(), remote || {}), text = JSON.stringify(merged);
+    if (!id) { const g = await gh('/gists', 'POST', { description: 'Trakia progress (kept in sync by the app)', public: false, files: { [GIST_FILE]: { content: text } } }); id = g.id; syncState.url = g.html_url; }
+    else if (!remote || text !== JSON.stringify(C.mergeSnapshots(remote, remote))) await gh('/gists/' + id, 'PATCH', { files: { [GIST_FILE]: { content: text } } });
+    // merge once more with the current state: answers given while the requests ran are kept
+    const now = snapshot(), next = C.mergeSnapshots(now, merged);
+    if (!session && JSON.stringify(next) !== JSON.stringify(C.mergeSnapshots(now, now))) applySnapshot(next);
+    syncState.gist = id; syncState.at = Date.now(); delete syncState.error; saveSync();
+    if (loud) toast('Synced');
+  } catch (e) {
+    syncState.error = e instanceof Error ? e.message : String(e); saveSync();
+    if (loud) toast('Sync failed: ' + syncState.error);
+  } finally {
+    syncBusy = false; renderSyncStatus();
+    if (syncAgain) { syncAgain = false; sync(); }
+  }
+}
+function renderSyncStatus(msg) {
+  const on = !!syncState.token, st = $('sync-status');
+  $('sync-off').hidden = on; $('sync-on').hidden = !on;
+  if (msg) { st.textContent = msg; return; }
+  if (!on) { st.textContent = 'Not connected: progress stays on this device.'; return; }
+  const ago = syncState.at ? Date.now() - syncState.at : 0;
+  st.innerHTML = (syncState.error ? 'Last sync failed: ' + esc(syncState.error) : syncState.at ? 'Synced ' + (ago < 60e3 ? 'just now' : fmtAgo(ago) + ' ago') : 'Not synced yet')
+    + (syncState.url ? ` · <a href="${esc(syncState.url)}" target="_blank" rel="noopener">open the gist</a>` : '');
+}
+$('btn-sync-connect').addEventListener('click', async () => {
+  const token = $('sync-token').value.trim(); if (!token) { toast('Paste a GitHub token first'); return; }
+  syncState = { token }; saveSync(); $('sync-token').value = '';
+  await sync(true);
+  if (syncState.error && !syncState.gist) { const err = syncState.error; syncState = {}; saveSync(); renderSyncStatus('Could not connect: ' + err); }
+});
+$('btn-sync-now').addEventListener('click', () => sync(true));
+$('btn-sync-off').addEventListener('click', () => { if (!confirm('Forget the token on this device? Your progress stays here and in the gist.')) return; syncState = {}; saveSync(); renderSyncStatus(); });
+// coming back to the app pulls what another device did; leaving it pushes what this one did
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' || Date.now() - (syncState.at || 0) > 60e3) sync(); });
+window.addEventListener('online', () => sync());
+
 // ---------- init ----------
-applyTheme(); renderHome();
+applyTheme(); renderHome(); sync();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(reg => reg.update().catch(() => {})).catch(() => {});
