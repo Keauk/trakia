@@ -44,13 +44,16 @@ trakia/
   DESIGN.md, README.md
   data/words.json          exported from the apkg (2952 entries, ordered by rank)
   data/sentences.json      2656 generated sentences (validated, with max_rank)
+  data/stories.json        15 reading stories, 3 per level 100–500 (D-026), with word map and questions
   tools/export_anki_words.py   apkg -> data/words.json
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe)
+  tools/validate_stories.py    story JSON -> data/stories.json (every word checked against its level, D-026)
   tools/build_data.py          data/*.json -> app/data.js (run after any data change)
   tools/find_combinations.js   lists mixtures of two accepted answers that are not accepted yet (D-020)
   tools/test_core.js           unit tests for app/core.js  (node tools/test_core.js)
   tools/check_decisions.py     checks decisions/D-*.md against decisions/TEMPLATE.md and the README table
   tools/SENTENCE_BRIEF.md      the brief the sentence-writing agents followed
+  tools/STORY_BRIEF.md         the brief for the reading stories (cast, gloss rule, questions)
   app/index.html           the trainer UI: markup and CSS
   app/ui.js                the UI script (DOM, sessions, settings, library, stats); was inline until D-013
   app/types.d.ts           shared shapes for the type check (Sentence, Settings, ProgressRecord, ...)
@@ -212,6 +215,17 @@ BG→NL card has been answered correctly once" (default; recognition before prod
 * streak (consecutive days with ≥1 session)
 * "hardest 20" (most lapses) with a *drill these* button
 * all numbers derived on the fly from the progress blob; nothing to keep in sync
+* reading: stories read of those open, average score of the latest question tries (D-028)
+
+### 4.3a Reading (D-026, D-027, D-028)
+
+Fifteen stories about one family, three per level 100–500; a story is open when its level is within
+the Anki position plus tolerance and its grammar within the stage (`C.storyEligible`). Each story
+maps every word form in its text to a dictionary form (`words`), which lets the validator check every
+running word against the level and lets the reader look up any tapped word (`C.storyTokens`,
+`wordInfo`). Up to 3 % of the words may be above the level, glossed in `extra`. Translations are
+shown per paragraph on request; 3–5 multiple-choice questions close each story. Read marks and
+scores live in `trakia.reading` and travel with sync.
 
 ### 4.4 Rank alignment UI
 
@@ -278,7 +292,9 @@ Suggested `index.html` structure (all in one file, ~900 lines total when finishe
                     <input> or <textarea> + on-screen helper keys
                     session progress bar (one segment per card)
                     result bar (correct / almost / wrong / revealed + word highlights + alternatives + "I was right")
-<main id=stats>     numbers + 1 canvas chart + hardest list
+<main id=reading>   stories by level (locked ones listed), reader with tappable words, per-paragraph
+                    translation, questions (D-026–D-028)
+<main id=stats>     numbers + 1 canvas chart + reading + hardest list
 <main id=library>   table of sentences with filter (eligible / all / tag), import/export buttons
 <main id=settings>  rank slider, tolerance, direction mix, new per session, strictness toggles
 <script>  state (load/save) · normalise · levenshtein · diff · check() · schedule() ·

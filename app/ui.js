@@ -28,12 +28,13 @@ let sessions = LS.get('sessions', []);  // [startTs]
 let drills = LS.get('drills', {});       // {itemId: {ok, bad, last}}
 let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 /** @type {Snapshot['stamps']} */ let stamps = LS.get('stamps', {});   // when shared settings / the deleted list last changed, last full reset (D-025)
-/** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});   // per-card resets, so a sync does not bring them back
+/** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});
+/** @type {Record<string, ReadingRecord>} */ let reading = LS.get('reading', {});   // stories read, quiz scores (D-026, D-028)   // per-card resets, so a sync does not bring them back
 let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
   settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
   progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading),
 };
 const WORDS = DATA.words, WIDX = C.wordIndex(WORDS), GRAMMAR = DATA.grammar, ASPECTS = C.aspectPairs(WORDS);
 const WORD_BY_RANK = new Map(WORDS.map(w => [w.rank, w]));
@@ -97,7 +98,7 @@ function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.
 function showTab(name) {
   /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
-  if (name === 'practise') renderHome(); if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
+  if (name === 'practise') renderHome(); if (name === 'reading') { closeStory(); renderReading(); } if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
   syncRunning(); window.scrollTo(0, 0);
 }
 // phones: while a text field has focus the on-screen keyboard is up, so the tab bar steps aside (CSS, D-015)
@@ -383,6 +384,7 @@ function renderStats() {
   // chart data
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);
+  renderReadingStats();
   $('chart-table').innerHTML = '<tr><th>day</th><th>✓</th><th>≈</th><th>✗</th></tr>' + days.map(d => `<tr><td>${d.k}</td><td>${d.v[2]}</td><td>${d.v[1]}</td><td>${d.v[0]}</td></tr>`).join('');
   // grammar drills
   const dToday = drillLog.filter(l => dayKey(l[0]) === today), dTot = dToday.length, dOk = dToday.filter(l => l[2] > 0).length;
@@ -501,17 +503,17 @@ $('import-file').addEventListener('change', async e => {
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 /** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
-function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared }; }
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading }; }
 /** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
 function applySnapshot(m) {
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
-  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared;
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading;
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
-  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared })) LS.set(k, v);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading })) LS.set(k, v);
   refreshSentences();
   // redraw what is on screen, without leaving the tab or the session summary
   const tab = document.querySelector('.tab.active');
-  if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLibrary(false); else if (tab && tab.id === 'tab-settings') renderSettings();
+  if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLibrary(false); else if (tab && tab.id === 'tab-settings') renderSettings(); else if (tab && tab.id === 'tab-reading' && $('reading-story').hidden) renderReading();
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
 }
 $('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', Object.assign(snapshot(), { exported: new Date().toISOString() })));
@@ -546,8 +548,138 @@ $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; save.reading(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
+
+// ---------- reading (D-026 stories, D-027 tap a word, D-028 questions) ----------
+const STORIES = DATA.stories || [], LEVELS = [...new Set(STORIES.map(s => s.level))].sort((a, b) => a - b);
+/** deck words by dictionary form (lowest rank wins, as in the validator) */
+const WORD_BY_BG = new Map(); for (const w of WORDS) { const k = C.storyKey(w.bg); if (!WORD_BY_BG.has(k)) WORD_BY_BG.set(k, w); }
+/** meanings of the function words a story may use without a deck entry */
+const FREE_MEANING = { 'ли': 'question particle', 'не': 'not', 'да': 'to, that (before a verb)', 'ще': 'will (future)', 'се': 'oneself (reflexive)', 'си': 'oneself; one\'s own; you are', 'по': 'more (по-), along', 'най': 'most (най-)', 'е': 'is (съм)', 'са': 'are (съм)', 'сме': 'we are (съм)', 'сте': 'you are (съм)', 'съм': 'I am (съм)', 'бях': 'I was (съм)', 'беше': 'was (съм)', 'бяхме': 'we were (съм)', 'бяха': 'they were (съм)', 'и': 'and; also' };
+/** @type {Story | null} */ let story = null;
+/** @type {{orders: number[][], picks: (number | null)[]} | null} */ let quiz = null;
+const storyLang = (/** @type {Story} */ st) => C.langFor(st.id, settings) === 'en' ? 'en' : 'nl';
+function renderReading() {
+  const open = STORIES.filter(st => C.storyEligible(st, settings)), reach = settings.rank + (settings.tolerance || 0);
+  const level = (/** @type {number} */ L, /** @type {boolean} */ isOpen) => {
+    const rows = STORIES.filter(st => st.level === L).map(st => {
+      const r = reading[st.id] || {}, lang = storyLang(st), meta = [st.word_count + ' words'];
+      if (r.read) meta.push('<span class="done">read ✓</span>'); if (r.quiz) meta.push(`questions ${r.quiz.score}/${r.quiz.total}`);
+      return `<button class="story-row" data-story="${esc(st.id)}"${isOpen ? '' : ' disabled'}><b lang="bg">${esc(st.title.bg)}</b><span>${esc(st.title[lang])} · ${meta.join(' · ')}</span></button>`;
+    }).join('');
+    const why = isOpen ? '' : L > reach ? ` · unlocks at word ${L} (you are at word ${settings.rank})` : ' · needs a higher grammar stage';
+    return `<div class="card${isOpen ? '' : ' locked'}"><h2>Level ${L}</h2><p class="tiny">Words 1–${L}${why}</p><div class="story-list">${rows}</div></div>`;
+  };
+  const openLevels = LEVELS.filter(L => STORIES.some(st => st.level === L && open.includes(st))).reverse();
+  const locked = LEVELS.filter(L => !openLevels.includes(L));
+  $('reading-list').innerHTML = `<div class="card"><h2>Reading</h2><p class="muted">Short stories about the Petrov family, written with the words you know from Anki. ${open.length ? `${open.length} of ${STORIES.length} stories are open at word ${settings.rank}.` : `The first stories open at word ${LEVELS[0] || 100}.`} Each ends with a few questions.</p></div>`
+    + openLevels.map(L => level(L, true)).join('') + locked.map(L => level(L, false)).join('');
+}
+$('reading-list').addEventListener('click', e => { const b = closest(e, '[data-story]'); if (b && !b.disabled) openStory(b.dataset.story || ''); });
+/** a text as tappable words: each word a button carrying its lookup key. A button may break a line on
+ * either side, so each word is kept in a nowrap span with the punctuation that touches it („Бабо, по-голям). */
+function storyHtml(/** @type {string} */ text, /** @type {Story} */ st) {
+  const extra = new Set(Object.keys(st.extra || {}).map(C.storyKey));
+  let out = '', cur = '';
+  const flush = () => { if (cur) out += `<span class="nw">${cur}</span>`; cur = ''; };
+  for (const tok of C.storyTokens(text)) {
+    if (tok.w) { const k = C.storyKey(tok.t), lem = st.words[k]; cur += `<button type="button" class="w${lem && extra.has(C.storyKey(lem)) ? ' gl' : ''}" data-k="${esc(k)}">${esc(tok.t)}</button>`; continue; }
+    for (const part of tok.t.split(/(\s+)/)) if (/^\s+$/.test(part)) { flush(); out += part; } else cur += esc(part);
+  }
+  flush();
+  return out;
+}
+function openStory(/** @type {string} */ id) {
+  const st = STORIES.find(x => x.id === id); if (!st) return;
+  story = st; const lang = storyLang(st), extra = st.extra || {};
+  $('reading-list').hidden = true; $('reading-story').hidden = false; hideWordPop();
+  $('story-meta').textContent = `Level ${st.level} · ${st.word_count} words`;
+  $('story-title').innerHTML = storyHtml(st.title.bg, st);
+  $('story-text').innerHTML = st.paragraphs.map((p, i) => {
+    // glossed words that occur in this paragraph, listed under it
+    const here = [...new Set(C.storyTokens(p.bg).filter(t => t.w).map(t => st.words[C.storyKey(t.t)]).filter(l => l && Object.keys(extra).some(x => C.storyKey(x) === C.storyKey(l))))];
+    const gl = here.map(l => { const g = extra[Object.keys(extra).find(x => C.storyKey(x) === C.storyKey(l)) || '']; return `<b lang="bg">${esc(l)}</b> – ${esc(g[lang])}`; }).join(', ');
+    return `<div class="para"><p class="bg" lang="bg">${storyHtml(p.bg, st)}</p>${gl ? `<p class="tiny new-words">New: ${gl}</p>` : ''}<button class="link-btn" data-tr="${i}">Show translation</button><p class="tr" id="tr-${i}" hidden>${esc(p[lang])}</p></div>`;
+  }).join('');
+  startQuiz(0); renderReadMark(); window.scrollTo(0, 0);
+}
+function closeStory() { story = null; quiz = null; hideWordPop(); $('reading-story').hidden = true; $('reading-list').hidden = false; }
+$('btn-story-back').addEventListener('click', () => { closeStory(); renderReading(); window.scrollTo(0, 0); });
+$('story-text').addEventListener('click', e => {
+  const t = closest(e, '[data-tr]'); if (t) { const p = $('tr-' + t.dataset.tr); p.hidden = !p.hidden; t.textContent = p.hidden ? 'Show translation' : 'Hide translation'; }
+});
+// tap a word (D-027)
+/** dictionary form and meaning of a word form in the open story @param {string} k @returns {string} */
+function wordInfo(k) {
+  if (!story) return '';
+  const lang = storyLang(story), names = new Set((story.names || []).map(C.storyKey));
+  if (names.has(k)) return `<b lang="bg">${esc(story.words[k] || k)}</b><span class="tiny">name</span>`;
+  const lem = story.words[k];
+  if (!lem) return FREE_MEANING[k] ? `<b lang="bg">${esc(k)}</b> – ${esc(FREE_MEANING[k])}` : `<b lang="bg">${esc(k)}</b>`;
+  const extra = story.extra || {}, ex = Object.keys(extra).find(x => C.storyKey(x) === C.storyKey(lem));
+  if (ex) return `<b lang="bg">${esc(lem)}</b> – ${esc(extra[ex][lang])}<span class="tiny">not yet in your deck</span>`;
+  const [form, forced] = lem.split('#'), w = forced ? WORD_BY_RANK.get(+forced) : WORD_BY_BG.get(C.storyKey(form));
+  if (!w) return `<b lang="bg">${esc(form)}</b>` + (FREE_MEANING[C.storyKey(form)] ? ' – ' + esc(FREE_MEANING[C.storyKey(form)]) : '');
+  return `<b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not yet reached in Anki' : ''}</span>`;
+}
+/** @type {HTMLElement | null} */ let popFor = null;
+function hideWordPop() { $('word-pop').hidden = true; if (popFor) popFor.classList.remove('on'); popFor = null; }
+function showWordPop(/** @type {HTMLElement} */ b) {
+  if (popFor === b) { hideWordPop(); return; }
+  hideWordPop();
+  const pop = $('word-pop'); pop.innerHTML = wordInfo(b.dataset.k || ''); pop.hidden = false;
+  const r = b.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+  const below = r.bottom + 6 + h < window.innerHeight;
+  pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + window.scrollX + 'px';
+  pop.style.top = (below ? r.bottom + 6 : r.top - h - 6) + window.scrollY + 'px';
+  b.classList.add('on'); popFor = b;
+}
+$('reading-story').addEventListener('click', e => { const b = closest(e, 'button.w'); if (b) { e.stopPropagation(); showWordPop(b); } });
+document.addEventListener('click', e => { if (popFor && !(e.target instanceof Node && $('word-pop').contains(e.target))) hideWordPop(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && popFor) hideWordPop(); });
+window.addEventListener('resize', () => hideWordPop());
+// questions (D-028)
+/** a shuffled order of n options, the same for a story and attempt @param {number} n @param {string} seed */
+function optionOrder(n, seed) {
+  let h = 0; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  const rand = () => { h = (h * 1103515245 + 12345) | 0; return ((h >>> 16) & 0x7fff) / 0x8000; };
+  const a = [...Array(n).keys()]; for (let i = n - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a;
+}
+let attempt = 0;
+function startQuiz(/** @type {number} */ n) {
+  if (!story) return; const st = story; attempt = n;
+  quiz = { orders: st.questions.map((q, i) => optionOrder(q.options.length, `${st.id}:${i}:${n}`)), picks: st.questions.map(() => null) };
+  renderQuiz();
+}
+function renderQuiz() {
+  if (!story || !quiz) return; const st = story, qz = quiz, lang = storyLang(st);
+  $('story-quiz').innerHTML = st.questions.map((q, i) => `<div class="q"><p>${i + 1}. ${esc(q.q[lang])}</p><div class="opts">${qz.orders[i].map(o => {
+    const picked = qz.picks[i], cls = picked == null ? '' : o === q.answer ? ' right' : o === picked ? ' wrong' : '';
+    return `<button class="opt${cls}" data-q="${i}" data-o="${o}"${picked == null ? '' : ' disabled'}>${esc(q.options[o][lang])}</button>`;
+  }).join('')}</div></div>`).join('');
+  const done = qz.picks.every(p => p != null), score = st.questions.filter((q, i) => qz.picks[i] === q.answer).length;
+  $('quiz-result').hidden = !done; $('quiz-result').textContent = done ? `${score} of ${st.questions.length} right.` : '';
+  $('btn-quiz-again').hidden = !done;
+}
+$('story-quiz').addEventListener('click', e => {
+  const b = closest(e, '.opt'); if (!b || !story || !quiz) return;
+  const i = +(b.dataset.q || 0); if (quiz.picks[i] != null) return;
+  quiz.picks[i] = +(b.dataset.o || 0);
+  if (quiz.picks.every(p => p != null)) {
+    const st = story, now = Date.now(), score = st.questions.filter((q, j) => quiz && quiz.picks[j] === q.answer).length;
+    reading[st.id] = { read: (reading[st.id] || {}).read || now, quiz: { at: now, score, total: st.questions.length } }; save.reading(); renderReadMark();
+  }
+  renderQuiz();
+});
+$('btn-quiz-again').addEventListener('click', () => startQuiz(attempt + 1));
+function renderReadMark() { const r = story && reading[story.id]; $('btn-story-read').textContent = r && r.read ? 'Read ✓' : 'Mark as read'; $('btn-story-read').disabled = !!(r && r.read); }
+$('btn-story-read').addEventListener('click', () => { if (!story) return; reading[story.id] = Object.assign({}, reading[story.id], { read: Date.now() }); save.reading(); renderReadMark(); toast('Marked as read'); });
+function renderReadingStats() {
+  const open = STORIES.filter(st => C.storyEligible(st, settings)), read = open.filter(st => reading[st.id] && reading[st.id].read).length;
+  const scored = Object.values(reading).map(r => r.quiz).filter(q => q && q.total), pct = scored.length ? Math.round(100 * scored.reduce((a, q) => a + (q ? q.score / q.total : 0), 0) / scored.length) + '%' : '–';
+  $('stats-reading').innerHTML = stat(`${read}/${open.length}`, 'stories read') + stat(pct, 'questions right (latest tries)');
+}
 
 // ---------- sync between devices through a secret gist (D-025) ----------
 const GIST_FILE = 'trakia-progress.json';

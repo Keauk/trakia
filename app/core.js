@@ -885,13 +885,38 @@
     const deleted = [...new Set(dl > dr ? L.deleted || [] : dr > dl ? R.deleted || [] : (L.deleted || []).concat(R.deleted || []))].sort();
     const hasR = !!R.settings && Object.keys(R.settings).length > 0;
     const settings = sharedSettings((Ls.settings || 0) > (Rs.settings || 0) || !hasR ? L.settings || {} : R.settings || {});
+    // stories: per story the record touched last (read mark or quiz), nothing from before a reset
+    /** @type {Record<string, ReadingRecord>} */ const allReading = {};
+    const touched = (/** @type {ReadingRecord} */ r) => Math.max(r.read || 0, r.quiz ? r.quiz.at : 0);
+    for (const side of [L.reading || {}, R.reading || {}]) for (const k in side) { const r = side[k], had = allReading[k]; if (!had || touched(r) >= touched(had)) allReading[k] = r; }
+    const reading = sortedMap(allReading, r => touched(r) > wiped ? r : undefined);
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
-      stamps, cleared,
+      stamps, cleared, reading,
     };
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots };
+  // ---------- reading (D-026, D-027) ----------
+  /** split a text into words and the pieces between them; a word is a run of letters, as in tools/validate_stories.py
+   * @param {string} text @returns {{t: string, w: boolean}[]} */
+  function storyTokens(text) {
+    const out = []; let at = 0;
+    for (const m of text.normalize('NFC').matchAll(/\p{L}+/gu)) {
+      if (m.index > at) out.push({ t: text.slice(at, m.index), w: false });
+      out.push({ t: m[0], w: true }); at = m.index + m[0].length;
+    }
+    if (at < text.length) out.push({ t: text.slice(at), w: false });
+    return out;
+  }
+  /** the key a word form has in a story's `words` map (lower case, ѝ as и like the validator) */
+  const storyKey = (/** @type {string} */ form) => form.normalize('NFC').toLowerCase().replace(/ѝ/g, 'и');
+  /** can the learner open this story: its level within their Anki position (plus tolerance) and its grammar within their stage
+   * @param {Story} story @param {Partial<Settings>} settings */
+  function storyEligible(story, settings) {
+    return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
+  }
+
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots, storyTokens, storyKey, storyEligible };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

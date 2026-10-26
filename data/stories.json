@@ -1,0 +1,3639 @@
+[
+ {
+  "id": "R100a",
+  "level": 100,
+  "title": {
+   "bg": "Новият апартамент",
+   "nl": "Het nieuwe appartement",
+   "en": "The new apartment"
+  },
+  "paragraphs": [
+   {
+    "bg": "Това е семейство Петрови. Иван е бащата. Той е лекар. Мария е майката. Ана е дъщеря им, а Петър е син им.",
+    "nl": "Dit is de familie Petrov. Ivan is de vader. Hij is arts. Maria is de moeder. Ana is hun dochter en Petar is hun zoon.",
+    "en": "This is the Petrov family. Ivan is the father. He is a doctor. Maria is the mother. Ana is their daughter, and Petar is their son."
+   },
+   {
+    "bg": "Те имат нов апартамент в София. Апартаментът е голям и хубав. В кухнята има голяма маса и нови столове.",
+    "nl": "Ze hebben een nieuw appartement in Sofia. Het appartement is groot en mooi. In de keuken staan een grote tafel en nieuwe stoelen.",
+    "en": "They have a new apartment in Sofia. The apartment is big and nice. In the kitchen there is a big table and new chairs."
+   },
+   {
+    "bg": "Стаята на Ана е голяма и има голям прозорец. Стаята на Петър е малка. Петър гледа стаята си и казва: „Стаята ми е много малка! И аз искам голяма стая!“",
+    "nl": "Ana's kamer is groot en heeft een groot raam. Petars kamer is klein. Petar kijkt naar zijn kamer en zegt: 'Mijn kamer is heel klein! Ik wil ook een grote kamer!'",
+    "en": "Ana's room is big and has a big window. Petar's room is small. Petar looks at his room and says: \"My room is very small! I want a big room too!\""
+   },
+   {
+    "bg": "Мария и Иван мислят. Какво да правят? Но Ана казва: „Петре, ако искаш, можеш да идваш в стаята ми.“",
+    "nl": "Maria en Ivan denken na. Wat moeten ze doen? Maar Ana zegt: 'Petar, als je wilt, mag je in mijn kamer komen.'",
+    "en": "Maria and Ivan think. What should they do? But Ana says: \"Petar, if you want, you can come into my room.\""
+   },
+   {
+    "bg": "Петър взема стола си и отива в стаята на Ана. „Сестра ми е много добра!“ казва той.",
+    "nl": "Petar pakt zijn stoel en gaat naar Ana's kamer. 'Mijn zus is heel lief!' zegt hij.",
+    "en": "Petar takes his chair and goes to Ana's room. \"My sister is very kind!\" he says."
+   }
+  ],
+  "words": {
+   "новият": "нов",
+   "апартамент": "апартамент",
+   "това": "това",
+   "семейство": "семейство",
+   "петрови": "Петрови",
+   "иван": "Иван",
+   "бащата": "баща",
+   "той": "той",
+   "лекар": "лекар",
+   "мария": "Мария",
+   "майката": "майка",
+   "ана": "Ана",
+   "дъщеря": "дъщеря",
+   "им": "те",
+   "а": "а",
+   "петър": "Петър",
+   "син": "син",
+   "те": "те",
+   "имат": "имам",
+   "нов": "нов",
+   "в": "в",
+   "софия": "София",
+   "апартаментът": "апартамент",
+   "голям": "голям",
+   "хубав": "хубав",
+   "кухнята": "кухня",
+   "има": "имам",
+   "голяма": "голям",
+   "маса": "маса",
+   "нови": "нов",
+   "столове": "стол",
+   "стаята": "стая",
+   "на": "на",
+   "прозорец": "прозорец",
+   "малка": "малък",
+   "гледа": "гледам",
+   "казва": "казвам",
+   "ми": "аз",
+   "много": "много",
+   "аз": "аз",
+   "искам": "искам",
+   "стая": "стая",
+   "мислят": "мисля",
+   "какво": "какво",
+   "правят": "правя",
+   "но": "но",
+   "петре": "Петре",
+   "ако": "ако",
+   "искаш": "искам",
+   "можеш": "мога",
+   "идваш": "идвам",
+   "взема": "вземам",
+   "стола": "стол",
+   "отива": "отивам",
+   "сестра": "сестра",
+   "добра": "добър"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wie in de familie is arts?",
+     "en": "Who in the family is a doctor?"
+    },
+    "options": [
+     {
+      "nl": "Maria",
+      "en": "Maria"
+     },
+     {
+      "nl": "Ivan",
+      "en": "Ivan"
+     },
+     {
+      "nl": "Ana",
+      "en": "Ana"
+     },
+     {
+      "nl": "Niemand",
+      "en": "Nobody"
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Waarom is Petar niet blij?",
+     "en": "Why is Petar not happy?"
+    },
+    "options": [
+     {
+      "nl": "Er zijn geen nieuwe stoelen.",
+      "en": "There are no new chairs."
+     },
+     {
+      "nl": "Ana's kamer heeft geen raam.",
+      "en": "Ana's room has no window."
+     },
+     {
+      "nl": "Zijn kamer is klein.",
+      "en": "His room is small."
+     },
+     {
+      "nl": "De keuken is klein.",
+      "en": "The kitchen is small."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wat zegt Ana tegen Petar?",
+     "en": "What does Ana tell Petar?"
+    },
+    "options": [
+     {
+      "nl": "Hij mag in haar kamer komen.",
+      "en": "He can come into her room."
+     },
+     {
+      "nl": "Hij mag haar bed hebben.",
+      "en": "He can have her bed."
+     },
+     {
+      "nl": "Haar kamer is ook klein.",
+      "en": "Her room is small too."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Hoe eindigt het verhaal?",
+     "en": "How does the story end?"
+    },
+    "options": [
+     {
+      "nl": "Ivan geeft Petar een grotere kamer.",
+      "en": "Ivan gives Petar a bigger room."
+     },
+     {
+      "nl": "Ana gaat naar Petars kamer.",
+      "en": "Ana goes to Petar's room."
+     },
+     {
+      "nl": "Maria zet een stoel in de keuken.",
+      "en": "Maria puts a chair in the kitchen."
+     },
+     {
+      "nl": "Petar gaat met zijn stoel naar Ana's kamer.",
+      "en": "Petar goes to Ana's room with his chair."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Петрови",
+   "Иван",
+   "Мария",
+   "Ана",
+   "Петър",
+   "Петре",
+   "София"
+  ],
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 95,
+  "stage": 1,
+  "word_count": 109
+ },
+ {
+  "id": "R100b",
+  "level": 100,
+  "title": {
+   "bg": "Ключът",
+   "nl": "De sleutel",
+   "en": "The key"
+  },
+  "paragraphs": [
+   {
+    "bg": "Иван, Ана и Петър са на вратата на апартамента. Иван има хляб и вода в ръцете си. „Нямам ключ!“ казва той.",
+    "nl": "Ivan, Ana en Petar staan bij de deur van het appartement. Ivan heeft brood en water in zijn handen. 'Ik heb geen sleutel!' zegt hij.",
+    "en": "Ivan, Ana and Petar are at the door of the apartment. Ivan has bread and water in his hands. \"I don't have a key!\" he says."
+   },
+   {
+    "bg": "„Не е ли ключът на масата в кухнята?“ казва Ана. „Не знам“, казва Иван. Мария има ключ, но тя не е с тях. „Какво да правим?“ казва Петър.",
+    "nl": "'Ligt de sleutel niet op de tafel in de keuken?' zegt Ana. 'Ik weet het niet,' zegt Ivan. Maria heeft een sleutel, maar zij is niet bij hen. 'Wat moeten we doen?' zegt Petar.",
+    "en": "\"Isn't the key on the table in the kitchen?\" says Ana. \"I don't know,\" says Ivan. Maria has a key, but she is not with them. \"What should we do?\" says Petar."
+   },
+   {
+    "bg": "Петър гледа баща си. Той вижда хляба, водата и… ключа! „Ключът е в ръката ти, с хляба!“ казва Петър.",
+    "nl": "Petar kijkt naar zijn vader. Hij ziet het brood, het water en… de sleutel! 'De sleutel zit in je hand, bij het brood!' zegt Petar.",
+    "en": "Petar looks at his father. He sees the bread, the water and… the key! \"The key is in your hand, with the bread!\" says Petar."
+   },
+   {
+    "bg": "Иван гледа ръката си. Ключът е в нея! „Ти имаш много добри очи!“ казва той на Петър. Те отиват в кухнята и Иван дава хляб на децата.",
+    "nl": "Ivan kijkt naar zijn hand. De sleutel zit erin! 'Jij hebt heel goede ogen!' zegt hij tegen Petar. Ze gaan naar de keuken en Ivan geeft de kinderen brood.",
+    "en": "Ivan looks at his hand. The key is in it! \"You have very good eyes!\" he says to Petar. They go to the kitchen and Ivan gives the children bread."
+   }
+  ],
+  "words": {
+   "ключът": "ключ",
+   "иван": "Иван",
+   "ана": "Ана",
+   "петър": "Петър",
+   "на": "на",
+   "вратата": "врата",
+   "апартамента": "апартамент",
+   "има": "имам",
+   "хляб": "хляб",
+   "вода": "вода",
+   "в": "в",
+   "ръцете": "ръка",
+   "нямам": "нямам",
+   "ключ": "ключ",
+   "казва": "казвам",
+   "той": "той",
+   "масата": "маса",
+   "кухнята": "кухня",
+   "знам": "знам",
+   "мария": "Мария",
+   "но": "но",
+   "тя": "тя",
+   "с": "с",
+   "тях": "те",
+   "какво": "какво",
+   "правим": "правя",
+   "гледа": "гледам",
+   "баща": "баща",
+   "вижда": "виждам",
+   "хляба": "хляб",
+   "водата": "вода",
+   "ключа": "ключ",
+   "ръката": "ръка",
+   "ти": "ти",
+   "нея": "тя",
+   "имаш": "имам",
+   "много": "много",
+   "добри": "добър",
+   "очи": "око",
+   "те": "те",
+   "отиват": "отивам",
+   "дава": "давам",
+   "децата": "дете"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wat heeft Ivan bij de deur in zijn handen?",
+     "en": "What does Ivan have in his hands at the door?"
+    },
+    "options": [
+     {
+      "nl": "Koffie en brood",
+      "en": "Coffee and bread"
+     },
+     {
+      "nl": "Brood en water",
+      "en": "Bread and water"
+     },
+     {
+      "nl": "Een stoel",
+      "en": "A chair"
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Waar ligt de sleutel volgens Ana misschien?",
+     "en": "Where does Ana think the key might be?"
+    },
+    "options": [
+     {
+      "nl": "Bij Maria",
+      "en": "With Maria"
+     },
+     {
+      "nl": "In Ivans hand",
+      "en": "In Ivan's hand"
+     },
+     {
+      "nl": "Op de tafel in de keuken",
+      "en": "On the table in the kitchen"
+     },
+     {
+      "nl": "Bij Petar",
+      "en": "With Petar"
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wie heeft ook een sleutel, maar is er niet?",
+     "en": "Who also has a key but isn't there?"
+    },
+    "options": [
+     {
+      "nl": "Maria",
+      "en": "Maria"
+     },
+     {
+      "nl": "Ana",
+      "en": "Ana"
+     },
+     {
+      "nl": "Petar",
+      "en": "Petar"
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waar is de sleutel echt?",
+     "en": "Where is the key really?"
+    },
+    "options": [
+     {
+      "nl": "In de keuken",
+      "en": "In the kitchen"
+     },
+     {
+      "nl": "In Petars hand",
+      "en": "In Petar's hand"
+     },
+     {
+      "nl": "In het water",
+      "en": "In the water"
+     },
+     {
+      "nl": "In Ivans hand, bij het brood",
+      "en": "In Ivan's hand, with the bread"
+     }
+    ],
+    "answer": 3
+   },
+   {
+    "q": {
+     "nl": "Wat zegt Ivan tegen Petar aan het eind?",
+     "en": "What does Ivan say to Petar at the end?"
+    },
+    "options": [
+     {
+      "nl": "Dat Maria een sleutel heeft",
+      "en": "That Maria has a key"
+     },
+     {
+      "nl": "Dat Petar heel goede ogen heeft",
+      "en": "That Petar has very good eyes"
+     },
+     {
+      "nl": "Dat hij het niet weet",
+      "en": "That he doesn't know"
+     }
+    ],
+    "answer": 1
+   }
+  ],
+  "names": [
+   "Иван",
+   "Ана",
+   "Петър",
+   "Мария"
+  ],
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 95,
+  "stage": 1,
+  "word_count": 96
+ },
+ {
+  "id": "R100c",
+  "level": 100,
+  "title": {
+   "bg": "Кафе или вода?",
+   "nl": "Koffie of water?",
+   "en": "Coffee or water?"
+  },
+  "paragraphs": [
+   {
+    "bg": "Мария е в кухнята и прави вечеря. На масата има хляб и вода. Иван е с нея. Той има кафе в ръката си.",
+    "nl": "Maria is in de keuken en maakt het avondeten. Op de tafel staan brood en water. Ivan is bij haar. Hij heeft koffie in zijn hand.",
+    "en": "Maria is in the kitchen and is making dinner. On the table there is bread and water. Ivan is with her. He has coffee in his hand."
+   },
+   {
+    "bg": "Петър вижда кафето и казва: „И аз искам кафе!“ „Не, кафето не е за деца“, казва Мария. „Можеш да вземеш вода.“ „Не искам вода!“ казва Петър.",
+    "nl": "Petar ziet de koffie en zegt: 'Ik wil ook koffie!' 'Nee, koffie is niet voor kinderen,' zegt Maria. 'Je mag water nemen.' 'Ik wil geen water!' zegt Petar.",
+    "en": "Petar sees the coffee and says: \"I want coffee too!\" \"No, coffee is not for children,\" says Maria. \"You can have water.\" \"I don't want water!\" says Petar."
+   },
+   {
+    "bg": "Ана отива на вратата. Това е приятелката ѝ Яна. „Здравейте!“ казва Яна. „Здравей, Яна! Има вечеря и за теб“, казва Мария.",
+    "nl": "Ana gaat naar de deur. Het is haar vriendin Jana. 'Hallo!' zegt Jana. 'Hallo, Jana! Er is ook avondeten voor jou,' zegt Maria.",
+    "en": "Ana goes to the door. It is her friend Yana. \"Hello!\" says Yana. \"Hello, Yana! There is dinner for you too,\" says Maria."
+   },
+   {
+    "bg": "Мария дава на Яна хляб и казва: „Какво искаш, Яна?“ „Вода, моля“, казва Яна.",
+    "nl": "Maria geeft Jana brood en zegt: 'Wat wil je, Jana?' 'Water, alsjeblieft,' zegt Jana.",
+    "en": "Maria gives Yana bread and says: \"What would you like, Yana?\" \"Water, please,\" says Yana."
+   },
+   {
+    "bg": "Петър гледа Яна и казва: „И аз искам вода, моля!“ Мария и Иван се гледат. Мария дава вода на Петър.",
+    "nl": "Petar kijkt naar Jana en zegt: 'Ik wil ook water, alsjeblieft!' Maria en Ivan kijken elkaar aan. Maria geeft Petar water.",
+    "en": "Petar looks at Yana and says: \"I want water too, please!\" Maria and Ivan look at each other. Maria gives Petar water."
+   }
+  ],
+  "words": {
+   "кафе": "кафе",
+   "или": "или",
+   "вода": "вода",
+   "мария": "Мария",
+   "в": "в",
+   "кухнята": "кухня",
+   "прави": "правя",
+   "вечеря": "вечеря",
+   "на": "на",
+   "масата": "маса",
+   "има": "имам",
+   "хляб": "хляб",
+   "иван": "Иван",
+   "с": "с",
+   "нея": "тя",
+   "той": "той",
+   "ръката": "ръка",
+   "петър": "Петър",
+   "вижда": "виждам",
+   "кафето": "кафе",
+   "казва": "казвам",
+   "аз": "аз",
+   "искам": "искам",
+   "за": "за",
+   "деца": "дете",
+   "можеш": "мога",
+   "вземеш": "вземам",
+   "ана": "Ана",
+   "отива": "отивам",
+   "вратата": "врата",
+   "това": "това",
+   "приятелката": "приятелка",
+   "яна": "Яна",
+   "здравейте": "Здравей",
+   "здравей": "Здравей",
+   "теб": "ти",
+   "дава": "давам",
+   "какво": "какво",
+   "искаш": "искам",
+   "моля": "Моля",
+   "гледа": "гледам",
+   "гледат": "гледам"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wat wil Petar eerst?",
+     "en": "What does Petar want at first?"
+    },
+    "options": [
+     {
+      "nl": "Water",
+      "en": "Water"
+     },
+     {
+      "nl": "Brood",
+      "en": "Bread"
+     },
+     {
+      "nl": "Koffie",
+      "en": "Coffee"
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waarom krijgt Petar geen koffie?",
+     "en": "Why doesn't Petar get coffee?"
+    },
+    "options": [
+     {
+      "nl": "Koffie is niet voor kinderen.",
+      "en": "Coffee is not for children."
+     },
+     {
+      "nl": "Ivan heeft de laatste koffie.",
+      "en": "Ivan has the last coffee."
+     },
+     {
+      "nl": "Jana wil de koffie.",
+      "en": "Yana wants the coffee."
+     },
+     {
+      "nl": "Er is geen koffie in de keuken.",
+      "en": "There is no coffee in the kitchen."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Wie staat er aan de deur?",
+     "en": "Who is at the door?"
+    },
+    "options": [
+     {
+      "nl": "Ivan",
+      "en": "Ivan"
+     },
+     {
+      "nl": "Jana, de vriendin van Ana",
+      "en": "Yana, Ana's friend"
+     },
+     {
+      "nl": "Een vriend van Petar",
+      "en": "A friend of Petar's"
+     },
+     {
+      "nl": "Een arts",
+      "en": "A doctor"
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat wil Jana drinken?",
+     "en": "What does Yana want to drink?"
+    },
+    "options": [
+     {
+      "nl": "Koffie",
+      "en": "Coffee"
+     },
+     {
+      "nl": "Niets",
+      "en": "Nothing"
+     },
+     {
+      "nl": "Water",
+      "en": "Water"
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waarom wil Petar aan het eind toch water?",
+     "en": "Why does Petar want water after all at the end?"
+    },
+    "options": [
+     {
+      "nl": "Maria zegt dat hij moet.",
+      "en": "Maria says he has to."
+     },
+     {
+      "nl": "Jana vraagt ook om water.",
+      "en": "Yana asks for water too."
+     },
+     {
+      "nl": "Ivan geeft hem geen koffie.",
+      "en": "Ivan doesn't give him coffee."
+     },
+     {
+      "nl": "Het brood is droog.",
+      "en": "The bread is dry."
+     }
+    ],
+    "answer": 1
+   }
+  ],
+  "names": [
+   "Мария",
+   "Иван",
+   "Петър",
+   "Ана",
+   "Яна"
+  ],
+  "extra": {
+   "приятелка": {
+    "nl": "vriendin",
+    "en": "(female) friend"
+   }
+  },
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 94,
+  "stage": 1,
+  "word_count": 107
+ },
+ {
+  "id": "R200a",
+  "level": 200,
+  "title": {
+   "bg": "Грип в неделя",
+   "nl": "Griep op zondag",
+   "en": "Flu on a Sunday"
+  },
+  "paragraphs": [
+   {
+    "bg": "Неделя е. Семейството е на масата за закуска, но Петър не идва. Той е в леглото и не иска да яде. „Петре, какво има?“, пита Ана. „Искам само да спя“, казва Петър.",
+    "nl": "Het is zondag. Het gezin zit aan tafel voor het ontbijt, maar Petar komt niet. Hij ligt in bed en wil niet eten. ‘Petar, wat is er?’ vraagt Ana. ‘Ik wil alleen slapen,’ zegt Petar.",
+    "en": "It is Sunday. The family is at the table for breakfast, but Petar doesn't come. He is in bed and doesn't want to eat. ‘Petar, what's wrong?’ asks Ana. ‘I just want to sleep,’ says Petar."
+   },
+   {
+    "bg": "Мария отива в стаята му. Петър има температура. Баща му, Иван, е лекар. Той идва, гледа очите, ушите и устата на сина си и казва: „Това е грип.“",
+    "nl": "Maria gaat naar zijn kamer. Petar heeft koorts. Zijn vader, Ivan, is dokter. Hij komt, kijkt naar de ogen, de oren en de mond van zijn zoon en zegt: ‘Dit is griep.’",
+    "en": "Maria goes to his room. Petar has a fever. His father, Ivan, is a doctor. He comes, looks at his son's eyes, ears and mouth and says: ‘This is the flu.’"
+   },
+   {
+    "bg": "Иван търси лекарство за деца, но в апартамента няма. Мария отива в аптеката и купува лекарство за Петър. Но Петър не иска да го пие. „Не го харесвам!“, казва той.",
+    "nl": "Ivan zoekt een medicijn voor kinderen, maar in het appartement is er geen. Maria gaat naar de apotheek en koopt een medicijn voor Petar. Maar Petar wil het niet innemen. ‘Ik vind het niet lekker!’ zegt hij.",
+    "en": "Ivan looks for a medicine for children, but there is none in the apartment. Maria goes to the pharmacy and buys a medicine for Petar. But Petar doesn't want to take it. ‘I don't like it!’ he says."
+   },
+   {
+    "bg": "Мария прави супа с пиле, ориз и малко чесън. Петър яде цялата супа. „Много е хубава!“, казва той. „Сега мога да пия и лекарството.“",
+    "nl": "Maria maakt soep met kip, rijst en een beetje knoflook. Petar eet de hele soep op. ‘Die is heel lekker!’ zegt hij. ‘Nu kan ik ook het medicijn innemen.’",
+    "en": "Maria makes soup with chicken, rice and a little garlic. Petar eats the whole soup. ‘It's very good!’ he says. ‘Now I can take the medicine too.’"
+   },
+   {
+    "bg": "Ана му дава и чаша чай. „За здраве, Петре!“, казва тя. Петър пие чая. Сега вече спи.",
+    "nl": "Ana geeft hem ook een kop thee. ‘Op je gezondheid, Petar!’ zegt ze. Petar drinkt de thee. Nu slaapt hij al.",
+    "en": "Ana also gives him a cup of tea. ‘To your health, Petar!’ she says. Petar drinks the tea. Now he is already asleep."
+   }
+  ],
+  "words": {
+   "грип": "грип",
+   "в": "в",
+   "неделя": "неделя",
+   "е": "съм",
+   "семейството": "семейство",
+   "на": "на",
+   "масата": "маса",
+   "за": "за",
+   "закуска": "закуска",
+   "но": "но",
+   "идва": "идвам",
+   "той": "той",
+   "леглото": "легло",
+   "и": "и",
+   "иска": "искам",
+   "яде": "ям",
+   "какво": "какво",
+   "има": "имам",
+   "пита": "питам",
+   "искам": "искам",
+   "само": "само",
+   "спя": "спя",
+   "казва": "казвам",
+   "отива": "отивам",
+   "стаята": "стая",
+   "му": "той",
+   "температура": "температура",
+   "баща": "баща",
+   "лекар": "лекар",
+   "гледа": "гледам",
+   "очите": "око",
+   "ушите": "ухо",
+   "устата": "уста",
+   "сина": "син",
+   "това": "това",
+   "търси": "търся",
+   "лекарство": "лекарство",
+   "деца": "дете",
+   "апартамента": "апартамент",
+   "няма": "нямам",
+   "аптеката": "аптека",
+   "купува": "купувам",
+   "го": "то",
+   "пие": "пия",
+   "харесвам": "харесвам",
+   "прави": "правя",
+   "супа": "супа",
+   "с": "с",
+   "пиле": "пиле",
+   "ориз": "ориз",
+   "малко": "малко",
+   "чесън": "чесън",
+   "цялата": "цял",
+   "много": "много",
+   "хубава": "хубав",
+   "сега": "сега",
+   "мога": "мога",
+   "пия": "пия",
+   "лекарството": "лекарство",
+   "дава": "давам",
+   "чаша": "чаша",
+   "чай": "чай",
+   "здраве": "здраве",
+   "тя": "тя",
+   "чая": "чай",
+   "вече": "вече",
+   "спи": "спя",
+   "ана": "Ана",
+   "иван": "Иван",
+   "мария": "Мария",
+   "петре": "Петре",
+   "петър": "Петър"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Waarom komt Petar niet naar het ontbijt?",
+     "en": "Why doesn't Petar come to breakfast?"
+    },
+    "options": [
+     {
+      "nl": "Hij is met Maria naar de apotheek.",
+      "en": "He is at the pharmacy with Maria."
+     },
+     {
+      "nl": "Hij ligt in bed en wil alleen slapen.",
+      "en": "He is in bed and only wants to sleep."
+     },
+     {
+      "nl": "Hij eet soep in de keuken.",
+      "en": "He is eating soup in the kitchen."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wie kijkt naar Petars ogen, oren en mond?",
+     "en": "Who looks at Petar's eyes, ears and mouth?"
+    },
+    "options": [
+     {
+      "nl": "Zijn vader Ivan",
+      "en": "His father Ivan"
+     },
+     {
+      "nl": "Zijn moeder Maria",
+      "en": "His mother Maria"
+     },
+     {
+      "nl": "Zijn zus Ana",
+      "en": "His sister Ana"
+     },
+     {
+      "nl": "Een dokter in het ziekenhuis",
+      "en": "A doctor at the hospital"
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waarom gaat Maria naar de apotheek?",
+     "en": "Why does Maria go to the pharmacy?"
+    },
+    "options": [
+     {
+      "nl": "Om kip en rijst voor de soep te kopen.",
+      "en": "To buy chicken and rice for the soup."
+     },
+     {
+      "nl": "Om thee voor Ana te kopen.",
+      "en": "To buy tea for Ana."
+     },
+     {
+      "nl": "Er is thuis geen medicijn voor kinderen.",
+      "en": "There is no medicine for children at home."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wanneer wil Petar het medicijn innemen?",
+     "en": "When is Petar willing to take the medicine?"
+    },
+    "options": [
+     {
+      "nl": "Als Ana hem thee geeft.",
+      "en": "When Ana gives him tea."
+     },
+     {
+      "nl": "Na het ontbijt met het gezin.",
+      "en": "After breakfast with the family."
+     },
+     {
+      "nl": "Hij wil het helemaal niet innemen.",
+      "en": "He doesn't want to take it at all."
+     },
+     {
+      "nl": "Als hij de soep van Maria op heeft.",
+      "en": "When he has eaten Maria's soup."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Ана",
+   "Иван",
+   "Мария",
+   "Петре",
+   "Петър"
+  ],
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 200,
+  "stage": 1,
+  "word_count": 134
+ },
+ {
+  "id": "R200b",
+  "level": 200,
+  "title": {
+   "bg": "Неделя в Пловдив",
+   "nl": "Zondag in Plovdiv",
+   "en": "Sunday in Plovdiv"
+  },
+  "paragraphs": [
+   {
+    "bg": "Тази неделя семейството е в Пловдив. Там живеят баба Елена и дядо Георги, родителите на Мария. Те имат стара къща с голяма кухня.",
+    "nl": "Deze zondag is het gezin in Plovdiv. Daar wonen oma Elena en opa Georgi, de ouders van Maria. Ze hebben een oud huis met een grote keuken.",
+    "en": "This Sunday the family is in Plovdiv. Grandma Elena and Grandpa Georgi, Maria's parents, live there. They have an old house with a big kitchen."
+   },
+   {
+    "bg": "Баба Елена прави баница със сирене, а Ана ѝ помага. „Бабо, колко яйца искаш?“, пита Ана. „Четири“, отговаря баба. „И малко масло.“ Иван и Мария пият кафе на масата.",
+    "nl": "Oma Elena maakt banitsa met witte kaas en Ana helpt haar. ‘Oma, hoeveel eieren wil je?’ vraagt Ana. ‘Vier,’ antwoordt oma. ‘En een beetje boter.’ Ivan en Maria drinken koffie aan tafel.",
+    "en": "Grandma Elena is making banitsa with white cheese, and Ana is helping her. ‘Grandma, how many eggs do you want?’ asks Ana. ‘Four,’ answers Grandma. ‘And a little butter.’ Ivan and Maria are drinking coffee at the table."
+   },
+   {
+    "bg": "Дядо Георги и Петър отиват да купят кисело мляко. Но Петър вижда банани. „Дядо, искам банан!“ Дядо Георги купува пет банана и забравя киселото мляко.",
+    "nl": "Opa Georgi en Petar gaan yoghurt kopen. Maar Petar ziet bananen. ‘Opa, ik wil een banaan!’ Opa Georgi koopt vijf bananen en vergeet de yoghurt.",
+    "en": "Grandpa Georgi and Petar go to buy yogurt. But Petar sees bananas. ‘Grandpa, I want a banana!’ Grandpa Georgi buys five bananas and forgets the yogurt."
+   },
+   {
+    "bg": "В къщата баба Елена пита: „Георги, къде е киселото мляко?“ Дядо гледа Петър, Петър гледа дядо. „Няма кисело мляко“, казва Петър, „но има банани!“",
+    "nl": "In het huis vraagt oma Elena: ‘Georgi, waar is de yoghurt?’ Opa kijkt naar Petar, Petar kijkt naar opa. ‘Er is geen yoghurt,’ zegt Petar, ‘maar er zijn bananen!’",
+    "en": "In the house Grandma Elena asks: ‘Georgi, where is the yogurt?’ Grandpa looks at Petar, Petar looks at Grandpa. ‘There is no yogurt,’ says Petar, ‘but there are bananas!’"
+   },
+   {
+    "bg": "На обяд семейството яде баница на голямата маса. Петър яде баница с банан. „Това е най-хубавият обяд!“, казва той. И дядо Георги взема един банан.",
+    "nl": "Bij de lunch eet het gezin banitsa aan de grote tafel. Petar eet banitsa met banaan. ‘Dit is de beste lunch!’ zegt hij. Ook opa Georgi neemt een banaan.",
+    "en": "At lunch the family eats banitsa at the big table. Petar eats banitsa with banana. ‘This is the best lunch!’ he says. Grandpa Georgi takes a banana too."
+   }
+  ],
+  "words": {
+   "неделя": "неделя",
+   "в": "в",
+   "тази": "този",
+   "семейството": "семейство",
+   "е": "съм",
+   "там": "там",
+   "живеят": "живея",
+   "баба": "баба",
+   "и": "и",
+   "дядо": "дядо",
+   "родителите": "родител",
+   "на": "на",
+   "те": "те",
+   "имат": "имам",
+   "стара": "стар",
+   "къща": "къща",
+   "с": "с",
+   "голяма": "голям",
+   "кухня": "кухня",
+   "прави": "правя",
+   "баница": "баница",
+   "със": "с",
+   "сирене": "сирене",
+   "а": "а",
+   "помага": "помагам",
+   "бабо": "баба",
+   "колко": "колко",
+   "яйца": "яйце",
+   "искаш": "искам",
+   "пита": "питам",
+   "четири": "четири",
+   "отговаря": "отговарям",
+   "малко": "малко",
+   "масло": "масло",
+   "пият": "пия",
+   "кафе": "кафе",
+   "масата": "маса",
+   "отиват": "отивам",
+   "купят": "купувам",
+   "кисело": "кисело мляко",
+   "мляко": "кисело мляко",
+   "но": "но",
+   "вижда": "виждам",
+   "банани": "банан",
+   "искам": "искам",
+   "банан": "банан",
+   "купува": "купувам",
+   "пет": "пет",
+   "банана": "банан",
+   "забравя": "забравям",
+   "киселото": "кисело мляко",
+   "къщата": "къща",
+   "къде": "къде",
+   "гледа": "гледам",
+   "няма": "нямам",
+   "казва": "казвам",
+   "има": "имам",
+   "обяд": "обяд",
+   "яде": "ям",
+   "голямата": "голям",
+   "маса": "маса",
+   "това": "това",
+   "хубавият": "хубав",
+   "той": "той",
+   "взема": "вземам",
+   "един": "един",
+   "ана": "Ана",
+   "георги": "Георги",
+   "елена": "Елена",
+   "иван": "Иван",
+   "мария": "Мария",
+   "петър": "Петър",
+   "пловдив": "Пловдив"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wie helpt oma Elena met de banitsa?",
+     "en": "Who helps Grandma Elena with the banitsa?"
+    },
+    "options": [
+     {
+      "nl": "Maria",
+      "en": "Maria"
+     },
+     {
+      "nl": "Opa Georgi",
+      "en": "Grandpa Georgi"
+     },
+     {
+      "nl": "Ana",
+      "en": "Ana"
+     },
+     {
+      "nl": "Petar",
+      "en": "Petar"
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wat willen opa Georgi en Petar eigenlijk gaan kopen?",
+     "en": "What do Grandpa Georgi and Petar set out to buy?"
+    },
+    "options": [
+     {
+      "nl": "Yoghurt",
+      "en": "Yogurt"
+     },
+     {
+      "nl": "Bananen",
+      "en": "Bananas"
+     },
+     {
+      "nl": "Eieren en boter",
+      "en": "Eggs and butter"
+     },
+     {
+      "nl": "Witte kaas",
+      "en": "White cheese"
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waarom is er geen yoghurt?",
+     "en": "Why is there no yogurt?"
+    },
+    "options": [
+     {
+      "nl": "Oma Elena vergeet hem te kopen.",
+      "en": "Grandma Elena forgets to buy it."
+     },
+     {
+      "nl": "Petar wil bananen en opa vergeet de yoghurt.",
+      "en": "Petar wants bananas and Grandpa forgets the yogurt."
+     },
+     {
+      "nl": "Ana eet alle yoghurt op.",
+      "en": "Ana eats all the yogurt."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat eet Petar bij de lunch?",
+     "en": "What does Petar eat at lunch?"
+    },
+    "options": [
+     {
+      "nl": "Banitsa met yoghurt",
+      "en": "Banitsa with yogurt"
+     },
+     {
+      "nl": "Alleen bananen",
+      "en": "Only bananas"
+     },
+     {
+      "nl": "Banitsa met banaan",
+      "en": "Banitsa with banana"
+     }
+    ],
+    "answer": 2
+   }
+  ],
+  "names": [
+   "Ана",
+   "Георги",
+   "Елена",
+   "Иван",
+   "Мария",
+   "Петър",
+   "Пловдив"
+  ],
+  "grammar": [
+   "present",
+   "da-clause",
+   "comparative",
+   "numeral"
+  ],
+  "max_rank": 197,
+  "stage": 1,
+  "word_count": 130
+ },
+ {
+  "id": "R200c",
+  "level": 200,
+  "title": {
+   "bg": "В ресторанта",
+   "nl": "In het restaurant",
+   "en": "At the restaurant"
+  },
+  "paragraphs": [
+   {
+    "bg": "Семейството е в един малък ресторант в София. Ресторантът е стар, но храната е много хубава. Една госпожица идва и пита какво искат.",
+    "nl": "Het gezin is in een klein restaurant in Sofia. Het restaurant is oud, maar het eten is heel lekker. Een jongedame komt en vraagt wat ze willen.",
+    "en": "The family is in a small restaurant in Sofia. The restaurant is old, but the food is very good. A young woman comes and asks what they want."
+   },
+   {
+    "bg": "Иван иска шопска салата и бира. Мария иска риба и чаша вино. Ана иска кюфтета и чай, а Петър иска само кебапчета.",
+    "nl": "Ivan wil een shopska salade en bier. Maria wil vis en een glas wijn. Ana wil gehaktballetjes en thee, en Petar wil alleen kebaptsjeta.",
+    "en": "Ivan wants a shopska salad and beer. Maria wants fish and a glass of wine. Ana wants meatballs and tea, and Petar only wants kebapcheta."
+   },
+   {
+    "bg": "Госпожицата идва с храната. Но тя дава рибата на Петър, а кебапчетата на Мария. Петър гледа рибата. „Аз не ям риба!“, казва той. Мария взема рибата и му дава кебапчетата.",
+    "nl": "De jongedame komt met het eten. Maar ze geeft de vis aan Petar en de kebaptsjeta aan Maria. Petar kijkt naar de vis. ‘Ik eet geen vis!’ zegt hij. Maria neemt de vis en geeft hem de kebaptsjeta.",
+    "en": "The young woman comes with the food. But she gives the fish to Petar and the kebapcheta to Maria. Petar looks at the fish. ‘I don't eat fish!’ he says. Maria takes the fish and gives him the kebapcheta."
+   },
+   {
+    "bg": "Иван търси сиренето в салатата. Там има краставици, но няма сирене. „Каква шопска салата е това?“, пита той. Госпожицата казва: „Извинете!“ и идва пак с много сирене.",
+    "nl": "Ivan zoekt de kaas in de salade. Er zit komkommer in, maar geen kaas. ‘Wat voor shopska salade is dit?’ vraagt hij. De jongedame zegt: ‘Sorry!’ en komt terug met veel kaas.",
+    "en": "Ivan looks for the cheese in the salad. There are cucumbers in it, but no cheese. ‘What kind of shopska salad is this?’ he asks. The young woman says: ‘Sorry!’ and comes back with a lot of cheese."
+   },
+   {
+    "bg": "Сега семейството яде и пие. Иван харесва салатата, а Мария – виното. Ана гледа Петър и пита: „Искаш ли риба, Петре?“ „Не!“, казва Петър.",
+    "nl": "Nu eet en drinkt het gezin. Ivan vindt de salade lekker, en Maria de wijn. Ana kijkt naar Petar en vraagt: ‘Wil je vis, Petar?’ ‘Nee!’ zegt Petar.",
+    "en": "Now the family eats and drinks. Ivan likes the salad, and Maria the wine. Ana looks at Petar and asks: ‘Do you want some fish, Petar?’ ‘No!’ says Petar."
+   }
+  ],
+  "words": {
+   "в": "в",
+   "ресторанта": "ресторант",
+   "семейството": "семейство",
+   "е": "съм",
+   "един": "един",
+   "малък": "малък",
+   "ресторант": "ресторант",
+   "ресторантът": "ресторант",
+   "стар": "стар",
+   "но": "но",
+   "храната": "храна",
+   "много": "много",
+   "хубава": "хубав",
+   "една": "един",
+   "госпожица": "госпожица",
+   "идва": "идвам",
+   "и": "и",
+   "пита": "питам",
+   "какво": "какво",
+   "искат": "искам",
+   "иска": "искам",
+   "шопска": "шопска салата",
+   "салата": "шопска салата",
+   "бира": "бира",
+   "риба": "риба",
+   "чаша": "чаша",
+   "вино": "вино",
+   "кюфтета": "кюфте",
+   "чай": "чай",
+   "а": "а",
+   "само": "само",
+   "кебапчета": "кебапче",
+   "госпожицата": "госпожица",
+   "с": "с",
+   "тя": "тя",
+   "дава": "давам",
+   "рибата": "риба",
+   "на": "на",
+   "кебапчетата": "кебапче",
+   "гледа": "гледам",
+   "аз": "аз",
+   "ям": "ям",
+   "казва": "казвам",
+   "той": "той",
+   "взема": "вземам",
+   "му": "той",
+   "търси": "търся",
+   "сиренето": "сирене",
+   "салатата": "салата",
+   "там": "там",
+   "има": "имам",
+   "краставици": "краставица",
+   "няма": "нямам",
+   "сирене": "сирене",
+   "каква": "какъв",
+   "това": "това",
+   "извинете": "Извинете",
+   "пак": "пак",
+   "сега": "сега",
+   "яде": "ям",
+   "пие": "пия",
+   "харесва": "харесвам",
+   "виното": "вино",
+   "искаш": "искам",
+   "ана": "Ана",
+   "иван": "Иван",
+   "мария": "Мария",
+   "петре": "Петре",
+   "петър": "Петър",
+   "софия": "София"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wat wil Ivan eten en drinken?",
+     "en": "What does Ivan want to eat and drink?"
+    },
+    "options": [
+     {
+      "nl": "Vis en wijn",
+      "en": "Fish and wine"
+     },
+     {
+      "nl": "Shopska salade en bier",
+      "en": "Shopska salad and beer"
+     },
+     {
+      "nl": "Gehaktballetjes en thee",
+      "en": "Meatballs and tea"
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat gaat er mis met het eten van Petar?",
+     "en": "What goes wrong with Petar's food?"
+    },
+    "options": [
+     {
+      "nl": "Hij krijgt de gehaktballetjes van Ana.",
+      "en": "He gets Ana's meatballs."
+     },
+     {
+      "nl": "Er zit geen kaas op zijn kebaptsjeta.",
+      "en": "There is no cheese on his kebapcheta."
+     },
+     {
+      "nl": "Hij krijgt de vis van Maria.",
+      "en": "He gets Maria's fish."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wat ontbreekt er in de salade van Ivan?",
+     "en": "What is missing from Ivan's salad?"
+    },
+    "options": [
+     {
+      "nl": "Kaas",
+      "en": "Cheese"
+     },
+     {
+      "nl": "Komkommer",
+      "en": "Cucumber"
+     },
+     {
+      "nl": "Vis",
+      "en": "Fish"
+     },
+     {
+      "nl": "Wijn",
+      "en": "Wine"
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Wat vraagt Ana aan het eind aan Petar?",
+     "en": "What does Ana ask Petar at the end?"
+    },
+    "options": [
+     {
+      "nl": "Of hij thee wil.",
+      "en": "Whether he wants tea."
+     },
+     {
+      "nl": "Of hij kebaptsjeta wil.",
+      "en": "Whether he wants kebapcheta."
+     },
+     {
+      "nl": "Of hij de salade lekker vindt.",
+      "en": "Whether he likes the salad."
+     },
+     {
+      "nl": "Of hij vis wil.",
+      "en": "Whether he wants fish."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Ана",
+   "Иван",
+   "Мария",
+   "Петре",
+   "Петър",
+   "София"
+  ],
+  "extra": {
+   "Извинете": {
+    "nl": "pardon, sorry (beleefd)",
+    "en": "excuse me, sorry (formal)"
+   }
+  },
+  "grammar": [
+   "present"
+  ],
+  "max_rank": 199,
+  "stage": 1,
+  "word_count": 127
+ },
+ {
+  "id": "R300a",
+  "level": 300,
+  "title": {
+   "bg": "Новите дрехи",
+   "nl": "De nieuwe kleren",
+   "en": "The new clothes"
+  },
+  "paragraphs": [
+   {
+    "bg": "Петък е. Мария и Ана излизат, защото в неделя отиват на гости на баба Елена и дядо Георги в Пловдив. Ана иска да носи нова рокля там. Те влизат в един магазин за дрехи.",
+    "nl": "Het is vrijdag. Maria en Ana gaan de deur uit, want op zondag gaan ze op bezoek bij oma Elena en opa Georgi in Plovdiv. Ana wil daar een nieuwe jurk dragen. Ze gaan een kledingwinkel binnen.",
+    "en": "It is Friday. Maria and Ana go out, because on Sunday they are visiting grandma Elena and grandpa Georgi in Plovdiv. Ana wants to wear a new dress there. They go into a clothes shop."
+   },
+   {
+    "bg": "Мария намира една дълга рокля. „Харесваш ли я?“ – пита тя. „Не, мамо. Много е дълга“ – отговаря Ана. После Мария намира една къса рокля. „А тази?“ „Тази е грозна.“ „Ами какво искаш тогава?“ – пита Мария. „Не искам рокля. Искам пола и риза.“",
+    "nl": "Maria vindt een lange jurk. ‘Vind je hem mooi?’ vraagt ze. ‘Nee, mam. Hij is heel lang,’ antwoordt Ana. Daarna vindt Maria een korte jurk. ‘En deze?’ ‘Deze is lelijk.’ ‘Tja, wat wil je dan?’ vraagt Maria. ‘Ik wil geen jurk. Ik wil een rok en een bloes.’",
+    "en": "Maria finds a long dress. 'Do you like it?' she asks. 'No, Mum. It's very long,' Ana answers. Then Maria finds a short dress. 'And this one?' 'This one is ugly.' 'Well, what do you want then?' asks Maria. 'I don't want a dress. I want a skirt and a shirt.'"
+   },
+   {
+    "bg": "Ана взема една пола и една риза и влиза в една малка стая. Мария седи на един стол и чака. Тя слага чантата си на пода. После Ана излиза. Полата и ризата ѝ стоят много добре. „Колко си красива!“ – казва Мария.",
+    "nl": "Ana pakt een rok en een bloes en gaat een kleine kamer binnen. Maria zit op een stoel en wacht. Ze zet haar tas op de grond. Daarna komt Ana naar buiten. De rok en de bloes staan haar heel goed. ‘Wat ben je mooi!’ zegt Maria.",
+    "en": "Ana takes a skirt and a shirt and goes into a small room. Maria sits on a chair and waits. She puts her bag on the floor. Then Ana comes out. The skirt and the shirt suit her very well. 'How pretty you are!' says Maria."
+   },
+   {
+    "bg": "После Ана вижда една шапка и едно яке. Тя слага шапката на главата на майка си. „Мамо, тази шапка е за теб!“ Мария харесва шапката и якето. Тя взема шапката, но не взема якето, защото вече има две якета.",
+    "nl": "Dan ziet Ana een hoed en een jas. Ze zet de hoed op het hoofd van haar moeder. ‘Mam, deze hoed is voor jou!’ Maria vindt de hoed en de jas mooi. Ze neemt de hoed, maar niet de jas, want ze heeft al twee jassen.",
+    "en": "Then Ana sees a hat and a jacket. She puts the hat on her mother's head. 'Mum, this hat is for you!' Maria likes the hat and the jacket. She takes the hat but not the jacket, because she already has two jackets."
+   },
+   {
+    "bg": "Те отиват да платят. Мария търси чантата си, но не я намира. „Къде е чантата ми?“ Ана ѝ помага да търси. После казва: „Ето я, мамо! Там е, на пода.“ Мария плаща сметката. „Добре, че си с мен!“ – казва тя на Ана.",
+    "nl": "Ze gaan betalen. Maria zoekt haar tas, maar ze vindt hem niet. ‘Waar is mijn tas?’ Ana helpt haar zoeken. Dan zegt ze: ‘Daar is hij, mam! Hij ligt daar, op de grond.’ Maria betaalt de rekening. ‘Gelukkig ben jij bij me!’ zegt ze tegen Ana.",
+    "en": "They go to pay. Maria looks for her bag, but she can't find it. 'Where is my bag?' Ana helps her look. Then she says: 'There it is, Mum! It's over there, on the floor.' Maria pays the bill. 'Good thing you're with me!' she says to Ana."
+   }
+  ],
+  "words": {
+   "новите": "нов",
+   "дрехи": "дреха",
+   "петък": "петък",
+   "излизат": "излизам",
+   "защото": "защото",
+   "в": "в",
+   "неделя": "неделя",
+   "отиват": "отивам",
+   "на": "на",
+   "гости": "гост",
+   "баба": "баба",
+   "дядо": "дядо",
+   "иска": "искам",
+   "носи": "нося",
+   "нова": "нов",
+   "рокля": "рокля",
+   "там": "там",
+   "те": "те",
+   "влизат": "влизам",
+   "един": "един",
+   "магазин": "магазин",
+   "за": "за",
+   "намира": "намирам",
+   "една": "един",
+   "дълга": "дълъг",
+   "харесваш": "харесвам",
+   "я": "тя",
+   "пита": "питам",
+   "тя": "тя",
+   "мамо": "мама",
+   "много": "много",
+   "отговаря": "отговарям",
+   "после": "после",
+   "къса": "къс",
+   "а": "а",
+   "тази": "този",
+   "грозна": "грозен",
+   "ами": "Ами…",
+   "какво": "какво",
+   "искаш": "искам",
+   "тогава": "тогава",
+   "искам": "искам",
+   "пола": "пола",
+   "риза": "риза",
+   "взема": "вземам",
+   "влиза": "влизам",
+   "малка": "малък",
+   "стая": "стая",
+   "седи": "седя",
+   "стол": "стол",
+   "чака": "чакам",
+   "слага": "слагам",
+   "чантата": "чанта",
+   "пода": "под",
+   "излиза": "излизам",
+   "полата": "пола",
+   "ризата": "риза",
+   "стоят": "стоя",
+   "добре": "добре",
+   "колко": "колко",
+   "красива": "красив",
+   "казва": "казвам",
+   "вижда": "виждам",
+   "шапка": "шапка",
+   "едно": "един",
+   "яке": "яке",
+   "шапката": "шапка",
+   "главата": "глава",
+   "майка": "майка",
+   "теб": "ти",
+   "харесва": "харесвам",
+   "якето": "яке",
+   "но": "но",
+   "вече": "вече",
+   "има": "имам",
+   "две": "две",
+   "якета": "яке",
+   "платят": "плащам",
+   "търси": "търся",
+   "къде": "къде",
+   "ми": "аз",
+   "помага": "помагам",
+   "ето": "ето",
+   "плаща": "плащам",
+   "сметката": "сметка",
+   "че": "че",
+   "с": "с",
+   "мен": "аз"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Waarom wil Ana nieuwe kleren?",
+     "en": "Why does Ana want new clothes?"
+    },
+    "options": [
+     {
+      "nl": "Ze gaat op vrijdag bij opa en oma op bezoek.",
+      "en": "She is visiting her grandparents on Friday."
+     },
+     {
+      "nl": "Ze gaat op zondag bij opa en oma op bezoek.",
+      "en": "She is visiting her grandparents on Sunday."
+     },
+     {
+      "nl": "Haar oude jurk is te kort.",
+      "en": "Her old dress is too short."
+     },
+     {
+      "nl": "Maria wil een nieuwe hoed.",
+      "en": "Maria wants a new hat."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat wil Ana uiteindelijk dragen?",
+     "en": "What does Ana want to wear in the end?"
+    },
+    "options": [
+     {
+      "nl": "Een lange jurk",
+      "en": "A long dress"
+     },
+     {
+      "nl": "Een korte jurk",
+      "en": "A short dress"
+     },
+     {
+      "nl": "Een rok en een bloes",
+      "en": "A skirt and a shirt"
+     },
+     {
+      "nl": "Een jas en een hoed",
+      "en": "A jacket and a hat"
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waarom neemt Maria de jas niet?",
+     "en": "Why doesn't Maria take the jacket?"
+    },
+    "options": [
+     {
+      "nl": "Ze heeft al twee jassen.",
+      "en": "She already has two jackets."
+     },
+     {
+      "nl": "De jas is lelijk.",
+      "en": "The jacket is ugly."
+     },
+     {
+      "nl": "Ana vindt de jas niet mooi.",
+      "en": "Ana doesn't like the jacket."
+     },
+     {
+      "nl": "Ze kan haar tas niet vinden.",
+      "en": "She can't find her bag."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waar is Maria’s tas?",
+     "en": "Where is Maria's bag?"
+    },
+    "options": [
+     {
+      "nl": "In de kleine kamer",
+      "en": "In the small room"
+     },
+     {
+      "nl": "Op de stoel",
+      "en": "On the chair"
+     },
+     {
+      "nl": "Thuis in Sofia",
+      "en": "At home in Sofia"
+     },
+     {
+      "nl": "Op de grond",
+      "en": "On the floor"
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Мария",
+   "Ана",
+   "Елена",
+   "Георги",
+   "Пловдив"
+  ],
+  "extra": {
+   "магазин": {
+    "nl": "winkel",
+    "en": "shop"
+   }
+  },
+  "grammar": [
+   "present",
+   "da-clause",
+   "numeral"
+  ],
+  "max_rank": 296,
+  "stage": 1,
+  "word_count": 199
+ },
+ {
+  "id": "R300b",
+  "level": 300,
+  "title": {
+   "bg": "Пералнята спира",
+   "nl": "De wasmachine stopt",
+   "en": "The washing machine stops"
+  },
+  "paragraphs": [
+   {
+    "bg": "Вторник е. Мария слага дрехите на децата в пералнята. Пералнята започва да работи, но после спира. Мария чака, но пералнята вече не работи, а на пода в банята има вода.",
+    "nl": "Het is dinsdag. Maria stopt de kleren van de kinderen in de wasmachine. De wasmachine begint te draaien, maar stopt dan. Maria wacht, maar de wasmachine doet het niet meer, en op de vloer van de badkamer staat water.",
+    "en": "It is Tuesday. Maria puts the children's clothes in the washing machine. The washing machine starts working, but then it stops. Maria waits, but the washing machine doesn't work any more, and there is water on the bathroom floor."
+   },
+   {
+    "bg": "Иван е в болницата и Мария не знае какво да прави. „Мамо, господин Стоянов може да ни помогне“ – казва Ана. Господин Стоянов е старият им съсед и знае много за перални. Ана излиза и се връща с него.",
+    "nl": "Ivan is in het ziekenhuis en Maria weet niet wat ze moet doen. ‘Mam, meneer Stojanov kan ons helpen,’ zegt Ana. Meneer Stojanov is hun oude buurman en hij weet veel van wasmachines. Ana gaat naar buiten en komt met hem terug.",
+    "en": "Ivan is at the hospital and Maria doesn't know what to do. 'Mum, Mr Stoyanov can help us,' says Ana. Mr Stoyanov is their old neighbour and he knows a lot about washing machines. Ana goes out and comes back with him."
+   },
+   {
+    "bg": "Господин Стоянов е стар и нисък, но още е силен. Той слага очилата си и гледа пералнята. Търси дълго. После казва: „Ето го!“ В ръката си държи един малък чорап.",
+    "nl": "Meneer Stojanov is oud en klein, maar nog sterk. Hij zet zijn bril op en bekijkt de wasmachine. Hij zoekt lang. Dan zegt hij: ‘Hier is het!’ In zijn hand houdt hij een kleine sok.",
+    "en": "Mr Stoyanov is old and short, but still strong. He puts on his glasses and looks at the washing machine. He searches for a long time. Then he says: 'Here it is!' In his hand he holds a small sock."
+   },
+   {
+    "bg": "„Чий е този чорап?“ – пита съседът. „На брат ми Петър е“ – казва Ана. „Ами… аз го търся от понеделник!“ – казва Петър. Сега пералнята пак работи. Ана и Петър помагат на мама с водата на пода.",
+    "nl": "‘Van wie is deze sok?’ vraagt de buurman. ‘Van mijn broer Petar,’ zegt Ana. ‘Eh… die zoek ik al sinds maandag!’ zegt Petar. Nu draait de wasmachine weer. Ana en Petar helpen mama met het water op de vloer.",
+    "en": "'Whose sock is this?' asks the neighbour. 'It's my brother Petar's,' says Ana. 'Um… I've been looking for it since Monday!' says Petar. Now the washing machine works again. Ana and Petar help Mum with the water on the floor."
+   },
+   {
+    "bg": "После Мария дава на господин Стоянов кафе и баница. „Колко сте добър!“ – казва тя. „Няма защо“ – отговаря съседът. Петър взема чорапа си. Сега той пак има два чорапа!",
+    "nl": "Daarna geeft Maria meneer Stojanov koffie en banitsa. ‘Wat bent u aardig!’ zegt ze. ‘Graag gedaan,’ antwoordt de buurman. Petar pakt zijn sok. Nu heeft hij weer twee sokken!",
+    "en": "Afterwards Maria gives Mr Stoyanov coffee and banitsa. 'How kind you are!' she says. 'Don't mention it,' the neighbour answers. Petar takes his sock. Now he has two socks again!"
+   }
+  ],
+  "words": {
+   "пералнята": "пералня",
+   "спира": "спирам",
+   "вторник": "вторник",
+   "слага": "слагам",
+   "дрехите": "дреха",
+   "на": "на",
+   "децата": "дете",
+   "в": "в",
+   "започва": "започвам",
+   "работи": "работя",
+   "но": "но",
+   "после": "после",
+   "чака": "чакам",
+   "а": "а",
+   "пода": "под",
+   "банята": "баня",
+   "има": "имам",
+   "вода": "вода",
+   "болницата": "болница",
+   "знае": "знам",
+   "какво": "какво",
+   "прави": "правя",
+   "мамо": "мама",
+   "господин": "господин",
+   "може": "мога",
+   "ни": "ние",
+   "помогне": "помагам",
+   "казва": "казвам",
+   "старият": "стар",
+   "им": "те",
+   "съсед": "съсед",
+   "много": "много",
+   "за": "за",
+   "перални": "пералня",
+   "излиза": "излизам",
+   "връща": "връщам се",
+   "с": "с",
+   "него": "той",
+   "стар": "стар",
+   "нисък": "нисък",
+   "още": "още",
+   "силен": "силен",
+   "той": "той",
+   "очилата": "очила",
+   "гледа": "гледам",
+   "търси": "търся",
+   "дълго": "дълъг",
+   "ето": "ето",
+   "го": "той",
+   "ръката": "ръка",
+   "държи": "държа",
+   "един": "един",
+   "малък": "малък",
+   "чорап": "чорап",
+   "чий": "чий",
+   "този": "този",
+   "пита": "питам",
+   "съседът": "съсед",
+   "брат": "брат",
+   "ми": "аз",
+   "ами": "Ами…",
+   "аз": "аз",
+   "търся": "търся",
+   "от": "от",
+   "понеделник": "понеделник",
+   "сега": "сега",
+   "пак": "пак",
+   "помагат": "помагам",
+   "мама": "мама",
+   "водата": "вода",
+   "дава": "давам",
+   "кафе": "кафе",
+   "баница": "баница",
+   "колко": "колко",
+   "добър": "добър",
+   "тя": "тя",
+   "няма": "Няма защо",
+   "защо": "Няма защо",
+   "отговаря": "отговарям",
+   "взема": "вземам",
+   "чорапа": "чорап",
+   "два": "две",
+   "вече": "вече"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wat is er mis met de wasmachine?",
+     "en": "What is wrong with the washing machine?"
+    },
+    "options": [
+     {
+      "nl": "Hij begint niet.",
+      "en": "It doesn't start."
+     },
+     {
+      "nl": "Hij stopt en er staat water op de vloer.",
+      "en": "It stops and there is water on the floor."
+     },
+     {
+      "nl": "Hij maakt de kleren kapot.",
+      "en": "It ruins the clothes."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Waarom helpt Ivan niet?",
+     "en": "Why doesn't Ivan help?"
+    },
+    "options": [
+     {
+      "nl": "Hij is in het ziekenhuis.",
+      "en": "He is at the hospital."
+     },
+     {
+      "nl": "Hij is bij de buurman.",
+      "en": "He is at the neighbour's."
+     },
+     {
+      "nl": "Hij weet niets van wasmachines.",
+      "en": "He knows nothing about washing machines."
+     },
+     {
+      "nl": "Hij slaapt.",
+      "en": "He is asleep."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Wat vindt meneer Stojanov in de wasmachine?",
+     "en": "What does Mr Stoyanov find in the washing machine?"
+    },
+    "options": [
+     {
+      "nl": "Zijn bril",
+      "en": "His glasses"
+     },
+     {
+      "nl": "Een sleutel",
+      "en": "A key"
+     },
+     {
+      "nl": "Een sok van Petar",
+      "en": "One of Petar's socks"
+     },
+     {
+      "nl": "Een rok van Ana",
+      "en": "One of Ana's skirts"
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wat heeft Petar aan het eind weer?",
+     "en": "What does Petar have again at the end?"
+    },
+    "options": [
+     {
+      "nl": "Zijn bril",
+      "en": "His glasses"
+     },
+     {
+      "nl": "Schone kleren",
+      "en": "Clean clothes"
+     },
+     {
+      "nl": "Koffie en banitsa",
+      "en": "Coffee and banitsa"
+     },
+     {
+      "nl": "Twee sokken",
+      "en": "Two socks"
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Мария",
+   "Ана",
+   "Иван",
+   "Стоянов",
+   "Петър"
+  ],
+  "grammar": [
+   "present",
+   "da-clause",
+   "numeral"
+  ],
+  "max_rank": 296,
+  "stage": 1,
+  "word_count": 163
+ },
+ {
+  "id": "R300c",
+  "level": 300,
+  "title": {
+   "bg": "Петър не може да спи",
+   "nl": "Petar kan niet slapen",
+   "en": "Petar can't sleep"
+  },
+  "paragraphs": [
+   {
+    "bg": "Петък е. Мария е в кухнята и прави вечеря: в тигана има кюфтета, а в тенджерата – картофи. Ана слага чиниите и вилиците на масата, а Петър носи хляба. Иван се връща от болницата и семейството яде и говори дълго.",
+    "nl": "Het is vrijdag. Maria staat in de keuken en maakt het avondeten: in de koekenpan liggen gehaktballetjes en in de pan aardappels. Ana zet de borden en de vorken op tafel en Petar brengt het brood. Ivan komt terug uit het ziekenhuis en het gezin eet en praat lang.",
+    "en": "It is Friday. Maria is in the kitchen making dinner: there are meatballs in the frying pan and potatoes in the pot. Ana puts the plates and the forks on the table, and Petar brings the bread. Ivan comes back from the hospital and the family eats and talks for a long time."
+   },
+   {
+    "bg": "После децата отиват в стаята си. Ана лежи в леглото, затваря очи и вече спи. Петър обаче не може да спи. Той лежи и гледа тавана. После слага възглавницата на главата си, но пак не може да спи.",
+    "nl": "Daarna gaan de kinderen naar hun kamer. Ana ligt in bed, doet haar ogen dicht en slaapt al. Maar Petar kan niet slapen. Hij ligt naar het plafond te kijken. Dan legt hij het kussen op zijn hoofd, maar hij kan nog steeds niet slapen.",
+    "en": "Then the children go to their room. Ana lies in bed, closes her eyes and is already asleep. Petar, however, can't sleep. He lies there looking at the ceiling. Then he puts the pillow on his head, but he still can't sleep."
+   },
+   {
+    "bg": "Петър става и отива в голямата стая. Там Иван и Мария седят на дивана и четат. „Мамо, тате, не мога да спя!“ „Защо, Петре?“ – пита Мария. „Мисля за баба и дядо. В неделя отиваме на гости в Пловдив, нали?“ „Да, отиваме“ – казва Иван.",
+    "nl": "Petar staat op en gaat naar de woonkamer. Daar zitten Ivan en Maria op de bank te lezen. ‘Mam, pap, ik kan niet slapen!’ ‘Waarom niet, Petar?’ vraagt Maria. ‘Ik denk aan opa en oma. Zondag gaan we op bezoek in Plovdiv, toch?’ ‘Ja, dat klopt,’ zegt Ivan.",
+    "en": "Petar gets up and goes to the living room. There Ivan and Maria sit on the sofa, reading. 'Mum, Dad, I can't sleep!' 'Why not, Petar?' asks Maria. 'I'm thinking about Grandma and Grandpa. On Sunday we're going to visit them in Plovdiv, aren't we?' 'Yes, we are,' says Ivan."
+   },
+   {
+    "bg": "„Нека да ти почета малко“ – казва Иван. Той взема Петър на ръце и отива с него в стаята на децата. Петър лежи в леглото си и слуша, а татко му чете.",
+    "nl": "‘Laat mij je een beetje voorlezen,’ zegt Ivan. Hij neemt Petar op zijn arm en gaat met hem naar de kinderkamer. Petar ligt in zijn bed en luistert, en zijn vader leest hem voor.",
+    "en": "'Let me read to you a little,' says Ivan. He picks Petar up and goes with him to the children's room. Petar lies in his bed and listens while his dad reads to him."
+   },
+   {
+    "bg": "Мария продължава да чете на дивана. После става и отива да види децата. Петър спи. Иван седи на един стол и спи, с очилата на носа. Мария затваря вратата. Сега в апартамента само тя не спи.",
+    "nl": "Maria leest verder op de bank. Daarna staat ze op en gaat bij de kinderen kijken. Petar slaapt. Ivan zit op een stoel en slaapt, met zijn bril op zijn neus. Maria doet de deur dicht. Nu is zij de enige in het appartement die niet slaapt.",
+    "en": "Maria goes on reading on the sofa. Then she gets up and goes to check on the children. Petar is asleep. Ivan sits on a chair, asleep, with his glasses on his nose. Maria closes the door. Now she is the only one in the apartment who is not asleep."
+   }
+  ],
+  "words": {
+   "може": "мога",
+   "спи": "спя",
+   "петък": "петък",
+   "в": "в",
+   "кухнята": "кухня",
+   "прави": "правя",
+   "вечеря": "вечеря",
+   "тигана": "тиган",
+   "има": "имам",
+   "кюфтета": "кюфте",
+   "а": "а",
+   "тенджерата": "тенджера",
+   "картофи": "картоф",
+   "слага": "слагам",
+   "чиниите": "чиния",
+   "вилиците": "вилица",
+   "на": "на",
+   "масата": "маса",
+   "носи": "нося",
+   "хляба": "хляб",
+   "връща": "връщам се",
+   "от": "от",
+   "болницата": "болница",
+   "семейството": "семейство",
+   "яде": "ям",
+   "говори": "говоря",
+   "дълго": "дълъг",
+   "после": "после",
+   "децата": "дете",
+   "отиват": "отивам",
+   "стаята": "стая",
+   "лежи": "лежа",
+   "леглото": "легло",
+   "затваря": "затварям",
+   "очи": "око",
+   "вече": "вече",
+   "обаче": "обаче",
+   "той": "той",
+   "гледа": "гледам",
+   "тавана": "таван",
+   "възглавницата": "възглавница",
+   "главата": "глава",
+   "но": "но",
+   "пак": "пак",
+   "става": "ставам",
+   "отива": "отивам",
+   "голямата": "голям",
+   "стая": "стая",
+   "там": "там",
+   "седят": "седя",
+   "дивана": "диван",
+   "четат": "чета",
+   "мамо": "мама",
+   "тате": "татко",
+   "мога": "мога",
+   "спя": "спя",
+   "защо": "защо",
+   "пита": "питам",
+   "мисля": "мисля",
+   "за": "за",
+   "баба": "баба",
+   "дядо": "дядо",
+   "неделя": "неделя",
+   "отиваме": "отивам",
+   "гости": "гост",
+   "нали": "нали",
+   "казва": "казвам",
+   "нека": "нека",
+   "ти": "ти",
+   "почета": "чета",
+   "малко": "малко",
+   "взема": "вземам",
+   "ръце": "ръка",
+   "с": "с",
+   "него": "той",
+   "слуша": "слушам",
+   "татко": "татко",
+   "му": "той",
+   "чете": "чета",
+   "продължава": "продължавам",
+   "види": "виждам",
+   "седи": "седя",
+   "един": "един",
+   "стол": "стол",
+   "очилата": "очила",
+   "носа": "нос",
+   "вратата": "врата",
+   "сега": "сега",
+   "апартамента": "апартамент",
+   "само": "само",
+   "тя": "тя"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Hoe helpt Ana bij het avondeten?",
+     "en": "How does Ana help with dinner?"
+    },
+    "options": [
+     {
+      "nl": "Ze kookt de aardappels.",
+      "en": "She cooks the potatoes."
+     },
+     {
+      "nl": "Ze brengt het brood.",
+      "en": "She brings the bread."
+     },
+     {
+      "nl": "Ze zet de borden en vorken op tafel.",
+      "en": "She puts the plates and forks on the table."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waarom kan Petar niet slapen?",
+     "en": "Why can't Petar sleep?"
+    },
+    "options": [
+     {
+      "nl": "Hij denkt aan het bezoek aan opa en oma op zondag.",
+      "en": "He is thinking about visiting his grandparents on Sunday."
+     },
+     {
+      "nl": "Ana praat te veel.",
+      "en": "Ana talks too much."
+     },
+     {
+      "nl": "Zijn kussen is te groot.",
+      "en": "His pillow is too big."
+     },
+     {
+      "nl": "Hij heeft honger.",
+      "en": "He is hungry."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Wat doet Ivan om Petar te helpen?",
+     "en": "What does Ivan do to help Petar?"
+    },
+    "options": [
+     {
+      "nl": "Hij geeft hem brood.",
+      "en": "He gives him bread."
+     },
+     {
+      "nl": "Hij leest hem voor.",
+      "en": "He reads to him."
+     },
+     {
+      "nl": "Hij doet het raam dicht.",
+      "en": "He closes the window."
+     },
+     {
+      "nl": "Hij neemt hem mee naar de bank.",
+      "en": "He takes him to the sofa."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat ziet Maria als ze bij de kinderen gaat kijken?",
+     "en": "What does Maria see when she checks on the children?"
+    },
+    "options": [
+     {
+      "nl": "Petar leest in bed.",
+      "en": "Petar is reading in bed."
+     },
+     {
+      "nl": "Ana en Petar praten.",
+      "en": "Ana and Petar are talking."
+     },
+     {
+      "nl": "Petar slaapt niet.",
+      "en": "Petar is not asleep."
+     },
+     {
+      "nl": "Petar en Ivan slapen allebei.",
+      "en": "Petar and Ivan are both asleep."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Мария",
+   "Ана",
+   "Иван",
+   "Петър",
+   "Петре",
+   "Пловдив"
+  ],
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 299,
+  "stage": 1,
+  "word_count": 192
+ },
+ {
+  "id": "R400a",
+  "level": 400,
+  "title": {
+   "bg": "Ана и зъболекарят",
+   "nl": "Ana en de tandarts",
+   "en": "Ana and the dentist"
+  },
+  "paragraphs": [
+   {
+    "bg": "В събота Ана има силна болка в един зъб. Тя не може да яде закуска и не иска да играе с Петър. Баща ѝ, Иван, е лекар, но не е зъболекар. Той гледа зъба и казва: „Не е хубаво. Трябва да отидеш на зъболекар.“",
+    "nl": "Op zaterdag heeft Ana erge pijn in een tand. Ze kan niet ontbijten en wil niet met Petar spelen. Haar vader, Ivan, is arts, maar geen tandarts. Hij kijkt naar de tand en zegt: ‘Dat is niet goed. Je moet naar de tandarts.’",
+    "en": "On Saturday Ana has a bad pain in one tooth. She can’t eat breakfast and doesn’t want to play with Petar. Her father, Ivan, is a doctor, but not a dentist. He looks at the tooth and says: “That’s not good. You have to go to a dentist.”"
+   },
+   {
+    "bg": "Мария се обажда на един зъболекар и после двете тръгват. Зъболекарят работи в една стара къща, на последния етаж. Там вече чакат едно момче и една стара жена. Момчето държи ръка на лицето си. Ана седи на един стол и гледа вратата. Страх я е.",
+    "nl": "Maria belt een tandarts en daarna gaan ze samen op weg. De tandarts werkt in een oud huis, op de bovenste verdieping. Daar wachten al een jongen en een oude vrouw. De jongen houdt een hand tegen zijn gezicht. Ana zit op een stoel en kijkt naar de deur. Ze is bang.",
+    "en": "Maria calls a dentist and then the two of them set off. The dentist works in an old house, on the top floor. A boy and an old woman are already waiting there. The boy holds a hand to his face. Ana sits on a chair and watches the door. She is afraid."
+   },
+   {
+    "bg": "После една медицинска сестра отваря вратата и казва: „Ана Петрова? Заповядайте!“ Ана влиза с майка си. Зъболекарят е млад мъж с брада. Той ѝ показва един голям стол. Ана лежи на стола и отваря уста.",
+    "nl": "Dan doet een verpleegster de deur open en zegt: ‘Ana Petrova? Komt u maar!’ Ana gaat met haar moeder naar binnen. De tandarts is een jonge man met een baard. Hij wijst haar een grote stoel. Ana ligt in de stoel en doet haar mond open.",
+    "en": "Then a nurse opens the door and says: “Ana Petrova? Come in, please!” Ana goes in with her mother. The dentist is a young man with a beard. He shows her a big chair. Ana lies in the chair and opens her mouth."
+   },
+   {
+    "bg": "Зъболекарят дълго гледа зъба. „Зъбът е лош, но мога да помогна. Само че трябва да ти направя една малка инжекция.“ Мария държи ръката ѝ и казва: „Ти си силна. Инжекцията е бърза.“ Така е: инжекцията е бърза, а болката е малка. После зъболекарят работи, а Ана гледа лампата на тавана. Вече не я е страх.",
+    "nl": "De tandarts kijkt lang naar de tand. ‘De tand is slecht, maar ik kan helpen. Alleen moet ik je een kleine prik geven.’ Maria houdt haar hand vast en zegt: ‘Je bent sterk. De prik gaat snel.’ En zo is het: de prik gaat snel en de pijn is klein. Daarna werkt de tandarts, en Ana kijkt naar de lamp aan het plafond. Ze is niet meer bang.",
+    "en": "The dentist looks at the tooth for a long time. “The tooth is bad, but I can help. Only, I have to give you a small injection.” Maria holds her hand and says: “You’re strong. The injection is quick.” And so it is: the injection is quick and the pain is small. Then the dentist works, and Ana looks at the lamp on the ceiling. She isn’t afraid any more."
+   },
+   {
+    "bg": "„Това е! Ти си много добър пациент“, казва зъболекарят. „Сега трябва да чакаш малко, после можеш да ядеш.“ Когато се връщат в апартамента, Петър пита сестра си: „Страшен ли е зъболекарят?“ „Не, той е добър. А аз съм силна!“ казва Ана. После тя пита: „Мамо, мога ли вече да ям?“ Мария ѝ дава топла супа.",
+    "nl": "‘Dat was het! Je bent een heel goede patiënt,’ zegt de tandarts. ‘Nu moet je even wachten, daarna mag je eten.’ Als ze terug zijn in het appartement, vraagt Petar aan zijn zus: ‘Is de tandarts eng?’ ‘Nee, hij is aardig. En ik ben sterk!’ zegt Ana. Daarna vraagt ze: ‘Mam, mag ik al eten?’ Maria geeft haar warme soep.",
+    "en": "“That’s it! You’re a very good patient,” says the dentist. “Now you have to wait a little, then you can eat.” When they get back to the apartment, Petar asks his sister: “Is the dentist scary?” “No, he’s nice. And I’m strong!” says Ana. Then she asks: “Mum, can I eat now?” Maria gives her warm soup."
+   }
+  ],
+  "words": {
+   "зъболекарят": "зъболекар",
+   "в": "в",
+   "събота": "събота",
+   "има": "имам",
+   "силна": "силен",
+   "болка": "болка",
+   "един": "един",
+   "зъб": "зъб",
+   "тя": "тя",
+   "може": "мога",
+   "яде": "ям",
+   "закуска": "закуска",
+   "иска": "искам",
+   "играе": "играя",
+   "с": "с",
+   "баща": "баща",
+   "лекар": "лекар",
+   "но": "но",
+   "зъболекар": "зъболекар",
+   "той": "той",
+   "гледа": "гледам",
+   "зъба": "зъб",
+   "казва": "казвам",
+   "хубаво": "хубав",
+   "трябва": "трябва",
+   "отидеш": "отивам",
+   "на": "на",
+   "обажда": "обаждам се",
+   "после": "после",
+   "двете": "две",
+   "тръгват": "тръгвам",
+   "работи": "работя",
+   "една": "един",
+   "стара": "стар",
+   "къща": "къща",
+   "последния": "последен",
+   "етаж": "етаж",
+   "там": "там",
+   "вече": "вече",
+   "чакат": "чакам",
+   "едно": "един",
+   "момче": "момче",
+   "жена": "жена",
+   "момчето": "момче",
+   "държи": "държа",
+   "ръка": "ръка",
+   "лицето": "лице",
+   "седи": "седя",
+   "стол": "стол",
+   "вратата": "врата",
+   "страх": "страх",
+   "я": "тя",
+   "медицинска": "медицинска сестра",
+   "сестра": "сестра",
+   "отваря": "отварям",
+   "заповядайте": "Заповядайте",
+   "влиза": "влизам",
+   "майка": "майка",
+   "млад": "млад",
+   "мъж": "мъж",
+   "брада": "брада",
+   "показва": "показвам",
+   "голям": "голям",
+   "лежи": "лежа",
+   "стола": "стол",
+   "уста": "уста",
+   "дълго": "дълъг",
+   "зъбът": "зъб",
+   "лош": "лош",
+   "мога": "мога",
+   "помогна": "помагам",
+   "само": "само",
+   "че": "че",
+   "ти": "ти",
+   "направя": "правя",
+   "малка": "малък",
+   "инжекция": "инжекция",
+   "ръката": "ръка",
+   "инжекцията": "инжекция",
+   "бърза": "бърз",
+   "така": "така",
+   "а": "а",
+   "болката": "болка",
+   "лампата": "лампа",
+   "тавана": "таван",
+   "това": "този",
+   "много": "много",
+   "добър": "добър",
+   "пациент": "пациент",
+   "сега": "сега",
+   "чакаш": "чакам",
+   "малко": "малко",
+   "можеш": "мога",
+   "ядеш": "ям",
+   "когато": "когато",
+   "връщат": "връщам се",
+   "апартамента": "апартамент",
+   "пита": "питам",
+   "страшен": "страшен",
+   "аз": "аз",
+   "мамо": "мама",
+   "ям": "ям",
+   "дава": "давам",
+   "топла": "топъл",
+   "супа": "супа",
+   "ана": "Ана",
+   "иван": "Иван",
+   "петър": "Петър",
+   "мария": "Мария",
+   "петрова": "Петрова"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Waarom helpt Ivan Ana niet zelf met haar tand?",
+     "en": "Why doesn’t Ivan treat Ana’s tooth himself?"
+    },
+    "options": [
+     {
+      "nl": "Hij moet naar het ziekenhuis.",
+      "en": "He has to go to the hospital."
+     },
+     {
+      "nl": "Hij is arts, maar geen tandarts.",
+      "en": "He is a doctor, but not a dentist."
+     },
+     {
+      "nl": "Hij is zelf ziek.",
+      "en": "He is ill himself."
+     },
+     {
+      "nl": "Hij speelt met Petar.",
+      "en": "He is playing with Petar."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wie wachten er al bij de tandarts?",
+     "en": "Who is already waiting at the dentist’s?"
+    },
+    "options": [
+     {
+      "nl": "Een jongen en een oude vrouw.",
+      "en": "A boy and an old woman."
+     },
+     {
+      "nl": "Petar en zijn vader.",
+      "en": "Petar and his father."
+     },
+     {
+      "nl": "Een verpleegster en een jonge man.",
+      "en": "A nurse and a young man."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Wat moet de tandarts doen voordat hij de tand kan helpen?",
+     "en": "What does the dentist have to do before he can fix the tooth?"
+    },
+    "options": [
+     {
+      "nl": "De tand eruit halen.",
+      "en": "Pull out the tooth."
+     },
+     {
+      "nl": "Ana naar het ziekenhuis sturen.",
+      "en": "Send Ana to the hospital."
+     },
+     {
+      "nl": "Ana een kleine prik geven.",
+      "en": "Give Ana a small injection."
+     },
+     {
+      "nl": "Met Ivan bellen.",
+      "en": "Call Ivan."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waar kijkt Ana naar terwijl de tandarts werkt?",
+     "en": "What does Ana look at while the dentist works?"
+    },
+    "options": [
+     {
+      "nl": "Naar de deur.",
+      "en": "At the door."
+     },
+     {
+      "nl": "Naar de baard van de tandarts.",
+      "en": "At the dentist’s beard."
+     },
+     {
+      "nl": "Naar de lamp aan het plafond.",
+      "en": "At the lamp on the ceiling."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wat vraagt Ana thuis aan haar moeder?",
+     "en": "What does Ana ask her mother at home?"
+    },
+    "options": [
+     {
+      "nl": "Of de tandarts eng is.",
+      "en": "Whether the dentist is scary."
+     },
+     {
+      "nl": "Of ze met Petar mag spelen.",
+      "en": "Whether she may play with Petar."
+     },
+     {
+      "nl": "Of de prik pijn doet.",
+      "en": "Whether the injection hurts."
+     },
+     {
+      "nl": "Of ze al mag eten.",
+      "en": "Whether she can eat now."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Ана",
+   "Иван",
+   "Петър",
+   "Мария",
+   "Петрова"
+  ],
+  "extra": {
+   "страх": {
+    "nl": "angst (iemand is bang: ‘страх я е’)",
+    "en": "fear (‘страх я е’: she is afraid)"
+   },
+   "страшен": {
+    "nl": "eng, angstaanjagend",
+    "en": "scary, frightening"
+   }
+  },
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 391,
+  "stage": 1,
+  "word_count": 237
+ },
+ {
+  "id": "R400b",
+  "level": 400,
+  "title": {
+   "bg": "Децата спят на балкона",
+   "nl": "De kinderen slapen op het balkon",
+   "en": "The children sleep on the balcony"
+  },
+  "paragraphs": [
+   {
+    "bg": "В петък Ана и Петър отиват на гости на баба Елена и дядо Георги в Пловдив. Дядо Георги има стара къща с голям двор и хубава градина. В градината има череши, ябълки, домати и краставици. Децата тичат в двора, а баба Елена ги гледа от прозореца.",
+    "nl": "Op vrijdag gaan Ana en Petar op bezoek bij oma Elena en opa Georgi in Plovdiv. Opa Georgi heeft een oud huis met een groot erf en een mooie tuin. In de tuin zijn kersen, appels, tomaten en komkommers. De kinderen rennen over het erf, en oma Elena kijkt vanuit het raam naar ze.",
+    "en": "On Friday Ana and Petar go to visit grandma Elena and grandpa Georgi in Plovdiv. Grandpa Georgi has an old house with a big yard and a nice garden. In the garden there are cherries, apples, tomatoes and cucumbers. The children run around the yard, and grandma Elena watches them from the window."
+   },
+   {
+    "bg": "Горещо е. Дядо Георги работи в градината и носи вода за доматите. „Дядо, искам да помогна!“ казва Петър. Дядо му дава една стара тенджера с вода. Петър тича с нея, но водата отива на обувките му, а не на доматите. „Добре де, и обувките искат вода“, казва дядо Георги. Ана помага на баба Елена в кухнята. Двете правят салата с домати и краставици.",
+    "nl": "Het is heet. Opa Georgi werkt in de tuin en brengt water naar de tomaten. ‘Opa, ik wil helpen!’ zegt Petar. Opa geeft hem een oude pan met water. Petar rent ermee, maar het water komt op zijn schoenen en niet op de tomaten. ‘Nou ja, de schoenen willen ook water,’ zegt opa Georgi. Ana helpt oma Elena in de keuken. Samen maken ze een salade met tomaten en komkommers.",
+    "en": "It is hot. Grandpa Georgi works in the garden and carries water to the tomatoes. “Grandpa, I want to help!” says Petar. Grandpa gives him an old pot of water. Petar runs with it, but the water goes on his shoes and not on the tomatoes. “Oh well, the shoes want water too,” says grandpa Georgi. Ana helps grandma Elena in the kitchen. The two of them make a salad with tomatoes and cucumbers."
+   },
+   {
+    "bg": "Когато свършват вечерята, децата отиват да спят. Но в стаята е много горещо и те не могат да спят. „Горещо ми е!“ казва Петър. Тогава дядо Георги отваря вратата на балкона. „Искате ли да спите на балкона? Там е по-хладно.“",
+    "nl": "Als ze klaar zijn met eten, gaan de kinderen slapen. Maar het is erg heet in de kamer en ze kunnen niet slapen. ‘Ik heb het heet!’ zegt Petar. Dan doet opa Georgi de balkondeur open. ‘Willen jullie op het balkon slapen? Daar is het koeler.’",
+    "en": "When they finish dinner, the children go to bed. But it is very hot in the room and they can’t sleep. “I’m hot!” says Petar. Then grandpa Georgi opens the balcony door. “Do you want to sleep on the balcony? It’s cooler there.”"
+   },
+   {
+    "bg": "Баба Елена донася одеяла, възглавници и чаршафи. Децата лежат на балкона и гледат звездите. „Колко са красиви!“ казва Ана. Петър не отговаря. Той вече спи.",
+    "nl": "Oma Elena brengt dekens, kussens en lakens. De kinderen liggen op het balkon en kijken naar de sterren. ‘Wat zijn ze mooi!’ zegt Ana. Petar geeft geen antwoord. Hij slaapt al.",
+    "en": "Grandma Elena brings blankets, pillows and sheets. The children lie on the balcony and look at the stars. “How beautiful they are!” says Ana. Petar doesn’t answer. He is already asleep."
+   },
+   {
+    "bg": "Но после става студено. Ана взема още едно одеяло от стаята и го слага на брат си. Сега и на двамата им е топло. Когато децата стават, дядо Георги вече работи в градината. „Добро утро! Студено ли е на балкона?“ „Малко“, казва Петър. „Но искам пак да спя там!“",
+    "nl": "Maar later wordt het koud. Ana pakt nog een deken uit de kamer en legt die op haar broer. Nu hebben ze het allebei warm. Als de kinderen opstaan, werkt opa Georgi al in de tuin. ‘Goedemorgen! Is het koud op het balkon?’ ‘Een beetje,’ zegt Petar. ‘Maar ik wil er weer slapen!’",
+    "en": "But later it gets cold. Ana takes another blanket from the room and puts it on her brother. Now they are both warm. When the children get up, grandpa Georgi is already working in the garden. “Good morning! Is it cold on the balcony?” “A little,” says Petar. “But I want to sleep there again!”"
+   }
+  ],
+  "words": {
+   "децата": "дете",
+   "спят": "спя",
+   "на": "на",
+   "балкона": "балкон",
+   "в": "в",
+   "петък": "петък",
+   "отиват": "отивам",
+   "гости": "гост",
+   "баба": "баба",
+   "дядо": "дядо",
+   "има": "имам",
+   "стара": "стар",
+   "къща": "къща",
+   "с": "с",
+   "голям": "голям",
+   "двор": "двор",
+   "хубава": "хубав",
+   "градина": "градина",
+   "градината": "градина",
+   "череши": "череша",
+   "ябълки": "ябълка",
+   "домати": "домат",
+   "краставици": "краставица",
+   "тичат": "тичам",
+   "двора": "двор",
+   "а": "а",
+   "ги": "те",
+   "гледа": "гледам",
+   "от": "от",
+   "прозореца": "прозорец",
+   "горещо": "горещ",
+   "работи": "работя",
+   "носи": "нося",
+   "вода": "вода",
+   "за": "за",
+   "доматите": "домат",
+   "искам": "искам",
+   "помогна": "помагам",
+   "казва": "казвам",
+   "му": "той",
+   "дава": "давам",
+   "една": "един",
+   "тенджера": "тенджера",
+   "тича": "тичам",
+   "нея": "тя",
+   "но": "но",
+   "водата": "вода",
+   "отива": "отивам",
+   "обувките": "обувка",
+   "добре": "добре",
+   "де": "де",
+   "искат": "искам",
+   "помага": "помагам",
+   "кухнята": "кухня",
+   "двете": "две",
+   "правят": "правя",
+   "салата": "салата",
+   "когато": "когато",
+   "свършват": "свършвам",
+   "вечерята": "вечеря",
+   "стаята": "стая",
+   "много": "много",
+   "те": "те",
+   "могат": "мога",
+   "ми": "аз",
+   "тогава": "тогава",
+   "отваря": "отварям",
+   "вратата": "врата",
+   "искате": "искам",
+   "спите": "спя",
+   "там": "там",
+   "хладно": "хладен",
+   "донася": "донасям",
+   "одеяла": "одеяло",
+   "възглавници": "възглавница",
+   "чаршафи": "чаршаф",
+   "лежат": "лежа",
+   "гледат": "гледам",
+   "звездите": "звезда",
+   "колко": "колко",
+   "красиви": "красив",
+   "отговаря": "отговарям",
+   "той": "той",
+   "вече": "вече",
+   "спи": "спя",
+   "после": "после",
+   "става": "ставам",
+   "студено": "студен",
+   "взема": "вземам",
+   "още": "още",
+   "едно": "един",
+   "одеяло": "одеяло",
+   "го": "то",
+   "слага": "слагам",
+   "брат": "брат",
+   "сега": "сега",
+   "двамата": "две",
+   "им": "те",
+   "топло": "топъл",
+   "стават": "ставам",
+   "добро": "Добро утро",
+   "утро": "Добро утро",
+   "малко": "малко",
+   "пак": "пак",
+   "спя": "спя",
+   "ана": "Ана",
+   "петър": "Петър",
+   "елена": "Елена",
+   "георги": "Георги",
+   "пловдив": "Пловдив"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wat heeft opa Georgi in Plovdiv?",
+     "en": "What does grandpa Georgi have in Plovdiv?"
+    },
+    "options": [
+     {
+      "nl": "Een appartement met een groot balkon.",
+      "en": "An apartment with a big balcony."
+     },
+     {
+      "nl": "Een oud huis met een erf en een tuin.",
+      "en": "An old house with a yard and a garden."
+     },
+     {
+      "nl": "Een restaurant met een tuin.",
+      "en": "A restaurant with a garden."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Hoe gaat het als Petar opa wil helpen?",
+     "en": "What happens when Petar wants to help grandpa?"
+    },
+    "options": [
+     {
+      "nl": "Het water komt op zijn schoenen in plaats van op de tomaten.",
+      "en": "The water ends up on his shoes instead of on the tomatoes."
+     },
+     {
+      "nl": "Hij plukt alle kersen.",
+      "en": "He picks all the cherries."
+     },
+     {
+      "nl": "Hij laat de pan in de keuken vallen.",
+      "en": "He drops the pot in the kitchen."
+     },
+     {
+      "nl": "Hij maakt een salade met oma.",
+      "en": "He makes a salad with grandma."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waarom slapen de kinderen op het balkon?",
+     "en": "Why do the children sleep on the balcony?"
+    },
+    "options": [
+     {
+      "nl": "Er zijn gasten in hun kamer.",
+      "en": "There are guests in their room."
+     },
+     {
+      "nl": "Ze willen de sterren zien.",
+      "en": "They want to see the stars."
+     },
+     {
+      "nl": "Het is te heet in de kamer.",
+      "en": "It is too hot in the room."
+     },
+     {
+      "nl": "Oma wil de lakens wassen.",
+      "en": "Grandma wants to wash the sheets."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Wat doet Ana als het ’s nachts koud wordt?",
+     "en": "What does Ana do when it gets cold in the night?"
+    },
+    "options": [
+     {
+      "nl": "Ze gaat terug naar de kamer om te slapen.",
+      "en": "She goes back to the room to sleep."
+     },
+     {
+      "nl": "Ze haalt nog een deken en legt die op Petar.",
+      "en": "She fetches another blanket and puts it on Petar."
+     },
+     {
+      "nl": "Ze maakt opa wakker.",
+      "en": "She wakes grandpa up."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat wil Petar de volgende ochtend?",
+     "en": "What does Petar want the next morning?"
+    },
+    "options": [
+     {
+      "nl": "Oma helpen in de keuken.",
+      "en": "To help grandma in the kitchen."
+     },
+     {
+      "nl": "Opa helpen in de tuin.",
+      "en": "To help grandpa in the garden."
+     },
+     {
+      "nl": "Een warme deken.",
+      "en": "A warm blanket."
+     },
+     {
+      "nl": "Nog eens op het balkon slapen.",
+      "en": "To sleep on the balcony again."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Ана",
+   "Петър",
+   "Елена",
+   "Георги",
+   "Пловдив"
+  ],
+  "extra": {
+   "звезда": {
+    "nl": "ster",
+    "en": "star"
+   }
+  },
+  "grammar": [
+   "present",
+   "da-clause",
+   "comparative"
+  ],
+  "max_rank": 395,
+  "stage": 1,
+  "word_count": 228
+ },
+ {
+  "id": "R400c",
+  "level": 400,
+  "title": {
+   "bg": "Сватбата на Николай",
+   "nl": "De bruiloft van Nikolaj",
+   "en": "Nikolay’s wedding"
+  },
+  "paragraphs": [
+   {
+    "bg": "В събота е сватбата на Николай и Вера. Николай е племенник на Мария, а на Ана и Петър е братовчед. Мария носи нова рокля, а Иван носи нова риза и панталон. Петър също носи риза, но не я харесва. „Ризата ми е много малка на врата!“ казва той. „Не е малка. Ти ставаш голям“, отговаря Мария.",
+    "nl": "Op zaterdag is de bruiloft van Nikolaj en Vera. Nikolaj is Maria’s neef (de zoon van haar broer of zus), en voor Ana en Petar is hij een neef. Maria draagt een nieuwe jurk, en Ivan draagt een nieuw overhemd en een broek. Petar draagt ook een overhemd, maar hij vindt het niet leuk. ‘Mijn overhemd is heel klein aan de hals!’ zegt hij. ‘Het is niet klein. Jij wordt groot,’ antwoordt Maria.",
+    "en": "On Saturday it is the wedding of Nikolay and Vera. Nikolay is Maria’s nephew, and to Ana and Petar he is a cousin. Maria wears a new dress, and Ivan wears a new shirt and trousers. Petar wears a shirt too, but he doesn’t like it. “My shirt is very small at the neck!” he says. “It isn’t small. You’re getting big,” answers Maria."
+   },
+   {
+    "bg": "Сватбата е в един голям ресторант. Там има много роднини: лели, чичовци, братовчеди. Ана не познава много от тях. Една стара леля спира Петър и го пита: „Ти чий си?“ „Аз съм син на Мария“, отговаря Петър. „А, ти си внук на Елена! Колко си висок!“ казва лелята.",
+    "nl": "De bruiloft is in een groot restaurant. Daar zijn veel familieleden: tantes, ooms, neven. Ana kent er veel niet van. Een oude tante houdt Petar staande en vraagt hem: ‘Van wie ben jij er een?’ ‘Ik ben de zoon van Maria,’ antwoordt Petar. ‘O, jij bent een kleinzoon van Elena! Wat ben je lang!’ zegt de tante.",
+    "en": "The wedding is in a big restaurant. There are many relatives there: aunts, uncles, cousins. Ana doesn’t know many of them. An old aunt stops Petar and asks him: “Whose are you?” “I’m Maria’s son,” answers Petar. “Ah, you’re Elena’s grandson! How tall you are!” says the aunt."
+   },
+   {
+    "bg": "Сватбата трябва да започне, но тогава Николай казва: „Къде е пръстенът? Не мога да го намеря!“ Цялото семейство търси пръстена: в чантите, на масите, в кухнята на ресторанта. Вера чака в красивата си рокля и пита: „Какво се случва?“",
+    "nl": "De bruiloft moet beginnen, maar dan zegt Nikolaj: ‘Waar is de ring? Ik kan hem niet vinden!’ De hele familie zoekt de ring: in de tassen, op de tafels, in de keuken van het restaurant. Vera wacht in haar mooie jurk en vraagt: ‘Wat is er aan de hand?’",
+    "en": "The wedding is about to begin, but then Nikolay says: “Where is the ring? I can’t find it!” The whole family looks for the ring: in the bags, on the tables, in the restaurant’s kitchen. Vera waits in her beautiful dress and asks: “What’s happening?”"
+   },
+   {
+    "bg": "Петър не търси, защото играе на стълбата с един малък братовчед. И там, на стълбата, той намира пръстена! Петър тича в ресторанта и го дава на Николай.",
+    "nl": "Petar zoekt niet, want hij speelt op de trap met een klein neefje. En daar, op de trap, vindt hij de ring! Petar rent het restaurant in en geeft hem aan Nikolaj.",
+    "en": "Petar isn’t looking, because he is playing on the stairs with a little cousin. And there, on the stairs, he finds the ring! Petar runs into the restaurant and gives it to Nikolay."
+   },
+   {
+    "bg": "Николай взема пръстена и казва: „Петре, ти си най-добрият братовчед!“ Сватбата започва и роднините гледат Вера и Николай. А Петър вече не мисли за малката си риза.",
+    "nl": "Nikolaj pakt de ring aan en zegt: ‘Petar, jij bent de beste neef!’ De bruiloft begint en de familieleden kijken naar Vera en Nikolaj. En Petar denkt niet meer aan zijn kleine overhemd.",
+    "en": "Nikolay takes the ring and says: “Petar, you’re the best cousin!” The wedding begins and the relatives watch Vera and Nikolay. And Petar no longer thinks about his small shirt."
+   }
+  ],
+  "words": {
+   "сватбата": "сватба",
+   "на": "на",
+   "в": "в",
+   "събота": "събота",
+   "племенник": "племенник",
+   "а": "а",
+   "братовчед": "братовчед",
+   "носи": "нося",
+   "нова": "нов",
+   "рокля": "рокля",
+   "риза": "риза",
+   "панталон": "панталон",
+   "също": "също",
+   "но": "но",
+   "я": "тя",
+   "харесва": "харесвам",
+   "ризата": "риза",
+   "ми": "аз",
+   "много": "много",
+   "малка": "малък",
+   "врата": "врат",
+   "казва": "казвам",
+   "той": "той",
+   "ти": "ти",
+   "ставаш": "ставам",
+   "голям": "голям",
+   "отговаря": "отговарям",
+   "един": "един",
+   "ресторант": "ресторант",
+   "там": "там",
+   "има": "имам",
+   "роднини": "роднина",
+   "лели": "леля",
+   "чичовци": "чичо",
+   "братовчеди": "братовчед",
+   "познава": "познавам",
+   "от": "от",
+   "тях": "те",
+   "една": "един",
+   "стара": "стар",
+   "леля": "леля",
+   "спира": "спирам",
+   "го": "той",
+   "пита": "питам",
+   "чий": "чий",
+   "аз": "аз",
+   "син": "син",
+   "внук": "внук",
+   "колко": "колко",
+   "висок": "висок",
+   "лелята": "леля",
+   "трябва": "трябва",
+   "започне": "започвам",
+   "тогава": "тогава",
+   "къде": "къде",
+   "пръстенът": "пръстен",
+   "мога": "мога",
+   "намеря": "намирам",
+   "цялото": "цял",
+   "семейство": "семейство",
+   "търси": "търся",
+   "пръстена": "пръстен",
+   "чантите": "чанта",
+   "масите": "маса",
+   "кухнята": "кухня",
+   "ресторанта": "ресторант",
+   "чака": "чакам",
+   "красивата": "красив",
+   "какво": "какво",
+   "случва": "случва се",
+   "защото": "защото",
+   "играе": "играя",
+   "стълбата": "стълба",
+   "с": "с",
+   "малък": "малък",
+   "намира": "намирам",
+   "тича": "тичам",
+   "дава": "давам",
+   "взема": "вземам",
+   "добрият": "добър",
+   "започва": "започвам",
+   "роднините": "роднина",
+   "гледат": "гледам",
+   "вече": "вече",
+   "мисли": "мисля",
+   "за": "за",
+   "малката": "малък",
+   "николай": "Николай",
+   "вера": "Вера",
+   "мария": "Мария",
+   "ана": "Ана",
+   "петър": "Петър",
+   "иван": "Иван",
+   "елена": "Елена",
+   "петре": "Петре"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wie is Nikolaj voor Ana en Petar?",
+     "en": "Who is Nikolay to Ana and Petar?"
+    },
+    "options": [
+     {
+      "nl": "Hun oom.",
+      "en": "Their uncle."
+     },
+     {
+      "nl": "Hun neef.",
+      "en": "Their cousin."
+     },
+     {
+      "nl": "Een vriend van Ivan.",
+      "en": "A friend of Ivan’s."
+     },
+     {
+      "nl": "De broer van Vera.",
+      "en": "Vera’s brother."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat vindt Petar niet leuk aan het begin?",
+     "en": "What does Petar not like at the start?"
+    },
+    "options": [
+     {
+      "nl": "Zijn overhemd, dat te klein is aan de hals.",
+      "en": "His shirt, which is too small at the neck."
+     },
+     {
+      "nl": "Zijn schoenen, die te groot zijn.",
+      "en": "His shoes, which are too big."
+     },
+     {
+      "nl": "De oude tante.",
+      "en": "The old aunt."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Wat wil de oude tante van Petar weten?",
+     "en": "What does the old aunt want to know from Petar?"
+    },
+    "options": [
+     {
+      "nl": "Hoe oud hij is.",
+      "en": "How old he is."
+     },
+     {
+      "nl": "Waar hij woont.",
+      "en": "Where he lives."
+     },
+     {
+      "nl": "Van wie hij een kind is.",
+      "en": "Whose child he is."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waar vindt Petar de ring?",
+     "en": "Where does Petar find the ring?"
+    },
+    "options": [
+     {
+      "nl": "In de keuken van het restaurant.",
+      "en": "In the restaurant’s kitchen."
+     },
+     {
+      "nl": "In de tas van Maria.",
+      "en": "In Maria’s bag."
+     },
+     {
+      "nl": "Op een tafel.",
+      "en": "On a table."
+     },
+     {
+      "nl": "Op de trap.",
+      "en": "On the stairs."
+     }
+    ],
+    "answer": 3
+   },
+   {
+    "q": {
+     "nl": "Waarom zoekt Petar niet mee naar de ring?",
+     "en": "Why isn’t Petar looking for the ring with the others?"
+    },
+    "options": [
+     {
+      "nl": "Hij speelt met een klein neefje op de trap.",
+      "en": "He is playing with a little cousin on the stairs."
+     },
+     {
+      "nl": "Hij praat met de oude tante.",
+      "en": "He is talking to the old aunt."
+     },
+     {
+      "nl": "Hij wacht met Vera.",
+      "en": "He is waiting with Vera."
+     },
+     {
+      "nl": "Hij eet in de keuken.",
+      "en": "He is eating in the kitchen."
+     }
+    ],
+    "answer": 0
+   }
+  ],
+  "names": [
+   "Николай",
+   "Вера",
+   "Мария",
+   "Ана",
+   "Петър",
+   "Иван",
+   "Елена",
+   "Петре"
+  ],
+  "extra": {
+   "пръстен": {
+    "nl": "ring",
+    "en": "ring"
+   }
+  },
+  "grammar": [
+   "present",
+   "da-clause",
+   "comparative"
+  ],
+  "max_rank": 397,
+  "stage": 1,
+  "word_count": 201
+ },
+ {
+  "id": "R500a",
+  "level": 500,
+  "title": {
+   "bg": "Пътуваме до Пловдив",
+   "nl": "We reizen naar Plovdiv",
+   "en": "We are travelling to Plovdiv"
+  },
+  "paragraphs": [
+   {
+    "bg": "В събота Иван, Мария и децата пътуват до Пловдив. Там живеят баба Елена и дядо Георги, родителите на Мария. Колата е пълна: чанти, сандвичи, бутилки с вода и една голяма торта за баба. Иван кара, а Мария седи до него. Ана чете, а Петър яде банан.",
+    "nl": "Op zaterdag reizen Ivan, Maria en de kinderen naar Plovdiv. Daar wonen oma Elena en opa Georgi, de ouders van Maria. De auto zit vol: tassen, broodjes, flessen water en een grote taart voor oma. Ivan rijdt en Maria zit naast hem. Ana leest en Petar eet een banaan.",
+    "en": "On Saturday Ivan, Maria and the children are travelling to Plovdiv. Grandma Elena and Grandpa Georgi, Maria's parents, live there. The car is full: bags, sandwiches, bottles of water and a big cake for Grandma. Ivan is driving and Maria is sitting next to him. Ana is reading and Petar is eating a banana."
+   },
+   {
+    "bg": "Петър пита: „Мамо, стигаме ли вече?“ „Не, още не“, отговаря Мария. След малко Петър пак пита: „А сега?“ „Петре, още сме в София!“, казва Ана.",
+    "nl": "Petar vraagt: ‘Mama, zijn we er al?’ ‘Nee, nog niet,’ antwoordt Maria. Even later vraagt Petar weer: ‘En nu?’ ‘Petar, we zijn nog in Sofia!’ zegt Ana.",
+    "en": "Petar asks, ‘Mum, are we there yet?’ ‘No, not yet,’ Maria answers. A little later Petar asks again, ‘And now?’ ‘Petar, we're still in Sofia!’ says Ana."
+   },
+   {
+    "bg": "После Петър дълго не говори. Мария го гледа: „Петре, добре ли си?“ „Не се чувствам добре, мамо. Стомахът ми...“ Иван спира и семейството слиза. Петър пие малко вода и върви с татко си около колата. След малко казва: „Вече съм по-добре.“ Пак се качват в колата и тръгват.",
+    "nl": "Daarna zegt Petar lange tijd niets. Maria kijkt naar hem: ‘Petar, gaat het?’ ‘Ik voel me niet goed, mama. Mijn maag…’ Ivan stopt en het gezin stapt uit. Petar drinkt wat water en loopt met zijn vader om de auto heen. Even later zegt hij: ‘Het gaat al beter.’ Ze stappen weer in de auto en vertrekken.",
+    "en": "After that Petar doesn't speak for a long time. Maria looks at him: ‘Petar, are you all right?’ ‘I don't feel well, Mum. My tummy…’ Ivan stops and the family gets out. Petar drinks a little water and walks around the car with his dad. A little later he says, ‘I'm already feeling better.’ They get back into the car and set off."
+   },
+   {
+    "bg": "Сега Иван кара по-бавно, а Петър спи. Около обяд Петър се събужда и пак пита: „Стигаме ли вече?“ „Да, Петре! Ето Пловдив!“, казва Мария. Баба Елена и дядо Георги вече чакат в двора.",
+    "nl": "Nu rijdt Ivan langzamer en Petar slaapt. Rond het middageten wordt Petar wakker en vraagt weer: ‘Zijn we er al?’ ‘Ja, Petar! Daar is Plovdiv!’ zegt Maria. Oma Elena en opa Georgi wachten al op het erf.",
+    "en": "Now Ivan drives more slowly and Petar sleeps. Around lunchtime Petar wakes up and asks again, ‘Are we there yet?’ ‘Yes, Petar! Here is Plovdiv!’ says Maria. Grandma Elena and Grandpa Georgi are already waiting in the yard."
+   },
+   {
+    "bg": "„Здравейте!“, казва дядо Георги. Баба Елена гледа внуците си: „Колко сте големи!“ На масата в двора има баница, салата и кебапчета. Мария дава тортата на баба. Петър вече се чувства добре. Той яде баница, после торта, после пак торта. Мария го гледа и казва: „Петре, по-малко торта, моля! В неделя пак пътуваме.“",
+    "nl": "‘Hallo!’ zegt opa Georgi. Oma Elena kijkt naar haar kleinkinderen: ‘Wat zijn jullie groot!’ Op de tafel op het erf staan banitsa, salade en kebaptsjeta. Maria geeft de taart aan oma. Petar voelt zich al goed. Hij eet banitsa, daarna taart, daarna weer taart. Maria kijkt naar hem en zegt: ‘Petar, minder taart, alsjeblieft! Zondag reizen we weer.’",
+    "en": "‘Hello!’ says Grandpa Georgi. Grandma Elena looks at her grandchildren: ‘How big you are!’ On the table in the yard there is banitsa, salad and kebapcheta. Maria gives the cake to Grandma. Petar already feels fine. He eats banitsa, then cake, then cake again. Maria looks at him and says, ‘Petar, less cake, please! On Sunday we're travelling again.’"
+   }
+  ],
+  "words": {
+   "пътуваме": "пътувам",
+   "до": "до",
+   "пловдив": "Пловдив",
+   "в": "в",
+   "събота": "събота",
+   "иван": "Иван",
+   "мария": "Мария",
+   "децата": "дете",
+   "пътуват": "пътувам",
+   "там": "там",
+   "живеят": "живея",
+   "баба": "баба",
+   "елена": "Елена",
+   "дядо": "дядо",
+   "георги": "Георги",
+   "родителите": "родител",
+   "на": "на",
+   "колата": "кола",
+   "пълна": "пълен",
+   "чанти": "чанта",
+   "сандвичи": "сандвич",
+   "бутилки": "бутилка",
+   "с": "с",
+   "вода": "вода",
+   "една": "един",
+   "голяма": "голям",
+   "торта": "торта",
+   "за": "за",
+   "кара": "карам",
+   "а": "а",
+   "седи": "седя",
+   "него": "той",
+   "ана": "Ана",
+   "чете": "чета",
+   "петър": "Петър",
+   "яде": "ям",
+   "банан": "банан",
+   "пита": "питам",
+   "мамо": "мама",
+   "стигаме": "стигам",
+   "вече": "вече",
+   "още": "още",
+   "отговаря": "отговарям",
+   "след": "след",
+   "малко": "малко",
+   "пак": "пак",
+   "сега": "сега",
+   "петре": "Петър",
+   "софия": "София",
+   "казва": "казвам",
+   "после": "после",
+   "дълго": "дълъг",
+   "говори": "говоря",
+   "го": "той",
+   "гледа": "гледам",
+   "добре": "добре",
+   "чувствам": "чувствам се",
+   "стомахът": "стомах",
+   "ми": "аз",
+   "спира": "спирам",
+   "семейството": "семейство",
+   "слиза": "слизам",
+   "пие": "пия",
+   "върви": "вървя",
+   "татко": "татко",
+   "около": "около",
+   "качват": "качвам се",
+   "тръгват": "тръгвам",
+   "бавно": "бавен",
+   "спи": "спя",
+   "обяд": "обяд",
+   "събужда": "събуждам се",
+   "ето": "ето",
+   "чакат": "чакам",
+   "двора": "двор",
+   "здравейте": "Здравей",
+   "внуците": "внук",
+   "колко": "колко",
+   "големи": "голям",
+   "масата": "маса",
+   "има": "имам",
+   "баница": "баница",
+   "салата": "салата",
+   "кебапчета": "кебапче",
+   "дава": "давам",
+   "тортата": "торта",
+   "чувства": "чувствам се",
+   "той": "той",
+   "моля": "Моля",
+   "неделя": "неделя"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Waarom stopt Ivan onderweg?",
+     "en": "Why does Ivan stop on the way?"
+    },
+    "options": [
+     {
+      "nl": "Ana wil in de auto lezen.",
+      "en": "Ana wants to read in the car."
+     },
+     {
+      "nl": "Petar voelt zich niet goed.",
+      "en": "Petar doesn't feel well."
+     },
+     {
+      "nl": "Ze moeten water kopen.",
+      "en": "They have to buy water."
+     },
+     {
+      "nl": "De taart valt op de grond.",
+      "en": "The cake falls on the floor."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat zegt Ana als Petar voor de tweede keer vraagt of ze er al zijn?",
+     "en": "What does Ana say when Petar asks for the second time whether they are there yet?"
+    },
+    "options": [
+     {
+      "nl": "Dat ze nog in Sofia zijn.",
+      "en": "That they are still in Sofia."
+     },
+     {
+      "nl": "Dat oma al wacht.",
+      "en": "That Grandma is already waiting."
+     },
+     {
+      "nl": "Dat hij moet slapen.",
+      "en": "That he should sleep."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waar wachten oma en opa?",
+     "en": "Where are Grandma and Grandpa waiting?"
+    },
+    "options": [
+     {
+      "nl": "In de keuken.",
+      "en": "In the kitchen."
+     },
+     {
+      "nl": "In Sofia.",
+      "en": "In Sofia."
+     },
+     {
+      "nl": "Op het erf.",
+      "en": "In the yard."
+     },
+     {
+      "nl": "In een restaurant.",
+      "en": "In a restaurant."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waarom wil Maria aan het eind dat Petar minder taart eet?",
+     "en": "Why does Maria want Petar to eat less cake at the end?"
+    },
+    "options": [
+     {
+      "nl": "De taart is voor opa.",
+      "en": "The cake is for Grandpa."
+     },
+     {
+      "nl": "Het middageten is bijna klaar.",
+      "en": "Lunch is almost ready."
+     },
+     {
+      "nl": "Ana wil ook taart.",
+      "en": "Ana wants cake too."
+     },
+     {
+      "nl": "Op zondag reizen ze weer.",
+      "en": "They are travelling again on Sunday."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Иван",
+   "Мария",
+   "Пловдив",
+   "Елена",
+   "Георги",
+   "Ана",
+   "Петър",
+   "Петре",
+   "София"
+  ],
+  "extra": {
+   "кола": {
+    "nl": "auto",
+    "en": "car"
+   }
+  },
+  "grammar": [
+   "present",
+   "comparative"
+  ],
+  "max_rank": 500,
+  "stage": 1,
+  "word_count": 210
+ },
+ {
+  "id": "R500b",
+  "level": 500,
+  "title": {
+   "bg": "В кафенето",
+   "nl": "In het café",
+   "en": "In the café"
+  },
+  "paragraphs": [
+   {
+    "bg": "В сряда Мария се среща с приятелката си Нина в едно малко кафене. Кафенето е пълно с хора. Мария и Нина седят на малка маса до прозореца.",
+    "nl": "Op woensdag spreekt Maria af met haar vriendin Nina in een klein café. Het café zit vol mensen. Maria en Nina zitten aan een klein tafeltje bij het raam.",
+    "en": "On Wednesday Maria meets her friend Nina in a small café. The café is full of people. Maria and Nina are sitting at a small table by the window."
+   },
+   {
+    "bg": "Един млад мъж им донася менюто. Нина иска сандвич със сирене и чай. Мария гледа десертите в менюто. „Какви торти имате?“, пита тя. „Имаме торта с череши и торта с лимон.“ „С лимон, моля. И едно кафе.“ Сандвичът на Нина е голям и евтин, а тортата на Мария е малка и скъпа.",
+    "nl": "Een jonge man brengt hun de menukaart. Nina wil een broodje kaas en thee. Maria bekijkt de desserts op de kaart. ‘Welke taarten hebben jullie?’ vraagt ze. ‘We hebben kersentaart en citroentaart.’ ‘Citroen, graag. En een koffie.’ Nina's broodje is groot en goedkoop, en Maria's taart is klein en duur.",
+    "en": "A young man brings them the menu. Nina wants a cheese sandwich and tea. Maria looks at the desserts on the menu. ‘What cakes do you have?’ she asks. ‘We have cherry cake and lemon cake.’ ‘Lemon, please. And a coffee.’ Nina's sandwich is big and cheap, and Maria's cake is small and expensive."
+   },
+   {
+    "bg": "Докато ядат, Нина казва: „Мария, имам нов приятел.“ „Така ли? Кой е той?“, пита Мария. „Казва се Стефан. Той е готвач.“ „Готвач! Супер! Къде работи?“ Нина не отговаря. Тя само гледа вратата на кухнята.",
+    "nl": "Terwijl ze eten, zegt Nina: ‘Maria, ik heb een nieuw vriendje.’ ‘O ja? Wie is het?’ vraagt Maria. ‘Hij heet Stefan. Hij is kok.’ ‘Een kok! Super! Waar werkt hij?’ Nina antwoordt niet. Ze kijkt alleen naar de keukendeur.",
+    "en": "While they are eating, Nina says, ‘Maria, I have a new boyfriend.’ ‘Really? Who is he?’ asks Maria. ‘His name is Stefan. He's a chef.’ ‘A chef! Great! Where does he work?’ Nina doesn't answer. She just looks at the kitchen door."
+   },
+   {
+    "bg": "Мария опитва тортата. „Много е хубава!“, казва тя. Тогава вратата на кухнята се отваря и един висок мъж излиза с купа в ръка. „Здравей, Мария! Аз съм Стефан. Този десерт е за теб.“ В купата има кисело мляко с череши. Мария опитва и десерта. „Стефан, ти си много добър готвач!“, казва тя. Нина гледа Стефан и казва: „Знам.“",
+    "nl": "Maria proeft de taart. ‘Die is erg lekker!’ zegt ze. Dan gaat de keukendeur open en komt er een lange man naar buiten met een kom in zijn hand. ‘Hallo, Maria! Ik ben Stefan. Dit dessert is voor jou.’ In de kom zit yoghurt met kersen. Maria proeft ook het dessert. ‘Stefan, jij bent een heel goede kok!’ zegt ze. Nina kijkt naar Stefan en zegt: ‘Dat weet ik.’",
+    "en": "Maria tastes the cake. ‘It's very good!’ she says. Then the kitchen door opens and a tall man comes out with a bowl in his hand. ‘Hello, Maria! I'm Stefan. This dessert is for you.’ In the bowl there is yogurt with cherries. Maria tastes the dessert too. ‘Stefan, you are a very good chef!’ she says. Nina looks at Stefan and says, ‘I know.’"
+   },
+   {
+    "bg": "Мария гледа Нина, после Стефан. „Значи ти правиш тортите тук?“ „Да, и десертите, и сандвичите“, казва Стефан. Когато Мария иска сметката, младият мъж с менюто казва: „Няма сметка. Стефан черпи!“ Мария казва на Нина: „Този готвач ми харесва!“",
+    "nl": "Maria kijkt naar Nina en dan naar Stefan. ‘Dus jij maakt hier de taarten?’ ‘Ja, en de desserts en de broodjes,’ zegt Stefan. Als Maria om de rekening vraagt, zegt de jonge man met de menukaart: ‘Er is geen rekening. Stefan trakteert!’ Maria zegt tegen Nina: ‘Die kok bevalt me wel!’",
+    "en": "Maria looks at Nina, then at Stefan. ‘So you make the cakes here?’ ‘Yes, and the desserts and the sandwiches,’ says Stefan. When Maria asks for the bill, the young man with the menu says, ‘There's no bill. Stefan is treating you!’ Maria says to Nina, ‘I like this chef!’"
+   }
+  ],
+  "words": {
+   "в": "в",
+   "кафенето": "кафене",
+   "сряда": "сряда",
+   "мария": "Мария",
+   "среща": "срещам",
+   "с": "с",
+   "приятелката": "приятелка",
+   "нина": "Нина",
+   "едно": "един",
+   "малко": "малък",
+   "кафене": "кафене",
+   "пълно": "пълен",
+   "хора": "хора",
+   "седят": "седя",
+   "на": "на",
+   "малка": "малък",
+   "маса": "маса",
+   "до": "до",
+   "прозореца": "прозорец",
+   "един": "един",
+   "млад": "млад",
+   "мъж": "мъж",
+   "им": "те",
+   "донася": "донасям",
+   "менюто": "меню",
+   "иска": "искам",
+   "сандвич": "сандвич",
+   "със": "с",
+   "сирене": "сирене",
+   "чай": "чай",
+   "гледа": "гледам",
+   "десертите": "десерт",
+   "какви": "какъв",
+   "торти": "торта",
+   "имате": "имам",
+   "пита": "питам",
+   "тя": "тя",
+   "имаме": "имам",
+   "торта": "торта",
+   "череши": "череша",
+   "лимон": "лимон",
+   "моля": "Моля",
+   "кафе": "кафе",
+   "сандвичът": "сандвич",
+   "голям": "голям",
+   "евтин": "евтин",
+   "а": "а",
+   "тортата": "торта",
+   "скъпа": "скъп",
+   "докато": "докато",
+   "ядат": "ям",
+   "казва": "казвам",
+   "имам": "имам",
+   "нов": "нов",
+   "приятел": "приятел",
+   "така": "така",
+   "кой": "кой",
+   "той": "той",
+   "стефан": "Стефан",
+   "готвач": "готвач",
+   "супер": "Супер",
+   "къде": "къде",
+   "работи": "работя",
+   "отговаря": "отговарям",
+   "само": "само",
+   "вратата": "врата",
+   "кухнята": "кухня",
+   "опитва": "опитвам",
+   "много": "много",
+   "хубава": "хубав",
+   "тогава": "тогава",
+   "отваря": "отварям",
+   "висок": "висок",
+   "излиза": "излизам",
+   "купа": "купа",
+   "ръка": "ръка",
+   "здравей": "Здравей",
+   "аз": "аз",
+   "този": "този",
+   "десерт": "десерт",
+   "за": "за",
+   "теб": "ти",
+   "купата": "купа",
+   "има": "имам",
+   "кисело": "кисело мляко",
+   "мляко": "кисело мляко",
+   "десерта": "десерт",
+   "ти": "ти",
+   "добър": "добър",
+   "знам": "знам",
+   "после": "после",
+   "значи": "Значи…",
+   "правиш": "правя",
+   "тортите": "торта",
+   "тук": "тук",
+   "сандвичите": "сандвич",
+   "когато": "когато",
+   "сметката": "сметка",
+   "младият": "млад",
+   "няма": "нямам",
+   "сметка": "сметка",
+   "черпи": "черпя",
+   "ми": "аз",
+   "харесва": "харесвам"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Wie is Stefan?",
+     "en": "Who is Stefan?"
+    },
+    "options": [
+     {
+      "nl": "De jonge man die de menukaart brengt.",
+      "en": "The young man who brings the menu."
+     },
+     {
+      "nl": "Maria's broer.",
+      "en": "Maria's brother."
+     },
+     {
+      "nl": "Nina's nieuwe vriend, een kok.",
+      "en": "Nina's new boyfriend, a chef."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waarom antwoordt Nina niet als Maria vraagt waar Stefan werkt?",
+     "en": "Why doesn't Nina answer when Maria asks where Stefan works?"
+    },
+    "options": [
+     {
+      "nl": "Stefan werkt in de keuken van dit café.",
+      "en": "Stefan works in the kitchen of this café."
+     },
+     {
+      "nl": "Ze weet het niet.",
+      "en": "She doesn't know."
+     },
+     {
+      "nl": "Ze eet net haar broodje.",
+      "en": "She is busy eating her sandwich."
+     },
+     {
+      "nl": "Stefan werkt in een ziekenhuis.",
+      "en": "Stefan works in a hospital."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Welke taart kiest Maria?",
+     "en": "Which cake does Maria choose?"
+    },
+    "options": [
+     {
+      "nl": "Kersentaart.",
+      "en": "Cherry cake."
+     },
+     {
+      "nl": "Citroentaart.",
+      "en": "Lemon cake."
+     },
+     {
+      "nl": "Ze neemt geen taart, alleen koffie.",
+      "en": "She has no cake, only coffee."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wie betaalt de rekening?",
+     "en": "Who pays the bill?"
+    },
+    "options": [
+     {
+      "nl": "Maria.",
+      "en": "Maria."
+     },
+     {
+      "nl": "Nina.",
+      "en": "Nina."
+     },
+     {
+      "nl": "Ze betalen samen.",
+      "en": "They pay together."
+     },
+     {
+      "nl": "Stefan.",
+      "en": "Stefan."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Мария",
+   "Нина",
+   "Стефан"
+  ],
+  "extra": {
+   "черпя": {
+    "nl": "trakteren (de rekening betalen voor anderen)",
+    "en": "to treat (pay for others)"
+   }
+  },
+  "grammar": [
+   "present"
+  ],
+  "max_rank": 498,
+  "stage": 1,
+  "word_count": 211
+ },
+ {
+  "id": "R500c",
+  "level": 500,
+  "title": {
+   "bg": "Къде е часовникът?",
+   "nl": "Waar is het horloge?",
+   "en": "Where is the watch?"
+  },
+  "paragraphs": [
+   {
+    "bg": "В неделя Ана търси часовника си. Той е нов, малък и много хубав. Часовникът е от баба Елена и дядо Георги. Ана иска да го покаже на приятелката си Яна, но сега го няма.",
+    "nl": "Op zondag zoekt Ana haar horloge. Het is nieuw, klein en heel mooi. Het horloge is van oma Elena en opa Georgi. Ana wil het aan haar vriendin Jana laten zien, maar nu is het weg.",
+    "en": "On Sunday Ana is looking for her watch. It is new, small and very pretty. The watch is from Grandma Elena and Grandpa Georgi. Ana wants to show it to her friend Yana, but now it is gone."
+   },
+   {
+    "bg": "Тя отваря чекмеджето, после гардероба. Там има само дрехи: блузи, пуловери, дънки и една рокля. Ана гледа и на рафта над леглото, но и там го няма.",
+    "nl": "Ze doet de la open, daarna de kledingkast. Daar liggen alleen kleren: bloesjes, truien, spijkerbroeken en een jurk. Ana kijkt ook op de plank boven het bed, maar daar is het ook niet.",
+    "en": "She opens the drawer, then the wardrobe. There are only clothes there: blouses, sweaters, jeans and a dress. Ana also looks on the shelf above the bed, but it isn't there either."
+   },
+   {
+    "bg": "Ана отива в банята. Тя гледа до мивката и под огледалото. Няма го. После влиза в хола, ляга на пода и гледа под дивана. Там има една маратонка на Петър и много боклук. Ана бута дивана и гледа под килима. И там го няма.",
+    "nl": "Ana gaat naar de badkamer. Ze kijkt naast de wastafel en onder de spiegel. Het is er niet. Daarna gaat ze de woonkamer in, gaat op de vloer liggen en kijkt onder de bank. Daar liggen een sneaker van Petar en veel rommel. Ana duwt de bank opzij en kijkt onder het tapijt. Ook daar is het niet.",
+    "en": "Ana goes to the bathroom. She looks next to the sink and under the mirror. It's not there. Then she goes into the living room, lies down on the floor and looks under the sofa. There is one of Petar's sneakers and a lot of rubbish there. Ana pushes the sofa aside and looks under the carpet. It isn't there either."
+   },
+   {
+    "bg": "Ана отива в кухнята. „Мамо, знаеш ли къде е часовникът ми?“ „Не, не знам“, казва Мария. Тя готви обяд. Ана гледа и в кухнята: на масата, до фурната и в шкафа. Няма го. „Може би Петър знае?“, казва Мария. Ана минава по коридора и чува Петър да говори в спалнята на родителите.",
+    "nl": "Ana gaat naar de keuken. ‘Mama, weet jij waar mijn horloge is?’ ‘Nee, dat weet ik niet,’ zegt Maria. Ze kookt het middageten. Ana kijkt ook in de keuken: op de tafel, naast de oven en in de kast. Het is er niet. ‘Misschien weet Petar het?’ zegt Maria. Ana loopt door de gang en hoort Petar praten in de slaapkamer van haar ouders.",
+    "en": "Ana goes to the kitchen. ‘Mum, do you know where my watch is?’ ‘No, I don't,’ says Maria. She is cooking lunch. Ana looks in the kitchen too: on the table, next to the oven and in the cupboard. It's not there. ‘Maybe Petar knows?’ says Maria. Ana walks along the hallway and hears Petar talking in their parents' bedroom."
+   },
+   {
+    "bg": "Тя влиза. Иван лежи на леглото, а Петър седи до него и слуша сърцето му. На ръката на Петър е часовникът на Ана! „Петре! Това е часовникът ми!“ „Аз съм лекар, а татко е пациент“, казва Петър. „А лекарят трябва да има часовник.“ Иван гледа Ана и казва: „Така е.“ Ана гледа брат си и баща си. „Добре, лекарю. Но после ми го даваш, нали?“",
+    "nl": "Ze gaat naar binnen. Ivan ligt op het bed en Petar zit naast hem en luistert naar zijn hart. Om Petars pols zit het horloge van Ana! ‘Petar! Dat is mijn horloge!’ ‘Ik ben dokter en papa is de patiënt,’ zegt Petar. ‘En een dokter moet een horloge hebben.’ Ivan kijkt naar Ana en zegt: ‘Dat klopt.’ Ana kijkt naar haar broer en haar vader. ‘Goed, dokter. Maar straks geef je het me terug, hè?’",
+    "en": "She goes in. Ivan is lying on the bed, and Petar is sitting next to him, listening to his heart. On Petar's wrist is Ana's watch! ‘Petar! That's my watch!’ ‘I'm the doctor and Dad is the patient,’ says Petar. ‘And a doctor has to have a watch.’ Ivan looks at Ana and says, ‘That's true.’ Ana looks at her brother and her father. ‘All right, doctor. But afterwards you give it back to me, OK?’"
+   }
+  ],
+  "words": {
+   "къде": "къде",
+   "часовникът": "часовник",
+   "в": "в",
+   "неделя": "неделя",
+   "ана": "Ана",
+   "търси": "търся",
+   "часовника": "часовник",
+   "той": "той",
+   "нов": "нов",
+   "малък": "малък",
+   "много": "много",
+   "хубав": "хубав",
+   "от": "от",
+   "баба": "баба",
+   "елена": "Елена",
+   "дядо": "дядо",
+   "георги": "Георги",
+   "иска": "искам",
+   "го": "той",
+   "покаже": "показвам",
+   "на": "на",
+   "приятелката": "приятелка",
+   "яна": "Яна",
+   "но": "но",
+   "сега": "сега",
+   "няма": "нямам",
+   "тя": "тя",
+   "отваря": "отварям",
+   "чекмеджето": "чекмедже",
+   "после": "после",
+   "гардероба": "гардероб",
+   "там": "там",
+   "има": "имам",
+   "само": "само",
+   "дрехи": "дреха",
+   "блузи": "блуза",
+   "пуловери": "пуловер",
+   "дънки": "дънки",
+   "една": "един",
+   "рокля": "рокля",
+   "гледа": "гледам",
+   "рафта": "рафт",
+   "над": "над",
+   "леглото": "легло",
+   "отива": "отивам",
+   "банята": "баня",
+   "до": "до",
+   "мивката": "мивка",
+   "под": "под#413",
+   "огледалото": "огледало",
+   "влиза": "влизам",
+   "хола": "хол",
+   "ляга": "лягам",
+   "пода": "под",
+   "дивана": "диван",
+   "маратонка": "маратонка",
+   "петър": "Петър",
+   "боклук": "боклук",
+   "бута": "бутам",
+   "килима": "килим",
+   "кухнята": "кухня",
+   "мамо": "мама",
+   "знаеш": "знам",
+   "ми": "аз",
+   "знам": "знам",
+   "казва": "казвам",
+   "мария": "Мария",
+   "готви": "готвя",
+   "обяд": "обяд",
+   "масата": "маса",
+   "фурната": "фурна",
+   "шкафа": "шкаф",
+   "може": "може би",
+   "би": "може би",
+   "знае": "знам",
+   "минава": "минавам",
+   "по": "по",
+   "коридора": "коридор",
+   "чува": "чувам",
+   "говори": "говоря",
+   "спалнята": "спалня",
+   "родителите": "родител",
+   "иван": "Иван",
+   "лежи": "лежа",
+   "а": "а",
+   "седи": "седя",
+   "него": "той",
+   "слуша": "слушам",
+   "сърцето": "сърце",
+   "му": "той",
+   "ръката": "ръка",
+   "петре": "Петър",
+   "това": "това",
+   "аз": "аз",
+   "лекар": "лекар",
+   "татко": "татко",
+   "пациент": "пациент",
+   "лекарят": "лекар",
+   "трябва": "трябва",
+   "часовник": "часовник",
+   "така": "така",
+   "брат": "брат",
+   "баща": "баща",
+   "добре": "добре",
+   "лекарю": "лекар",
+   "даваш": "давам",
+   "нали": "нали"
+  },
+  "questions": [
+   {
+    "q": {
+     "nl": "Van wie heeft Ana het horloge gekregen?",
+     "en": "Who gave Ana the watch?"
+    },
+    "options": [
+     {
+      "nl": "Van haar vader.",
+      "en": "Her father."
+     },
+     {
+      "nl": "Van oma en opa.",
+      "en": "Grandma and Grandpa."
+     },
+     {
+      "nl": "Van Petar.",
+      "en": "Petar."
+     },
+     {
+      "nl": "Van haar moeder.",
+      "en": "Her mother."
+     }
+    ],
+    "answer": 1
+   },
+   {
+    "q": {
+     "nl": "Wat vindt Ana onder de bank?",
+     "en": "What does Ana find under the sofa?"
+    },
+    "options": [
+     {
+      "nl": "Haar horloge.",
+      "en": "Her watch."
+     },
+     {
+      "nl": "Een jurk en een trui.",
+      "en": "A dress and a sweater."
+     },
+     {
+      "nl": "Een sneaker van Petar en rommel.",
+      "en": "One of Petar's sneakers and rubbish."
+     }
+    ],
+    "answer": 2
+   },
+   {
+    "q": {
+     "nl": "Waar is het horloge?",
+     "en": "Where is the watch?"
+    },
+    "options": [
+     {
+      "nl": "Om de pols van Petar.",
+      "en": "On Petar's wrist."
+     },
+     {
+      "nl": "In de la.",
+      "en": "In the drawer."
+     },
+     {
+      "nl": "Onder het tapijt.",
+      "en": "Under the carpet."
+     },
+     {
+      "nl": "Bij Maria in de keuken.",
+      "en": "With Maria in the kitchen."
+     }
+    ],
+    "answer": 0
+   },
+   {
+    "q": {
+     "nl": "Waarom draagt Petar het horloge?",
+     "en": "Why is Petar wearing the watch?"
+    },
+    "options": [
+     {
+      "nl": "Hij wil weten hoe laat het is.",
+      "en": "He wants to know the time."
+     },
+     {
+      "nl": "Ivan geeft het hem.",
+      "en": "Ivan gives it to him."
+     },
+     {
+      "nl": "Hij wil het aan oma laten zien.",
+      "en": "He wants to show it to Grandma."
+     },
+     {
+      "nl": "Hij speelt dokter, en een dokter heeft een horloge nodig.",
+      "en": "He is playing doctor, and a doctor needs a watch."
+     }
+    ],
+    "answer": 3
+   }
+  ],
+  "names": [
+   "Ана",
+   "Елена",
+   "Георги",
+   "Мария",
+   "Петър",
+   "Петре",
+   "Иван",
+   "Яна"
+  ],
+  "grammar": [
+   "present",
+   "da-clause"
+  ],
+  "max_rank": 497,
+  "stage": 1,
+  "word_count": 225
+ }
+]

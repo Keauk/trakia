@@ -515,4 +515,35 @@ t('mergeSnapshots: resets travel with the sync (D-025)', () => {
   // restoring deleted sentences: the newer list wins
   assert.deepEqual(C.mergeSnapshots({ deleted: [], stamps: { deleted: 50 } }, { deleted: ['D1'], stamps: { deleted: 10 } }).deleted, []);
 });
+t('storyTokens splits words like the story validator, keeping the text (D-026, D-027)', () => {
+  const toks = C.storyTokens('„Здравей, Ана!“ По-голям е.');
+  assert.equal(toks.map(x => x.t).join(''), '„Здравей, Ана!“ По-голям е.');
+  assert.deepEqual(toks.filter(x => x.w).map(x => x.t), ['Здравей', 'Ана', 'По', 'голям', 'е']);
+  assert.equal(C.storyKey('Ѝ'), 'и'); assert.equal(C.storyKey('Детето'), 'детето');
+});
+t('storyEligible: level within the Anki position plus tolerance, grammar within the stage (D-026)', () => {
+  const st = { level: 200, grammar: ['present'] };
+  assert.equal(C.storyEligible(st, { rank: 102, stage: 1 }), false);
+  assert.equal(C.storyEligible(st, { rank: 200, stage: 1 }), true);
+  assert.equal(C.storyEligible(st, { rank: 150, tolerance: 50, stage: 1 }), true);
+  assert.equal(C.storyEligible({ level: 100, grammar: ['aorist'] }, { rank: 500, stage: 1 }), false);
+});
+t('mergeSnapshots: read marks and quiz scores, newest per story (D-025, D-026)', () => {
+  const m = C.mergeSnapshots({ reading: { A: { read: 100 }, B: { read: 50, quiz: { at: 300, score: 2, total: 4 } } } },
+    { reading: { A: { read: 90, quiz: { at: 200, score: 3, total: 3 } }, B: { read: 50, quiz: { at: 250, score: 4, total: 4 } } } });
+  assert.equal(m.reading.A.quiz.score, 3, 'the record touched last wins');
+  assert.equal(m.reading.B.quiz.score, 2);
+  assert.deepEqual(C.mergeSnapshots({ reading: { A: { read: 100 } }, stamps: { wiped: 150 } }, {}).reading, {}, 'a reset clears read marks');
+});
+t('every word of every bundled story can be looked up (D-027)', () => {
+  const fs = require('fs'), path = require('path'), file = path.join(__dirname, '..', 'data', 'stories.json');
+  if (!fs.existsSync(file)) return;
+  const FREE = new Set(['ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха', 'по', 'най', 'и']);
+  for (const st of JSON.parse(fs.readFileSync(file, 'utf8'))) {
+    const names = new Set((st.names || []).map(C.storyKey));
+    for (const text of [st.title.bg, ...st.paragraphs.map(p => p.bg)]) for (const tok of C.storyTokens(text)) if (tok.w) {
+      const k = C.storyKey(tok.t); assert.ok(st.words[k] || names.has(k) || FREE.has(k), `${st.id}: "${tok.t}" has no lookup`);
+    }
+  }
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

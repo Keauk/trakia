@@ -33,6 +33,9 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-023](D-023-wallpaper.md) | A moving wallpaper behind the app: a built-in fireplace or the learner's own video | look | done |
 | [D-024](D-024-short-varied-sessions.md) | Shorter sessions of 20 different sentences, with no repeats between sessions in a row | session builder / scheduling | done |
 | [D-025](D-025-gist-sync.md) | Sync progress between devices through a secret GitHub gist | sync / storage | in progress |
+| [D-026](D-026-reading-tab.md) | A Reading tab with short stories at the learner's level | new tab / content | in progress |
+| [D-027](D-027-tap-a-word.md) | Tap a word in a story to see its dictionary form and meaning | reading UI | in progress |
+| [D-028](D-028-comprehension-questions.md) | Comprehension questions after each story, counted on the Stats tab | reading UI / stats | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

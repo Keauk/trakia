@@ -313,6 +313,42 @@ setTimeout(async () => {
   $('btn-export-progress').click();
   assert.match(downloaded, /^trakia-progress-/);
 
+  // D-026 / D-027 / D-028: reading tab, at word 150 so only level 100 is open
+  const rankBefore = $('set-rank').value; $('set-rank').value = '150'; $('set-rank').dispatchEvent(new window.Event('input'));
+  document.querySelector('nav button[data-tab=reading]').click();
+  {
+    const STORIES = window.TRAKIA_DATA.stories, rank = JSON.parse(window.localStorage.getItem('trakia.settings') || '{}').rank || 102;
+    const open = STORIES.filter(st => C.storyEligible(st, { rank, stage: 1 }));
+    assert.ok(STORIES.length >= 15 && open.length >= 3, 'stories bundled and the level-100 ones open: ' + open.length);
+    assert.equal(document.querySelectorAll('#reading-list .story-row:not([disabled])').length, open.length);
+    assert.match($('reading-list').textContent, /unlocks at word 200/);
+    const st = open[0];
+    document.querySelector(`#reading-list [data-story="${st.id}"]`).click();
+    assert.equal($('reading-story').hidden, false); assert.equal($('story-title').textContent, st.title.bg);
+    assert.equal($('tr-0').hidden, true);
+    document.querySelector('#story-text [data-tr="0"]').click();
+    assert.equal($('tr-0').hidden, false); assert.equal($('tr-0').textContent, st.paragraphs[0].nl, 'translation in the practice language');
+    // tap a word that is a deck word
+    const names = new Set((st.names || []).map(C.storyKey)), extra = new Set(Object.keys(st.extra || {}).map(C.storyKey));
+    const k = Object.keys(st.words).find(f => !names.has(f) && !extra.has(C.storyKey(st.words[f])) && !st.words[f].includes('#') && window.TRAKIA_DATA.words.some(w => C.storyKey(w.bg) === C.storyKey(st.words[f])));
+    const w = window.TRAKIA_DATA.words.find(x => C.storyKey(x.bg) === C.storyKey(st.words[k]));
+    document.querySelector(`#reading-story button.w[data-k="${k}"]`).click();
+    assert.equal($('word-pop').hidden, false); assert.ok($('word-pop').textContent.includes(`${w.bg} – ${w.en}`) && $('word-pop').textContent.includes('word ' + w.rank), 'word card: ' + $('word-pop').textContent);
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' })); assert.equal($('word-pop').hidden, true);
+    // answer every question: the first one right, the rest wrong where possible
+    st.questions.forEach((q, i) => { const o = i === 0 ? q.answer : (q.answer + 1) % q.options.length; document.querySelector(`#story-quiz .opt[data-q="${i}"][data-o="${o}"]`).click(); });
+    assert.equal($('quiz-result').textContent, `1 of ${st.questions.length} right.`);
+    assert.equal(document.querySelectorAll('#story-quiz .opt.right').length, st.questions.length, 'the right answer is shown for every question');
+    const rec = JSON.parse(window.localStorage.getItem('trakia.reading'))[st.id];
+    assert.ok(rec.read > 0); assert.deepEqual([rec.quiz.score, rec.quiz.total], [1, st.questions.length]);
+    assert.equal($('btn-story-read').textContent, 'Read ✓');
+    $('btn-story-back').click();
+    assert.match(document.querySelector(`#reading-list [data-story="${st.id}"]`).textContent, /read ✓/);
+    document.querySelector('nav button[data-tab=stats]').click();
+    assert.match($('stats-reading').textContent, new RegExp(`1/${open.length}`));
+  }
+  $('set-rank').value = rankBefore; $('set-rank').dispatchEvent(new window.Event('input'));
+
   // D-025: sync through a secret gist, against an in-memory imitation of the GitHub API
   const FILE = 'trakia-progress.json', TOKEN = 'github_pat_SECRET123', gists = {}; let made = 0;
   const reply = (status, body) => ({ ok: status < 300, status, json: async () => body, text: async () => JSON.stringify(body) });
@@ -362,5 +398,6 @@ setTimeout(async () => {
   let blob = null; window.URL.createObjectURL = b => { blob = b; return 'blob:x'; };
   $('btn-export-progress').click();
   const exported = await blob.text(); assert.ok(!exported.includes(TOKEN)); assert.equal(JSON.parse(exported).progress['ZZ1|bg2nl'].last, later);
+  assert.equal(Object.keys(JSON.parse(exported).reading).length, 1, 'read marks travel with the snapshot');
   console.log('UI smoke test passed');
 }, 100);
