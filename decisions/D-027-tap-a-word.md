@@ -64,6 +64,11 @@ A couple of hours on top of D-026. Risk: a form shared by two lemmas (`те` = t
   writes both Петре and Петър; the brief and the validator require the list from now on.
 - Map keys keep ѝ (her) apart from и (and); before, tapping ѝ showed "and". Fixed with D-030,
   which needed the same keys for the sentences.
+- Practice sentences mark their forms of address too (`vocative`, found by
+  `validate_sentences.py`: a noun or name in a vocative form set off by a comma, ! or ?), so tapping
+  "госпожо" on the practice screen says it is the form for addressing someone. Restricting it to
+  nouns and names was needed: by ending alone, verbs (имаме) and adjectives (студено) matched. 21
+  places in 2,656 sentences (госпожо, госпожице, господине, бабо, мамо), all checked by hand.
 
 ## Open questions
 - Also offer the lookup on the Bulgarian prompt in the practice screen, once sentences carry a

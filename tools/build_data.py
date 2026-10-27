@@ -10,8 +10,8 @@ sentences = json.load(open(os.path.join(root, 'data/sentences.json'), encoding='
 grammar = json.load(open(os.path.join(root, 'data/grammar.json'), encoding='utf-8'))
 stories_path = os.path.join(root, 'data/stories.json')   # reading stories (D-026), checked by tools/validate_stories.py
 stories = json.load(open(stories_path, encoding='utf-8')) if os.path.exists(stories_path) else []
-slim_words = [{'rank': w['rank'], 'bg': w['bg'], 'en': w['en'], 'pos': w['pos'], 'forms': w['forms'],
-               'learned': w['learned']} for w in words]
+slim_words = [{'rank': w['rank'], 'bg': w['bg'], 'en': w['en'], 'pos': w['pos'], 'cat': w.get('cat', ''), 'forms': w['forms'],
+               'learned': w['learned']} for w in words]   # cat: the deck's topic, for sneak-peek distractors (D-031)
 learned = max((w['rank'] for w in words if w['learned']), default=0)
 out = os.path.join(root, 'app/data.js')
 with open(out, 'w', encoding='utf-8') as fh:

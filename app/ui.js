@@ -31,11 +31,12 @@ let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 /** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});   // per-card resets, so a sync does not bring them back
 /** @type {Record<string, ReadingRecord>} */ let reading = LS.get('reading', {});   // stories read, quiz scores (D-026, D-028)
 /** @type {Record<string, DaySummary>} */ let dayTotals = LS.get('days', {});   // totals of the days older than the last 30 (D-029)
+/** @type {Record<string, {at: number, ok: boolean}>} */ let peeks = LS.get('peeks', {});   // words guessed in a sneak peek, by rank (D-031)
 let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
   settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
   progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals), peeks: () => LS.set('peeks', peeks),
 };
 // fold answers older than 30 days into day totals (D-029)
 (function compactAtLoad() {
@@ -300,7 +301,7 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   $('answer').disabled = true; setState(state);
   $('answer-actions').hidden = true; $('feedback').hidden = false;
   // now the Bulgarian prompt may be looked up word by word, never before the answer (D-030)
-  if (!K.toBg && s.words) { promptSource = { words: s.words }; $('prompt').innerHTML = storyHtml(s.bg, promptSource); }
+  if (!K.toBg && s.words) { promptSource = { words: s.words, vocative: s.vocative }; $('prompt').innerHTML = storyHtml(s.bg, promptSource); }
   // a looser translation (D-014) is accepted, but the expected line shows the closest exact one, highlighted against what was typed
   const closer = r.loose && r.closer && r.result !== 'wrong' ? r.closer : '';
   let shown = closer || r.expected || accepted[0];
@@ -514,14 +515,14 @@ $('import-file').addEventListener('change', async e => {
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 /** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
-function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals }; }
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks }; }
 /** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
 function applySnapshot(m) {
   m = Object.assign({}, m, C.compactHistory(m, Date.now()));
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
-  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days;
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {};
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
-  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals })) LS.set(k, v);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks })) LS.set(k, v);
   refreshSentences();
   // redraw what is on screen, without leaving the tab or the session summary
   const tab = document.querySelector('.tab.active');
@@ -560,8 +561,65 @@ $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
+
+// ---------- sneak peek: guess the next Anki words from a sentence (D-031) ----------
+/** @type {{items: ReturnType<typeof C.peekItems>, i: number, picked: number | null, right: number} | null} */ let peek = null;
+const PEEK_SIZE = 10;
+function startPeek() {
+  const items = C.peekItems(WORDS, SENT, settings, peeks, PEEK_SIZE);
+  if (!items.length) { toast('No words ahead of your Anki position to peek at'); return; }
+  peek = { items, i: 0, picked: null, right: 0 };
+  $('session-home').hidden = true; $('session-done').hidden = true; $('peek-done').hidden = true; $('peek-run').hidden = false;
+  renderPeek(); window.scrollTo(0, 0);
+}
+function renderPeek() {
+  if (!peek) return;
+  const it = peek.items[peek.i], w = it.word, forms = new Set(it.forms), answered = peek.picked != null;
+  $('peek-count').textContent = `Sneak peek · ${peek.i + 1} of ${peek.items.length} · word ${w.rank}`;
+  $('peek-sentence').innerHTML = C.storyTokens(it.sentence.bg).map(t => t.w && forms.has(C.storyKey(t.t)) ? `<mark>${esc(t.t)}</mark>` : esc(t.t)).join('');
+  $('peek-others').innerHTML = it.others.length ? 'Also new: ' + it.others.map(o => `<b lang="bg">${esc(o.bg)}</b> – ${esc(o.en)}`).join(', ') : '';
+  const shown = it.forms.find(f => it.sentence.bg.toLowerCase().includes(f)) || w.bg;
+  $('peek-question').innerHTML = `What does <b lang="bg">${esc(shown)}</b> mean here?`;
+  $('peek-opts').innerHTML = it.options.map((o, j) => {
+    const cls = !answered ? '' : j === it.answer ? ' right' : j === peek?.picked ? ' wrong' : '';
+    return `<button class="opt${cls}" data-o="${j}"${answered ? ' disabled' : ''}>${j + 1}. ${esc(o.en)}</button>`;
+  }).join('');
+  $('peek-reveal').hidden = !answered; $('btn-peek-next').hidden = !answered;
+  if (answered) {
+    const lang = C.langFor(it.sentence.id, settings) === 'en' ? 'en' : 'nl';
+    $('peek-meaning').innerHTML = `<b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)} <span class="tiny">· word ${w.rank}${w.forms ? ' · ' + esc(w.forms) : ''}</span>`;
+    $('peek-translation').textContent = it.sentence[lang] || it.sentence.nl;
+    $('btn-peek-next').textContent = peek.i + 1 < peek.items.length ? 'Next' : 'Finish';
+  }
+}
+function pickPeek(/** @type {number} */ j) {
+  if (!peek || peek.picked != null) return;
+  const it = peek.items[peek.i], ok = j === it.answer;
+  peek.picked = j; if (ok) peek.right++;
+  peeks[it.word.rank] = { at: Date.now(), ok }; save.peeks();
+  renderPeek(); $('btn-peek-next').focus();
+}
+function nextPeek() {
+  if (!peek || peek.picked == null) return;
+  if (peek.i + 1 < peek.items.length) { peek.i++; peek.picked = null; renderPeek(); return; }
+  const n = peek.items.length, first = peek.items[0].word.rank, last = peek.items[n - 1].word.rank;
+  $('peek-summary').textContent = `You guessed ${peek.right} of ${n} right. Anki teaches these words next (word ${first}–${last}); when you meet them there, you have already thought about them once.`;
+  stopPeek(); $('session-home').hidden = true; $('peek-done').hidden = false; sync();
+}
+function stopPeek() { peek = null; $('peek-run').hidden = true; $('session-home').hidden = false; renderHome(); }
+$('btn-peek').addEventListener('click', startPeek);
+$('peek-opts').addEventListener('click', e => { const b = closest(e, '.opt'); if (b) pickPeek(+(b.dataset.o || 0)); });
+$('btn-peek-next').addEventListener('click', nextPeek);
+$('btn-peek-stop').addEventListener('click', () => { stopPeek(); sync(); });
+$('btn-peek-home').addEventListener('click', () => { $('peek-done').hidden = true; $('session-home').hidden = false; renderHome(); });
+// keys: 1–4 choose, Enter goes on
+document.addEventListener('keydown', e => {
+  if (!peek || $('peek-run').hidden) return;
+  if (peek.picked == null && /^[1-4]$/.test(e.key) && +e.key <= peek.items[peek.i].options.length) { e.preventDefault(); pickPeek(+e.key - 1); }
+  else if (peek.picked != null && e.key === 'Enter' && !e.repeat) { e.preventDefault(); nextPeek(); }
+});
 
 // ---------- reading (D-026 stories, D-027 tap a word, D-028 questions) ----------
 const STORIES = DATA.stories || [], LEVELS = [...new Set(STORIES.map(s => s.level))].sort((a, b) => a - b);

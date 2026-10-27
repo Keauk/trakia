@@ -10,6 +10,7 @@ For every sentence it:
   * computes max_rank = highest rank among resolved lemmas (the sentence becomes available in the
     app once your Anki position >= max_rank),
   * drops exact duplicate Bulgarian sentences,
+  * lists a sentence's forms of address (госпожо, Петре) as `vocative`, for the word card (D-027),
   * when a sentence has a `words` map (word form -> dictionary form, D-030; proposed by
     tools/map_sentence_words.py): requires every word of `bg` to be mapped or free, adds to
     `lemmas` every dictionary form the map uses that the list lacks, and reports every sentence
@@ -79,6 +80,36 @@ def resolve_lemma(lem, idx, en=''):
 WORD_RE = re.compile(r'[^\W\d_]+')
 
 
+def vocative_form(form, lemma):
+    """is `form` the vocative of the one-word dictionary form `lemma` (both lower case)? госпожа -> госпожо,
+    госпожица -> госпожице, мария -> марийо, господин -> господине, лекар -> лекарю, петър -> петре, татко -> тате"""
+    L, f = lemma, form
+    if f == L or ' ' in L:
+        return False
+    return (L.endswith('ица') and f == L[:-1] + 'е'
+            or L.endswith('а') and f == L[:-1] + 'о'
+            or L.endswith('я') and f in (L[:-1] + 'йо', L[:-1] + 'ьо')
+            or L.endswith('ко') and f == L[:-2] + 'е'
+            or L[-1:] not in 'аеиоуъюя' and f in (L + 'е', L + 'ю', L + 'о')
+            or len(L) > 3 and L[-2] == 'ъ' and f == L[:-2] + L[-1] + 'е')
+
+
+def vocatives(s, pos_of):
+    """the forms of address in a sentence: a vocative form of a noun or name (имаме, студено look alike but are
+    a verb and an adjective) that stands next to a comma, ! or ? (so a plural like мъже inside a clause is not taken)"""
+    text, out = unicodedata.normalize('NFC', s['bg']), []
+    for m in WORD_RE.finditer(text):
+        t = m.group(0).lower(); raw = s['words'].get(t, '').split('#')[0]; lem = raw.lower()
+        pos = pos_of.get(norm(raw))
+        if not (pos == 'noun' or pos is None and raw[:1].isupper()):
+            continue
+        before, after = text[:m.start()].rstrip(' „"'), text[m.end():].lstrip(' “"')
+        set_off = after[:1] in (',', '!', '?') or before[-1:] in (',', '') or before.endswith(('—', '–', '!', '?', '.'))
+        if lem and set_off and vocative_form(t, lem) and t not in out:
+            out.append(t)
+    return out
+
+
 def lemmas_from_map(s, idx, problems):
     """the writer's lemma list plus every dictionary form the sentence's `words` map adds (names and free
     words aside), so the map can only add a forgotten word, never drop a listed one; complains about
@@ -109,6 +140,9 @@ def main(argv):
     words_path, *files = argv
     words = json.load(open(words_path, encoding='utf-8'))
     idx = build_index(words)
+    pos_of = {}
+    for w in sorted(words, key=lambda w: w['rank']):
+        pos_of.setdefault(norm(w['bg']), w.get('pos'))
     merged, seen, unknown, problems, rank_changes = [], set(), Counter(), [], []
     for path in files:
         try:
@@ -152,6 +186,9 @@ def main(argv):
                     rec[loose] = [a.strip() for a in s[loose] if a.strip()]
             if s.get('words'):
                 rec['words'] = s['words']
+                voc = vocatives(s, pos_of)   # forms of address, for the word card (D-027)
+                if voc:
+                    rec['vocative'] = voc
                 if old_rank is not None and rec['max_rank'] != old_rank:
                     rank_changes.append((s['id'], old_rank, rec['max_rank'], s['bg']))
             for extra in ('grammar', 'note', 'rank_estimated'):   # pass-through fields

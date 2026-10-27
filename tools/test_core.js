@@ -564,6 +564,13 @@ t('compactHistory: days before the last 30 become totals, whole and only once (D
   const wiped = C.mergeSnapshots({ stamps: { wiped: now - 35 * D } }, { days: c.days });
   assert.deepEqual(wiped.days, {});
 });
+t('practice sentences mark their forms of address, and only those (D-027)', () => {
+  const byId = new Map(require('../data/sentences.json').map(s => [s.id, s]));
+  assert.deepEqual(byId.get('A004').vocative, ['госпожо']); assert.deepEqual(byId.get('B009').vocative, ['господине']);
+  assert.equal(byId.get('A164').vocative, undefined, 'Госпожа Иванова живее … names her, does not address her');
+  const all = [...byId.values()].flatMap(s => s.vocative || []);
+  assert.ok(!all.some(v => /ме$/.test(v)), 'no verb forms such as имаме'); assert.ok(all.length >= 20);
+});
 t('every word of every practice sentence can be looked up (D-030)', () => {
   const sents = require('../data/sentences.json');
   const FREE = new Set(['ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха', 'по', 'най', 'и', 'ѝ']);
@@ -573,5 +580,25 @@ t('every word of every practice sentence can be looked up (D-030)', () => {
     for (const tok of C.storyTokens(s.bg)) if (tok.w) { const k = C.storyKey(tok.t); assert.ok(s.words[k] || FREE.has(k), `${s.id}: "${tok.t}" has no lookup`); n++; }
   }
   assert.ok(n > 15000);
+});
+t('peekItems: the next words after the position, each in a sentence, with four meanings (D-031)', () => {
+  const W = require('../data/words.json'), S = require('../data/sentences.json');
+  let seed = 1; const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  const items = C.peekItems(W, S, { rank: 102, stage: 1 }, { 103: { at: 1, ok: true } }, 10, rand);
+  assert.equal(items.length, 10);
+  assert.ok(items.every(it => it.word.rank > 102 && it.word.rank <= 162), 'words just after the position');
+  assert.ok(!items.some(it => it.word.rank === 103), 'a peeked word is skipped');
+  for (const it of items) {
+    assert.ok(it.forms.length && it.forms.every(f => it.sentence.words[f]), it.word.bg + ': marked forms come from the sentence');
+    assert.equal(it.options.length, 4); assert.equal(it.options[it.answer], it.word);
+    assert.equal(new Set(it.options.map(o => o.en)).size, 4, 'four different meanings');
+  }
+  assert.ok(items.filter(it => it.others.length === 0).length >= 7, 'mostly sentences where only the new word is unknown');
+  assert.ok(items.every(it => C.grammarOk(it.sentence, { stage: 1 })), 'sentences within grammar stage 1');
+  // all of the next 60 peeked: the run starts over with the next words
+  const all = {}; for (let r = 103; r <= 162; r++) all[r] = { at: 1, ok: false };
+  assert.equal(C.peekItems(W, S, { rank: 102, stage: 1 }, all, 3, rand)[0].word.rank, 103);
+  // merged like the rest of the snapshot: the newer guess per word
+  assert.equal(C.mergeSnapshots({ peeks: { 103: { at: 5, ok: true } } }, { peeks: { 103: { at: 3, ok: false } } }).peeks['103'].ok, true);
 });
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

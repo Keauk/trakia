@@ -38,6 +38,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-028](D-028-comprehension-questions.md) | Comprehension questions after each story, counted on the Stats tab | reading UI / stats | in progress |
 | [D-029](D-029-history-compaction.md) | Keep 30 days of answer history in full and older days as daily totals | storage / stats | done |
 | [D-030](D-030-sentence-word-maps.md) | Map every word of every practice sentence to its dictionary form | data / checking / practise UI | done |
+| [D-031](D-031-sneak-peek.md) | Sneak peek: guess the meaning of the next Anki words from a sentence, before Anki teaches them | practise | done |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

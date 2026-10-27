@@ -924,6 +924,9 @@
     const touched = (/** @type {ReadingRecord} */ r) => Math.max(r.read || 0, r.quiz ? r.quiz.at : 0);
     for (const side of [L.reading || {}, R.reading || {}]) for (const k in side) { const r = side[k], had = allReading[k]; if (!had || touched(r) >= touched(had)) allReading[k] = r; }
     const reading = sortedMap(allReading, r => touched(r) > wiped ? r : undefined);
+    // sneak peeks (D-031): per word the newer guess
+    /** @type {Record<string, {at: number, ok: boolean}>} */ const allPeeks = {};
+    for (const side of [L.peeks || {}, R.peeks || {}]) for (const k in side) { const p = side[k], had = allPeeks[k]; if (!had || p.at >= had.at) allPeeks[k] = p; }
     // day totals (D-029): per number the larger of the two, nothing before the day of a reset
     const wipeDay = wiped ? dayKey(wiped) : '';
     /** @type {Record<string, DaySummary>} */ const allDays = {};
@@ -936,8 +939,49 @@
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
-      stamps, cleared, reading, days: sortedMap(allDays, normDay),
+      stamps, cleared, reading, days: sortedMap(allDays, normDay), peeks: sortedMap(allPeeks, p => p.at > wiped ? p : undefined),
     };
+  }
+
+  // ---------- sneak peek: guess the next Anki words from a sentence (D-031) ----------
+  /** up to `n` of the words after the learner's Anki position, each with a practice sentence that uses it and four meanings to choose from.
+   * The sentence fits the grammar stage where possible, has the fewest other words beyond the position, then the fewest words; distractors share
+   * the deck topic and part of speech where possible (within 400 ranks), else the part of speech or just the neighbourhood (150 ranks). Words in `peeked` are skipped while there are others in the next 60.
+   * @param {Word[]} words @param {Sentence[]} sentences @param {Partial<Settings>} settings @param {Record<string, any>} peeked @param {number} n @param {() => number} [rand]
+   * @returns {{word: Word, sentence: Sentence, forms: string[], others: Word[], options: Word[], answer: number}[]} */
+  function peekItems(words, sentences, settings, peeked, n, rand) {
+    rand = rand || Math.random; peeked = peeked || {};
+    const pos = settings.rank || 0, byBg = new Map(), byRank = new Map(words.map(w => [w.rank, w]));
+    for (const w of words) { const k = storyKey(w.bg); if (!byBg.has(k)) byBg.set(k, w); }
+    /** @param {string} l @returns {Word | undefined} */
+    const wordOf = l => { const [f, r] = l.split('#'); return r ? byRank.get(+r) : byBg.get(storyKey(f)); };
+    const ahead = words.filter(w => w.rank > pos && w.rank <= pos + 60);
+    const fresh = ahead.filter(w => !peeked[w.rank]);
+    const out = [];
+    for (const w of (fresh.length ? fresh : ahead)) {
+      if (out.length >= n) break;
+      let best = null, bestScore = Infinity;
+      for (const s of sentences) {
+        if (!s.words || !s.lemmas.some(l => wordOf(l) === w)) continue;
+        const others = s.lemmas.map(wordOf).filter(x => x && x !== w && x.rank > pos);
+        const score = (grammarOk(s, settings) ? 0 : 10000) + others.length * 100 + s.bg.split(/\s+/).length;   // the learner's grammar stage first
+        if (score < bestScore) { bestScore = score; best = { s, others: /** @type {Word[]} */ (others) }; }
+      }
+      if (!best) continue;
+      const sw = best.s.words || {};
+      const forms = Object.keys(sw).filter(f => wordOf(sw[f]) === w);
+      // distractors that make the sentence matter: the same topic and word type first (ракия: other drinks), then the same word type nearby
+      const other = words.filter(x => x !== w && x.en !== w.en);
+      const tiers = [other.filter(x => w.cat && x.cat === w.cat && x.pos === w.pos && Math.abs(x.rank - w.rank) <= 400),
+        other.filter(x => x.pos === w.pos && Math.abs(x.rank - w.rank) <= 150), other.filter(x => Math.abs(x.rank - w.rank) <= 150)];
+      const pool = (tiers.find(t => t.length >= 3) || tiers[2]).slice();
+      /** @type {Word[]} */ const distract = [];
+      while (distract.length < 3 && pool.length) { const x = pool.splice(Math.floor(rand() * pool.length), 1)[0]; if (!distract.some(d => d.en === x.en)) distract.push(x); }
+      const options = distract.slice(), answer = Math.floor(rand() * (options.length + 1));
+      options.splice(answer, 0, w);
+      out.push({ word: w, sentence: best.s, forms, others: [...new Set(best.others)], options, answer });
+    }
+    return out;
   }
 
   // ---------- reading (D-026, D-027) ----------
@@ -960,6 +1004,6 @@
     return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots, dayKey, compactHistory, storyTokens, storyKey, storyEligible };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

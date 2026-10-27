@@ -225,6 +225,14 @@ BG→NL card has been answered correctly once" (default; recognition before prod
 * all numbers derived on the fly from the progress blob; nothing to keep in sync
 * reading: stories read of those open, average score of the latest question tries (D-028)
 
+### 4.3b Sneak peek (D-031)
+
+A button on the Practise home runs up to ten of the words just after the Anki position: each in a
+practice sentence (fewest other unknown words, within the grammar stage) with the word marked, four
+meanings to choose from (distractors from the same deck topic), then the meaning and the sentence's
+translation. Guessing before Anki teaches the word uses the pretesting effect. Peeked words live in
+`trakia.peeks` and travel with sync; they only decide which words the next run offers.
+
 ### 4.3a Reading (D-026, D-027, D-028)
 
 Fifteen stories about one family, three per level 100–500; a story is open when its level is within

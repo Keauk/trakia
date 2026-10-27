@@ -366,6 +366,32 @@ setTimeout(async () => {
     document.querySelector('nav button[data-tab=stats]').click();
     assert.match($('stats-reading').textContent, new RegExp(`1/${open.length}`));
   }
+  // D-031: sneak peek at the words after the position (still word 150 here)
+  document.querySelector('nav button[data-tab=practise]').click();
+  $('btn-peek').click();
+  assert.equal($('peek-run').hidden, false); assert.equal($('session-home').hidden, true);
+  {
+    const total = +$('peek-count').textContent.match(/of (\d+)/)[1];
+    assert.equal(total, 10);
+    for (let i = 0; i < total; i++) {
+      assert.match($('peek-count').textContent, new RegExp(`^Sneak peek · ${i + 1} of 10 · word \\d+$`));
+      const rank = +$('peek-count').textContent.match(/word (\d+)/)[1]; assert.ok(rank > 150 && rank <= 210);
+      assert.ok($('peek-sentence').querySelector('mark'), 'the word is marked in the sentence');
+      assert.equal($('peek-reveal').hidden, true, 'nothing revealed before the guess');
+      if (i % 2) $('peek-opts').querySelector('.opt[data-o="1"]').click(); else document.dispatchEvent(new window.KeyboardEvent('keydown', { key: '1' }));
+      assert.equal($('peek-reveal').hidden, false); assert.ok($('peek-translation').textContent.length > 3, 'translation shown');
+      assert.equal($('peek-opts').querySelectorAll('.opt.right').length, 1); assert.match($('peek-meaning').textContent, new RegExp('word ' + rank));
+      document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    }
+    assert.equal($('peek-run').hidden, true); assert.equal($('peek-done').hidden, false);
+    assert.match($('peek-summary').textContent, /^You guessed \d+ of 10 right\./);
+    const stored = JSON.parse(window.localStorage.getItem('trakia.peeks'));
+    assert.equal(Object.keys(stored).length, 10); assert.ok(Object.keys(stored).every(r => +r > 150));
+    // the next run offers the next ten words
+    $('btn-peek-home').click(); $('btn-peek').click();
+    assert.ok(!stored[$('peek-count').textContent.match(/word (\d+)/)[1]], 'the next run starts with a word not peeked yet');
+    $('btn-peek-stop').click(); assert.equal($('session-home').hidden, false);
+  }
   $('set-rank').value = rankBefore; $('set-rank').dispatchEvent(new window.Event('input'));
 
   // D-025: sync through a secret gist, against an in-memory imitation of the GitHub API
@@ -430,5 +456,6 @@ setTimeout(async () => {
   $('btn-export-progress').click();
   const exported = await blob.text(); assert.ok(!exported.includes(TOKEN)); assert.equal(JSON.parse(exported).progress['ZZ1|bg2nl'].last, later);
   assert.equal(Object.keys(JSON.parse(exported).reading).length, 1, 'read marks travel with the snapshot');
+  assert.equal(Object.keys(JSON.parse(exported).peeks).length, 10, 'sneak peeks travel with the snapshot');
   console.log('UI smoke test passed');
 }, 100);

@@ -2,7 +2,9 @@
 // Ambient declarations: no imports or exports, so every name here is global in both files.
 
 /** One row of data/words.json: a deck word in Anki rank order. */
-interface Word { rank: number; bg: string; en: string; pos: string; forms: string; learned?: boolean }
+interface Word { rank: number; bg: string; en: string; pos: string; forms: string; learned?: boolean;
+  /** the deck's topic (food, body, family, …) */
+  cat?: string }
 
 /** One practice sentence from data/sentences.json. */
 interface Sentence {
@@ -15,6 +17,8 @@ interface Sentence {
   lemmas: string[]; max_rank: number | null; tags: string[]; source: string; grammar?: string[];
   /** every word form of `bg` (lower case) -> its dictionary form (D-030) */
   words?: Record<string, string>;
+  /** forms of address in `bg` (госпожо, господине), for the word card (D-027) */
+  vocative?: string[];
 }
 
 interface GrammarTable { headers: string[]; rows: string[][] }
@@ -88,6 +92,8 @@ interface Snapshot {
   reading: Record<string, ReadingRecord>;
   /** totals of the days older than the last 30 (D-029) */
   days: Record<string, DaySummary>;
+  /** words guessed in a sneak peek, by rank (D-031) */
+  peeks: Record<string, { at: number; ok: boolean }>;
 }
 
 /** One compacted day (D-029): answers and drill answers as [wrong, almost, correct], session starts. */
