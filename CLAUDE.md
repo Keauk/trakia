@@ -4,6 +4,27 @@
 for the architecture and data pipeline, `README.md` for how to run, test and publish, and
 `decisions/README.md` for the list of features and their status.
 
+## This repository is PUBLIC: never commit a secret
+
+Everything committed here is public on GitHub, and the `gh-pages` branch is served to the world.
+A secret pushed once stays in the history and in forks and caches even after a later commit
+removes it.
+
+- Never commit, push or publish a token, key, password or credential of any kind: GitHub tokens
+  (`github_pat_…`, `ghp_…`, `gho_…`), the gist sync token (D-025), Azure or Google keys (an
+  `AZURE_SPEECH_KEY` for D-005, D-033), private keys (`-----BEGIN … PRIVATE KEY-----`), `.env`
+  files, cookies, or a person's personal data.
+- Secrets live outside the repository only: in an environment variable, the learner's browser
+  (`localStorage` `trakia.sync`, never in an export, snapshot or the gist), or a password manager.
+  Code reads them from there; it never writes them into a file in the repository, `data/`, a log or
+  a test fixture. Tests use obvious fakes (`github_pat_SECRET123`).
+- Before every commit, look at what is staged (`git diff --cached`), not only at the files you
+  meant to change. Never use `git add -A` or `git add .` blindly; add files by name or check the
+  list first. `.gitignore` excludes common secret files (`*.env`, `*token*`, `*secret*`, `*.pem`,
+  …); do not weaken it.
+- If a secret is ever committed: stop, do not push (or stop pushing), tell the user at once, and
+  have the secret revoked. Removing it from the history is not enough on its own.
+
 ## Every feature has a decision record
 
 A **feature** is anything that adds or changes what the app does for the learner or how it decides
