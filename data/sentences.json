@@ -3413,10 +3413,12 @@
 "Той е нула за мен."
 ],
 "en_alt": [
-"For me, he's a zero.",
-"He's a zero to me."
+"He's a nobody to me.",
+"To me he's a zero.",
+"He's a zero to me.",
+"For me, he's a zero."
 ],
-"en": "To me he's a zero.",
+"en": "To me he's a nobody.",
 "lemmas": [
 "за",
 "аз",
@@ -3433,8 +3435,6 @@
 "Voor mij is hij niemand."
 ],
 "en_loose": [
-"To me he's a nobody.",
-"He's a nobody to me.",
 "To me he is nothing."
 ],
 "words": {
