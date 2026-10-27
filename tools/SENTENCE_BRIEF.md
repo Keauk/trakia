@@ -94,3 +94,6 @@ Write the file in chunks (append 50 at a time to a temp file, then assemble) if 
 quality high; the final file must be a single JSON array. Validate it parses with
 `python3 -I -c "import json,sys; d=json.load(open(sys.argv[1])); print(len(d))" <file>` before you finish.
 Your final reply: the number of sentences written and the path. Nothing else.
+
+(For whoever merges the files: `tools/map_sentence_words.py` then proposes each sentence's `words`
+map from its `lemmas`, D-030; map what it cannot place by hand before `validate_sentences.py`.)

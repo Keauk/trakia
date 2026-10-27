@@ -7,6 +7,9 @@ Patch file: JSON array of {"id": ..., "<field>": <new value>, ..., "drop": true?
 Fields bg, nl, nl_alt, bg_alt, bg_alt_en, en, en_alt, nl_loose, en_loose, lemmas, tags replace the old value entirely. "drop": true removes
 the sentence. After patching, lemmas are re-resolved against data/words.json (via
 validate_sentences.py) so max_rank stays correct; unresolved lemmas are reported.
+A patch that changes `bg` leaves the sentence's `words` map (D-030) behind: the re-validation then
+reports the unmapped words. Run tools/map_sentence_words.py (and map what it cannot place) before
+validating again.
 """
 import json, sys, os, subprocess, tempfile
 FIELDS = ('bg', 'nl', 'nl_alt', 'bg_alt', 'bg_alt_en', 'en', 'en_alt', 'nl_loose', 'en_loose', 'lemmas', 'tags')

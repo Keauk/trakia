@@ -46,7 +46,8 @@ trakia/
   data/sentences.json      2656 generated sentences (validated, with max_rank)
   data/stories.json        15 reading stories, 3 per level 100–500 (D-026), with word map and questions
   tools/export_anki_words.py   apkg -> data/words.json
-  tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe)
+  tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe; word maps, D-030)
+  tools/map_sentence_words.py  proposes each sentence's word map (form -> dictionary form) from its lemmas (D-030)
   tools/validate_stories.py    story JSON -> data/stories.json (every word checked against its level, D-026)
   tools/build_data.py          data/*.json -> app/data.js (run after any data change)
   tools/find_combinations.js   lists mixtures of two accepted answers that are not accepted yet (D-020)
@@ -74,15 +75,19 @@ trakia/
   "en": "Tomorrow I'll go to the market with my mother.",
   "en_alt": ["Tomorrow I'm going to the market with my mother."],
   "en_loose": ["Tomorrow I'll go shopping with my mother."],
-  "lemmas": ["утре", "ходя", "пазар", "с", "майка", "мой"],
+  "lemmas": ["утре", "ходя", "пазар", "с", "майка", "аз"],
+  "words": {"утре": "утре", "ходя": "ходя", "пазар": "пазар", "с": "с", "майка": "майка", "ми": "аз"},
   "max_rank": 231,
   "tags": ["shopping", "future", "family"],
   "source": "generated-2026-10"
 }
 ```
 
-Only `bg` and `nl` are mandatory in an upload; everything else is optional. `lemmas` is what makes
-rank-filtering precise. If a row has no lemmas, the importer falls back to matching the lowercase
+Only `bg` and `nl` are mandatory in an upload; everything else is optional. `words` (D-030) maps
+every word form of `bg` to its dictionary form; `tools/map_sentence_words.py` proposes it from
+`lemmas`, and `validate_sentences.py` then derives `lemmas` and `max_rank` from it, so every running
+word counts for the rank. The map also lets the learner tap a word of the prompt after answering.
+For the bundled sentences `lemmas` is derived; in an upload it is what makes rank-filtering precise. If a row has no lemmas, the importer falls back to matching the lowercase
 tokens of `bg` against the word list (dictionary forms + the `Forms` column); tokens it cannot match
 are ignored, so `max_rank` may be too low. Such rows get `"rank_estimated": true` and show a small
 "≈" badge so you know the filter is approximate.
@@ -124,7 +129,10 @@ the app keeps a secret gist `trakia-progress.json` and merges it with the device
 after every session and when the app is hidden or shown (`C.mergeSnapshots`: newest answer per card,
 histories combined, resets carried as timestamps; theme, wallpaper and keyboard settings stay per
 device). The token lives in `trakia.sync` and never enters a snapshot. **Export / Import progress**
-write/read the same snapshot as a file; importing merges too.
+write/read the same snapshot as a file; importing merges too. **History** (D-029): the answer,
+drill and session lists keep the last 30 days in full; older days are folded into `trakia.days`
+(per day wrong / almost / correct counts and sessions), so the stored history stays small and the
+streak and all-time numbers still count every day.
 
 ## 4. Core behaviours
 

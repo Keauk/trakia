@@ -519,7 +519,7 @@ t('storyTokens splits words like the story validator, keeping the text (D-026, D
   const toks = C.storyTokens('„Здравей, Ана!“ По-голям е.');
   assert.equal(toks.map(x => x.t).join(''), '„Здравей, Ана!“ По-голям е.');
   assert.deepEqual(toks.filter(x => x.w).map(x => x.t), ['Здравей', 'Ана', 'По', 'голям', 'е']);
-  assert.equal(C.storyKey('Ѝ'), 'и'); assert.equal(C.storyKey('Детето'), 'детето');
+  assert.equal(C.storyKey('Ѝ'), 'ѝ', 'ѝ (her) is looked up apart from и (and)'); assert.equal(C.storyKey('Детето'), 'детето');
 });
 t('storyEligible: level within the Anki position plus tolerance, grammar within the stage (D-026)', () => {
   const st = { level: 200, grammar: ['present'] };
@@ -538,12 +538,40 @@ t('mergeSnapshots: read marks and quiz scores, newest per story (D-025, D-026)',
 t('every word of every bundled story can be looked up (D-027)', () => {
   const fs = require('fs'), path = require('path'), file = path.join(__dirname, '..', 'data', 'stories.json');
   if (!fs.existsSync(file)) return;
-  const FREE = new Set(['ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха', 'по', 'най', 'и']);
+  const FREE = new Set(['ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха', 'по', 'най', 'и', 'ѝ']);
   for (const st of JSON.parse(fs.readFileSync(file, 'utf8'))) {
     const names = new Set((st.names || []).map(C.storyKey));
     for (const text of [st.title.bg, ...st.paragraphs.map(p => p.bg)]) for (const tok of C.storyTokens(text)) if (tok.w) {
       const k = C.storyKey(tok.t); assert.ok(st.words[k] || names.has(k) || FREE.has(k), `${st.id}: "${tok.t}" has no lookup`);
     }
   }
+});
+t('compactHistory: days before the last 30 become totals, whole and only once (D-029)', () => {
+  const D = 86400e3, now = new Date(2026, 9, 26, 12).getTime(), old = now - 40 * D, older = now - 41 * D, recent = now - 2 * D;
+  const st = { log: [[older, 'A|bg2nl', 2], [old, 'A|bg2nl', 0], [old + 60e3, 'B|bg2nl', 2], [old + 120e3, 'C|bg2nl', 1], [recent, 'A|bg2nl', 2]],
+    drillLog: [[old, 'x', 2], [old, 'y', 0], [recent, 'x', 1]], sessions: [old, older, recent] };
+  const c = C.compactHistory(st, now);
+  assert.deepEqual(c.log.map(e => e[0]), [recent]); assert.deepEqual(c.drillLog.map(e => e[0]), [recent]); assert.deepEqual(c.sessions, [recent]);
+  assert.deepEqual(c.days[C.dayKey(old)], { a: [1, 1, 1], d: [1, 0, 1], s: 1 });
+  assert.deepEqual(c.days[C.dayKey(older)], { a: [0, 0, 1], s: 1 });
+  assert.deepEqual(Object.keys(c.days), [C.dayKey(older), C.dayKey(old)], 'days sorted');
+  const again = C.compactHistory(c, now);
+  assert.equal(JSON.stringify(again), JSON.stringify(c), 'compacting twice changes nothing');
+  // one device compacted, the other still holds the same answers in full: the day is not counted twice
+  const both = C.mergeSnapshots({ log: c.log, drillLog: c.drillLog, sessions: c.sessions, days: c.days }, st);
+  assert.deepEqual(C.compactHistory(both, now).days, c.days);
+  // a reset drops the totals of earlier days
+  const wiped = C.mergeSnapshots({ stamps: { wiped: now - 35 * D } }, { days: c.days });
+  assert.deepEqual(wiped.days, {});
+});
+t('every word of every practice sentence can be looked up (D-030)', () => {
+  const sents = require('../data/sentences.json');
+  const FREE = new Set(['ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха', 'по', 'най', 'и', 'ѝ']);
+  let n = 0;
+  for (const s of sents) {
+    assert.ok(s.words, s.id + ' has a words map');
+    for (const tok of C.storyTokens(s.bg)) if (tok.w) { const k = C.storyKey(tok.t); assert.ok(s.words[k] || FREE.has(k), `${s.id}: "${tok.t}" has no lookup`); n++; }
+  }
+  assert.ok(n > 15000);
 });
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

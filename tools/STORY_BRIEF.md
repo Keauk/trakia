@@ -65,6 +65,7 @@ One JSON file (UTF-8, valid JSON, an array) with your stories:
   ],
   "words": {"ключът": "ключ", "иван": "Иван", "е": "съм", "пред": "пред", "вратата": "врата", "той": "той", "няма": "нямам", "ключ": "ключ"},
   "names": ["Иван"],
+  "vocative": [],
   "extra": {"пред": {"nl": "voor (plaats)", "en": "in front of"}},
   "grammar": ["present"],
   "questions": [
@@ -80,6 +81,10 @@ One JSON file (UTF-8, valid JSON, an array) with your stories:
   "може би"). Map names to themselves. The free words (ли, не, да, …) may be left out or mapped.
   No forms that do not occur in the text. When one form has two meanings in your story, pick the
   one that occurs most.
+- `vocative`: every form you use to address someone that differs from its dictionary form
+  (`"петре"`, `"мамо"`, `"бабо"`, `"тате"`, `"лекарю"`), in lower case. Map each to its base
+  form in `words` (`"петре": "Петър"`, `"мамо": "мама"`); the app then explains the form when the
+  learner taps it. A vocative equal to the base form (дядо, Ана) is not listed.
 - `grammar`: the tags that occur: `present`, `da-clause` (and `comparative`, `numeral` if used).
 - Ids: `R<level><letter>`, e.g. R200a, R200b, R200c.
 

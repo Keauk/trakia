@@ -36,6 +36,8 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-026](D-026-reading-tab.md) | A Reading tab with short stories at the learner's level | new tab / content | in progress |
 | [D-027](D-027-tap-a-word.md) | Tap a word in a story to see its dictionary form and meaning | reading UI | in progress |
 | [D-028](D-028-comprehension-questions.md) | Comprehension questions after each story, counted on the Stats tab | reading UI / stats | in progress |
+| [D-029](D-029-history-compaction.md) | Keep 30 days of answer history in full and older days as daily totals | storage / stats | done |
+| [D-030](D-030-sentence-word-maps.md) | Map every word of every practice sentence to its dictionary form | data / checking / practise UI | done |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

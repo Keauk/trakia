@@ -11,6 +11,7 @@ For every story it:
   * resolves every lemma in `words` to a deck rank, unless the lemma is a glossed word in `extra`,
   * fails an unglossed word above the story's level and a glossed share above 3 % of the words,
   * allows only stage-1 grammar (present, da-clause),
+  * checks that each listed vocative (form of address: Петре, мамо) occurs and maps to its base form,
   * checks 3-5 questions with 3-4 options in Dutch and English and a valid answer,
   * writes max_rank, stage and word_count.
 Exit status 1 when any story has an error.
@@ -25,8 +26,13 @@ GLOSS_MAX = 0.03
 WORD_RE = re.compile(r'[^\W\d_]+')   # same as /\p{L}+/u in core.js storyTokens
 
 
+def key(w):
+    """a word's key in `words`: lower case, NFC; ѝ (her) stays apart from и (and), unlike norm"""
+    return unicodedata.normalize('NFC', w).lower()
+
+
 def words_of(text):
-    return [norm(w) for w in WORD_RE.findall(unicodedata.normalize('NFC', text))]
+    return [key(w) for w in WORD_RE.findall(unicodedata.normalize('NFC', text))]
 
 
 def check_story(s, idx, rank_of_lemma):
@@ -45,8 +51,8 @@ def check_story(s, idx, rank_of_lemma):
         for lang in ('bg', 'nl', 'en'):
             if not str(p.get(lang, '')).strip():
                 errs.append(f'paragraph {i + 1}: {lang} missing')
-    words = {norm(k): v for k, v in s['words'].items()}
-    names = {norm(n) for n in s.get('names', [])}
+    words = {key(k): v for k, v in s['words'].items()}
+    names = {key(n) for n in s.get('names', [])}
     extra = {norm(k): v for k, v in s.get('extra', {}).items()}
     for lem, gl in extra.items():
         if not (isinstance(gl, dict) and gl.get('nl') and gl.get('en')):
@@ -59,7 +65,7 @@ def check_story(s, idx, rank_of_lemma):
         if w in names:
             continue
         if w not in words:
-            if w in FREE:
+            if norm(w) in FREE:
                 continue
             errs.append(f'word "{w}" is not in `words`, `names` or the free list'); continue
         lem = norm(words[w])
@@ -67,7 +73,7 @@ def check_story(s, idx, rank_of_lemma):
             glossed += 1; continue
         r = rank_of_lemma(words[w])
         if r is None:
-            if lem in FREE:
+            if norm(lem) in FREE:
                 continue
             errs.append(f'"{w}" -> lemma "{words[w]}" is not in the deck (gloss it in `extra` or rephrase)'); continue
         if r > s['level']:
@@ -78,6 +84,11 @@ def check_story(s, idx, rank_of_lemma):
     share = glossed / max(1, len(running))
     if share > GLOSS_MAX:
         errs.append(f'glossed words are {share:.1%} of the text (max {GLOSS_MAX:.0%})')
+    for v in s.get('vocative', []):
+        if key(v) not in running:
+            errs.append(f'vocative "{v}" does not occur in the text')
+        elif key(v) not in words:
+            errs.append(f'vocative "{v}" needs its base form in `words` (петре -> Петър)')
     unused = sorted(set(words) - set(running))
     if unused:
         errs.append('`words` lists forms that are not in the text: ' + ', '.join(unused[:10]))
@@ -122,8 +133,8 @@ def main(argv):
                 print('  ERROR ' + '\n  ERROR '.join(errs))
                 continue
             rec = {k: s[k] for k in ('id', 'level', 'title', 'paragraphs', 'words', 'questions')}
-            rec['words'] = {norm(k): v for k, v in s['words'].items()}
-            for k in ('names', 'extra', 'grammar'):
+            rec['words'] = {key(k): v for k, v in s['words'].items()}
+            for k in ('names', 'extra', 'grammar', 'vocative'):
                 if s.get(k):
                     rec[k] = s[k]
             rec.update(max_rank=info['max_rank'], stage=info['stage'], word_count=info['word_count'])

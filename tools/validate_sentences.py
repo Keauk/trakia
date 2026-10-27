@@ -10,6 +10,10 @@ For every sentence it:
   * computes max_rank = highest rank among resolved lemmas (the sentence becomes available in the
     app once your Anki position >= max_rank),
   * drops exact duplicate Bulgarian sentences,
+  * when a sentence has a `words` map (word form -> dictionary form, D-030; proposed by
+    tools/map_sentence_words.py): requires every word of `bg` to be mapped or free, adds to
+    `lemmas` every dictionary form the map uses that the list lacks, and reports every sentence
+    whose max_rank changes,
   * reports unknown lemmas so they can be fixed or mapped.
 Sentences whose lemmas cannot all be resolved keep max_rank from the resolved ones and get
 "unresolved": [...] so the app (or you) can decide what to do with them.
@@ -53,6 +57,10 @@ def build_index(words):
 FREE = {'ли', 'не', 'да', 'ще', 'съм', 'си', 'е', 'сме', 'сте', 'са', 'се', 'бях', 'беше', 'бяхме', 'бяха',
         'по', 'най', 'ѝ', 'и'}
 
+# numerals 1-20 count as free in a sentence (SENTENCE_BRIEF.md): mapped for lookup, not for the rank
+NUMERALS = {'един', 'две', 'три', 'четири', 'пет', 'шест', 'седем', 'осем', 'девет', 'десет', 'единадесет', 'дванадесет',
+            'тринадесет', 'четиринадесет', 'петнадесет', 'шестнадесет', 'седемнадесет', 'осемнадесет', 'деветнадесет', 'двадесет'}
+
 def resolve_lemma(lem, idx, en=''):
     """rank of a lemma as written in a sentence's lemma list, or None. Honours "lemma#rank" and the
     homograph sense hints (checked against the sentence's English gloss)."""
@@ -68,6 +76,32 @@ def resolve_lemma(lem, idx, en=''):
             r = hi
     return r
 
+WORD_RE = re.compile(r'[^\W\d_]+')
+
+
+def lemmas_from_map(s, idx, problems):
+    """the writer's lemma list plus every dictionary form the sentence's `words` map adds (names and free
+    words aside), so the map can only add a forgotten word, never drop a listed one; complains about
+    words of `bg` the map does not cover"""
+    words = {unicodedata.normalize('NFC', k).lower(): v for k, v in s['words'].items()}
+    out = list(s.get('lemmas', []))
+    for tok in WORD_RE.findall(unicodedata.normalize('NFC', s['bg'])):
+        t = tok.lower()
+        if t not in words:
+            if norm(t) not in FREE:
+                problems.append(f'{s["id"]}: "{tok}" is not in `words`')
+            elif t in s.get('lemmas', []) and t not in out:   # a free word the writer listed (по) still counts
+                out.append(t)
+            continue
+        lem = words[t]
+        is_name = lem[:1].isupper() and resolve_lemma(lem, idx) is None
+        # free words and numerals count only where the writer listed them
+        free = (norm(lem) in FREE or norm(lem) in NUMERALS) and lem not in s.get('lemmas', [])
+        if not is_name and not free and lem not in out:
+            out.append(lem)
+    return out, words
+
+
 def main(argv):
     out = 'data/sentences.json'
     if '-o' in argv:
@@ -75,7 +109,7 @@ def main(argv):
     words_path, *files = argv
     words = json.load(open(words_path, encoding='utf-8'))
     idx = build_index(words)
-    merged, seen, unknown, problems = [], set(), Counter(), []
+    merged, seen, unknown, problems, rank_changes = [], set(), Counter(), [], []
     for path in files:
         try:
             data = json.load(open(path, encoding='utf-8'))
@@ -92,6 +126,9 @@ def main(argv):
             if key in seen:
                 problems.append(f'{sid}: duplicate of an earlier sentence, dropped'); continue
             seen.add(key)
+            old_rank = s.get('max_rank')
+            if s.get('words'):
+                s['lemmas'], s['words'] = lemmas_from_map(s, idx, problems)
             ranks, unresolved = [], []
             for lem in s['lemmas']:
                 r = resolve_lemma(lem, idx, s.get('en', ''))
@@ -113,6 +150,10 @@ def main(argv):
             for loose in ('nl_loose', 'en_loose', 'bg_alt_en'):   # looser translations (D-014); BG for the English prompt only (D-018)
                 if any(a.strip() for a in s.get(loose, [])):
                     rec[loose] = [a.strip() for a in s[loose] if a.strip()]
+            if s.get('words'):
+                rec['words'] = s['words']
+                if old_rank is not None and rec['max_rank'] != old_rank:
+                    rank_changes.append((s['id'], old_rank, rec['max_rank'], s['bg']))
             for extra in ('grammar', 'note', 'rank_estimated'):   # pass-through fields
                 if s.get(extra) not in (None, [], ''):
                     rec[extra] = s[extra]
@@ -125,6 +166,11 @@ def main(argv):
     print(f'{len(merged)} sentences written to {out}; {n_unres} with unresolved lemmas')
     bands = Counter((r['max_rank'] or 0) // 300 * 300 for r in merged)
     print('max_rank distribution (bucket start -> count):', dict(sorted(bands.items())))
+    if rank_changes:
+        up = sum(1 for _, a, b, _ in rank_changes if (b or 0) > (a or 0))
+        print(f'\nmax_rank changed for {len(rank_changes)} sentences ({up} up, {len(rank_changes) - up} down):')
+        for sid, a, b, bg in rank_changes:
+            print(f'  {sid}: {a} -> {b}   {bg}')
     if problems:
         print(f'\n{len(problems)} problems:'); print('\n'.join(problems[:60]))
     if unknown:

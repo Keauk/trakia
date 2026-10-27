@@ -58,6 +58,12 @@ A couple of hours on top of D-026. Risk: a form shared by two lemmas (`те` = t
 - Each word button sits in a `white-space: nowrap` span with the punctuation that touches it: a
   browser may break a line on either side of a button, which put a full stop or an opening „ on a
   line of its own (seen in a 375 px screenshot).
+- Forms of address (vocative: Петре, мамо, бабо, тате, лекарю) are listed per story in
+  `vocative` and mapped to their base form; the card shows the base form and the line "петре: the
+  form for addressing someone (vocative)". Added after the learner asked why the first story
+  writes both Петре and Петър; the brief and the validator require the list from now on.
+- Map keys keep ѝ (her) apart from и (and); before, tapping ѝ showed "and". Fixed with D-030,
+  which needed the same keys for the sentences.
 
 ## Open questions
 - Also offer the lookup on the Bulgarian prompt in the practice screen, once sentences carry a

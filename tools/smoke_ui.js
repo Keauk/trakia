@@ -31,13 +31,26 @@ assert.ok(document.body.classList.contains('running'));
 assert.equal($('run-card').dataset.state, 'idle');
 const id = (() => { const txt = $('prompt').textContent; return window.TRAKIA_DATA.sentences.find(s => s.bg === txt); })();
 assert.ok(id, 'prompt is a bundled sentence');
+// D-030: the prompt is plain text until the card is answered, then every word can be tapped
+assert.equal($('prompt').querySelector('button.w'), null, 'no lookup before answering');
 // exact answer -> correct
 type(id.nl);
 assert.match($('verdict').className, /correct/);
 assert.equal($('run-card').dataset.state, 'correct'); assert.equal($('verdict').textContent, '✓ Correct');
 assert.equal($('expected').querySelector('mark'), null, 'exact answer: nothing highlighted'); assert.equal($('verdict-note').textContent, '');
 assert.equal($('btn-accept').hidden, true);
-type('', 'Enter'); // next
+{
+  const k = Object.keys(id.words).find(f => window.TRAKIA_DATA.words.some(w => C.storyKey(w.bg) === C.storyKey(id.words[f])));
+  const w = window.TRAKIA_DATA.words.find(x => C.storyKey(x.bg) === C.storyKey(id.words[k]));
+  assert.equal($('prompt').textContent, id.bg, 'the prompt text is unchanged');
+  $('prompt').querySelector(`button.w[data-k="${k}"]`).click();
+  assert.ok($('word-pop').textContent.includes(`${w.bg} – ${w.en}`), 'word card on the prompt: ' + $('word-pop').textContent);
+  document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+  // Enter on the tapped word goes to the next card, it does not reopen the word card
+  const before = $('counter').textContent; $('prompt').querySelector('button.w').focus();
+  document.activeElement.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  assert.notEqual($('counter').textContent, before, 'Enter on a prompt word moves on'); assert.equal($('word-pop').hidden, true);
+}
 assert.equal($('segs').children[0].className, 'done'); assert.equal($('segs').children[1].className, 'cur');
 // second card: one typo -> almost
 const s2 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
@@ -335,6 +348,12 @@ setTimeout(async () => {
     document.querySelector(`#reading-story button.w[data-k="${k}"]`).click();
     assert.equal($('word-pop').hidden, false); assert.ok($('word-pop').textContent.includes(`${w.bg} – ${w.en}`) && $('word-pop').textContent.includes('word ' + w.rank), 'word card: ' + $('word-pop').textContent);
     document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' })); assert.equal($('word-pop').hidden, true);
+    // a form of address shows its base form and says what it is
+    if ((st.vocative || []).includes('петре')) {
+      document.querySelector('#reading-story button.w[data-k="петре"]').click();
+      assert.match($('word-pop').textContent, /^Петър\s*name\s*петре: the form for addressing someone \(vocative\)$/, 'vocative card: ' + $('word-pop').textContent);
+      document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+    } else assert.fail('the first level-100 story addresses Петър as Петре');
     // answer every question: the first one right, the rest wrong where possible
     st.questions.forEach((q, i) => { const o = i === 0 ? q.answer : (q.answer + 1) % q.options.length; document.querySelector(`#story-quiz .opt[data-q="${i}"][data-o="${o}"]`).click(); });
     assert.equal($('quiz-result').textContent, `1 of ${st.questions.length} right.`);
@@ -383,6 +402,8 @@ setTimeout(async () => {
   other.progress['ZZ1|bg2nl'] = Object.assign({}, other.progress[localKeys[0]], { last: later });
   other.settings = Object.assign({}, other.settings, { rank: 777, theme: 'dark' }); other.stamps = Object.assign({}, other.stamps, { settings: later });
   other.log.push([later, 'ZZ1|bg2nl', 2]);
+  // D-029: the other device still holds answers from 60 days ago; after the sync they are day totals here
+  const old60 = Date.now() - 60 * 86400e3; other.log.push([old60, 'ZZ1|bg2nl', 2], [old60 + 1000, 'ZZ1|bg2nl', 0]); other.drillLog.push([old60, 'x', 2]);
   gists.g1.content = JSON.stringify(other);
   const themeBefore = JSON.parse(window.localStorage.getItem('trakia.settings')).theme;
   $('btn-sync-now').click(); await tick();
@@ -390,6 +411,16 @@ setTimeout(async () => {
   assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 777);
   assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).theme, themeBefore, 'theme stays per device');
   assert.equal($('set-rank').value, '777', 'the open Settings tab shows the new position');
+  assert.ok(JSON.parse(window.localStorage.getItem('trakia.log')).every(e => e[0] > Date.now() - 31 * 86400e3), 'no answers older than 30 days in the log');
+  assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.days'))[C.dayKey(old60)], { a: [1, 0, 1], d: [0, 0, 1] });
+  assert.ok(!JSON.parse(gists.g1.content).log.some(e => e[0] === old60), 'the gist gets the compacted history');
+  document.querySelector('nav button[data-tab=stats]').click();
+  {
+    const raw = JSON.parse(window.localStorage.getItem('trakia.drillLog')).length;
+    const allTime = +[...$('stats-drills').querySelectorAll('.stat')].find(el => /all time$/.test(el.textContent) && !/accuracy/.test(el.textContent)).querySelector('b').textContent;
+    assert.equal(allTime, raw + 1, 'all-time drill answers include the compacted day');
+  }
+  document.querySelector('nav button[data-tab=settings]').click();
   // a device connecting later finds the same gist instead of making a second one
   $('btn-sync-off').click(); assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.sync')), {});
   $('sync-token').value = TOKEN; $('btn-sync-connect').click(); await tick();
