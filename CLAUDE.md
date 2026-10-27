@@ -39,15 +39,19 @@ Rules:
    question and add the answer (`- ~~Question?~~ Answer.`); update the README row; put the id at
    the start of the commit message (`D-012: …`). A feature is not done while the record says
    otherwise.
-6. **Check before committing**: `python3 tools/check_decisions.py` must pass. It fails on a missing
-   or misnamed section, wrong order, a bad status line, a record missing from the README table, or a
-   README status that disagrees with the file.
+6. **Check before committing**: `python3 tools/check_decisions.py` must pass (`npm test` runs it).
+   It fails on a missing or misnamed section, wrong order, a bad status line, a record missing from
+   the README table, or a README status that disagrees with the file.
 
 ## Before committing anything
 
-- `npm test` (unit tests, the headless UI test and the `tsc` type check) must pass. The JavaScript
-  is checked through JSDoc types; shared shapes live in `app/types.d.ts`. Annotate new code, do not
-  silence errors with `any` unless a DOM API leaves no alternative.
-- After changing `index.html`, `ui.js`, `core.js` or `data.js`, bump `CACHE_VERSION` in `app/sw.js`.
-- After editing `data/*.json`, run `python3 tools/build_data.py`.
+- Run `npm run build` after changing `data/*.json` or anything in `app/`: it regenerates
+  `app/data.js` and stamps the service worker's cache version (a hash of the app files, D-032;
+  never edit `CACHE_VERSION` by hand).
+- `npm test` must pass: unit tests, the headless UI test, the `tsc` type check, the decision
+  records, both data validators, and the freshness of `data.js` and the cache version. It names the
+  fix when something is stale. The JavaScript is checked through JSDoc types; shared shapes live in
+  `app/types.d.ts`. Annotate new code, do not silence errors with `any` unless a DOM API leaves no
+  alternative. `tools/publish.sh` runs `npm test` and refuses to publish when it fails; GitHub
+  Actions runs it on every push.
 - Committing, pushing and publishing (`tools/publish.sh`) are separate steps the user asks for.

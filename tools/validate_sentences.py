@@ -2,6 +2,9 @@
 """Validate and merge generated sentence files into data/sentences.json.
 
 Usage:  python3 tools/validate_sentences.py data/words.json out/A.json out/B.json ... -o data/sentences.json
+        python3 tools/validate_sentences.py --check data/words.json data/sentences.json
+          (D-032: writes nothing; exits 1 on any problem or when the file is not what validation would
+           write, e.g. a stale max_rank, lemma list or vocative list; part of npm test)
 
 For every sentence it:
   * checks required fields (id, bg, nl, lemmas) and types,
@@ -135,6 +138,9 @@ def lemmas_from_map(s, idx, problems):
 
 def main(argv):
     out = 'data/sentences.json'
+    check = '--check' in argv
+    if check:
+        argv = [a for a in argv if a != '--check']
     if '-o' in argv:
         i = argv.index('-o'); out = argv[i + 1]; del argv[i:i + 2]
     words_path, *files = argv
@@ -198,8 +204,17 @@ def main(argv):
                 rec['unresolved'] = unresolved
             merged.append(rec)
     merged.sort(key=lambda r: (r['max_rank'] or 10**6, r['id']))
-    json.dump(merged, open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
+    text = json.dumps(merged, ensure_ascii=False, indent=0)
     n_unres = sum(1 for r in merged if 'unresolved' in r)
+    if check:
+        stale = len(files) != 1 or open(files[0], encoding='utf-8').read() != text
+        bad = problems or n_unres or stale
+        print(f'{len(merged)} sentences checked: {len(problems)} problems, {n_unres} with unresolved lemmas'
+              + (', the file differs from what validation writes: run python3 tools/validate_sentences.py data/words.json data/sentences.json -o data/sentences.json' if stale else ''))
+        if problems:
+            print('\n'.join(problems[:60]))
+        return 1 if bad else 0
+    open(out, 'w', encoding='utf-8').write(text)
     print(f'{len(merged)} sentences written to {out}; {n_unres} with unresolved lemmas')
     bands = Counter((r['max_rank'] or 0) // 300 * 300 for r in merged)
     print('max_rank distribution (bucket start -> count):', dict(sorted(bands.items())))
@@ -215,4 +230,4 @@ def main(argv):
         print(', '.join(f'{k}×{v}' for k, v in unknown.most_common(80)))
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))

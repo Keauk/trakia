@@ -123,4 +123,5 @@ by the next sync.
 ## Open questions
 - Should the app show a small sync indicator in the top bar, or is the status line in Settings
   enough?
-- When the log grows past 1 MB, should old log entries be compacted into daily totals?
+- ~~When the log grows past 1 MB, should old log entries be compacted into daily totals?~~ Yes:
+  D-029 keeps 30 days in full and older days as daily totals.

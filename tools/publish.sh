@@ -4,6 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 git diff --quiet && git diff --cached --quiet || { echo "commit or stash your changes first"; exit 1; }
+# nothing reaches the phone unchecked (D-032): tests, type check, records, data validators, data.js and cache version
+npm test || { echo "npm test failed: not publishing"; exit 1; }
 git push origin main
 tree=$(git rev-parse HEAD:app)
 parent=$(git rev-parse -q --verify refs/remotes/origin/gh-pages 2>/dev/null || true)

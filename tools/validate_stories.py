@@ -3,6 +3,7 @@
 
 Usage:  python3 tools/validate_stories.py data/words.json in1.json [in2.json ...] -o data/stories.json
         python3 tools/validate_stories.py data/words.json in.json            (check only, no output)
+        python3 tools/validate_stories.py -q data/words.json data/stories.json   (errors and summary only; npm test)
 
 For every story it:
   * checks the fields (id, level, title, paragraphs, words, questions) and their types,
@@ -111,7 +112,8 @@ def check_story(s, idx, rank_of_lemma):
 
 
 def main(argv):
-    out = None
+    out, quiet = None, '-q' in argv
+    argv = [a for a in argv if a != '-q']
     if '-o' in argv:
         i = argv.index('-o'); out = argv[i + 1]; del argv[i:i + 2]
     words_path, *files = argv
@@ -125,12 +127,12 @@ def main(argv):
             if sid in seen:
                 errs.append('duplicate id')
             seen.add(sid)
-            if info:
+            if info and not quiet:
                 print(f'{sid:6} level {s.get("level")}: {info["word_count"]} words, highest rank {info["max_rank"]}, '
                       f'glossed {info["glossed"]} ({info["glossed"] / max(1, info["word_count"]):.1%}), {len(s.get("questions", []))} questions')
             if errs:
                 failed += 1
-                print('  ERROR ' + '\n  ERROR '.join(errs))
+                print(f'{sid}:\n  ERROR ' + '\n  ERROR '.join(errs))
                 continue
             rec = {k: s[k] for k in ('id', 'level', 'title', 'paragraphs', 'words', 'questions')}
             rec['words'] = {key(k): v for k, v in s['words'].items()}

@@ -71,5 +71,5 @@ A couple of hours on top of D-026. Risk: a form shared by two lemmas (`те` = t
   places in 2,656 sentences (госпожо, госпожице, господине, бабо, мамо), all checked by hand.
 
 ## Open questions
-- Also offer the lookup on the Bulgarian prompt in the practice screen, once sentences carry a
-  form → lemma map?
+- ~~Also offer the lookup on the Bulgarian prompt in the practice screen, once sentences carry a
+  form → lemma map?~~ Done in D-030: after an answer the Bulgarian prompt can be tapped.

@@ -25,14 +25,15 @@ file also works on the laptop.
 
 ```bash
 npm install                                   # once: jsdom for the headless UI test
-npm test                                      # unit tests (incl. FSRS reference vectors) + headless UI test + type check
+npm run build                                 # after editing data/*.json or app/: regenerate app/data.js, stamp the cache version
+npm test                                      # everything below, plus unit tests (incl. FSRS reference vectors), headless UI test, type check
+npm run check                                 # records, data validators, data.js and cache version up to date (fast, no JS tests)
 npm run typecheck                             # tsc --noEmit over app/core.js and app/ui.js (JSDoc types, see app/types.d.ts)
-python3 tools/check_decisions.py              # every decisions/D-*.md follows TEMPLATE.md and is in the table
-python3 tools/build_data.py                   # regenerate app/data.js after editing data/*.json
 python3 tools/export_anki_words.py deck.apkg  # refresh data/words.json from a new Anki export
 ```
-After changing index.html, ui.js, core.js or data.js, bump `CACHE_VERSION` in `app/sw.js` so installed
-phones pick up the new version.
+The service worker's `CACHE_VERSION` is a hash of the app files, written by `npm run build`, so
+installed phones pick up every new version; `npm test` fails when it is stale (D-032). GitHub
+Actions runs `npm test` on every push.
 
 ## Publish (GitHub Pages)
 
@@ -42,3 +43,5 @@ The site https://keauk.github.io/trakia/ is served from the `gh-pages` branch, w
 ```bash
 tools/publish.sh
 ```
+
+It runs `npm test` first and publishes nothing when a check fails (D-032).

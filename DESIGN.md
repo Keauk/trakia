@@ -272,7 +272,7 @@ python3 -m http.server 8080 --bind 0.0.0.0   # on the laptop; find its IP with: 
 Phone on the same Wi-Fi → Chrome → `http://<laptop-ip>:8080` → menu → *Add to Home screen*.
 With `manifest.json` + a service worker that caches `index.html`, `sentences.json`, `words.json`
 (and the SheetJS file) the installed app opens full-screen and works offline; the laptop server is
-only needed again when you ship a new version (bump `CACHE_VERSION` in `sw.js`). Progress lives in
+only needed again when you ship a new version (`npm run build` stamps a new `CACHE_VERSION` in `sw.js`). Progress lives in
 the phone's own browser storage; turn on sync in Settings (D-025), or use Export/Import, to share it
 with the laptop.
 
@@ -297,7 +297,7 @@ same behaviour as on the phone.
 | 1 | core loop | rank slider, pick sentence, type answer, check (normalise + exact + near-miss), correct/almost/wrong verdict with diff, progress in localStorage | done |
 | 2 | scheduling + stats | Leitner ladder, session builder, free practice, stats tab with 14-day chart, export/import progress | done |
 | 3 | import + adjudication | JSON/CSV/XLSX import with merge, "my answer was correct", export merged sentence set, delete/restore | done |
-| 4 | PWA | manifest, service worker, icons, install on Android | done (bump `CACHE_VERSION` in `sw.js` on each release) |
+| 4 | PWA | manifest, service worker, icons, install on Android | done (`CACHE_VERSION` is a content hash since D-032) |
 | 5 | nice-to-have | transliteration input (done), dark mode (done); TTS via Web Speech API (`bg-BG` voice on Android), Anki's own 2952 example sentences translated to Dutch as a second pack, edit-in-place in the Library | later |
 
 Suggested `index.html` structure (all in one file, ~900 lines total when finished):
