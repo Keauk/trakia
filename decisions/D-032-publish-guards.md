@@ -1,6 +1,6 @@
 # D-032: Nothing reaches the phone unchecked: tests before every publish, and no manual cache bump
 
-Status: in progress · Created: 2026-10-27 · Area: tooling (`tools/publish.sh`, `tools/stamp_cache.py`, `tools/build_data.py`, `tools/validate_sentences.py`, `tools/validate_stories.py`, `package.json`, `.github/workflows/test.yml`, `app/sw.js`, `CLAUDE.md`)
+Status: done (2026-10-27) · Created: 2026-10-27 · Area: tooling (`tools/publish.sh`, `tools/stamp_cache.py`, `tools/build_data.py`, `tools/validate_sentences.py`, `tools/validate_stories.py`, `package.json`, `.github/workflows/test.yml`, `app/sw.js`, `CLAUDE.md`)
 
 ## Context
 Three steps that protect the learner's phone are done by hand and can be forgotten:
@@ -58,7 +58,9 @@ few seconds. Risk: a hash over the files changes the cache name on every content
 exactly the intent; the old caches are deleted by the existing `activate` handler.
 
 ## As built
-- Built as proposed; not yet committed or pushed, so the GitHub workflow has not run yet.
+- Built as proposed. The workflow ran green on the first push (run 40491556266, 16 s, all checks
+  in the log); GitHub then flagged checkout@v4, setup-node@v4 and setup-python@v5 as running on the
+  deprecated Node 20, so the workflow now uses the v7 releases of all three.
   `tools/stamp_cache.py` (new), `--check` in `build_data.py` and `validate_sentences.py`, `-q` in
   `validate_stories.py`; `package.json`: `build`, `check`, and `test` ending in `check`;
   `tools/publish.sh` runs `npm test` before pushing; `.github/workflows/test.yml`; `CLAUDE.md`,
