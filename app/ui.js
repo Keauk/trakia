@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1 };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -86,7 +86,7 @@ for (const id of ['btn-theme', 'btn-theme-m']) {
 }
 if (darkQuery) darkQuery.addEventListener('change', applyTheme);
 const LANG_NAME = { nl: 'Dutch', en: 'English' }, LANG_CODE = { nl: 'NL', en: 'EN' };
-function dirLabel(dir) { const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
+function dirLabel(dir) { if (dir === 'listen') return '🎧 → BG'; const k = C.parseKey('x|' + dir); return k.toBg ? `${LANG_CODE[k.lang] || k.lang.toUpperCase()} → BG` : `BG → ${LANG_CODE[k.lang] || k.lang.toUpperCase()}`; }
 function otherText(s) { const L = C.langFor(s.id, settings); return { lang: L, text: s[L] || s.nl, alts: s[L + '_alt'] || [] }; }
 /** the collapsible "other accepted answers" list; looser translations (D-014) last, marked ≈ */
 function renderAlts(list, loose) {
@@ -185,7 +185,7 @@ function startDrill(cardFilter) {
 }
 function renderDrillCard() {
   const item = session.queue[session.i].item;
-  session.pending = null; hideSay();
+  session.pending = null; hideSay(); $('prompt').hidden = false; $('listen-box').hidden = true;
   renderProgress(); renderChips('Grammar drill', false, false); setState('idle'); syncRunning();
   $('prompt').textContent = item.prompt; $('prompt').lang = 'bg';
   $('newwords').innerHTML = `<span class="hint">${esc(item.hint)}</span>`;
@@ -240,18 +240,22 @@ function renderCard() {
   if (session.drill) return renderDrillCard();
   const item = session.queue[session.i], { dir, s } = cardOf(item), K = C.parseKey(item.key);
   if (!s) { session.i++; return renderCard(); }
+  // dictation without sound (switched off, or a sentence without a clip) is the reading card again (D-005)
+  if (K.listen && (!soundOn() || !s.au)) { item.key = s.id + '|bg2' + C.langFor(s.id, settings); return renderCard(); }
   session.pending = null;
   renderProgress(); renderChips(dirLabel(dir), session.free, !!item.retry); setState('idle'); syncRunning();
-  $('prompt').textContent = K.toBg ? (s[K.lang] || s.nl) : s.bg; promptSource = null; if (popFor) hideWordPop();
-  $('prompt').lang = K.toBg ? K.lang : 'bg';
-  const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
+  $('prompt').textContent = K.listen ? '' : K.toBg ? (s[K.lang] || s.nl) : s.bg; promptSource = null; if (popFor) hideWordPop();
+  $('prompt').lang = K.toBg && !K.listen ? K.lang : 'bg'; $('prompt').hidden = K.listen;
+  $('listen-box').hidden = !K.listen; $('listen-hint').hidden = true; $('listen-hint').textContent = otherText(s).text;
+  $('btn-listen-hint').hidden = false; $('btn-listen-text').hidden = false;
+  const chips = K.listen ? '' : (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
   $('newwords').innerHTML = chips ? '<span class="tiny">new:</span>' + chips : '';
   const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.lang = K.toBg ? 'bg' : K.lang;
   const L = LANG_NAME[K.lang] || 'Dutch';
-  inp.placeholder = K.toBg ? 'Въведи превод' : narrow() ? `Type in ${L}` : `Type the ${L} translation`;
+  inp.placeholder = K.listen ? 'Напиши каквото чуваш' : K.toBg ? 'Въведи превод' : narrow() ? `Type in ${L}` : `Type the ${L} translation`;
   $('translit-preview').hidden = !(settings.translit && K.toBg); $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
-  hideSay(); if (!K.toBg) offerSay(s, 'btn-say');   // a Bulgarian prompt can be heard (D-005)
+  hideSay(); if (K.listen) offerSay(s, 'btn-listen', true); else if (!K.toBg) offerSay(s, 'btn-say');   // a Bulgarian prompt can be heard (D-005)
   setTimeout(() => inp.focus(), 50);
 }
 function toBgCard() { const it = session && session.queue[session.i]; return !!(it && !session.drill && C.parseKey(it.key).toBg); }
@@ -325,7 +329,8 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   renderAlts(accepted.filter(a => a !== shown), (loose || []).filter(a => a !== shown && a !== r.expected));
   $('gloss').textContent = s.max_rank ? 'rank ' + s.max_rank + (s.rank_estimated ? ' ≈' : '') : '';
   $('btn-accept').hidden = r.result === 'correct' || giveUp;
-  if (K.toBg) offerSay(s, 'btn-say-exp');   // the Bulgarian answer, once shown (D-005)
+  if (K.listen) { $('listen-hint').hidden = false; $('btn-listen-hint').hidden = true; $('btn-listen-text').hidden = true; }   // dictation: the meaning, with the answer
+  else if (K.toBg) offerSay(s, 'btn-say-exp');   // the Bulgarian answer, once shown (D-005)
   setTimeout(() => $('btn-next').focus(), 30);
 }
 function acceptMine() {
@@ -413,7 +418,7 @@ function renderStats() {
   let html = '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length;
   const curLangs = settings.lang === 'mixed' ? ['nl', 'en'] : [settings.lang || 'nl'];
-  const dirsShown = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].filter(d => curLangs.includes(C.parseKey('x|' + d).lang) || Object.keys(progress).some(k => k.endsWith('|' + d)));
+  const dirsShown = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg', 'listen'].filter(d => curLangs.includes(C.parseKey('x|' + d).lang) || Object.keys(progress).some(k => k.endsWith('|' + d)));
   for (const dir of dirsShown) {
     const bands = [0, 0, 0, 0]; let seen = 0, dueN = 0, recallSum = 0, recallN = 0;
     for (const k in progress) if (k.endsWith('|' + dir) && SENT_BY_ID.has(k.split('|')[0])) {
@@ -422,7 +427,7 @@ function renderStats() {
       if (p.due <= now) { dueN++; if (p.state === 'review') { recallSum += C.recallNow(p, now, settings); recallN++; } }
     }
     const avg = recallN ? Math.round(100 * recallSum / recallN) + ' %' : '–';
-    html += `<p style="margin:6px 0 2px"><b>${dirLabel(dir).replace('BG', 'Bulgarian').replace('NL', 'Dutch').replace('EN', 'English')}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${dueN} due now · predicted recall of due cards ${avg}</span></p>`;
+    html += `<p style="margin:6px 0 2px"><b>${dir === 'listen' ? 'Dictation: hear Bulgarian, type it' : dirLabel(dir).replace('BG', 'Bulgarian').replace('NL', 'Dutch').replace('EN', 'English')}</b> <span class="tiny">${seen} seen of ${elig} eligible · ${dueN} due now · predicted recall of due cards ${avg}</span></p>`;
     html += `<div class="bar">${['var(--almost)', 'var(--correct)', 'var(--correct)', 'var(--primary)'].map((c, i) => `<i style="width:${elig ? 100 * bands[i] / elig : 0}%;background:${c};opacity:${i === 1 ? .6 : 1}"></i>`).join('')}</div>`;
     html += `<div class="boxes" style="grid-template-columns:repeat(4,1fr)">${['learning', '< 7 d', '7–30 d', '≥ 30 d'].map((l, i) => `<div><b>${bands[i]}</b>${l}</div>`).join('')}</div>`;
   }
@@ -465,7 +470,7 @@ function renderLibrary(reset) {
   const f = $('lib-filter').value, q = C.normalise($('lib-search').value, 'nl');
   const now = Date.now();
   let rows = SENT.filter(s => {
-    const keys = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => s.id + '|' + d), seen = keys.some(k => progress[k]);
+    const keys = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg', 'listen'].map(d => s.id + '|' + d), seen = keys.some(k => progress[k]);
     if (f === 'eligible' && !C.eligible(s, settings)) return false;
     if (f === 'locked' && (s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0))) return false;
     if (f === 'stage' && C.grammarOk(s, settings)) return false;
@@ -480,7 +485,9 @@ function renderLibrary(reset) {
   $('lib-count').textContent = rows.length + ' sentences';
   const status = (s, dir) => { const p = progress[s.id + '|' + dir]; if (!p) return '<span class="tiny">–</span>'; const due = p.due <= now ? 'due' : fmtAgo(p.due - now); const m = C.maturity(p); const learning = p.state !== 'review'; const cls = learning && (p.step || 0) === 0 ? 'b0' : m === 'young' ? 'b1' : m === 'established' ? 'b5' : 'b8'; const label = learning ? (p.state === 'relearning' ? 'relearn' : 'learning') : fmtDays(p.s); return `<span class="badge ${cls}" title="${learning ? p.state + ' step ' + (p.step || 0) : 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1)}; ${p.due <= now ? 'due now' : 'due in ' + due}">${label}<small> · ${due}</small></span>`; };
   const head = `<tr><th>rank</th><th>sentence</th><th>BG→${settings.lang === 'mixed' ? 'X' : LANG_CODE[settings.lang] || 'NL'}</th><th>${settings.lang === 'mixed' ? 'X' : LANG_CODE[settings.lang] || 'NL'}→BG</th></tr>`;
-  $('lib-table').innerHTML = '<colgroup><col style="width:56px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => (() => { const o = otherText(s); return `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></td><td>${status(s, 'bg2' + o.lang)}</td><td>${status(s, o.lang + '2bg')}</td></tr>`; })()).join('');
+  // once dictation has taken over the reading card (D-005), its column shows the dictation card
+  const readCol = (/** @type {Sentence} */ s, /** @type {string} */ L) => { const ks = C.cardKeys(s, progress, settings); return ks.includes(s.id + '|listen') && !ks.includes(s.id + '|bg2' + L) ? '<span title="dictation">🎧</span> ' + status(s, 'listen') : status(s, 'bg2' + L); };
+  $('lib-table').innerHTML = '<colgroup><col style="width:56px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => (() => { const o = otherText(s); return `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></td><td>${readCol(s, o.lang)}</td><td>${status(s, o.lang + '2bg')}</td></tr>`; })()).join('');
   $('lib-more').hidden = rows.length <= libShown;
 }
 $('lib-table').addEventListener('click', e => {
@@ -491,10 +498,10 @@ $('lib-table').addEventListener('click', e => {
   const s = SENT_BY_ID.get(tr.dataset.id); if (!s) return;
   const ua = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => (userAlts[s.id + '|' + d] || []).map(a => `${d.endsWith('2bg') ? 'BG' : LANG_CODE[d.slice(3)]}: ${esc(a)}`)).flat();
   const det = document.createElement('tr'); det.className = 'lib-row-detail';
-  const pr = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${dirLabel(d)}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
+  const pr = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg', 'listen'].map(d => { const p = progress[s.id + '|' + d]; return p ? `${dirLabel(d)}: ${p.state === 'review' ? 'stability ' + fmtDays(p.s) + ', difficulty ' + (p.d || 0).toFixed(1) + ', recall now ' + Math.round(100 * C.recallNow(p, Date.now(), settings)) + ' %' : p.state + ' (step ' + (p.step || 0) + ')'}, ${p.reps} answers, ${p.lapses} lapses${(p.almosts || p.orders) ? `, ${(p.almosts || 0) + (p.orders || 0)} free passes used` : ''}` : null; }).filter(Boolean);
   det.innerHTML = `<td colspan="4">${pr.length ? `<div><b>Progress</b> ${pr.join(' · ')}</div>` : ''}${s.en ? `<div><b>EN</b> ${esc(s.en)}</div>` : ''}${s.nl ? `<div><b>NL</b> ${esc(s.nl)}</div>` : ''}${s.nl_alt.length ? `<div><b>NL also</b> ${s.nl_alt.map(esc).join(' · ')}</div>` : ''}${(s.en_alt || []).length ? `<div><b>EN also</b> ${s.en_alt.map(esc).join(' · ')}</div>` : ''}${(s.nl_loose || []).length ? `<div><b>NL looser</b> ${(s.nl_loose || []).map(esc).join(' · ')}</div>` : ''}${(s.en_loose || []).length ? `<div><b>EN looser</b> ${(s.en_loose || []).map(esc).join(' · ')}</div>` : ''}${s.bg_alt.length ? `<div><b>BG also</b> ${s.bg_alt.map(esc).join(' · ')}</div>` : ''}${(s.bg_alt_en || []).length ? `<div><b>BG also (EN prompt)</b> ${(s.bg_alt_en || []).map(esc).join(' · ')}</div>` : ''}${ua.length ? `<div><b>Yours</b> ${ua.join(' · ')}</div>` : ''}${onlyHere(s).length ? `<div><b>Only here</b> ${onlyHere(s).map(esc).join(', ')} <span class="tiny">(no other sentence uses this word)</span></div>` : ''}${s.grammar && s.grammar.length ? `<div><b>grammar</b> ${s.grammar.map(esc).join(', ')}${C.grammarOk(s, settings) ? '' : ' <span class="tiny">(beyond your stage)</span>'}</div>` : ''}<div><b>lemmas</b> ${(s.lemmas || []).map(esc).join(', ') || '–'} <span class="tiny">· id ${esc(s.id)} · ${esc(s.source || '')}</span></div><div class="row"><button class="btn small" data-act="reset">Reset progress</button><button class="btn small" data-act="delete">Delete sentence</button></div></td>`;
   tr.after(det);
-  q(det, '[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg']) { const k = s.id + '|' + d; if (progress[k]) cleared[k] = Date.now(); delete progress[k]; } LS.set('cleared', cleared); save.progress(); renderLibrary(false); toast('Progress reset'); };
+  q(det, '[data-act=reset]').onclick = () => { for (const d of ['bg2nl', 'nl2bg', 'bg2en', 'en2bg', 'listen']) { const k = s.id + '|' + d; if (progress[k]) cleared[k] = Date.now(); delete progress[k]; } LS.set('cleared', cleared); save.progress(); renderLibrary(false); toast('Progress reset'); };
   q(det, '[data-act=delete]').onclick = () => { deleted.push(s.id); save.deleted(); refreshSentences(); renderLibrary(false); toast('Deleted (restore in Settings)'); };
 });
 
@@ -551,7 +558,7 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num')];
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool')];
 function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
@@ -891,11 +898,11 @@ document.addEventListener('pointerdown', unlock, true); document.addEventListene
 // the practise card's clip: the Bulgarian prompt, or the Bulgarian answer once shown; a replay switches voice
 /** @type {{key: string, voice: string, btn: AppElement, played: boolean} | null} */ let say = null;
 function hideSay() { stopAudio(); say = null; $('btn-say').hidden = true; $('btn-say-exp').hidden = true; }
-/** @param {Sentence} s @param {string} btnId */
-function offerSay(s, btnId) {
+/** @param {Sentence} s @param {string} btnId @param {boolean} [always] play even with auto-play off (a dictation prompt) */
+function offerSay(s, btnId, always) {
   say = s.au ? { key: s.au, voice: pickVoice(), btn: $(btnId), played: false } : null;
   $(btnId).hidden = !say;
-  if (say && soundOn() && settings.autoplay !== false) sayNow();
+  if (say && soundOn() && (always || settings.autoplay !== false)) sayNow();
 }
 function sayNow() {
   if (!say || !soundOn()) return;
@@ -905,8 +912,15 @@ function sayNow() {
   playClip(cur.voice, cur.key); cur.btn.classList.add('playing');
   const off = () => { if (!player || player.paused || say !== cur) cur.btn.classList.remove('playing'); else setTimeout(off, 200); }; setTimeout(off, 400);
 }
-$('btn-say').addEventListener('click', sayNow); $('btn-say-exp').addEventListener('click', sayNow);
-for (const id of ['btn-say', 'btn-say-exp']) $(id).addEventListener('mousedown', e => e.preventDefault());   // keep the phone keyboard up
+$('btn-say').addEventListener('click', sayNow); $('btn-say-exp').addEventListener('click', sayNow); $('btn-listen').addEventListener('click', sayNow);
+for (const id of ['btn-say', 'btn-say-exp', 'btn-listen', 'btn-listen-hint', 'btn-listen-text']) $(id).addEventListener('mousedown', e => e.preventDefault());   // keep the phone keyboard up
+// dictation: the meaning as a hint, or the text after all (no headphones right now); the answer then counts for the reading card
+$('btn-listen-hint').addEventListener('click', () => { $('listen-hint').hidden = false; });
+$('btn-listen-text').addEventListener('click', () => {
+  if (!session || session.pending) return;
+  const it = session.queue[session.i], K = C.parseKey(it.key);
+  if (K.listen) { it.key = K.id + '|bg2' + C.langFor(K.id, settings); renderCard(); }
+});
 // Alt+R (⌥R) replays: typing never produces it and it does not switch keyboard layouts
 document.addEventListener('keydown', e => { if (e.altKey && e.code === 'KeyR' && session && say) { e.preventDefault(); sayNow(); } });
 /** fetch a session's clips in both voices in the background, so a tunnel does not silence the next card */
@@ -965,7 +979,11 @@ function applySound() {
   document.body.classList.toggle('mute', !soundOn());
   const label = soundOn() ? 'Sound off' : 'Sound on';
   for (const id of ['btn-sound', 'btn-sound-m']) { const b = $(id); b.setAttribute('aria-label', label); b.title = label; }
-  if (!soundOn()) { stopAudio(); if (reader) pauseReader(); }
+  if (!soundOn()) {
+    stopAudio(); if (reader) pauseReader();
+    const it = session && !session.drill && !session.pending && session.queue[session.i];
+    if (it && C.parseKey(it.key).listen) renderCard();   // a dictation card on screen becomes its reading card
+  }
 }
 function toggleSound() { settings.sound = !soundOn(); save.settings(); applySound(); $('set-sound').checked = soundOn(); }
 for (const id of ['btn-sound', 'btn-sound-m']) { $(id).addEventListener('click', toggleSound); $(id).addEventListener('mousedown', e => e.preventDefault()); }

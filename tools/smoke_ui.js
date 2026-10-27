@@ -445,6 +445,41 @@ setTimeout(async () => {
     const say = $('word-pop').querySelector('[data-au]'); assert.ok(say, 'the word card has a speaker'); say.click(); await wait();
     assert.ok(last().endsWith(`/${window.TRAKIA_DATA.words.find(w => w.bg === 'вода').au}.mp3`), 'the word plays');
     document.querySelector('nav button[data-tab=practise]').click();
+    // dictation (D-005 phase C): three sentences whose reading card is mature and whose dictation card is due
+    const settingsNow = Object.assign({ rank: 102, stage: 1 }, JSON.parse(window.localStorage.getItem('trakia.settings')));
+    const done = new Set(Object.keys(JSON.parse(window.localStorage.getItem('trakia.progress'))).map(k => k.split('|')[0]));   // sentences answered earlier in this test rest for 4 hours (D-024)
+    const ds = window.TRAKIA_DATA.sentences.filter(x => x.au && !done.has(x.id) && C.eligible(x, settingsNow) && C.langFor(x.id, settingsNow) === 'nl').slice(0, 3), now = Date.now(), day = 86400e3;
+    const prog = {};
+    for (const x of ds) {
+      prog[x.id + '|bg2nl'] = { box: 6, due: now + 30 * day, reps: 6, lapses: 0, streak: 6, last: now - 2 * day, state: 'review', s: 40, d: 4 };
+      prog[x.id + '|nl2bg'] = { box: 2, due: now + 9 * day, reps: 2, lapses: 0, streak: 2, last: now - 2 * day, state: 'review', s: 9, d: 5 };
+      prog[x.id + '|listen'] = { box: 1, due: now - 1000, reps: 1, lapses: 0, streak: 1, last: now - 2 * day, state: 'review', s: 0.5, d: 6 };
+    }
+    const pf = new window.File([JSON.stringify({ app: 'trakia', version: 2, progress: prog })], 'p.json', { type: 'application/json' });
+    Object.defineProperty($('import-progress'), 'files', { value: [pf], configurable: true }); $('import-progress').dispatchEvent(new window.Event('change')); await wait(80);
+    const isListen = () => $('dir-badge').textContent === '🎧 → BG';
+    const nextListen = async () => { for (let i = 0; i < 40 && !isListen(); i++) { $('btn-dontknow').click(); $('btn-next').click(); await wait(5); } await wait(); assert.ok(isListen(), 'a dictation card comes up'); };
+    $('btn-start').click(); await wait();
+    await nextListen();
+    let d = ds.find(x => last().endsWith(`/${x.au}.mp3`));
+    assert.ok(d, 'the dictation card plays its sentence: ' + last());
+    assert.equal($('prompt').hidden, true, 'the text is hidden'); assert.equal($('listen-box').hidden, false); assert.equal($('newwords').innerHTML, '', 'no new-word chips give the words away');
+    assert.equal($('answer').placeholder, 'Напиши каквото чуваш');
+    $('btn-listen-hint').click(); assert.equal($('listen-hint').hidden, false); assert.equal($('listen-hint').textContent, d.nl, 'the meaning as a hint');
+    type(d.bg); assert.match($('verdict').className, /correct/, 'typing what was heard is correct');
+    $('btn-next').click(); assert.ok(JSON.parse(window.localStorage.getItem('trakia.progress'))[d.id + '|listen'].reps === 2, 'the dictation card was scheduled');
+    // Show text: no headphones for this card, so it becomes the reading card
+    await nextListen(); d = ds.find(x => last().endsWith(`/${x.au}.mp3`));
+    $('btn-listen-text').click();
+    assert.equal($('dir-badge').textContent, 'BG → NL'); assert.equal($('prompt').textContent, d.bg); assert.equal($('prompt').hidden, false); assert.equal($('listen-box').hidden, true);
+    type(d.nl); $('btn-next').click();
+    const pr = JSON.parse(window.localStorage.getItem('trakia.progress'));
+    assert.equal(pr[d.id + '|bg2nl'].reps, 7, 'the answer counts for the reading card'); assert.equal(pr[d.id + '|listen'].reps, 1, 'the dictation card waits for sound');
+    // sound off with a dictation card on screen: it becomes its reading card
+    await nextListen(); d = ds.find(x => last().endsWith(`/${x.au}.mp3`));
+    $('btn-sound').click(); assert.equal($('dir-badge').textContent, 'BG → NL'); assert.equal($('prompt').textContent, d.bg);
+    $('btn-sound').click(); $('btn-quit').click(); $('btn-home').click();
+    assert.ok(C.cardKeys(d, pr, Object.assign({}, settingsNow, { sound: false })).includes(d.id + '|bg2nl'));
   }
 
   // D-025: sync through a secret gist, against an in-memory imitation of the GitHub API

@@ -265,6 +265,12 @@ The service worker keeps clips in their own cache `trakia-audio`, which outlives
 Settings can download all of them for offline use. Clips are played from a Blob URL because Safari
 asks for byte ranges, which a cache-first worker does not answer.
 
+Dictation (`<id>|listen`): once a sentence's reading card is mature (stability ≥ 21 days) and its
+production card was right once, `cardKeys` replaces the reading card with a dictation card: the
+voice plays, the text stays hidden, the learner types the Bulgarian, checked against `bg` only.
+Two lapses of the dictation card bring the reading card back. With *Sound off*, or *Show text* on
+one card, the reading card is served instead and the dictation card waits.
+
 ### 4.4 Rank alignment UI
 
 A slider/number input *"I'm at word … in Anki"* (default from `words.json`'s learned count, i.e.

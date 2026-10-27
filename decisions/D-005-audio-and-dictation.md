@@ -1,6 +1,6 @@
 # D-005: Hear every sentence, word and story in two natural Bulgarian voices, and add a dictation mode
 
-Status: in progress · Created: 2026-10-21 · Area: data pipeline (`tools/build_audio.py`, `data/audio.json`, `data/cast.json`, `app/audio/`), `app/sw.js`, practise UI (`renderCard`, `showFeedback`, word card), reading UI (`openStory`), `core.js` (dictation direction)
+Status: done (2026-10-27) · Created: 2026-10-21 · Area: data pipeline (`tools/build_audio.py`, `data/audio.json`, `data/cast.json`, `app/audio/`), `app/sw.js`, practise UI (`renderCard`, `showFeedback`, word card), reading UI (`openStory`), `core.js` (dictation direction)
 
 ## Context
 Practice is reading and typing only. That builds a silent vocabulary: the learner may know a
@@ -51,12 +51,14 @@ Built in three phases; each is usable on its own.
    fetched when the session starts.
 
 **C. Dictation.**
-10. A `listen` direction: the prompt is audio only, in a random voice, with replay and, after one
-    wrong attempt, the Dutch/English meaning as a hint; the learner types the Bulgarian. It is
-    checked with the Bulgarian rules.
+10. A `listen` direction: the prompt is audio only, in a random voice, with replay (switching
+    voice) and a *Meaning* button that shows the Dutch/English translation as a hint; the learner
+    types the Bulgarian. It is checked with the Bulgarian rules, against the sentence heard only.
+    Setting *Dictation* (default on, shared between devices).
 11. Dictation **takes over from reading, it does not add a card**: once a sentence's BG → NL/EN
     card is mature (stability ≥ 21 days) and its NL/EN → BG card was answered correctly once,
-    the BG → NL/EN card retires (no longer scheduled, history kept) and the `listen` card starts.
+    the `listen` card is unlocked; from its first answer the BG → NL/EN card retires (no longer
+    scheduled, history kept). Only with both directions on: dictation is typed in Bulgarian.
     The reading card comes back only if the `listen` card lapses twice, as in D-004's retirement
     rule. The review load stays the same, and the easiest card becomes a harder one.
 12. **Sound off** (a toggle in the top bar, per device): for places without headphones. Nothing
@@ -181,7 +183,8 @@ Risks:
   built, one rule must decide: a reading card that D-004 retires hands over to dictation.
 
 ## As built
-Phases A and B built, not yet committed; phase C (dictation, items 10–13) not started.
+All three phases built: A and B in fd0c206, C (dictation, items 10–13) in the commit that closes
+this record.
 - Phase A: `tools/audio_lib.py` (which clips exist: keys, story segments, voices),
   `tools/build_audio.py` (generation with `edge-tts` 7.3.1 from `.venv`, `--check`, `--prune`,
   `--only`, `--limit`), `tools/requirements-audio.txt`, `data/cast.json` (17 speakers),
@@ -197,8 +200,30 @@ Phases A and B built, not yet committed; phase C (dictation, items 10–13) not 
   `voices`, `speed` are device settings. The smoke test fakes media playback and checks auto-play,
   the voice switch, sound off, a full story in the right voices and order, word offsets, and the
   word card.
+- Phase C: `core.js`: the `listen` direction in `parseKey`, `acceptedFor` (only `bg`) and
+  `cardKeys` (the hand-over rule, `LISTEN_AFTER` = 21 days); `ui.js`: the dictation card (hidden
+  prompt, *Listen again*, *Meaning*, *Show text*, no new-word chips), the switch to the reading
+  card on *Show text* and on *Sound off*, the 🎧 → BG badge, dictation on the Stats tab and in the
+  Library; `index.html`: `#listen-box`, the *Dictation* setting. Unit tests for the hand-over rule
+  (mature reading card, production card right once, sound off, setting off, no clip, two lapses,
+  one card per sentence in a session); the smoke test answers a dictation card, uses *Meaning*,
+  *Show text* and *Sound off*, and checks which card the answer counted for.
 
 ### Decisions taken
+- The reading card retires at the dictation card's first answer, not at the unlock: a dictation
+  card starts as a new card, drawn a few per session, so retiring at the unlock would leave every
+  newly unlocked sentence without any review until its dictation card came up.
+- No dictation with *Out of Bulgarian only*: old progress could otherwise unlock a card that is
+  typed in Bulgarian, which that setting opts out of.
+- The Library's reading column shows the dictation card (🎧) once it has taken over.
+- Retirement is not stored: `cardKeys` derives it from the progress records (a dictation card
+  exists and has lapsed fewer than two times), so there is no `retired` flag to sync or to get out
+  of step. The planned `retired: true` field was dropped.
+- The hint is a *Meaning* button the learner can press at any time, instead of appearing after a
+  first wrong attempt: a second attempt on the same card would need a new answer flow, and the
+  learner decides best when they need the meaning.
+- A dictation card accepts only the sentence that was heard, not the other translations in
+  `bg_alt`, which the voice did not say.
 - The manifest keeps per clip only its length in ms, its source (`edge-tts 7.3.1`) and, for story
   clips, the word timings: the text is already in the data files (the key is its hash) and git
   keeps the date.

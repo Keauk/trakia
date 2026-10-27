@@ -534,25 +534,42 @@
     if (l === 'mixed') { let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return (h & 1) ? 'en' : 'nl'; }
     return 'nl';
   }
-  /** directions that exist for a sentence under the current settings: 'bg2<lang>' and '<lang>2bg' (gated) */
+  /** a reading card this stable (days) hands over to dictation (D-005) */
+  const LISTEN_AFTER = 21;
+  /** directions that exist for a sentence under the current settings: 'bg2<lang>' and '<lang>2bg' (gated),
+   * and dictation 'listen' (D-005): once the reading card is mature (stability ≥ LISTEN_AFTER days) and the
+   * production card was answered correctly once, hearing the sentence and typing it is unlocked, and from its
+   * first answer it takes the reading card's place (until then both run, so no sentence goes unreviewed). The
+   * reading card comes back when the dictation card has lapsed twice, and whenever the sound is off
+   * (settings.sound false), when dictation cards wait. Only with both directions on: it is typed in Bulgarian. */
   function cardKeys(s, progress, settings) {
     const dirs = settings.directions || 'gated', ks = [], L = langFor(s.id, settings);
-    const rec = s.id + '|bg2' + L, prod = s.id + '|' + L + '2bg';
+    const rec = s.id + '|bg2' + L, prod = s.id + '|' + L + '2bg', lis = s.id + '|listen';
     if (dirs !== 'nl2bg') ks.push(rec);
     if (dirs === 'both' || dirs === 'nl2bg') ks.push(prod);
     else if (dirs === 'gated') { const p = progress[rec]; if (p && p.box >= 1) ks.push(prod); }
+    if (s.au && settings.dictation !== false && settings.sound !== false && (dirs === 'gated' || dirs === 'both')) {
+      const pl = progress[lis], pr = progress[rec], pp = progress[prod];
+      if (pl || (pr && pr.state === 'review' && (pr.s || 0) >= LISTEN_AFTER && pp && pp.box >= 1)) {
+        if (pl && (pl.lapses || 0) < 2) ks.splice(ks.indexOf(rec), 1);
+        ks.push(lis);
+      }
+    }
     return ks;
   }
-  /** split a card key into {id, dir, lang, toBg}: 'B017|nl2bg' -> {id:'B017', dir:'nl2bg', lang:'nl', toBg:true} */
+  /** split a card key into {id, dir, lang, toBg, listen}: 'B017|nl2bg' -> {id:'B017', dir:'nl2bg', lang:'nl', toBg:true, listen:false};
+   * 'B017|listen' (dictation) -> lang 'bg', toBg true, listen true */
   function parseKey(key) {
     const i = key.lastIndexOf('|'), id = key.slice(0, i), dir = key.slice(i + 1);
+    if (dir === 'listen') return { id, dir, lang: 'bg', toBg: true, listen: true };   // dictation: hear Bulgarian, type it (D-005)
     const toBg = dir.endsWith('2bg'), lang = toBg ? dir.slice(0, -3) : dir.slice(3);
-    return { id, dir, lang, toBg };
+    return { id, dir, lang, toBg, listen: false };
   }
   /** accepted answers for a card: the other-language sentence (+ alternatives) or the Bulgarian;
    *  an English prompt also accepts the other "you" form (ти/вие), which English leaves open (D-018) */
   function acceptedFor(s, dir) {
     const k = parseKey('x|' + dir);
+    if (k.listen) return [s.bg];   // dictation: what was heard, not another translation
     if (k.toBg) return [s.bg].concat(s.bg_alt || [], k.lang === 'en' ? s.bg_alt_en || [] : []);
     return [s[k.lang] || ''].concat(s[k.lang + '_alt'] || []).filter(Boolean);
   }
@@ -1004,6 +1021,6 @@
     return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

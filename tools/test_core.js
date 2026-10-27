@@ -363,8 +363,8 @@ t('D-011 English normalisation and languages', () => {
   const mixed = ids.map(i => C.langFor(i, { lang: 'mixed' }));
   assert.ok(mixed.includes('en') && mixed.includes('nl'), 'mixed splits: ' + mixed.join(','));
   assert.deepEqual(ids.map(i => C.langFor(i, { lang: 'mixed' })), mixed, 'stable');
-  assert.deepEqual(C.parseKey('B017|en2bg'), { id: 'B017', dir: 'en2bg', lang: 'en', toBg: true });
-  assert.deepEqual(C.parseKey('B017|bg2nl'), { id: 'B017', dir: 'bg2nl', lang: 'nl', toBg: false });
+  assert.deepEqual(C.parseKey('B017|en2bg'), { id: 'B017', dir: 'en2bg', lang: 'en', toBg: true, listen: false });
+  assert.deepEqual(C.parseKey('B017|bg2nl'), { id: 'B017', dir: 'bg2nl', lang: 'nl', toBg: false, listen: false });
   const s = { id: 'x', bg: 'Да.', bg_alt: ['Да, да.'], nl: 'Ja.', nl_alt: ['Jawel.'], en: 'Yes.', en_alt: ['Yeah.'] };
   assert.deepEqual(C.acceptedFor(s, 'bg2en'), ['Yes.', 'Yeah.']); assert.deepEqual(C.acceptedFor(s, 'en2bg'), ['Да.', 'Да, да.']); assert.deepEqual(C.acceptedFor(s, 'bg2nl'), ['Ja.', 'Jawel.']);
   // D-018: the other "you" form only for the English prompt ("Do you have…" leaves ти/вие open, "Hebben jullie…" does not)
@@ -600,5 +600,27 @@ t('peekItems: the next words after the position, each in a sentence, with four m
   assert.equal(C.peekItems(W, S, { rank: 102, stage: 1 }, all, 3, rand)[0].word.rank, 103);
   // merged like the rest of the snapshot: the newer guess per word
   assert.equal(C.mergeSnapshots({ peeks: { 103: { at: 5, ok: true } } }, { peeks: { 103: { at: 3, ok: false } } }).peeks['103'].ok, true);
+});
+t('D-005 dictation takes over from a mature reading card', () => {
+  const s = { id: 'd', bg: 'Обичам кафе.', bg_alt: ['Аз обичам кафе.'], nl: 'Ik hou van koffie.', nl_alt: [], en: 'I like coffee.', en_alt: [], au: 'abc123def456', max_rank: 10, lemmas: [] };
+  const set = { lang: 'nl', directions: 'gated' }, mature = { state: 'review', s: 30, box: 6, due: 0, lapses: 0 }, young = { state: 'review', s: 5, box: 3, due: 0 };
+  assert.deepEqual(C.parseKey('d|listen'), { id: 'd', dir: 'listen', lang: 'bg', toBg: true, listen: true });
+  assert.deepEqual(C.acceptedFor(s, 'listen'), ['Обичам кафе.'], 'only what was heard, not the other translations');
+  assert.deepEqual(C.cardKeys(s, { 'd|bg2nl': mature }, set), ['d|bg2nl', 'd|nl2bg'], 'no dictation before the production card was right once');
+  assert.deepEqual(C.cardKeys(s, { 'd|bg2nl': young, 'd|nl2bg': { box: 1 } }, set), ['d|bg2nl', 'd|nl2bg'], 'a young reading card stays');
+  const ready = { 'd|bg2nl': mature, 'd|nl2bg': { box: 1 } };
+  assert.deepEqual(C.cardKeys(s, ready, set), ['d|bg2nl', 'd|nl2bg', 'd|listen'], 'mature: dictation unlocks, the reading card runs on until its first answer');
+  assert.deepEqual(C.cardKeys(s, Object.assign({}, ready, { 'd|listen': { lapses: 0, due: 0 } }), set), ['d|nl2bg', 'd|listen'], 'answered once: dictation takes the reading card\'s place');
+  assert.deepEqual(C.cardKeys(s, ready, Object.assign({}, set, { directions: 'bg2nl' })), ['d|bg2nl'], 'out of Bulgarian only: no dictation, it is typed in Bulgarian');
+  assert.deepEqual(C.cardKeys(s, ready, Object.assign({}, set, { sound: false })), ['d|bg2nl', 'd|nl2bg'], 'sound off: the reading card is back');
+  assert.deepEqual(C.cardKeys(s, ready, Object.assign({}, set, { dictation: false })), ['d|bg2nl', 'd|nl2bg'], 'dictation can be switched off');
+  assert.deepEqual(C.cardKeys(Object.assign({}, s, { au: undefined }), ready, set), ['d|bg2nl', 'd|nl2bg'], 'no clip, no dictation (an imported sentence)');
+  const started = Object.assign({}, ready, { 'd|bg2nl': young, 'd|listen': { lapses: 1, due: 0 } });
+  assert.deepEqual(C.cardKeys(s, started, set), ['d|nl2bg', 'd|listen'], 'once started, dictation stays even if the reading card was reset');
+  assert.deepEqual(C.cardKeys(s, Object.assign({}, started, { 'd|listen': { lapses: 2, due: 0 } }), set), ['d|bg2nl', 'd|nl2bg', 'd|listen'], 'two lapses bring the reading card back');
+  // dictation cards are typed on the Bulgarian keyboard, so they join the X -> BG blocks (D-021)
+  assert.equal(C.parseKey('d|listen').toBg, true);
+  const q = C.buildSession([s], { 'd|nl2bg': { box: 1, due: 0, last: 1, state: 'review', s: 3 }, 'd|bg2nl': Object.assign({}, mature, { last: 1 }), 'd|listen': { due: 0, last: 1, state: 'review', s: 3, box: 1 } }, set, 10 * 86400e3).queue;
+  assert.ok(q.length === 1 && /\|(listen|nl2bg)$/.test(q[0]), 'one card for the sentence, never the retired reading card: ' + q);
 });
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));
