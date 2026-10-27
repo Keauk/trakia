@@ -845,6 +845,40 @@
     return out;
   }
 
+  // ---------- history: recent answers in full, older days as totals (D-029) ----------
+  /** the local calendar day of a timestamp, "YYYY-MM-DD" */
+  function dayKey(/** @type {number} */ ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  /** fold every answer, drill answer and session start of a day before the last `keepDays` days into that day's totals.
+   * A total takes the larger of the old total and the count, never the sum, so a day compacted on two devices is not counted twice.
+   * @param {{log?: (number | string)[][], drillLog?: (number | string)[][], sessions?: number[], days?: Record<string, DaySummary>}} st @param {number} now @param {number} [keepDays]
+   * @returns {{log: (number | string)[][], drillLog: (number | string)[][], sessions: number[], days: Record<string, DaySummary>}} */
+  function compactHistory(st, now, keepDays) {
+    const cutoff = dayKey(now - (keepDays == null ? 30 : keepDays) * 86400e3);
+    /** @type {Record<string, DaySummary>} */ const days = {};
+    for (const k in st.days || {}) days[k] = Object.assign({}, (st.days || {})[k]);
+    /** @template {(number | string)[] | number} E @param {E[] | undefined} list @param {'a' | 'd' | 's'} field @returns {E[]} */
+    const fold = (list, field) => {
+      /** @type {Record<string, number[]>} */ const counts = {};
+      const keep = /** @type {E[]} */ ([]);
+      for (const e of list || []) {
+        const ts = Array.isArray(e) ? +e[0] : +e, k = dayKey(ts);
+        if (k >= cutoff) { keep.push(e); continue; }
+        const c = counts[k] = counts[k] || [0, 0, 0];
+        if (field === 's' || !Array.isArray(e)) c[0]++; else c[+e[2]]++;
+      }
+      for (const k in counts) {
+        const day = days[k] = days[k] || {};
+        if (field === 's') day.s = Math.max(day.s || 0, counts[k][0]);
+        else day[field] = [0, 1, 2].map(i => Math.max((day[field] || [0, 0, 0])[i], counts[k][i]));
+      }
+      return keep;
+    };
+    const log = fold(st.log, 'a'), drillLog = fold(st.drillLog, 'd'), sessions = fold(st.sessions, 's');
+    return { log, drillLog, sessions, days: sortedMap(days, normDay) };
+  }
+  /** a day's totals with its fields in a fixed order @param {DaySummary} d @returns {DaySummary} */
+  function normDay(d) { /** @type {DaySummary} */ const o = {}; if (d.a) o.a = d.a; if (d.d) o.d = d.d; if (d.s) o.s = d.s; return o; }
+
   // ---------- sync between devices (D-025) ----------
   /** settings that belong to one device and never travel with a sync */
   const DEVICE_SETTINGS = ['theme', 'wallpaper', 'wallpaperUrl', 'wallpaperDim', 'translit', 'dirRun'];
@@ -890,10 +924,19 @@
     const touched = (/** @type {ReadingRecord} */ r) => Math.max(r.read || 0, r.quiz ? r.quiz.at : 0);
     for (const side of [L.reading || {}, R.reading || {}]) for (const k in side) { const r = side[k], had = allReading[k]; if (!had || touched(r) >= touched(had)) allReading[k] = r; }
     const reading = sortedMap(allReading, r => touched(r) > wiped ? r : undefined);
+    // day totals (D-029): per number the larger of the two, nothing before the day of a reset
+    const wipeDay = wiped ? dayKey(wiped) : '';
+    /** @type {Record<string, DaySummary>} */ const allDays = {};
+    for (const side of [L.days || {}, R.days || {}]) for (const k in side) {
+      if (k < wipeDay) continue;
+      const d = allDays[k] = allDays[k] || {}, x = side[k];
+      for (const f of /** @type {const} */ (['a', 'd'])) { const v = x[f]; if (v) d[f] = [0, 1, 2].map(i => Math.max((d[f] || [0, 0, 0])[i], v[i] || 0)); }
+      if (x.s) d.s = Math.max(d.s || 0, x.s);
+    }
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
-      stamps, cleared, reading,
+      stamps, cleared, reading, days: sortedMap(allDays, normDay),
     };
   }
 
@@ -909,14 +952,14 @@
     if (at < text.length) out.push({ t: text.slice(at), w: false });
     return out;
   }
-  /** the key a word form has in a story's `words` map (lower case, ѝ as и like the validator) */
-  const storyKey = (/** @type {string} */ form) => form.normalize('NFC').toLowerCase().replace(/ѝ/g, 'и');
+  /** the key a word form has in a `words` map: lower case; ѝ (her) stays apart from и (and), unlike in answer checking */
+  const storyKey = (/** @type {string} */ form) => form.normalize('NFC').toLowerCase();
   /** can the learner open this story: its level within their Anki position (plus tolerance) and its grammar within their stage
    * @param {Story} story @param {Partial<Settings>} settings */
   function storyEligible(story, settings) {
     return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots, storyTokens, storyKey, storyEligible };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, mergeSnapshots, dayKey, compactHistory, storyTokens, storyKey, storyEligible };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

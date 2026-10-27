@@ -28,14 +28,22 @@ let sessions = LS.get('sessions', []);  // [startTs]
 let drills = LS.get('drills', {});       // {itemId: {ok, bad, last}}
 let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 /** @type {Snapshot['stamps']} */ let stamps = LS.get('stamps', {});   // when shared settings / the deleted list last changed, last full reset (D-025)
-/** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});
-/** @type {Record<string, ReadingRecord>} */ let reading = LS.get('reading', {});   // stories read, quiz scores (D-026, D-028)   // per-card resets, so a sync does not bring them back
+/** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});   // per-card resets, so a sync does not bring them back
+/** @type {Record<string, ReadingRecord>} */ let reading = LS.get('reading', {});   // stories read, quiz scores (D-026, D-028)
+/** @type {Record<string, DaySummary>} */ let dayTotals = LS.get('days', {});   // totals of the days older than the last 30 (D-029)
 let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
   settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
   progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals),
 };
+// fold answers older than 30 days into day totals (D-029)
+(function compactAtLoad() {
+  const c = C.compactHistory({ log, drillLog, sessions, days: dayTotals }, Date.now());
+  if (c.log.length === log.length && c.drillLog.length === drillLog.length && c.sessions.length === sessions.length) return;
+  log = c.log; drillLog = c.drillLog; sessions = c.sessions; dayTotals = c.days;
+  save.log(); save.drillLog(); save.sessions(); save.days();
+})();
 const WORDS = DATA.words, WIDX = C.wordIndex(WORDS), GRAMMAR = DATA.grammar, ASPECTS = C.aspectPairs(WORDS);
 const WORD_BY_RANK = new Map(WORDS.map(w => [w.rank, w]));
 
@@ -89,7 +97,7 @@ function renderAlts(list, loose) {
   el.open = false;   // every card starts collapsed (D-021)
 }
 function fitAnswer() { const a = $('answer'); a.style.height = 'auto'; a.style.height = (a.scrollHeight + a.offsetHeight - a.clientHeight) + 'px'; }
-function dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+const dayKey = C.dayKey;
 function fmtDays(d) { if (d == null) return '–'; if (d < 1) return Math.round(d * 24) + ' h'; return (d < 10 ? d.toFixed(1) : Math.round(d)) + ' d'; }
 function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.round(ms / 60e3) + ' min'; if (ms < 86400e3) return Math.round(ms / 3600e3) + ' h'; return Math.round(ms / 86400e3) + ' d'; }
 
@@ -208,7 +216,6 @@ function nextDrill() {
   if (p.result === 'wrong') t.bad += 1; else t.ok += 1;
   t.last = Date.now(); drills[p.key] = t;
   drillLog.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0]);
-  if (drillLog.length > 20000) drillLog = drillLog.slice(-15000);
   save.drills(); save.drillLog();
   session.counts[p.result]++;
   session.i++; renderCard();
@@ -232,7 +239,7 @@ function renderCard() {
   if (!s) { session.i++; return renderCard(); }
   session.pending = null;
   renderProgress(); renderChips(dirLabel(dir), session.free, !!item.retry); setState('idle'); syncRunning();
-  $('prompt').textContent = K.toBg ? (s[K.lang] || s.nl) : s.bg;
+  $('prompt').textContent = K.toBg ? (s[K.lang] || s.nl) : s.bg; promptSource = null; if (popFor) hideWordPop();
   $('prompt').lang = K.toBg ? K.lang : 'bg';
   const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
   $('newwords').innerHTML = chips ? '<span class="tiny">new:</span>' + chips : '';
@@ -251,8 +258,9 @@ $('answer').addEventListener('input', () => { if (!session || session.drill) ret
 $('answer').addEventListener('keydown', e => { if (e.key !== 'Enter') return; e.preventDefault(); e.stopPropagation(); if (e.repeat || !session) return; if (session.pending) next(); else checkAnswer(false); });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter' || !session || !session.pending || e.repeat) return;
-  const a = document.activeElement;   // other buttons, the alternatives toggle and links keep their own Enter
-  if (a && a !== $('btn-next') && a !== $('answer') && a.matches('button, summary, a, input, select, textarea')) return;
+  const a = document.activeElement;   // other buttons, the alternatives toggle and links keep their own Enter;
+  // a tapped prompt word (D-030) does not, so Enter still moves on after a lookup
+  if (a && a !== $('btn-next') && a !== $('answer') && !a.matches('button.w') && a.matches('button, summary, a, input, select, textarea')) return;
   e.preventDefault(); next();
 });
 // Check and Don't know do not take the focus from the answer field: on a phone that would close the keyboard,
@@ -291,6 +299,8 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   const state = giveUp ? 'revealed' : r.result;
   $('answer').disabled = true; setState(state);
   $('answer-actions').hidden = true; $('feedback').hidden = false;
+  // now the Bulgarian prompt may be looked up word by word, never before the answer (D-030)
+  if (!K.toBg && s.words) { promptSource = { words: s.words }; $('prompt').innerHTML = storyHtml(s.bg, promptSource); }
   // a looser translation (D-014) is accepted, but the expected line shows the closest exact one, highlighted against what was typed
   const closer = r.loose && r.closer && r.result !== 'wrong' ? r.closer : '';
   let shown = closer || r.expected || accepted[0];
@@ -326,7 +336,6 @@ function next() {
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
   progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
   log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0]);
-  if (log.length > 20000) log = log.slice(-15000);
   save.progress(); save.log();
   session.counts[p.result]++;
   if (effective === 'wrong' && !item.retry) {
@@ -376,6 +385,7 @@ function renderStats() {
   const now = Date.now(), today = dayKey(now);
   const byDay = {};
   for (const l of log) { const k = dayKey(l[0]); (byDay[k] = byDay[k] || [0, 0, 0])[l[2]]++; }
+  for (const k in dayTotals) { const a = dayTotals[k].a; if (a) byDay[k] = [0, 1, 2].map(i => Math.max((byDay[k] || [0, 0, 0])[i], a[i])); }   // older days as totals (D-029)
   const t = byDay[today] || [0, 0, 0], tot = t[0] + t[1] + t[2];
   let streak = 0; for (let d = 0; ; d++) { const k = dayKey(now - d * 86400e3); if (byDay[k]) streak++; else if (d === 0) continue; else break; if (d > 3650) break; }
   const ms = log.filter(l => dayKey(l[0]) === today).map(l => l[0]);
@@ -388,7 +398,8 @@ function renderStats() {
   $('chart-table').innerHTML = '<tr><th>day</th><th>✓</th><th>≈</th><th>✗</th></tr>' + days.map(d => `<tr><td>${d.k}</td><td>${d.v[2]}</td><td>${d.v[1]}</td><td>${d.v[0]}</td></tr>`).join('');
   // grammar drills
   const dToday = drillLog.filter(l => dayKey(l[0]) === today), dTot = dToday.length, dOk = dToday.filter(l => l[2] > 0).length;
-  const dAll = drillLog.length, dAllOk = drillLog.filter(l => l[2] > 0).length;
+  const dOld = Object.values(dayTotals).map(d => d.d || [0, 0, 0]);
+  const dAll = drillLog.length + dOld.reduce((n, d) => n + d[0] + d[1] + d[2], 0), dAllOk = drillLog.filter(l => l[2] > 0).length + dOld.reduce((n, d) => n + d[1] + d[2], 0);
   $('stats-drills').innerHTML = stat(dTot, 'drill answers today') + stat(dTot ? Math.round(100 * dOk / dTot) + '%' : '–', 'accuracy today') + stat(dAll, 'all time') + stat(dAll ? Math.round(100 * dAllOk / dAll) + '%' : '–', 'accuracy all time');
   const items = Object.fromEntries(C.drillItems(GRAMMAR, 5).map(it => [it.id, it]));
   const weak = Object.entries(drills).filter(([k, t]) => t.bad > 0 && items[k]).sort((a, b) => (b[1].bad - b[1].ok) - (a[1].bad - a[1].ok) || b[1].bad - a[1].bad).slice(0, 10);
@@ -503,13 +514,14 @@ $('import-file').addEventListener('change', async e => {
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 /** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
-function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading }; }
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals }; }
 /** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
 function applySnapshot(m) {
+  m = Object.assign({}, m, C.compactHistory(m, Date.now()));
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
-  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading;
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days;
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
-  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading })) LS.set(k, v);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals })) LS.set(k, v);
   refreshSentences();
   // redraw what is on screen, without leaving the tab or the session summary
   const tab = document.querySelector('.tab.active');
@@ -548,7 +560,7 @@ $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; save.reading(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
 
 // ---------- reading (D-026 stories, D-027 tap a word, D-028 questions) ----------
@@ -556,7 +568,7 @@ const STORIES = DATA.stories || [], LEVELS = [...new Set(STORIES.map(s => s.leve
 /** deck words by dictionary form (lowest rank wins, as in the validator) */
 const WORD_BY_BG = new Map(); for (const w of WORDS) { const k = C.storyKey(w.bg); if (!WORD_BY_BG.has(k)) WORD_BY_BG.set(k, w); }
 /** meanings of the function words a story may use without a deck entry */
-const FREE_MEANING = { 'ли': 'question particle', 'не': 'not', 'да': 'to, that (before a verb)', 'ще': 'will (future)', 'се': 'oneself (reflexive)', 'си': 'oneself; one\'s own; you are', 'по': 'more (по-), along', 'най': 'most (най-)', 'е': 'is (съм)', 'са': 'are (съм)', 'сме': 'we are (съм)', 'сте': 'you are (съм)', 'съм': 'I am (съм)', 'бях': 'I was (съм)', 'беше': 'was (съм)', 'бяхме': 'we were (съм)', 'бяха': 'they were (съм)', 'и': 'and; also' };
+const FREE_MEANING = { 'ли': 'question particle', 'не': 'not', 'да': 'to, that (before a verb)', 'ще': 'will (future)', 'се': 'oneself (reflexive)', 'си': 'oneself; one\'s own; you are', 'по': 'more (по-), along', 'най': 'most (най-)', 'е': 'is (съм)', 'са': 'are (съм)', 'сме': 'we are (съм)', 'сте': 'you are (съм)', 'съм': 'I am (съм)', 'бях': 'I was (съм)', 'беше': 'was (съм)', 'бяхме': 'we were (съм)', 'бяха': 'they were (съм)', 'и': 'and; also', 'ѝ': 'her, to her (тя)' };
 /** @type {Story | null} */ let story = null;
 /** @type {{orders: number[][], picks: (number | null)[]} | null} */ let quiz = null;
 const storyLang = (/** @type {Story} */ st) => C.langFor(st.id, settings) === 'en' ? 'en' : 'nl';
@@ -579,7 +591,7 @@ function renderReading() {
 $('reading-list').addEventListener('click', e => { const b = closest(e, '[data-story]'); if (b && !b.disabled) openStory(b.dataset.story || ''); });
 /** a text as tappable words: each word a button carrying its lookup key. A button may break a line on
  * either side, so each word is kept in a nowrap span with the punctuation that touches it („Бабо, по-голям). */
-function storyHtml(/** @type {string} */ text, /** @type {Story} */ st) {
+function storyHtml(/** @type {string} */ text, /** @type {WordSource} */ st) {
   const extra = new Set(Object.keys(st.extra || {}).map(C.storyKey));
   let out = '', cur = '';
   const flush = () => { if (cur) out += `<span class="nw">${cur}</span>`; cur = ''; };
@@ -595,12 +607,12 @@ function openStory(/** @type {string} */ id) {
   story = st; const lang = storyLang(st), extra = st.extra || {};
   $('reading-list').hidden = true; $('reading-story').hidden = false; hideWordPop();
   $('story-meta').textContent = `Level ${st.level} · ${st.word_count} words`;
-  $('story-title').innerHTML = storyHtml(st.title.bg, st);
+  $('story-title').innerHTML = storyHtml(st.title.bg, storySource(st));
   $('story-text').innerHTML = st.paragraphs.map((p, i) => {
     // glossed words that occur in this paragraph, listed under it
     const here = [...new Set(C.storyTokens(p.bg).filter(t => t.w).map(t => st.words[C.storyKey(t.t)]).filter(l => l && Object.keys(extra).some(x => C.storyKey(x) === C.storyKey(l))))];
     const gl = here.map(l => { const g = extra[Object.keys(extra).find(x => C.storyKey(x) === C.storyKey(l)) || '']; return `<b lang="bg">${esc(l)}</b> – ${esc(g[lang])}`; }).join(', ');
-    return `<div class="para"><p class="bg" lang="bg">${storyHtml(p.bg, st)}</p>${gl ? `<p class="tiny new-words">New: ${gl}</p>` : ''}<button class="link-btn" data-tr="${i}">Show translation</button><p class="tr" id="tr-${i}" hidden>${esc(p[lang])}</p></div>`;
+    return `<div class="para"><p class="bg" lang="bg">${storyHtml(p.bg, storySource(st))}</p>${gl ? `<p class="tiny new-words">New: ${gl}</p>` : ''}<button class="link-btn" data-tr="${i}">Show translation</button><p class="tr" id="tr-${i}" hidden>${esc(p[lang])}</p></div>`;
   }).join('');
   startQuiz(0); renderReadMark(); window.scrollTo(0, 0);
 }
@@ -609,33 +621,40 @@ $('btn-story-back').addEventListener('click', () => { closeStory(); renderReadin
 $('story-text').addEventListener('click', e => {
   const t = closest(e, '[data-tr]'); if (t) { const p = $('tr-' + t.dataset.tr); p.hidden = !p.hidden; t.textContent = p.hidden ? 'Show translation' : 'Hide translation'; }
 });
-// tap a word (D-027)
-/** dictionary form and meaning of a word form in the open story @param {string} k @returns {string} */
-function wordInfo(k) {
-  if (!story) return '';
-  const lang = storyLang(story), names = new Set((story.names || []).map(C.storyKey));
-  if (names.has(k)) return `<b lang="bg">${esc(story.words[k] || k)}</b><span class="tiny">name</span>`;
-  const lem = story.words[k];
+// tap a word (D-027 stories, D-030 practice sentences)
+const storySource = (/** @type {Story} */ st) => /** @type {WordSource} */ ({ words: st.words, names: st.names, extra: st.extra, vocative: st.vocative, lang: storyLang(st) });
+/** dictionary form and meaning of a word form @param {string} k @param {WordSource} src @returns {string} */
+function wordInfo(k, src) {
+  const lang = src.lang || 'nl', names = new Set((src.names || []).map(C.storyKey));
+  // a form of address (Петре, мамо) gets a line saying so, under the base form
+  const voc = (src.vocative || []).map(C.storyKey).includes(k) ? `<span class="tiny">${esc(k)}: the form for addressing someone (vocative)</span>` : '';
+  const name = (/** @type {string} */ n) => `<b lang="bg">${esc(n)}</b><span class="tiny">name</span>${voc}`;
+  if (names.has(k)) return name(src.words[k] || k);
+  const lem = src.words[k];
   if (!lem) return FREE_MEANING[k] ? `<b lang="bg">${esc(k)}</b> – ${esc(FREE_MEANING[k])}` : `<b lang="bg">${esc(k)}</b>`;
-  const extra = story.extra || {}, ex = Object.keys(extra).find(x => C.storyKey(x) === C.storyKey(lem));
+  const extra = src.extra || {}, ex = Object.keys(extra).find(x => C.storyKey(x) === C.storyKey(lem));
   if (ex) return `<b lang="bg">${esc(lem)}</b> – ${esc(extra[ex][lang])}<span class="tiny">not yet in your deck</span>`;
   const [form, forced] = lem.split('#'), w = forced ? WORD_BY_RANK.get(+forced) : WORD_BY_BG.get(C.storyKey(form));
-  if (!w) return `<b lang="bg">${esc(form)}</b>` + (FREE_MEANING[C.storyKey(form)] ? ' – ' + esc(FREE_MEANING[C.storyKey(form)]) : '');
-  return `<b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not yet reached in Anki' : ''}</span>`;
+  if (!w && FREE_MEANING[C.storyKey(form)]) return `<b lang="bg">${esc(form)}</b> – ${esc(FREE_MEANING[C.storyKey(form)])}`;
+  if (!w) return /^\p{Lu}/u.test(form) ? name(form) : `<b lang="bg">${esc(form)}</b>`;   // a sentence's names are the capitalised non-deck words
+  return `<b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not yet reached in Anki' : ''}</span>${voc}`;
 }
 /** @type {HTMLElement | null} */ let popFor = null;
 function hideWordPop() { $('word-pop').hidden = true; if (popFor) popFor.classList.remove('on'); popFor = null; }
-function showWordPop(/** @type {HTMLElement} */ b) {
+function showWordPop(/** @type {HTMLElement} */ b, /** @type {WordSource} */ src) {
   if (popFor === b) { hideWordPop(); return; }
   hideWordPop();
-  const pop = $('word-pop'); pop.innerHTML = wordInfo(b.dataset.k || ''); pop.hidden = false;
+  const pop = $('word-pop'); pop.innerHTML = wordInfo(b.dataset.k || '', src); pop.hidden = false;
   const r = b.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
   const below = r.bottom + 6 + h < window.innerHeight;
   pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + window.scrollX + 'px';
   pop.style.top = (below ? r.bottom + 6 : r.top - h - 6) + window.scrollY + 'px';
   b.classList.add('on'); popFor = b;
 }
-$('reading-story').addEventListener('click', e => { const b = closest(e, 'button.w'); if (b) { e.stopPropagation(); showWordPop(b); } });
+$('reading-story').addEventListener('click', e => { const b = closest(e, 'button.w'); if (b && story) { e.stopPropagation(); showWordPop(b, storySource(story)); } });
+// a practice sentence's prompt, once the card is answered (D-030)
+/** @type {WordSource | null} */ let promptSource = null;
+$('prompt').addEventListener('click', e => { const b = closest(e, 'button.w'); if (b && promptSource) { e.stopPropagation(); showWordPop(b, promptSource); } });
 document.addEventListener('click', e => { if (popFor && !(e.target instanceof Node && $('word-pop').contains(e.target))) hideWordPop(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && popFor) hideWordPop(); });
 window.addEventListener('resize', () => hideWordPop());
@@ -722,7 +741,7 @@ async function sync(loud) {
     let id = syncState.gist, remote = null;
     if (id) try { remote = await readGist(id); } catch (e) { if (!(e instanceof Error && 'status' in e && e.status === 404)) throw e; id = undefined; }
     if (!id) { id = await findGist(); if (id) remote = await readGist(id); }
-    const merged = C.mergeSnapshots(snapshot(), remote || {}), text = JSON.stringify(merged);
+    const m0 = C.mergeSnapshots(snapshot(), remote || {}), merged = Object.assign(m0, C.compactHistory(m0, Date.now())), text = JSON.stringify(merged);
     if (!id) { const g = await gh('/gists', 'POST', { description: 'Trakia progress (kept in sync by the app)', public: false, files: { [GIST_FILE]: { content: text } } }); id = g.id; syncState.url = g.html_url; }
     else if (!remote || text !== JSON.stringify(C.mergeSnapshots(remote, remote))) await gh('/gists/' + id, 'PATCH', { files: { [GIST_FILE]: { content: text } } });
     // merge once more with the current state: answers given while the requests ran are kept

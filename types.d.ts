@@ -13,6 +13,8 @@ interface Sentence {
   /** Bulgarian answers accepted only for the English prompt: the other "you" form (D-018) */
   bg_alt_en?: string[];
   lemmas: string[]; max_rank: number | null; tags: string[]; source: string; grammar?: string[];
+  /** every word form of `bg` (lower case) -> its dictionary form (D-030) */
+  words?: Record<string, string>;
 }
 
 interface GrammarTable { headers: string[]; rows: string[][] }
@@ -25,12 +27,17 @@ interface Story {
   paragraphs: { bg: string; nl: string; en: string }[];
   /** every word form of the title and text (lower case) -> its dictionary form in words.json (D-027) */
   words: Record<string, string>; names?: string[];
+  /** forms of address that differ from the base form (петре -> Петър), lower case */
+  vocative?: string[];
   /** glossed words above the level, with their meaning */
   extra?: Record<string, { nl: string; en: string }>;
   grammar?: string[]; max_rank: number | null; stage: number; word_count: number;
   /** comprehension questions (D-028); `answer` indexes `options` */
   questions: { q: { nl: string; en: string }; options: { nl: string; en: string }[]; answer: number }[];
 }
+
+/** Anything whose words can be tapped for their meaning (D-027, D-030): a story, or a practice sentence. */
+interface WordSource { words: Record<string, string>; names?: string[]; extra?: Record<string, { nl: string; en: string }>; vocative?: string[]; lang?: 'nl' | 'en' }
 
 /** What the learner did with one story (D-026, D-028). */
 interface ReadingRecord { read?: number; quiz?: { at: number; score: number; total: number } }
@@ -79,7 +86,12 @@ interface Snapshot {
   cleared: Record<string, number>;
   /** stories read and quiz scores (D-026, D-028) */
   reading: Record<string, ReadingRecord>;
+  /** totals of the days older than the last 30 (D-029) */
+  days: Record<string, DaySummary>;
 }
+
+/** One compacted day (D-029): answers and drill answers as [wrong, almost, correct], session starts. */
+interface DaySummary { a?: number[]; d?: number[]; s?: number }
 
 /** localStorage `trakia.sync`: kept out of every snapshot, so the token never leaves this browser. */
 interface SyncState { token?: string; gist?: string; url?: string; at?: number; error?: string }
