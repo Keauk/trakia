@@ -40,6 +40,22 @@ nav{display:flex;gap:2px;background:var(--nav-track);padding:3px;border-radius:1
 :root[data-theme=dark] .theme-btn .i-sun{display:block}:root[data-theme=dark] .theme-btn .i-moon{display:none}
 @media (hover:hover){.theme-btn:hover{color:var(--ink);background:var(--nav-track)}}
 .theme-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+/* sound (D-005): the top-bar switch shows a speaker or a struck speaker; with sound off every speaker button hides */
+.theme-btn .i-mute{display:none}
+body.mute .theme-btn .i-mute{display:block}body.mute .theme-btn .i-snd{display:none}
+body.mute .say-btn,body.mute .story-audio,body.mute .say-para{display:none}
+.say-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:none;color:var(--faint);cursor:pointer;vertical-align:middle;-webkit-tap-highlight-color:transparent}
+.say-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.say-btn.playing{color:var(--primary)}
+@media (hover:hover){.say-btn:hover{color:var(--ink);background:var(--nav-track)}}
+.say-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.say-row{display:flex;align-items:flex-start;gap:6px}
+.say-row>p{flex:1;min-width:0}
+.say-row>.say-btn{margin-top:2px}
+#word-pop .say-btn{width:28px;height:28px;margin:-4px -6px -4px 2px}
+.story-audio{display:flex;align-items:center;gap:10px;margin:8px 0 0}
+.story-audio .btn{flex:none;white-space:nowrap;min-width:104px}
+button.w.say-on{background:var(--revealed-tint);color:var(--revealed)}
 nav button{background:none;border:0;padding:7px 14px;border-radius:7px;font:500 13px/1.4 var(--sans);color:var(--muted);cursor:pointer}
 @media (hover:hover){nav button:hover{color:var(--ink)}}
 nav button.active{background:var(--nav-active);color:var(--ink);box-shadow:var(--nav-active-shadow)}
@@ -278,7 +294,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <button data-tab="library">Library</button>
       <button data-tab="settings">Settings</button>
     </nav>
-    <div class="hright"><span id="hdr-rank"></span><button class="theme-btn" id="btn-theme" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button></div>
+    <div class="hright"><span id="hdr-rank"></span><button class="theme-btn" id="btn-sound" aria-label="Sound off" title="Sound off"><svg class="i-snd" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><svg class="i-mute" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg></button><button class="theme-btn" id="btn-theme" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button></div>
   </div>
 </header>
 <main>
@@ -301,7 +317,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <div class="card">
       <div class="peek-top"><span class="tiny" id="peek-count"></span><button class="link-btn" id="btn-peek-stop">Stop</button></div>
       <p class="tiny">Anki teaches this word soon. Guess what it means from the sentence: a wrong guess helps you remember it too.</p>
-      <p class="peek-sentence" id="peek-sentence" lang="bg"></p>
+      <div class="say-row"><p class="peek-sentence" id="peek-sentence" lang="bg"></p><button class="say-btn" id="btn-say-peek" aria-label="Listen" title="Listen" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button></div>
       <p class="tiny" id="peek-others"></p>
       <p class="peek-q" id="peek-question"></p>
       <div class="opts" id="peek-opts"></div>
@@ -322,6 +338,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <button class="icon-btn" id="btn-quit-m" aria-label="End session">✕</button>
       <div class="segs" id="segs-m" role="progressbar" aria-label="Session progress"></div>
       <span class="count" id="counter-m"></span>
+      <button class="theme-btn" id="btn-sound-m" aria-label="Sound off" title="Sound off"><svg class="i-snd" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><svg class="i-mute" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg></button>
       <button class="theme-btn" id="btn-theme-m" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
     </div>
     <div class="run-meta d-only">
@@ -332,7 +349,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <div class="run-body">
         <div class="progress d-only"><div class="segs" id="segs" role="progressbar" aria-label="Session progress"></div><span class="count" id="counter"></span></div>
         <div class="chips-row m-only" id="chips-m"></div>
-        <p id="prompt" class="prompt"></p>
+        <div class="say-row"><p id="prompt" class="prompt"></p><button class="say-btn" id="btn-say" aria-label="Listen (Alt+R)" title="Listen (Alt+R)" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button></div>
         <div id="newwords" class="newwords"></div>
         <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Type the translation"></textarea>
         <p id="translit-preview" class="preview" hidden></p>
@@ -345,7 +362,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <div class="result-main">
           <div class="status"><span id="verdict" class="verdict"></span><span id="verdict-note" class="note"></span></div>
           <p class="label" id="expected-label" hidden>→ Exact translation</p>
-          <p id="expected" class="expected"></p>
+          <div class="say-row"><p id="expected" class="expected"></p><button class="say-btn" id="btn-say-exp" aria-label="Listen (Alt+R)" title="Listen (Alt+R)" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button></div>
           <ul id="notes" class="notes" hidden></ul>
           <div class="links">
             <details id="alts" class="alts"><summary></summary><ul></ul></details>
@@ -378,6 +395,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <button class="link-btn" id="btn-story-back">← All stories</button>
       <p class="tiny" id="story-meta"></p>
       <h2 class="story-title" id="story-title" lang="bg"></h2>
+      <div class="story-audio"><button class="btn small" id="btn-story-play">▶ Listen</button><span class="tiny" id="story-play-note">Kalina reads; the men speak with Borislav's voice.</span></div>
       <p class="tiny">Tap a word for its meaning. Words with a dotted line are above your level; they are explained under the paragraph.</p>
       <div id="story-text"></div>
     </div>
@@ -551,6 +569,17 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <h2>Typing</h2>
     <div class="toggle"><input type="checkbox" id="set-translit"><div>Latin keyboard for Bulgarian<div class="help">Type <i>kupih hlyab</i>, the Cyrillic preview is what gets checked. sh=ш ch=ч zh=ж sht=щ yu=ю ya=я y=ъ j=й x=ь c=ц q=я</div></div></div>
     <div class="field"><label for="set-theme">Theme</label><select id="set-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+  </div>
+  <div class="card">
+    <h2>Sound</h2>
+    <div class="toggle"><input type="checkbox" id="set-sound"><div>Sound on<div class="help">Off when you have no headphones: nothing plays, and the speaker buttons hide. Also the speaker in the top bar. Per device.</div></div></div>
+    <div class="toggle"><input type="checkbox" id="set-autoplay"><div>Play by itself<div class="help">A Bulgarian prompt plays when the card appears; the Bulgarian answer plays when it is shown.</div></div></div>
+    <div class="field"><label for="set-voices">Voices</label><select id="set-voices"><option value="both">Both, mixed (Kalina and Borislav)</option><option value="k">Kalina only</option><option value="b">Borislav only</option></select>
+      <div class="help">Hearing a word from more than one speaker helps you recognise it. With both, each card picks a voice and every replay switches to the other. Stories always use Kalina, and Borislav for the men.</div></div>
+    <div class="field"><label for="set-speed">Speed</label><select id="set-speed"><option value="1">Normal</option><option value="0.8">Slow (0.8×)</option></select></div>
+    <div class="field"><label>Offline</label>
+      <div class="row" style="margin-top:0"><button class="btn" id="btn-audio-dl">Download all audio</button><button class="btn" id="btn-audio-rm">Remove downloaded audio</button></div>
+      <div class="help" id="audio-status">Clips are kept as they are played. Download all of them (about 200 MB, best on Wi-Fi) to hear everything offline.</div></div>
   </div>
   <div class="card">
     <h2>Wallpaper</h2>

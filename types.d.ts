@@ -4,7 +4,13 @@
 /** One row of data/words.json: a deck word in Anki rank order. */
 interface Word { rank: number; bg: string; en: string; pos: string; forms: string; learned?: boolean;
   /** the deck's topic (food, body, family, …) */
-  cat?: string }
+  cat?: string;
+  /** clip key of the spoken word, in both voices (D-005) */
+  au?: string }
+
+/** A spoken part of a story title or paragraph (D-005): `bg` offsets from–to, voice k (Kalina) or b (Borislav),
+ *  the clip key, and per word [start ms, from, to] for the read-along highlight. */
+type AudioSeg = [number, number, 'k' | 'b', string, [number, number, number][]];
 
 /** One practice sentence from data/sentences.json. */
 interface Sentence {
@@ -19,6 +25,8 @@ interface Sentence {
   words?: Record<string, string>;
   /** forms of address in `bg` (госпожо, господине), for the word card (D-027) */
   vocative?: string[];
+  /** clip key of `bg`, in both voices (D-005) */
+  au?: string;
 }
 
 interface GrammarTable { headers: string[]; rows: string[][] }
@@ -27,8 +35,9 @@ interface GrammarData { version: number; pronouns: string[]; cards: GrammarCard[
 
 /** A reading story from data/stories.json (D-026), checked by tools/validate_stories.py. */
 interface Story {
-  id: string; level: number; title: { bg: string; nl: string; en: string };
-  paragraphs: { bg: string; nl: string; en: string }[];
+  id: string; level: number; title: { bg: string; nl: string; en: string; au?: AudioSeg[] };
+  /** speakers: one name per quoted line, from data/cast.json; au: the spoken parts (D-005) */
+  paragraphs: { bg: string; nl: string; en: string; speakers?: string[]; au?: AudioSeg[] }[];
   /** every word form of the title and text (lower case) -> its dictionary form in words.json (D-027) */
   words: Record<string, string>; names?: string[];
   /** forms of address that differ from the base form (петре -> Петър), lower case */
@@ -61,6 +70,8 @@ interface Settings {
   dirRun: number;
   /** moving background (D-023): 'none' | 'fire' | 'video', a direct video URL, and the overlay opacity 0–90 */
   wallpaper: string; wallpaperUrl: string; wallpaperDim: number;
+  /** audio (D-005), per device: sound on, play prompts by themselves, 'both' | 'k' | 'b', playback rate */
+  sound: boolean; autoplay: boolean; voices: string; speed: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 
