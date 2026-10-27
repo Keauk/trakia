@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55 };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1 };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -105,6 +105,7 @@ function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.
 // ---------- tabs ----------
 /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 function showTab(name) {
+  stopReader(); hideSay();
   /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   if (name === 'practise') renderHome(); if (name === 'reading') { closeStory(); renderReading(); } if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
@@ -143,6 +144,7 @@ function startSession(opts) {
   sessions.push(session.started); save.sessions();
   $('session-home').hidden = true; $('session-done').hidden = true; $('session-run').hidden = false;
   renderCard();
+  prefetchClips([...new Set(queue.map(k => (SENT_BY_ID.get(k.split('|')[0]) || {}).au).filter(Boolean))]);
 }
 function cardOf(item) { const [id, dir] = item.key.split('|'); return { id, dir, s: SENT_BY_ID.get(id) }; }
 
@@ -183,7 +185,7 @@ function startDrill(cardFilter) {
 }
 function renderDrillCard() {
   const item = session.queue[session.i].item;
-  session.pending = null;
+  session.pending = null; hideSay();
   renderProgress(); renderChips('Grammar drill', false, false); setState('idle'); syncRunning();
   $('prompt').textContent = item.prompt; $('prompt').lang = 'bg';
   $('newwords').innerHTML = `<span class="hint">${esc(item.hint)}</span>`;
@@ -249,6 +251,7 @@ function renderCard() {
   inp.placeholder = K.toBg ? 'Въведи превод' : narrow() ? `Type in ${L}` : `Type the ${L} translation`;
   $('translit-preview').hidden = !(settings.translit && K.toBg); $('translit-preview').textContent = '';
   $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
+  hideSay(); if (!K.toBg) offerSay(s, 'btn-say');   // a Bulgarian prompt can be heard (D-005)
   setTimeout(() => inp.focus(), 50);
 }
 function toBgCard() { const it = session && session.queue[session.i]; return !!(it && !session.drill && C.parseKey(it.key).toBg); }
@@ -322,6 +325,7 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   renderAlts(accepted.filter(a => a !== shown), (loose || []).filter(a => a !== shown && a !== r.expected));
   $('gloss').textContent = s.max_rank ? 'rank ' + s.max_rank + (s.rank_estimated ? ' ≈' : '') : '';
   $('btn-accept').hidden = r.result === 'correct' || giveUp;
+  if (K.toBg) offerSay(s, 'btn-say-exp');   // the Bulgarian answer, once shown (D-005)
   setTimeout(() => $('btn-next').focus(), 30);
 }
 function acceptMine() {
@@ -356,7 +360,7 @@ function endSession() {
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
   $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
   $('btn-again').textContent = session.drill ? 'Drill again' : 'Practise again';
-  session = null; syncRunning(); sync();
+  session = null; hideSay(); syncRunning(); sync();
 }
 
 // ---------- grammar tab ----------
@@ -547,8 +551,8 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num')];
-function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num')];
+function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
@@ -556,7 +560,7 @@ function renderRankHelp() {
 }
 function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s => Math.max(1, Math.round(s / o.factor * (Math.pow(o.retention, 1 / o.decay) - 1))); $('retention-help').textContent = `a card with 10 days of stability comes back after ${ivl(10)} d, with 60 days after ${ivl(60)} d`; }
 function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your Anki position fit this stage.`; }
-function renderSettings() { writers.forEach(w => w()); renderWallpaperFields(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+function renderSettings() { writers.forEach(w => w()); renderWallpaperFields(); renderAudioStatus(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
@@ -586,10 +590,11 @@ function renderPeek() {
     const cls = !answered ? '' : j === it.answer ? ' right' : j === peek?.picked ? ' wrong' : '';
     return `<button class="opt${cls}" data-o="${j}"${answered ? ' disabled' : ''}>${j + 1}. ${esc(o.en)}</button>`;
   }).join('');
-  $('peek-reveal').hidden = !answered; $('btn-peek-next').hidden = !answered;
+  $('peek-reveal').hidden = !answered; $('btn-peek-next').hidden = !answered; $('btn-say-peek').hidden = !answered || !it.sentence.au;
+  if (it.sentence.au) $('btn-say-peek').dataset.au = it.sentence.au;
   if (answered) {
     const lang = C.langFor(it.sentence.id, settings) === 'en' ? 'en' : 'nl';
-    $('peek-meaning').innerHTML = `<b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)} <span class="tiny">· word ${w.rank}${w.forms ? ' · ' + esc(w.forms) : ''}</span>`;
+    $('peek-meaning').innerHTML = `<b lang="bg">${esc(w.bg)}</b>${sayBtn(w.au, 'Listen to the word')} – ${esc(w.en)} <span class="tiny">· word ${w.rank}${w.forms ? ' · ' + esc(w.forms) : ''}</span>`;
     $('peek-translation').textContent = it.sentence[lang] || it.sentence.nl;
     $('btn-peek-next').textContent = peek.i + 1 < peek.items.length ? 'Next' : 'Finish';
   }
@@ -600,6 +605,7 @@ function pickPeek(/** @type {number} */ j) {
   peek.picked = j; if (ok) peek.right++;
   peeks[it.word.rank] = { at: Date.now(), ok }; save.peeks();
   renderPeek(); $('btn-peek-next').focus();
+  if (it.sentence.au && soundOn() && settings.autoplay !== false) $('btn-say-peek').click();   // hear the sentence with the answer
 }
 function nextPeek() {
   if (!peek || peek.picked == null) return;
@@ -608,7 +614,7 @@ function nextPeek() {
   $('peek-summary').textContent = `You guessed ${peek.right} of ${n} right. Anki teaches these words next (word ${first}–${last}); when you meet them there, you have already thought about them once.`;
   stopPeek(); $('session-home').hidden = true; $('peek-done').hidden = false; sync();
 }
-function stopPeek() { peek = null; $('peek-run').hidden = true; $('session-home').hidden = false; renderHome(); }
+function stopPeek() { stopAudio(); peek = null; $('peek-run').hidden = true; $('session-home').hidden = false; renderHome(); }
 $('btn-peek').addEventListener('click', startPeek);
 $('peek-opts').addEventListener('click', e => { const b = closest(e, '.opt'); if (b) pickPeek(+(b.dataset.o || 0)); });
 $('btn-peek-next').addEventListener('click', nextPeek);
@@ -651,10 +657,11 @@ $('reading-list').addEventListener('click', e => { const b = closest(e, '[data-s
  * either side, so each word is kept in a nowrap span with the punctuation that touches it („Бабо, по-голям). */
 function storyHtml(/** @type {string} */ text, /** @type {WordSource} */ st) {
   const extra = new Set(Object.keys(st.extra || {}).map(C.storyKey));
-  let out = '', cur = '';
+  let out = '', cur = '', at = 0;   // data-o: where the word starts in the text, for the read-along highlight (D-005)
   const flush = () => { if (cur) out += `<span class="nw">${cur}</span>`; cur = ''; };
   for (const tok of C.storyTokens(text)) {
-    if (tok.w) { const k = C.storyKey(tok.t), lem = st.words[k]; cur += `<button type="button" class="w${lem && extra.has(C.storyKey(lem)) ? ' gl' : ''}" data-k="${esc(k)}">${esc(tok.t)}</button>`; continue; }
+    at += tok.t.length;
+    if (tok.w) { const k = C.storyKey(tok.t), lem = st.words[k]; cur += `<button type="button" class="w${lem && extra.has(C.storyKey(lem)) ? ' gl' : ''}" data-k="${esc(k)}" data-o="${at - tok.t.length}">${esc(tok.t)}</button>`; continue; }
     for (const part of tok.t.split(/(\s+)/)) if (/^\s+$/.test(part)) { flush(); out += part; } else cur += esc(part);
   }
   flush();
@@ -670,11 +677,11 @@ function openStory(/** @type {string} */ id) {
     // glossed words that occur in this paragraph, listed under it
     const here = [...new Set(C.storyTokens(p.bg).filter(t => t.w).map(t => st.words[C.storyKey(t.t)]).filter(l => l && Object.keys(extra).some(x => C.storyKey(x) === C.storyKey(l))))];
     const gl = here.map(l => { const g = extra[Object.keys(extra).find(x => C.storyKey(x) === C.storyKey(l)) || '']; return `<b lang="bg">${esc(l)}</b> – ${esc(g[lang])}`; }).join(', ');
-    return `<div class="para"><p class="bg" lang="bg">${storyHtml(p.bg, storySource(st))}</p>${gl ? `<p class="tiny new-words">New: ${gl}</p>` : ''}<button class="link-btn" data-tr="${i}">Show translation</button><p class="tr" id="tr-${i}" hidden>${esc(p[lang])}</p></div>`;
+    return `<div class="para"><p class="bg" lang="bg">${storyHtml(p.bg, storySource(st))}</p>${gl ? `<p class="tiny new-words">New: ${gl}</p>` : ''}<button class="say-btn say-para" data-play="${i}" aria-label="Listen from here" title="Listen from here">${SAY_SVG}</button><button class="link-btn" data-tr="${i}">Show translation</button><p class="tr" id="tr-${i}" hidden>${esc(p[lang])}</p></div>`;
   }).join('');
-  startQuiz(0); renderReadMark(); window.scrollTo(0, 0);
+  startQuiz(0); renderReadMark(); stopReader(); window.scrollTo(0, 0);
 }
-function closeStory() { story = null; quiz = null; hideWordPop(); $('reading-story').hidden = true; $('reading-list').hidden = false; }
+function closeStory() { stopReader(); story = null; quiz = null; hideWordPop(); $('reading-story').hidden = true; $('reading-list').hidden = false; }
 $('btn-story-back').addEventListener('click', () => { closeStory(); renderReading(); window.scrollTo(0, 0); });
 $('story-text').addEventListener('click', e => {
   const t = closest(e, '[data-tr]'); if (t) { const p = $('tr-' + t.dataset.tr); p.hidden = !p.hidden; t.textContent = p.hidden ? 'Show translation' : 'Hide translation'; }
@@ -695,7 +702,7 @@ function wordInfo(k, src) {
   const [form, forced] = lem.split('#'), w = forced ? WORD_BY_RANK.get(+forced) : WORD_BY_BG.get(C.storyKey(form));
   if (!w && FREE_MEANING[C.storyKey(form)]) return `<b lang="bg">${esc(form)}</b> – ${esc(FREE_MEANING[C.storyKey(form)])}`;
   if (!w) return /^\p{Lu}/u.test(form) ? name(form) : `<b lang="bg">${esc(form)}</b>`;   // a sentence's names are the capitalised non-deck words
-  return `<b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not yet reached in Anki' : ''}</span>${voc}`;
+  return `<b lang="bg">${esc(w.bg)}</b>${soundOn() ? sayBtn(w.au, 'Listen to the word') : ''} – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not yet reached in Anki' : ''}</span>${voc}`;
 }
 /** @type {HTMLElement | null} */ let popFor = null;
 function hideWordPop() { $('word-pop').hidden = true; if (popFor) popFor.classList.remove('on'); popFor = null; }
@@ -836,8 +843,160 @@ $('btn-sync-off').addEventListener('click', () => { if (!confirm('Forget the tok
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' || Date.now() - (syncState.at || 0) > 60e3) sync(); });
 window.addEventListener('online', () => sync());
 
+// ---------- audio (D-005): pre-generated clips in Kalina's (k) and Borislav's (b) voice ----------
+const VOICE_DIR = { k: 'kalina', b: 'borislav' }, AUDIO_CACHE = 'trakia-audio';
+const SAY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
+const clipUrl = (/** @type {string} */ v, /** @type {string} */ key) => `audio/${VOICE_DIR[v]}/${key.slice(0, 2)}/${key}.mp3`;
+const soundOn = () => settings.sound !== false;
+const pickVoice = () => settings.voices === 'k' || settings.voices === 'b' ? settings.voices : Math.random() < 0.5 ? 'k' : 'b';
+const otherVoice = (/** @type {string} */ v) => settings.voices === 'k' || settings.voices === 'b' ? settings.voices : v === 'k' ? 'b' : 'k';
+// one element for every clip: Safari lets it play after a fetch once it has played inside a tap (see unlock below)
+const player = typeof Audio === 'function' ? new Audio() : null;
+let playToken = 0, blobUrl = '';
+/** @type {((how: 'ended' | 'stopped' | 'failed') => void) | null} */ let playDone = null;
+/** stop whatever plays; a pending playClip resolves 'stopped' */
+function stopAudio() {
+  playToken++;
+  if (player) { player.onended = player.onerror = null; try { player.pause(); } catch (e) { /* no media in the headless test */ } }
+  if (playDone) { const d = playDone; playDone = null; d('stopped'); }
+  if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = ''; }
+  document.querySelectorAll('.say-btn.playing').forEach(b => b.classList.remove('playing'));
+}
+/** play one clip, fetched whole and played from a Blob URL (a service worker cannot answer the byte-range
+ * requests Safari makes for media); onTime gets the position in ms on every frame
+ * @param {string} v @param {string} key @param {(ms: number) => void} [onTime] @returns {Promise<'ended' | 'stopped' | 'failed'>} */
+async function playClip(v, key, onTime) {
+  stopAudio();
+  const my = playToken, url = clipUrl(v, key);
+  if (!player || !soundOn()) return 'failed';
+  let src = url;
+  if (location.protocol !== 'file:' && typeof fetch === 'function') {
+    try { const r = await fetch(url); if (!r.ok) return 'failed'; src = URL.createObjectURL(await r.blob()); } catch (e) { return 'failed'; }
+    if (my !== playToken) { URL.revokeObjectURL(src); return 'stopped'; }
+    blobUrl = src;
+  }
+  return new Promise(res => {
+    playDone = res;
+    const end = (/** @type {'ended' | 'failed'} */ how) => { if (playDone === res) { playDone = null; res(how); } };
+    player.onended = () => end('ended'); player.onerror = () => end('failed');
+    player.src = src; player.playbackRate = +settings.speed || 1;
+    const pr = player.play(); if (pr && pr.catch) pr.catch(() => end('failed'));
+    if (onTime) { const tick = () => { if (my !== playToken || playDone !== res) return; onTime(player.currentTime * 1000); requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
+  });
+}
+// the first tap anywhere plays a moment of silence on the shared element, which unlocks it on Safari
+const unlock = () => { document.removeEventListener('pointerdown', unlock, true); document.removeEventListener('keydown', unlock, true); if (!player || playDone) return; player.src = 'data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=='; const pr = player.play(); if (pr && pr.catch) pr.catch(() => {}); };
+document.addEventListener('pointerdown', unlock, true); document.addEventListener('keydown', unlock, true);
+
+// the practise card's clip: the Bulgarian prompt, or the Bulgarian answer once shown; a replay switches voice
+/** @type {{key: string, voice: string, btn: AppElement, played: boolean} | null} */ let say = null;
+function hideSay() { stopAudio(); say = null; $('btn-say').hidden = true; $('btn-say-exp').hidden = true; }
+/** @param {Sentence} s @param {string} btnId */
+function offerSay(s, btnId) {
+  say = s.au ? { key: s.au, voice: pickVoice(), btn: $(btnId), played: false } : null;
+  $(btnId).hidden = !say;
+  if (say && soundOn() && settings.autoplay !== false) sayNow();
+}
+function sayNow() {
+  if (!say || !soundOn()) return;
+  const cur = say;
+  if (cur.played) cur.voice = otherVoice(cur.voice);
+  cur.played = true;
+  playClip(cur.voice, cur.key); cur.btn.classList.add('playing');
+  const off = () => { if (!player || player.paused || say !== cur) cur.btn.classList.remove('playing'); else setTimeout(off, 200); }; setTimeout(off, 400);
+}
+$('btn-say').addEventListener('click', sayNow); $('btn-say-exp').addEventListener('click', sayNow);
+for (const id of ['btn-say', 'btn-say-exp']) $(id).addEventListener('mousedown', e => e.preventDefault());   // keep the phone keyboard up
+// Alt+R (⌥R) replays: typing never produces it and it does not switch keyboard layouts
+document.addEventListener('keydown', e => { if (e.altKey && e.code === 'KeyR' && session && say) { e.preventDefault(); sayNow(); } });
+/** fetch a session's clips in both voices in the background, so a tunnel does not silence the next card */
+async function prefetchClips(/** @type {string[]} */ keys) {
+  if (!soundOn() || typeof fetch !== 'function' || location.protocol === 'file:') return;
+  for (const k of keys) for (const v of ['k', 'b']) { try { await fetch(clipUrl(v, k)); } catch (e) { return; } }
+}
+// any [data-au] button (word card, sneak peek): a deck word or a sentence, in a voice that alternates per button
+document.addEventListener('click', e => {
+  const b = closest(e, '[data-au]'); if (!b || !soundOn()) return;
+  const v = b.dataset.v ? otherVoice(b.dataset.v) : pickVoice(); b.dataset.v = v;
+  b.classList.add('playing'); playClip(v, b.dataset.au || '').then(() => b.classList.remove('playing'));
+});
+const sayBtn = (/** @type {string | undefined} */ key, /** @type {string} */ label) => key ? `<button type="button" class="say-btn" data-au="${esc(key)}" aria-label="${esc(label)}" title="${esc(label)}">${SAY_SVG}</button>` : '';
+
+// stories: Kalina narrates, Borislav speaks the men's lines; the word being spoken lights up
+/** @type {{parts: {el: HTMLElement, seg: AudioSeg}[], i: number, on: boolean} | null} */ let reader = null;
+/** @returns {{el: HTMLElement, seg: AudioSeg}[]} */
+function storyParts(/** @type {Story} */ st) {
+  const paras = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('#story-text .para .bg'));
+  return (st.title.au || []).map(seg => ({ el: /** @type {HTMLElement} */ ($('story-title')), seg })).concat(st.paragraphs.flatMap((p, i) => (p.au || []).map(seg => ({ el: paras[i], seg }))));
+}
+function clearReadMarks() { document.querySelectorAll('#reading-story .say-on').forEach(b => b.classList.remove('say-on')); }
+/** light up the words of a part being spoken: the current word once its start has passed, or the whole part without timings */
+function markSpoken(/** @type {HTMLElement} */ el, /** @type {AudioSeg} */ seg, /** @type {number} */ ms) {
+  const words = seg[4], cur = words.length ? words.filter(w => w[0] <= ms).pop() : null;
+  const [a, b] = words.length ? (cur ? [cur[1], cur[2]] : [-1, -1]) : [seg[0], seg[1]];
+  el.querySelectorAll('button.w').forEach(btn => { const o = +(/** @type {HTMLElement} */ (btn).dataset.o || -1); btn.classList.toggle('say-on', o >= a && o < b); });
+}
+function renderReader() { $('btn-story-play').textContent = reader && reader.on ? '❚❚ Pause' : reader && reader.i > 0 ? '▶ Resume' : '▶ Listen'; }
+async function readFrom(/** @type {number} */ i) {
+  if (!story || !soundOn()) return;
+  const parts = storyParts(story); if (!parts.length) return;
+  /** @type {NonNullable<typeof reader>} */ const r = { parts, i, on: true }; reader = r; renderReader();
+  while (reader === r && r.on && r.i < parts.length) {
+    const { el, seg } = parts[r.i];
+    const how = await playClip(seg[2], seg[3], ms => markSpoken(el, seg, ms));
+    if (reader !== r || !r.on) return;
+    clearReadMarks();
+    if (how === 'failed') { toast('This part has no audio here (offline?)'); r.on = false; break; }
+    r.i++;
+  }
+  if (reader === r) { if (r.i >= parts.length) reader = null; else r.on = false; renderReader(); }
+}
+function pauseReader() { if (reader) reader.on = false; stopAudio(); clearReadMarks(); renderReader(); }
+function stopReader() { reader = null; stopAudio(); clearReadMarks(); renderReader(); }
+$('btn-story-play').addEventListener('click', () => { if (reader && reader.on) pauseReader(); else readFrom(reader ? reader.i : 0); });
+$('story-text').addEventListener('click', e => {
+  const b = closest(e, '[data-play]'); if (!b || !story) return;
+  const p = +(b.dataset.play || 0), first = storyParts(story).findIndex(x => x.el === document.querySelectorAll('#story-text .para .bg')[p]);
+  if (first >= 0) readFrom(first);
+});
+
+// the sound switch (top bar and Settings): off when there are no headphones
+function applySound() {
+  document.body.classList.toggle('mute', !soundOn());
+  const label = soundOn() ? 'Sound off' : 'Sound on';
+  for (const id of ['btn-sound', 'btn-sound-m']) { const b = $(id); b.setAttribute('aria-label', label); b.title = label; }
+  if (!soundOn()) { stopAudio(); if (reader) pauseReader(); }
+}
+function toggleSound() { settings.sound = !soundOn(); save.settings(); applySound(); $('set-sound').checked = soundOn(); }
+for (const id of ['btn-sound', 'btn-sound-m']) { $(id).addEventListener('click', toggleSound); $(id).addEventListener('mousedown', e => e.preventDefault()); }
+
+// offline: every clip into the audio cache at once
+function allClipUrls() {
+  const out = new Set();
+  for (const x of [...DATA.sentences, ...WORDS]) if (x.au) { out.add(clipUrl('k', x.au)); out.add(clipUrl('b', x.au)); }
+  for (const st of STORIES) for (const seg of (st.title.au || []).concat(st.paragraphs.flatMap(p => p.au || []))) out.add(clipUrl(seg[2], seg[3]));
+  return [...out];
+}
+async function renderAudioStatus(/** @type {string} */ msg) {
+  const el = $('audio-status'); if (msg) { el.textContent = msg; return; }
+  if (typeof caches === 'undefined') { el.textContent = 'Clips play from the web; keeping them offline needs the installed app (https).'; return; }
+  try { const n = (await (await caches.open(AUDIO_CACHE)).keys()).length; el.textContent = `${n} of ${allClipUrls().length} clips on this device. Clips are kept as they are played; download all of them (about 200 MB, best on Wi-Fi) to hear everything offline.`; } catch (e) { /* storage blocked */ }
+}
+let audioDl = false;
+$('btn-audio-dl').addEventListener('click', async () => {
+  if (audioDl) return;
+  if (typeof caches === 'undefined') { toast('Offline audio needs the installed app (https)'); return; }
+  audioDl = true;
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) { /* the browser decides */ }
+  const cache = await caches.open(AUDIO_CACHE), urls = allClipUrls(), total = urls.length; let done = 0, failed = 0;
+  const worker = async () => { while (urls.length) { const u = urls.pop() || ''; try { if (!(await cache.match(u))) { const r = await fetch(u); if (r.status === 200) await cache.put(u, r); else failed++; } } catch (e) { failed++; } if (++done % 100 === 0) renderAudioStatus(`Downloading… ${done} of ${total}`); } };
+  await Promise.all([1, 2, 3, 4, 5, 6].map(worker));
+  audioDl = false; renderAudioStatus(failed ? `Done, but ${failed} clips failed (offline?). Try again to fetch the rest.` : '').then(() => { if (!failed) toast('All audio is on this device'); });
+});
+$('btn-audio-rm').addEventListener('click', async () => { if (typeof caches === 'undefined') return; await caches.delete(AUDIO_CACHE); renderAudioStatus(); toast('Downloaded audio removed'); });
+
 // ---------- init ----------
-applyTheme(); renderHome(); sync();
+applyTheme(); applySound(); renderHome(); sync();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(reg => reg.update().catch(() => {})).catch(() => {});

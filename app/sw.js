@@ -1,6 +1,7 @@
 // Trakia service worker: cache-first for the app shell so it works offline once installed.
 // CACHE_VERSION is a hash of the SHELL files, written by tools/stamp_cache.py (npm run build); never edit it by hand (D-032).
-const CACHE_VERSION = 'trakia-4fc09e27479d';
+const CACHE_VERSION = 'trakia-f01dde254f70';
+const AUDIO = 'trakia-audio';   // spoken clips (D-005): named by their text, so they never change and outlive every version
 const SHELL = ['./', './index.html', './core.js', './ui.js', './data.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png',
   './fonts/golos-text-latin.woff2', './fonts/golos-text-cyrillic.woff2', './fonts/pt-serif-700-cyrillic.woff2', './fonts/ibm-plex-mono-400-latin.woff2', './fonts/ibm-plex-mono-500-latin.woff2'];
 
@@ -11,10 +12,17 @@ self.addEventListener('install', e => {
     .then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_VERSION && k !== AUDIO).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (new URL(e.request.url).pathname.includes('/audio/')) {   // kept in their own cache, fetched once
+    e.respondWith(caches.open(AUDIO).then(c => c.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => {
+      if (res.status === 200) c.put(e.request, res.clone());
+      return res;
+    }))));
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => {
       if (res.ok && new URL(e.request.url).origin === location.origin) {

@@ -7,6 +7,9 @@ const dom = new JSDOM(html, { url: 'http://localhost/app/index.html', runScripts
 const { window } = dom; const { document } = window;
 window.HTMLCanvasElement.prototype.getContext = () => null;   // no canvas in jsdom
 window.confirm = () => true;
+// D-005: jsdom plays no media; play() records the source and ends the clip at once
+const played = []; window.HTMLMediaElement.prototype.pause = function () {};
+window.HTMLMediaElement.prototype.play = function () { played.push(this.src); setTimeout(() => this.onended && this.onended(), 5); return Promise.resolve(); };
 // jsdom's Blob has no text()/arrayBuffer(); real browsers do
 window.Blob.prototype.text = function () { return new Promise(r => { const fr = new window.FileReader(); fr.onload = () => r(fr.result); fr.readAsText(this); }); }; window.URL.createObjectURL = () => 'blob:x'; window.URL.revokeObjectURL = () => {};
 for (const f of ['data.js', 'core.js', 'ui.js']) window.eval(fs.readFileSync(path.join(APP, f), 'utf8'));
@@ -393,6 +396,56 @@ setTimeout(async () => {
     $('btn-peek-stop').click(); assert.equal($('session-home').hidden, false);
   }
   $('set-rank').value = rankBefore; $('set-rank').dispatchEvent(new window.Event('input'));
+
+  // D-005: listening. A fetched clip becomes blob:<its url>, so `played` shows which clip and voice played
+  {
+    window.fetch = async url => { const b = new window.Blob(['mp3']); b._u = String(url); return { ok: true, status: 200, blob: async () => b }; };
+    window.URL.createObjectURL = b => 'blob:' + (b._u || 'x');
+    const wait = (ms = 40) => new Promise(r => setTimeout(r, ms)), clipOf = (v, key) => `blob:audio/${v}/${key.slice(0, 2)}/${key}.mp3`;
+    const last = () => played.filter(u => u.startsWith('blob:audio/')).pop() || '', voiceOf = u => u.split('/')[1];
+    const dirs = d => { document.querySelector('nav button[data-tab=settings]').click(); $('set-dirs').value = d; $('set-dirs').dispatchEvent(new window.Event('input')); document.querySelector('nav button[data-tab=practise]').click(); };
+    dirs('bg2nl'); $('btn-start').click(); await wait();
+    let s = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
+    assert.equal($('btn-say').hidden, false, 'a Bulgarian prompt has a speaker button');
+    assert.ok(last().endsWith(`/${s.au}.mp3`), 'the prompt plays by itself: ' + last());
+    const v1 = voiceOf(last()); $('btn-say').click(); await wait();
+    assert.ok(last().endsWith(`/${s.au}.mp3`) && voiceOf(last()) !== v1, 'a replay switches the voice');
+    $('btn-quit').click(); $('btn-home').click();
+    dirs('nl2bg'); $('btn-start').click(); await wait();
+    s = window.TRAKIA_DATA.sentences.find(x => x.nl === $('prompt').textContent || x.en === $('prompt').textContent);
+    assert.equal($('btn-say').hidden, true, 'a Dutch prompt has nothing to hear');
+    $('btn-dontknow').click(); await wait();
+    assert.equal($('btn-say-exp').hidden, false); assert.ok(last().endsWith(`/${s.au}.mp3`), 'the Bulgarian answer plays when shown');
+    // sound off (no headphones): nothing plays, the setting is per device
+    $('btn-sound').click();
+    assert.ok(document.body.classList.contains('mute')); assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).sound, false);
+    assert.ok(window.TrakiaCore.DEVICE_SETTINGS.includes('sound'));
+    const n = played.length; $('btn-next').click(); for (let i = 0; i < 4; i++) { $('btn-dontknow').click(); $('btn-next').click(); } await wait();
+    assert.equal(played.length, n, 'nothing plays with the sound off');
+    $('btn-sound').click(); assert.ok(!document.body.classList.contains('mute'));
+    $('btn-quit').click(); $('btn-home').click();
+    dirs('gated');
+    // a story: Kalina narrates, Borislav speaks the men's lines, part after part
+    document.querySelector('nav button[data-tab=reading]').click();
+    document.querySelector('[data-story=R100b]').click();
+    const st = window.TRAKIA_DATA.stories.find(x => x.id === 'R100b');
+    const paras = [...document.querySelectorAll('#story-text .para .bg')];
+    paras.forEach((el, i) => el.querySelectorAll('button.w').forEach(b => assert.equal(st.paragraphs[i].bg.substr(+b.dataset.o, b.textContent.length), b.textContent, 'word offsets match the text')));
+    const segs = (st.title.au || []).concat(st.paragraphs.flatMap(p => p.au)), want = segs.map(g => clipOf(g[2] === 'k' ? 'kalina' : 'borislav', g[3]));
+    assert.ok(segs.some(g => g[2] === 'b') && segs.some(g => g[2] === 'k'), 'both voices in R100b');
+    const from = played.length; $('btn-story-play').click(); assert.equal($('btn-story-play').textContent, '❚❚ Pause');
+    for (let i = 0; i < 100 && played.length - from < want.length; i++) await wait(20);
+    await wait();
+    assert.deepEqual(played.slice(from), want, 'the story plays part by part in the right voices');
+    assert.equal($('btn-story-play').textContent, '▶ Listen', 'back to the start after the end');
+    const ivan = st.paragraphs[0].au.find(g => st.paragraphs[0].bg.slice(g[0], g[1]) === 'Нямам ключ!');
+    assert.equal(ivan[2], 'b', 'Ivan says "Нямам ключ!" with Borislav');
+    // a deck word on the word card can be heard
+    const wb = [...paras[0].querySelectorAll('button.w')].find(b => b.dataset.k === 'вода'); wb.click();
+    const say = $('word-pop').querySelector('[data-au]'); assert.ok(say, 'the word card has a speaker'); say.click(); await wait();
+    assert.ok(last().endsWith(`/${window.TRAKIA_DATA.words.find(w => w.bg === 'вода').au}.mp3`), 'the word plays');
+    document.querySelector('nav button[data-tab=practise]').click();
+  }
 
   // D-025: sync through a secret gist, against an in-memory imitation of the GitHub API
   const FILE = 'trakia-progress.json', TOKEN = 'github_pat_SECRET123', gists = {}; let made = 0;

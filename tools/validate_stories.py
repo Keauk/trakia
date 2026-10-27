@@ -13,6 +13,8 @@ For every story it:
   * fails an unglossed word above the story's level and a glossed share above 3 % of the words,
   * allows only stage-1 grammar (present, da-clause),
   * checks that each listed vocative (form of address: Петре, мамо) occurs and maps to its base form,
+  * checks that every quoted line („…“) of a paragraph has its speaker in `speakers`, in order,
+    and that every speaker is in data/cast.json (name -> m/f; men are voiced by Borislav, D-005),
   * checks 3-5 questions with 3-4 options in Dutch and English and a valid answer,
   * writes max_rank, stage and word_count.
 Exit status 1 when any story has an error.
@@ -25,6 +27,9 @@ LEVELS = (100, 200, 300, 400, 500)
 STAGE1 = {'present', 'da-clause', 'comparative', 'numeral'}
 GLOSS_MAX = 0.03
 WORD_RE = re.compile(r'[^\W\d_]+')   # same as /\p{L}+/u in core.js storyTokens
+QUOTE_RE = re.compile(r'„[^“]*“')       # a quoted line; its speaker picks the voice (D-005)
+CAST = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'cast.json'),
+                      encoding='utf-8'))
 
 
 def key(w):
@@ -52,6 +57,12 @@ def check_story(s, idx, rank_of_lemma):
         for lang in ('bg', 'nl', 'en'):
             if not str(p.get(lang, '')).strip():
                 errs.append(f'paragraph {i + 1}: {lang} missing')
+        quotes, speakers = QUOTE_RE.findall(p.get('bg', '')), p.get('speakers', [])
+        if len(quotes) != len(speakers):
+            errs.append(f'paragraph {i + 1}: {len(quotes)} quoted lines but {len(speakers)} speakers')
+        for who in speakers:
+            if who not in CAST:
+                errs.append(f'paragraph {i + 1}: speaker "{who}" is not in data/cast.json')
     words = {key(k): v for k, v in s['words'].items()}
     names = {key(n) for n in s.get('names', [])}
     extra = {norm(k): v for k, v in s.get('extra', {}).items()}

@@ -45,11 +45,16 @@ trakia/
   data/words.json          exported from the apkg (2952 entries, ordered by rank)
   data/sentences.json      2656 generated sentences (validated, with max_rank)
   data/stories.json        15 reading stories, 3 per level 100–500 (D-026), with word map and questions
+  data/cast.json           story speakers -> m/f: men's lines are read by Borislav (D-005)
+  data/audio.json          manifest of the spoken clips: length, source, word timings of story clips (D-005)
+  data/audio_overrides.json  spoken text that differs from the written one ("w:5": "във")
   tools/export_anki_words.py   apkg -> data/words.json
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe; word maps, D-030)
   tools/map_sentence_words.py  proposes each sentence's word map (form -> dictionary form) from its lemmas (D-030)
   tools/validate_stories.py    story JSON -> data/stories.json (every word checked against its level, D-026)
   tools/build_data.py          data/*.json -> app/data.js (run after any data change)
+  tools/build_audio.py         generates the missing clips with edge-tts (.venv), --check, --prune (D-005)
+  tools/audio_lib.py           which clips exist: keys, story segments, voices
   tools/find_combinations.js   lists mixtures of two accepted answers that are not accepted yet (D-020)
   tools/test_core.js           unit tests for app/core.js  (node tools/test_core.js)
   tools/check_decisions.py     checks decisions/D-*.md against decisions/TEMPLATE.md and the README table
@@ -60,6 +65,7 @@ trakia/
   app/types.d.ts           shared shapes for the type check (Sentence, Settings, ProgressRecord, ...)
   app/core.js              pure logic: normalise, check, diff, translit, scheduling, import parsing
   app/data.js              generated bundle of words + sentences (so file:// and offline work)
+  app/audio/<voice>/<k[:2]>/<key>.mp3   spoken clips (kalina, borislav), key = SHA-256 of the text (D-005)
   app/manifest.json, app/sw.js, app/icon*.{svg,png}   PWA install + offline cache
 ```
 
@@ -242,6 +248,22 @@ running word against the level and lets the reader look up any tapped word (`C.s
 `wordInfo`). Up to 3 % of the words may be above the level, glossed in `extra`. Translations are
 shown per paragraph on request; 3–5 multiple-choice questions close each story. Read marks and
 scores live in `trakia.reading` and travel with sync.
+
+### 4.3c Listening (D-005)
+
+Every sentence and deck word is spoken by two Microsoft neural voices, Kalina and Borislav; stories
+by Kalina, with Borislav for the lines of male speakers (`speakers` per paragraph, `data/cast.json`).
+The clips are generated once on the laptop (`tools/build_audio.py`, mp3 24 kHz 48 kbps) and served
+as files with the app; a clip is named after the SHA-256 of its text, so an edited sentence needs
+only its own new clips. `build_data.py` puts the key (`au`) on sentences and words and the spoken
+parts on story titles and paragraphs (`[from, to, voice, key, word timings]`).
+
+The app plays a Bulgarian prompt when the card appears and a Bulgarian answer when it is shown; each
+card takes a random voice and a replay switches voice (talker variability). Stories play part by
+part with the word being spoken highlighted. *Sound off* (top bar, per device) silences everything.
+The service worker keeps clips in their own cache `trakia-audio`, which outlives app versions;
+Settings can download all of them for offline use. Clips are played from a Blob URL because Safari
+asks for byte ranges, which a cache-first worker does not answer.
 
 ### 4.4 Rank alignment UI
 

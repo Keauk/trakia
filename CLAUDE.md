@@ -69,6 +69,8 @@ Rules:
 - Run `npm run build` after changing `data/*.json` or anything in `app/`: it regenerates
   `app/data.js` and stamps the service worker's cache version (a hash of the app files, D-032;
   never edit `CACHE_VERSION` by hand).
+- After changing the Bulgarian of a sentence, word or story, run `.venv/bin/python tools/build_audio.py`
+  (new clips) and `python3 tools/build_audio.py --prune` (old ones), then `npm run build` (D-005).
 - `npm test` must pass: unit tests, the headless UI test, the `tsc` type check, the decision
   records, both data validators, and the freshness of `data.js` and the cache version. It names the
   fix when something is stale. The JavaScript is checked through JSDoc types; shared shapes live in

@@ -881,7 +881,7 @@
 
   // ---------- sync between devices (D-025) ----------
   /** settings that belong to one device and never travel with a sync */
-  const DEVICE_SETTINGS = ['theme', 'wallpaper', 'wallpaperUrl', 'wallpaperDim', 'translit', 'dirRun'];
+  const DEVICE_SETTINGS = ['theme', 'wallpaper', 'wallpaperUrl', 'wallpaperDim', 'translit', 'dirRun', 'sound', 'autoplay', 'voices', 'speed'];   // sound: headphones or not, per device (D-005)
   /** the settings that are synced, keys sorted. @type {(s: Partial<Settings>) => Partial<Settings>} */
   function sharedSettings(s) { const out = {}; for (const k of Object.keys(s || {}).sort()) if (!DEVICE_SETTINGS.includes(k)) out[k] = s[k]; return out; }
   /** copy of an object with its keys sorted, values mapped by f. @type {<T, U>(o: Record<string, T>, f: (v: T, k: string) => U | undefined) => Record<string, U>} */

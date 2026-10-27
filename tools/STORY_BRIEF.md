@@ -85,6 +85,11 @@ One JSON file (UTF-8, valid JSON, an array) with your stories:
   (`"петре"`, `"мамо"`, `"бабо"`, `"тате"`, `"лекарю"`), in lower case. Map each to its base
   form in `words` (`"петре": "Петър"`, `"мамо": "мама"`); the app then explains the form when the
   learner taps it. A vocative equal to the base form (дядо, Ана) is not listed.
+- `speakers` (on a paragraph): when a paragraph has quoted lines („…“), one name per quoted line,
+  in the order they occur: `"speakers": ["Петър", "Мария"]`. Use the names in `data/cast.json`
+  (the base form: Петър, not Петре; `зъболекарят` for an unnamed dentist) and add any new speaker
+  there with `m` or `f`. Male speakers are read by the male voice, everything else by the female
+  narrator (D-005). Write every spoken line in „…“ quotes, never with a dash.
 - `grammar`: the tags that occur: `present`, `da-clause` (and `comparative`, `numeral` if used).
 - Ids: `R<level><letter>`, e.g. R200a, R200b, R200c.
 
