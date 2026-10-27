@@ -181,6 +181,12 @@ input[type=range]{width:100%}
 #toast.show{opacity:1}
 kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--input-bg)}
 /* wide screens: the tabs sit on the page centre line, the same as the content column */
+/* sneak peek (D-031) */
+.peek-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.peek-sentence{font:500 22px/1.5 var(--sans);margin:14px 0 4px;color:var(--ink)}
+.peek-sentence mark{background:var(--revealed-tint);color:var(--revealed);border-radius:4px;padding:0 2px}
+.peek-q{font-weight:600;margin:16px 0 8px}
+.peek-meaning{margin:14px 0 4px;font-size:16px}
 /* reading (D-026, D-027, D-028) */
 .story-list{display:flex;flex-direction:column;gap:8px}
 .story-row{display:block;width:100%;text-align:left;background:var(--input-bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--ink);font:inherit;cursor:pointer}
@@ -286,7 +292,28 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <button class="btn primary" id="btn-start">Practise</button>
         <button class="btn" id="btn-free">Free practice</button>
         <button class="btn" id="btn-gdrill">Grammar drill</button>
+        <button class="btn" id="btn-peek">Sneak peek</button>
       </div>
+    </div>
+  </div>
+
+  <div id="peek-run" hidden>
+    <div class="card">
+      <div class="peek-top"><span class="tiny" id="peek-count"></span><button class="link-btn" id="btn-peek-stop">Stop</button></div>
+      <p class="tiny">Anki teaches this word soon. Guess what it means from the sentence: a wrong guess helps you remember it too.</p>
+      <p class="peek-sentence" id="peek-sentence" lang="bg"></p>
+      <p class="tiny" id="peek-others"></p>
+      <p class="peek-q" id="peek-question"></p>
+      <div class="opts" id="peek-opts"></div>
+      <div id="peek-reveal" hidden><p class="peek-meaning" id="peek-meaning"></p><p class="muted" id="peek-translation"></p></div>
+      <div class="row"><button class="btn primary" id="btn-peek-next" hidden>Next</button></div>
+    </div>
+  </div>
+  <div id="peek-done" hidden>
+    <div class="card">
+      <h2>Sneak peek done</h2>
+      <p class="muted" id="peek-summary"></p>
+      <div class="row"><button class="btn" id="btn-peek-home">Back</button></div>
     </div>
   </div>
 
