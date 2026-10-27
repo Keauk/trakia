@@ -55,6 +55,12 @@ body.mute .say-btn,body.mute .story-audio,body.mute .say-para{display:none}
 #word-pop .say-btn{width:28px;height:28px;margin:-4px -6px -4px 2px}
 .story-audio{display:flex;align-items:center;gap:10px;margin:8px 0 0}
 .story-audio .btn{flex:none;white-space:nowrap;min-width:104px}
+/* dictation (D-005): the prompt is the voice; the text stays hidden */
+.listen-box{display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;margin:2px 0 4px}
+.listen-play{display:inline-flex;align-items:center;gap:8px}
+.listen-play svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.listen-play.playing{color:var(--primary);border-color:var(--primary)}
+.listen-hint{flex-basis:100%;margin:0;color:var(--muted);font-size:15px}
 button.w.say-on{background:var(--revealed-tint);color:var(--revealed)}
 nav button{background:none;border:0;padding:7px 14px;border-radius:7px;font:500 13px/1.4 var(--sans);color:var(--muted);cursor:pointer}
 @media (hover:hover){nav button:hover{color:var(--ink)}}
@@ -350,6 +356,12 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <div class="progress d-only"><div class="segs" id="segs" role="progressbar" aria-label="Session progress"></div><span class="count" id="counter"></span></div>
         <div class="chips-row m-only" id="chips-m"></div>
         <div class="say-row"><p id="prompt" class="prompt"></p><button class="say-btn" id="btn-say" aria-label="Listen (Alt+R)" title="Listen (Alt+R)" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button></div>
+        <div class="listen-box" id="listen-box" hidden>
+          <button class="btn listen-play" id="btn-listen" title="Listen again (Alt+R)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Listen again</button>
+          <button class="link-btn" id="btn-listen-hint">Meaning</button>
+          <button class="link-btn" id="btn-listen-text">Show text</button>
+          <p class="listen-hint" id="listen-hint" hidden></p>
+        </div>
         <div id="newwords" class="newwords"></div>
         <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Type the translation"></textarea>
         <p id="translit-preview" class="preview" hidden></p>
@@ -576,6 +588,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <div class="toggle"><input type="checkbox" id="set-autoplay"><div>Play by itself<div class="help">A Bulgarian prompt plays when the card appears; the Bulgarian answer plays when it is shown.</div></div></div>
     <div class="field"><label for="set-voices">Voices</label><select id="set-voices"><option value="both">Both, mixed (Kalina and Borislav)</option><option value="k">Kalina only</option><option value="b">Borislav only</option></select>
       <div class="help">Hearing a word from more than one speaker helps you recognise it. With both, each card picks a voice and every replay switches to the other. Stories always use Kalina, and Borislav for the men.</div></div>
+    <div class="toggle"><input type="checkbox" id="set-dictation"><div>Dictation<div class="help">Once you read a sentence well (three weeks between reviews) and have typed it in Bulgarian once, you hear it instead and type what you hear. With the sound off you get the text again.</div></div></div>
     <div class="field"><label for="set-speed">Speed</label><select id="set-speed"><option value="1">Normal</option><option value="0.8">Slow (0.8×)</option></select></div>
     <div class="field"><label>Offline</label>
       <div class="row" style="margin-top:0"><button class="btn" id="btn-audio-dl">Download all audio</button><button class="btn" id="btn-audio-rm">Remove downloaded audio</button></div>

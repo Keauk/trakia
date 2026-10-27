@@ -72,6 +72,8 @@ interface Settings {
   wallpaper: string; wallpaperUrl: string; wallpaperDim: number;
   /** audio (D-005), per device: sound on, play prompts by themselves, 'both' | 'k' | 'b', playback rate */
   sound: boolean; autoplay: boolean; voices: string; speed: number;
+  /** dictation cards take over from mature reading cards (D-005 phase C); shared between devices */
+  dictation: boolean;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 
