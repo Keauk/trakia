@@ -156,6 +156,7 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
 .stat{background:var(--input-bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .stat b{display:block;font:600 24px/1.1 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat b small{font:600 13px/1 var(--sans);color:var(--correct);margin-left:6px}.stat b small.neg{color:var(--wrong)}
 .stat span{font-size:12px;color:var(--muted)}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -210,6 +211,9 @@ input[type=range]{width:100%}
 kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--input-bg)}
 /* wide screens: the tabs sit on the page centre line, the same as the content column */
 /* sneak peek (D-031) */
+.word-graph{display:block;width:100%;height:auto;margin:10px 0 2px;font:11px var(--sans)}
+.word-graph text{fill:var(--faint)}.word-graph path{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.word-graph line{stroke-width:1}
+.graph-key{margin:0 0 6px}.graph-key .k-known{color:var(--correct)}.graph-key .k-started{color:var(--primary)}
 .wc{margin-left:6px;font:600 13px/1 var(--mono)}.wc-new{color:var(--primary)}.wc-learn{color:var(--wrong)}.wc-due{color:var(--correct)}
 .wr-front{font:600 28px/1.3 var(--sans);margin:18px 0 6px;color:var(--ink)}
 .wr-answer{font:600 22px/1.35 var(--sans);margin:14px 0 2px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink)}
@@ -499,6 +503,10 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
   <div class="card">
     <h2>Today</h2>
     <div class="stats" id="stats-today"></div>
+  </div>
+  <div class="card" id="stats-words-card" hidden>
+    <h2>Words you know</h2>
+    <div id="stats-words"></div>
   </div>
   <div class="card">
     <h2>Last 14 days</h2>
