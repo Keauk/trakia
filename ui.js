@@ -122,13 +122,10 @@ let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,
 function renderHome() {
   const now = Date.now();
   const elig = SENT.filter(s => C.eligible(s, settings));
-  let due = 0, learning = 0, seen = 0;
-  for (const s of SENT) for (const k of C.cardKeys(s, progress, settings)) { const p = progress[k]; if (p) { seen++; if (p.due <= now) { due++; if (p.state !== 'review') learning++; } } }
-  const today = dayKey(now), todayLog = log.filter(l => dayKey(l[0]) === today), todaySessions = sessions.filter(t => dayKey(t) === today).length;
+  let due = 0, learning = 0;
+  for (const s of SENT) for (const k of C.cardKeys(s, progress, settings)) { const p = progress[k]; if (p && p.due <= now) { due++; if (p.state !== 'review') learning++; } }
   const unseenElig = elig.reduce((n, s) => n + C.cardKeys(s, progress, settings).filter(k => !progress[k]).length, 0);
   $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning });
-  const next = C.nextUnlock(SENT, settings);
-  $('home-summary').innerHTML = `Today: ${todayLog.length} answers in ${todaySessions} session${todaySessions === 1 ? '' : 's'}. ${elig.length} of ${SENT.length} sentences fit your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}) and grammar stage ${settings.stage || 5}; practising in ${settings.lang === 'mixed' ? 'Dutch and English (mixed)' : LANG_NAME[settings.lang] || 'Dutch'}; ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || unseenElig ? 'Practise' : 'Free practice';
   renderWordsButton();
@@ -143,7 +140,7 @@ function startSession(opts) {
   if (opts.keys) { queue = opts.keys; free = true; }
   else if (opts.free) { const b = C.buildSession(SENT, progress, Object.assign({}, settings, { sessionSize: 0, freeSize: settings.sessionSize }), Date.now()); queue = b.queue; free = true; if (!queue.length) { toast('Nothing to practise yet — start a normal session first'); return; } }
   else { const b = C.buildSession(SENT, progress, settings, Date.now()); queue = b.queue; free = b.free; }
-  if (!queue.length) { toast('No sentences available — raise your Anki position in Settings'); return; }
+  if (!queue.length) { toast(C.hasWords(progress) ? 'No sentences available yet — study some words first' : 'No sentences available — raise your word position in Settings'); return; }
   session = { queue: queue.map(k => ({ key: k })), i: 0, free, counts: { correct: 0, almost: 0, wrong: 0 }, pending: null, started: Date.now() };
   sessions.push(session.started); save.sessions();
   $('session-home').hidden = true; $('session-done').hidden = true; $('session-run').hidden = false;
@@ -574,11 +571,11 @@ function renderRankHelp() {
   $('rank-help').textContent = `${elig} of ${SENT.length} sentences eligible.` + (next ? ` Next unlock at word ${next.max_rank} (${WORD_BY_RANK.get(next.max_rank)?.bg || ''}).` : '');
 }
 function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s => Math.max(1, Math.round(s / o.factor * (Math.pow(o.retention, 1 / o.decay) - 1))); $('retention-help').textContent = `a card with 10 days of stability comes back after ${ivl(10)} d, with 60 days after ${ivl(60)} d`; }
-function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your Anki position fit this stage.`; }
-function renderSettings() { writers.forEach(w => w()); const auto = C.hasWords(progress); $('set-rank').disabled = $('set-rank-range').disabled = $('load-words').disabled = auto; $('rank-auto').hidden = !auto; $('rank-tip').hidden = auto; $('rank-label').textContent = auto ? 'Your position: word number' : 'I\'m at word number … in Anki'; renderWallpaperFields(); renderAudioStatus(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your word position fit this stage.`; }
+function renderSettings() { writers.forEach(w => w()); const auto = C.hasWords(progress); $('set-rank').disabled = $('set-rank-range').disabled = $('load-words').disabled = auto; $('rank-auto').hidden = !auto; $('rank-tip').hidden = auto; $('rank-label').textContent = auto ? 'Your position: word number' : 'I\'m at word number …'; renderWallpaperFields(); renderAudioStatus(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
-  try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
+  try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Word position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
 $('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; wordDays = {}; save.wordDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
@@ -588,7 +585,7 @@ $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted()
 const PEEK_SIZE = 10;
 function startPeek() {
   const items = C.peekItems(WORDS, SENT, settings, peeks, PEEK_SIZE);
-  if (!items.length) { toast('No words ahead of your Anki position to peek at'); return; }
+  if (!items.length) { toast('No words ahead of your position to peek at'); return; }
   peek = { items, i: 0, picked: null, right: 0 };
   $('session-home').hidden = true; $('session-done').hidden = true; $('peek-done').hidden = true; $('peek-run').hidden = false;
   renderPeek(); window.scrollTo(0, 0);
@@ -822,7 +819,7 @@ function renderReading() {
   };
   const openLevels = LEVELS.filter(L => STORIES.some(st => st.level === L && open.includes(st))).reverse();
   const locked = LEVELS.filter(L => !openLevels.includes(L));
-  $('reading-list').innerHTML = `<div class="card"><h2>Reading</h2><p class="muted">Short stories about the Petrov family, written with the words you know from Anki. ${open.length ? `${open.length} of ${STORIES.length} stories are open at word ${settings.rank}.` : `The first stories open at word ${LEVELS[0] || 100}.`} Each ends with a few questions.</p></div>`
+  $('reading-list').innerHTML = `<div class="card"><h2>Reading</h2><p class="muted">Short stories about the Petrov family, written with the words you know. ${open.length ? `${open.length} of ${STORIES.length} stories are open at word ${settings.rank}.` : `The first stories open at word ${LEVELS[0] || 100}.`} Each ends with a few questions.</p></div>`
     + openLevels.map(L => level(L, true)).join('') + locked.map(L => level(L, false)).join('');
 }
 $('reading-list').addEventListener('click', e => { const b = closest(e, '[data-story]'); if (b && !b.disabled) openStory(b.dataset.story || ''); });
@@ -875,7 +872,7 @@ function wordInfo(k, src) {
   const [form, forced] = lem.split('#'), w = forced ? WORD_BY_RANK.get(+forced) : WORD_BY_BG.get(C.storyKey(form));
   if (!w && FREE_MEANING[C.storyKey(form)]) return `<b lang="bg">${esc(form)}</b> – ${esc(FREE_MEANING[C.storyKey(form)])}`;
   if (!w) return /^\p{Lu}/u.test(form) ? name(form) : `<b lang="bg">${esc(form)}</b>`;   // a sentence's names are the capitalised non-deck words
-  return `<b lang="bg">${esc(w.bg)}</b>${soundOn() ? sayBtn(w.au, 'Listen to the word') : ''} – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not yet reached in Anki' : ''}</span>${voc}`;
+  return `<b lang="bg">${esc(w.bg)}</b>${soundOn() ? sayBtn(w.au, 'Listen to the word') : ''} – ${esc(w.en)}<span class="tiny">word ${w.rank}${w.rank > settings.rank ? ' · not learned yet' : ''}</span>${voc}`;
 }
 /** @type {HTMLElement | null} */ let popFor = null;
 function hideWordPop() { $('word-pop').hidden = true; if (popFor) popFor.classList.remove('on'); popFor = null; }

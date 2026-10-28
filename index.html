@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Тракия</title>
-<meta name="description" content="Dutch ⇄ Bulgarian sentence trainer aligned with the Bulgarian 2952 Anki deck">
+<meta name="description" content="Dutch ⇄ Bulgarian sentence and word trainer for the 2,952 words of the Bulgarian 2952 deck">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" data-scheme="light">
 <meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)" data-scheme="dark">
 <link rel="manifest" href="manifest.json">
@@ -369,7 +369,6 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <button class="btn" id="btn-lr" title="Hands-free listening">Listen hands-free</button>
       </div>
     </div>
-    <p class="tiny home-note" id="home-summary"></p>
   </div>
 
   <div id="peek-run" hidden>
@@ -404,7 +403,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <div class="peek-top"><span class="tiny" id="wr-count"></span><button class="link-btn" id="btn-wr-stop">Stop</button></div>
       <div id="wr-start" hidden>
         <h2>Where do you start?</h2>
-        <p class="muted">The deck has 2,952 words, in the order Anki teaches them. Words you already know count as known: they come back as reviews, spread over the coming weeks. 0 starts at the first word.</p>
+        <p class="muted">The deck has 2,952 words, in a fixed order. Words you already know count as known: they come back as reviews, spread over the coming weeks. 0 starts at the first word.</p>
         <div class="field"><label for="wr-known">Words 1 to … count as known</label><div class="inline"><input type="number" id="wr-known" min="0" max="2952" step="1"><span class="tiny" id="wr-known-word"></span></div></div>
         <div class="row"><button class="btn primary" id="btn-wr-begin">Start</button></div>
       </div>
@@ -557,7 +556,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
   <div class="card">
     <h2>Reading</h2>
     <div class="stats" id="stats-reading"></div>
-    <p class="tiny">Stories open at your Anki position and the latest score of their questions.</p>
+    <p class="tiny">Stories open at your word position and the latest score of their questions.</p>
   </div>
   <div class="card">
     <h2>Hardest sentences</h2>
@@ -606,9 +605,9 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
 
 <section id="tab-settings" class="tab">
   <div class="card">
-    <h2>Anki alignment</h2>
+    <h2>Word position</h2>
     <div class="field">
-      <label for="set-rank" id="rank-label">I'm at word number … in Anki</label>
+      <label for="set-rank" id="rank-label">I'm at word number …</label>
       <div class="inline"><input type="number" id="set-rank" min="0" max="2952" step="1"><span class="tiny" id="rank-word"></span></div>
       <input type="range" id="set-rank-range" min="0" max="2952" step="1">
       <div class="help" id="rank-help"></div>
@@ -633,10 +632,10 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <option value="5">5 — everything</option>
       </select>
       <div class="help" id="stage-help"></div>
-      <div class="help">A new sentence is offered only if its words are within your Anki position <b>and</b> its grammar is within your stage, so you are never asked to produce a tense you have not learned. Sentences already in review keep coming back regardless.</div>
+      <div class="help">A new sentence is offered only if its words are within your word position <b>and</b> its grammar is within your stage, so you are never asked to produce a tense you have not learned. Sentences already in review keep coming back regardless.</div>
     </div>
     <div class="field">
-      <label for="set-tol">Tolerance (words ahead of Anki)</label>
+      <label for="set-tol">Tolerance (words ahead of your position)</label>
       <div class="inline"><input type="number" id="set-tol" min="0" max="500" step="5"></div>
       <div class="help">Allows sentences whose hardest word is up to this many ranks beyond your position. New words are shown under the prompt.</div>
     </div>
