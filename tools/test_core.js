@@ -623,17 +623,4 @@ t('D-005 dictation takes over from a mature reading card', () => {
   const q = C.buildSession([s], { 'd|nl2bg': { box: 1, due: 0, last: 1, state: 'review', s: 3 }, 'd|bg2nl': Object.assign({}, mature, { last: 1 }), 'd|listen': { due: 0, last: 1, state: 'review', s: 3, box: 1 } }, set, 10 * 86400e3).queue;
   assert.ok(q.length === 1 && /\|(listen|nl2bg)$/.test(q[0]), 'one card for the sentence, never the retired reading card: ' + q);
 });
-t('D-033 checking what a speech recogniser heard', () => {
-  assert.deepEqual(C.speechCandidates('Имам 3 котки'), ['Имам три котки']);
-  assert.deepEqual(C.speechCandidates('Купих 2 хляба'), ['Купих два хляба', 'Купих две хляба'], 'both genders of 2');
-  assert.equal(C.speechCandidates('1 2 1 2 1 2 1 2').length, 32, 'capped');
-  const opt = { typoPct: 10, bagOfWords: true };
-  const r = C.checkSpoken(['за мен той е нула'], ['За мен той е нула.'], opt);
-  assert.equal(r.result, 'correct', 'no punctuation, lower case: still correct'); assert.equal(r.alt, 0); assert.equal(r.heard, 'за мен той е нула');
-  const r2 = C.checkSpoken(['за мен той е нула та', 'за мен той е нула'], ['За мен той е нула.'], opt);
-  assert.equal(r2.result, 'correct'); assert.equal(r2.alt, 1, 'a later alternative that is right wins');
-  assert.equal(C.checkSpoken(['Имам 2 котки'], ['Имам две котки.'], opt).result, 'correct', 'digits become words');
-  assert.equal(C.checkSpoken(['книгата'], ['книга'], Object.assign({}, opt, { bagOfWords: false, strictForms: true })).result, 'wrong', 'a word card wants the form asked for');
-  assert.equal(C.checkSpoken([], ['x'], opt), null);
-});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

@@ -1,6 +1,6 @@
 # D-033: A Speak tab: say the Bulgarian for a Dutch or English word or sentence, checked by speech recognition
 
-Status: in progress · Created: 2026-10-27 · Area: new tab (`index.html`: nav, `#tab-speak`; `ui.js`: speak session, recogniser; `core.js`: speak cards, transcript check)
+Status: rejected (2026-10-28) · Created: 2026-10-27 · Area: new tab (`index.html`: nav, `#tab-speak`; `ui.js`: speak session, recogniser; `core.js`: speak cards, transcript check)
 
 ## Context
 The app trains reading, typing and (with D-005) listening, but never speaking. Typing a sentence
@@ -132,18 +132,24 @@ Risks:
   learner's own key, which would need its own record.
 
 ## As built
-Phase 0 built and published: `app/speak-test.html` and `app/speak-test.js` (not linked from the
-app; in the service worker's `SHELL` so a new version is never served stale), `C.speechCandidates`
-and `C.checkSpoken` in `core.js` (digits to number words, the best verdict over the recogniser's
-alternatives), unit tests, and `tools/smoke_speak.js` (a fake recogniser; part of `npm test`). The
-page picks 30 sentences the learner has typed into Bulgarian correctly (topped up with the easiest
-eligible ones) and 10 deck nouns, verbs or adjectives, checks every alternative with the learner's
-own checker settings, can record alongside, and copies a text report.
+Rejected on 2026-10-28, after phase 0; nothing of it remains in the app. Phase 0 (a speech test page,
+`app/speak-test.html` and `.js`, with `C.speechCandidates` and `C.checkSpoken` and a headless test)
+was published in a0b877a and removed again.
 
 ### Decisions taken
-- Phase 0 also measures single words (10), since word cards are half of the tab and short
-  utterances are harder for a recogniser.
-- The page shows the Bulgarian to read aloud: phase 0 measures the recogniser, not recall.
+- The first real test failed: the learner uses Brave, which ships the Web Speech API but blocks its
+  recognition results (Brave issue #2802), and Firefox has no recogniser at all. The learner wants
+  the app to work in every browser, so the browser's recogniser is out.
+- The browser-independent options all had a cost the learner did not want: a cloud recogniser
+  (Azure, Google, Groq) needs a key stored in the browser, where any page on `keauk.github.io` or a
+  compromised script could read it; Whisper on the device is a 150–250 MB download, slow on a phone
+  and weak at Bulgarian; the phone keyboard's voice typing works in any browser but adds a tap per
+  card and only on the phone.
+- On the device, recording alongside recognition took the microphone from the recogniser
+  (`no-speech`), so "hear yourself" would not have worked during recognition either.
+- The learner found the whole flow too awkward for now and scrapped the idea. If it comes back,
+  start from the keyboard's voice typing (no key, any browser) or a recogniser behind a key that
+  cannot cost money (Azure F0).
 
 ## Open questions
 - ~~Should a word card accept any form of the word (книгата for книга), since the prompt gives no

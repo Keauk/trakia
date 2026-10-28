@@ -11,5 +11,5 @@
     "types": [],
     "skipLibCheck": true
   },
-  "include": ["app/types.d.ts", "app/core.js", "app/ui.js", "app/speak-test.js"]
+  "include": ["app/types.d.ts", "app/core.js", "app/ui.js"]
 }
