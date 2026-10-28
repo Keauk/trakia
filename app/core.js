@@ -752,6 +752,26 @@
     return { queue, free, nDue: due.length, nNew: fresh.length };
   }
 
+  // ---------- speech (D-033): checking what a speech recogniser heard ----------
+  // a recogniser writes numbers as digits ("3"); the sentence says "три"
+  const NUM_WORDS = { 0: ['нула'], 1: ['един', 'една', 'едно'], 2: ['два', 'две'], 3: ['три'], 4: ['четири'], 5: ['пет'], 6: ['шест'], 7: ['седем'], 8: ['осем'], 9: ['девет'], 10: ['десет'],
+    11: ['единайсет', 'единадесет'], 12: ['дванайсет', 'дванадесет'], 13: ['тринайсет', 'тринадесет'], 14: ['четиринайсет', 'четиринадесет'], 15: ['петнайсет', 'петнадесет'],
+    16: ['шестнайсет', 'шестнадесет'], 17: ['седемнайсет', 'седемнадесет'], 18: ['осемнайсет', 'осемнадесет'], 19: ['деветнайсет', 'деветнадесет'], 20: ['двайсет', 'двадесет'] };
+  /** a transcript as texts to check: each number in digits becomes each Bulgarian word for it (at most 32 texts) */
+  function speechCandidates(text) {
+    let out = [text];
+    for (const m of text.match(/\d+/g) || []) { const ws = NUM_WORDS[+m]; if (ws) out = out.flatMap(t => ws.map(w => t.replace(m, w))).slice(0, 32); }
+    return out;
+  }
+  const VERDICT_RANK = { wrong: 0, almost: 1, correct: 2 };
+  /** the best check over a recogniser's alternatives (best first): correct beats almost beats wrong, an earlier
+   * alternative wins a tie. Adds `alt` (index of the alternative that counted) and `heard` (its text). */
+  function checkSpoken(/** @type {string[]} */ alts, /** @type {string[]} */ accepted, opt) {
+    let best = null, at = -1;
+    alts.forEach((a, i) => { for (const c of speechCandidates(a)) { const r = check(c, accepted, 'bg', opt); if (!best || VERDICT_RANK[r.result] > VERDICT_RANK[best.result]) { best = r; at = i; } } });
+    return best ? Object.assign(best, { alt: at, heard: alts[at] }) : null;
+  }
+
   /** next sentence that would unlock after the current rank, or null */
   function nextUnlock(sentences, settings) {
     const limit = settings.rank + (settings.tolerance || 0);
@@ -1021,6 +1041,6 @@
     return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, speechCandidates, checkSpoken };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

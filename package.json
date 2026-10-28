@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Dutch-Bulgarian sentence trainer (PWA)",
   "scripts": {
-    "test": "node tools/test_core.js && node tools/smoke_ui.js && tsc -p tsconfig.json && npm run --silent check",
+    "test": "node tools/test_core.js && node tools/smoke_ui.js && node tools/smoke_speak.js && tsc -p tsconfig.json && npm run --silent check",
     "build": "python3 tools/build_data.py && python3 tools/stamp_cache.py",
     "publish": "tools/publish.sh",
     "typecheck": "tsc -p tsconfig.json",

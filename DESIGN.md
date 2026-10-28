@@ -65,6 +65,7 @@ trakia/
   app/types.d.ts           shared shapes for the type check (Sentence, Settings, ProgressRecord, ...)
   app/core.js              pure logic: normalise, check, diff, translit, scheduling, import parsing
   app/data.js              generated bundle of words + sentences (so file:// and offline work)
+  app/speak-test.html, speak-test.js   speech recognition test for the Speak tab (D-033 phase 0), not linked
   app/audio/<voice>/<k[:2]>/<key>.mp3   spoken clips (kalina, borislav), key = SHA-256 of the text (D-005)
   app/manifest.json, app/sw.js, app/icon*.{svg,png}   PWA install + offline cache
 ```

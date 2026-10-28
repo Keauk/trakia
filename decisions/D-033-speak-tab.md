@@ -1,6 +1,6 @@
 # D-033: A Speak tab: say the Bulgarian for a Dutch or English word or sentence, checked by speech recognition
 
-Status: accepted · Created: 2026-10-27 · Area: new tab (`index.html`: nav, `#tab-speak`; `ui.js`: speak session, recogniser; `core.js`: speak cards, transcript check)
+Status: in progress · Created: 2026-10-27 · Area: new tab (`index.html`: nav, `#tab-speak`; `ui.js`: speak session, recogniser; `core.js`: speak cards, transcript check)
 
 ## Context
 The app trains reading, typing and (with D-005) listening, but never speaking. Typing a sentence
@@ -132,7 +132,18 @@ Risks:
   learner's own key, which would need its own record.
 
 ## As built
-Not started.
+Phase 0 built and published: `app/speak-test.html` and `app/speak-test.js` (not linked from the
+app; in the service worker's `SHELL` so a new version is never served stale), `C.speechCandidates`
+and `C.checkSpoken` in `core.js` (digits to number words, the best verdict over the recogniser's
+alternatives), unit tests, and `tools/smoke_speak.js` (a fake recogniser; part of `npm test`). The
+page picks 30 sentences the learner has typed into Bulgarian correctly (topped up with the easiest
+eligible ones) and 10 deck nouns, verbs or adjectives, checks every alternative with the learner's
+own checker settings, can record alongside, and copies a text report.
+
+### Decisions taken
+- Phase 0 also measures single words (10), since word cards are half of the tab and short
+  utterances are harder for a recogniser.
+- The page shows the Bulgarian to read aloud: phase 0 measures the recogniser, not recall.
 
 ## Open questions
 - ~~Should a word card accept any form of the word (книгата for книга), since the prompt gives no

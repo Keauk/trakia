@@ -40,7 +40,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-030](D-030-sentence-word-maps.md) | Map every word of every practice sentence to its dictionary form | data / checking / practise UI | done |
 | [D-031](D-031-sneak-peek.md) | Sneak peek: guess the meaning of the next Anki words from a sentence, before Anki teaches them | practise | done |
 | [D-032](D-032-publish-guards.md) | Nothing reaches the phone unchecked: tests before every publish, and no manual cache bump | tooling | done |
-| [D-033](D-033-speak-tab.md) | A Speak tab: say the Bulgarian for a Dutch or English word or sentence, checked by speech recognition | new tab | accepted |
+| [D-033](D-033-speak-tab.md) | A Speak tab: say the Bulgarian for a Dutch or English word or sentence, checked by speech recognition | new tab | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).
