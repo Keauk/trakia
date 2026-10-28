@@ -597,6 +597,16 @@ setTimeout(async () => {
     assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 31, 'starting word 31 moves the position');
     const lastLog = JSON.parse(window.localStorage.getItem('trakia.log')).slice(-1)[0];
     assert.ok(String(lastLog[1]).startsWith('w:') && lastLog[2] === 2 && lastLog[5] === 3, 'Good is logged: ' + lastLog);
+    // another device answers the card on screen: after the merge the run moves on (D-025 sync)
+    {
+      const shownKey = () => 'w:' + /word (\d+)/.exec($('wr-dir').textContent)[1] + '|' + ($('wr-dir').textContent.startsWith('Bulgarian') ? 'bg2en' : 'en2bg');
+      const k = shownKey(), now = Date.now();
+      const elsewhere = { [k]: { box: 4, due: now + 30 * 86400e3, reps: 5, lapses: 0, streak: 5, last: now + 1000, s: 30, d: 4, state: 'review' } };
+      const f = new window.File([JSON.stringify({ app: 'trakia', version: 2, progress: elsewhere })], 'p.json', { type: 'application/json' });
+      Object.defineProperty($('import-progress'), 'files', { value: [f], configurable: true }); $('import-progress').dispatchEvent(new window.Event('change'));
+      for (let i = 0; i < 20 && !$('wr-card').hidden && shownKey() === k; i++) await new Promise(r => setTimeout(r, 10));
+      assert.ok($('wr-card').hidden || shownKey() !== k, 'the card answered elsewhere is not asked again');
+    }
     $('btn-wr-stop').click();
     assert.match($('words-nums').innerHTML, /n-new/, 'the Words card shows the counts'); assert.equal($('btn-words').textContent, 'Study words');
     document.querySelector('nav button[data-tab=settings]').click();

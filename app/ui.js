@@ -544,6 +544,7 @@ function applySnapshot(m) {
   const tab = document.querySelector('.tab.active');
   if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLibrary(false); else if (tab && tab.id === 'tab-settings') renderSettings(); else if (tab && tab.id === 'tab-reading' && $('reading-story').hidden) renderReading();
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
+  wrRefresh();
 }
 $('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', Object.assign(snapshot(), { exported: new Date().toISOString() })));
 $('import-progress').addEventListener('change', async e => {
@@ -725,8 +726,13 @@ function gradeWordCard(/** @type {number} */ g) {
   progress[k] = C.gradeWord(was, g, now, settings); save.progress();
   log.push([now, k, score, 0, score, g]); save.log();
   if (!was) followWords();
-  recordWordDay();
+  recordWordDay(); syncLater();
   wr.last = k; wr.n++; stopAudio(); wrNext(); sayFront();
+}
+/** after a sync: a card not yet turned over is picked again (another device may have answered it), and the counts are redrawn */
+function wrRefresh() {
+  if (!wr || $('words-run').hidden || !wr.key) return;
+  if (!wr.shown) wrNext(); else $('wr-count').innerHTML = 'Words ' + countsHtml(wordQ().counts);
 }
 function stopWords() { stopAudio(); wr = null; $('words-run').hidden = true; $('session-home').hidden = false; renderHome(); }
 $('btn-words').addEventListener('click', () => { startWords(); sayFront(); });
@@ -1010,7 +1016,10 @@ $('btn-sync-connect').addEventListener('click', async () => {
 $('btn-sync-now').addEventListener('click', () => sync(true));
 $('btn-sync-off').addEventListener('click', () => { if (!confirm('Forget the token on this device? Your progress stays here and in the gist.')) return; syncState = {}; saveSync(); renderSyncStatus(); });
 // coming back to the app pulls what another device did; leaving it pushes what this one did
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' || Date.now() - (syncState.at || 0) > 60e3) sync(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' || Date.now() - (syncState.at || 0) > 15e3) sync(); });
+/** upload a few seconds after the last word answer, so another device sees it without this run being finished */
+let syncSoon = /** @type {ReturnType<typeof setTimeout> | null} */ (null);
+function syncLater() { if (!syncState.token) return; if (syncSoon) clearTimeout(syncSoon); syncSoon = setTimeout(() => { syncSoon = null; sync(); }, 8000); }
 window.addEventListener('online', () => sync());
 
 // ---------- audio (D-005): pre-generated clips in Kalina's (k) and Borislav's (b) voice ----------
