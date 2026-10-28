@@ -1,6 +1,6 @@
 // Trakia service worker: cache-first for the app shell so it works offline once installed.
 // CACHE_VERSION is a hash of the SHELL files, written by tools/stamp_cache.py (npm run build); never edit it by hand (D-032).
-const CACHE_VERSION = 'trakia-39f4fadaeeec';
+const CACHE_VERSION = 'trakia-6013f0e4b60d';
 const AUDIO = 'trakia-audio';   // spoken clips (D-005): named by their text, so they never change and outlive every version
 const SHELL = ['./', './index.html', './core.js', './ui.js', './data.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png',
   './fonts/golos-text-latin.woff2', './fonts/golos-text-cyrillic.woff2', './fonts/pt-serif-700-cyrillic.woff2', './fonts/ibm-plex-mono-400-latin.woff2', './fonts/ibm-plex-mono-500-latin.woff2'];

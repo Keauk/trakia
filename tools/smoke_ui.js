@@ -572,7 +572,7 @@ setTimeout(async () => {
   assert.equal(Object.keys(JSON.parse(exported).peeks).length, 10, 'sneak peeks travel with the snapshot');
   // deck words (D-035): a new learner seeds the words they know, then flips and grades cards
   document.querySelector('nav button[data-tab=practise]').click();
-  assert.equal($('btn-words').textContent, 'Words', 'no counts before any word card');
+  assert.equal($('btn-words').textContent, 'Start words', 'no word cards yet');
   $('btn-words').click();
   assert.ok(!$('wr-start').hidden, 'a new learner is asked where to start');
   $('wr-known').value = '30'; $('wr-known').dispatchEvent(new window.Event('input'));
@@ -600,7 +600,7 @@ setTimeout(async () => {
     const lastLog = JSON.parse(window.localStorage.getItem('trakia.log')).slice(-1)[0];
     assert.ok(String(lastLog[1]).startsWith('w:') && lastLog[2] === 2 && lastLog[5] === 3, 'Good is logged: ' + lastLog);
     $('btn-wr-stop').click();
-    assert.match($('btn-words').innerHTML, /wc-new/, 'the Words button shows the counts');
+    assert.match($('words-nums').innerHTML, /n-new/, 'the Words card shows the counts'); assert.equal($('btn-words').textContent, 'Study words');
     document.querySelector('nav button[data-tab=settings]').click();
     assert.ok($('set-rank').disabled && !$('rank-auto').hidden, 'the position is read-only');
     document.querySelector('nav button[data-tab=stats]').click();
