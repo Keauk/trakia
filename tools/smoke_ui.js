@@ -480,6 +480,31 @@ setTimeout(async () => {
     $('btn-sound').click(); assert.equal($('dir-badge').textContent, 'BG → NL'); assert.equal($('prompt').textContent, d.bg);
     $('btn-sound').click(); $('btn-quit').click(); $('btn-home').click();
     assert.ok(C.cardKeys(d, pr, Object.assign({}, settingsNow, { sound: false })).includes(d.id + '|bg2nl'));
+    // hands-free listening (D-034): practice is Dutch, a silence, the Bulgarian, a silence, the other voice
+    $('btn-sound').click(); assert.ok(document.body.classList.contains('mute'));
+    $('btn-lr').click(); assert.equal($('listen-run').hidden, false); assert.equal($('session-home').hidden, true);
+    assert.match($('lr-count').textContent, /^Practice · 1 of \d+/);
+    let lfrom = played.length; $('btn-lr-play').click();
+    assert.ok(!document.body.classList.contains('mute'), 'play turns the sound on');
+    await wait(150); $('btn-lr-play').click(); await wait();
+    const kind = u => u.startsWith('data:audio/wav') ? 'sil' : (u.match(/^blob:audio\/(\w+)\//) || [])[1];
+    const seq = played.slice(lfrom).map(kind);
+    assert.deepEqual(seq.slice(0, 6).map(k => k === 'borislav' ? 'kalina' : k), ['fenna', 'sil', 'kalina', 'sil', 'kalina', 'sil'], 'practice order: ' + seq.slice(0, 6));
+    assert.notEqual(seq[2], seq[4], 'the repeat is in the other voice');
+    const first = played.slice(lfrom)[2], s1 = window.TRAKIA_DATA.sentences.find(x => first.endsWith(`/${x.au}.mp3`));
+    assert.ok(s1 && played.slice(lfrom)[0].endsWith(`/${s1.au_nl}.mp3`), 'the Dutch is the same sentence');
+    assert.equal($('btn-lr-play').textContent, '▶ Play', 'paused');
+    // background: Bulgarian only
+    document.querySelector('[data-lmode=background]').click(); assert.match($('lr-count').textContent, /^Background/);
+    lfrom = played.length; $('btn-lr-play').click(); await wait(120); $('btn-lr-play').click(); await wait();
+    assert.ok(played.slice(lfrom).length > 4 && played.slice(lfrom).every(u => kind(u) !== 'fenna'), 'no Dutch in the background');
+    // Next skips to the following item; the time limit stops it
+    const before = $('lr-count').textContent; $('btn-lr-next').click(); assert.notEqual($('lr-count').textContent, before);
+    $('set-lr-limit').value = '10'; $('set-lr-limit').dispatchEvent(new window.Event('change'));
+    const realNow = window.Date.now; $('btn-lr-play').click(); window.Date.now = () => realNow() + 11 * 60e3; await wait(80); window.Date.now = realNow;
+    assert.equal($('btn-lr-play').textContent, '▶ Play', 'stopped at the limit'); assert.match($('toast').textContent, /Listening done/);
+    assert.ok(Object.values(JSON.parse(window.localStorage.getItem('trakia.listened'))).some(v => v > 0), 'minutes listened are kept');
+    $('btn-lr-close').click(); assert.equal($('listen-run').hidden, true); assert.equal($('session-home').hidden, false);
   }
 
   // D-025: sync through a secret gist, against an in-memory imitation of the GitHub API

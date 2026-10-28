@@ -623,4 +623,13 @@ t('D-005 dictation takes over from a mature reading card', () => {
   const q = C.buildSession([s], { 'd|nl2bg': { box: 1, due: 0, last: 1, state: 'review', s: 3 }, 'd|bg2nl': Object.assign({}, mature, { last: 1 }), 'd|listen': { due: 0, last: 1, state: 'review', s: 3, box: 1 } }, set, 10 * 86400e3).queue;
   assert.ok(q.length === 1 && /\|(listen|nl2bg)$/.test(q[0]), 'one card for the sentence, never the retired reading card: ' + q);
 });
+t('D-034 sentences for hands-free listening', () => {
+  const mk = (id, rank) => ({ id, bg: 'Б ' + id, nl: 'N ' + id, au: 'k' + id, max_rank: rank, lemmas: [], bg_alt: [], nl_alt: [] });
+  const S = [mk('a', 5), mk('b', 6), mk('c', 7), mk('d', 8), Object.assign(mk('e', 9), { au: undefined }), mk('z', 9999)];
+  const set = { rank: 100, stage: 5 }, now = 100 * 86400e3, day = 86400e3;
+  const prog = { 'a|bg2nl': { state: 'review', s: 50, last: now - day, due: now + day }, 'b|bg2nl': { state: 'review', s: 2, last: now - 3 * day, due: now }, 'c|nl2bg': { state: 'learning', step: 0, due: now }, 'e|bg2nl': { state: 'review', s: 1, last: now - day } };
+  assert.deepEqual(C.listenItems(S, prog, set, 'practice', now).map(s => s.id), ['c', 'b', 'a'], 'seen ones only, weakest first; a learning card counts as weakest; no clip, no item');
+  assert.deepEqual(C.listenItems(S, prog, set, 'background', now, () => 0).map(s => s.id).sort(), ['a', 'b', 'c']);
+  assert.deepEqual(C.listenItems(S, {}, set, 'practice', now).map(s => s.id), ['a', 'b', 'c', 'd'], 'nothing seen: the easiest eligible ones');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

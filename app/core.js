@@ -752,6 +752,25 @@
     return { queue, free, nDue: due.length, nNew: fresh.length };
   }
 
+  /**
+   * listenItems(sentences, progress, settings, mode, now, rand) -> sentences for hands-free listening (D-034).
+   * The sentences with a clip that the learner has seen (any card with progress) and that are eligible; for
+   * 'practice' the weakest first (lowest recall over their cards, cards still learning count as 0), for
+   * 'background' shuffled. With none seen: the 30 easiest eligible sentences.
+   */
+  function listenItems(sentences, progress, settings, mode, now, rand) {
+    rand = rand || Math.random;
+    /** @type {Map<string, number>} */ const recall = new Map();
+    for (const k in progress) { const id = parseKey(k).id, r = recallNow(progress[k], now, settings); recall.set(id, Math.min(recall.has(id) ? /** @type {number} */ (recall.get(id)) : 1, r)); }
+    let list = sentences.filter(s => s.au && recall.has(s.id) && eligible(s, settings));
+    if (!list.length) {
+      const easy = sentences.filter(s => s.au && eligible(s, settings)).sort((a, b) => (a.max_rank || 0) - (b.max_rank || 0)).slice(0, 30);
+      return mode === 'background' ? shuffle(easy, rand) : easy;
+    }
+    list = shuffle(list.slice(), rand);
+    return mode === 'background' ? list : list.sort((a, b) => (recall.has(a.id) ? /** @type {number} */ (recall.get(a.id)) : 0) - (recall.has(b.id) ? /** @type {number} */ (recall.get(b.id)) : 0));
+  }
+
   /** next sentence that would unlock after the current rank, or null */
   function nextUnlock(sentences, settings) {
     const limit = settings.rank + (settings.tolerance || 0);
@@ -898,7 +917,7 @@
 
   // ---------- sync between devices (D-025) ----------
   /** settings that belong to one device and never travel with a sync */
-  const DEVICE_SETTINGS = ['theme', 'wallpaper', 'wallpaperUrl', 'wallpaperDim', 'translit', 'dirRun', 'sound', 'autoplay', 'voices', 'speed'];   // sound: headphones or not, per device (D-005)
+  const DEVICE_SETTINGS = ['theme', 'wallpaper', 'wallpaperUrl', 'wallpaperDim', 'translit', 'dirRun', 'sound', 'autoplay', 'voices', 'speed', 'listenMode', 'listenPause', 'listenRepeat', 'listenLimit'];   // sound: headphones or not, per device (D-005)
   /** the settings that are synced, keys sorted. @type {(s: Partial<Settings>) => Partial<Settings>} */
   function sharedSettings(s) { const out = {}; for (const k of Object.keys(s || {}).sort()) if (!DEVICE_SETTINGS.includes(k)) out[k] = s[k]; return out; }
   /** copy of an object with its keys sorted, values mapped by f. @type {<T, U>(o: Record<string, T>, f: (v: T, k: string) => U | undefined) => Record<string, U>} */
@@ -1021,6 +1040,6 @@
     return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

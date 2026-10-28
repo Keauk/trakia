@@ -5,6 +5,7 @@ first 12 hex digits of SHA-256 of the spoken text (NFC, trimmed). The same text 
 edited sentence needs one new clip per voice and nothing else changes.
 
   * every sentence (`bg`) and every deck word (`bg`): both voices;
+  * every sentence's Dutch (`nl`) in Fenna's voice, the prompt of hands-free listening (D-034);
   * stories: the title and the narration in Kalina's voice, each quoted line („…“) in the voice of its
     speaker (paragraph `speakers`, gender from data/cast.json: men are Borislav).
 data/audio_overrides.json gives a different spoken text for an item: "w:<rank>" for a word, "s:<id>" for a
@@ -15,8 +16,9 @@ import hashlib, json, os, re, unicodedata
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIO_DIR = os.path.join(ROOT, 'app', 'audio')
 MANIFEST = os.path.join(ROOT, 'data', 'audio.json')
-VOICES = {'kalina': 'bg-BG-KalinaNeural', 'borislav': 'bg-BG-BorislavNeural'}
-LETTER = {'kalina': 'k', 'borislav': 'b'}           # the voice as data.js names it
+VOICES = {'kalina': 'bg-BG-KalinaNeural', 'borislav': 'bg-BG-BorislavNeural', 'fenna': 'nl-NL-FennaNeural'}
+LETTER = {'kalina': 'k', 'borislav': 'b', 'fenna': 'n'}   # the voice as data.js names it
+BG_VOICES = ('kalina', 'borislav')
 QUOTE_RE = re.compile(r'„[^“]*“')
 SENTENCE_END_RE = re.compile(r'[.!?…]+\s+(?=[А-ЯЁA-Z])')   # a sentence ends before a capital, not at "и… ключа"
 
@@ -87,10 +89,12 @@ def needed(words=None, sentences=None, stories=None, cast=None, overrides=None):
             need[k]['timings'] = True
 
     for s in sentences:
-        for v in VOICES:
+        for v in BG_VOICES:
             add(v, spoken('s:' + s['id'], s['bg'], overrides), False, 'sentences')
+        if s.get('nl'):
+            add('fenna', s['nl'], False, 'prompts')
     for w in words:
-        for v in VOICES:
+        for v in BG_VOICES:
             add(v, spoken('w:%d' % w['rank'], w['bg'], overrides), False, 'words')
     for st in stories:
         add('kalina', st['title']['bg'], True, 'stories')

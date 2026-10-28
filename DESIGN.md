@@ -47,7 +47,7 @@ trakia/
   data/stories.json        15 reading stories, 3 per level 100–500 (D-026), with word map and questions
   data/cast.json           story speakers -> m/f: men's lines are read by Borislav (D-005)
   data/audio.json          manifest of the spoken clips: length, source, word timings of story clips (D-005)
-  data/audio_overrides.json  spoken text that differs from the written one ("w:5": "във")
+  data/audio_overrides.json  spoken text that differs from the written one (empty so far)
   tools/export_anki_words.py   apkg -> data/words.json
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe; word maps, D-030)
   tools/map_sentence_words.py  proposes each sentence's word map (form -> dictionary form) from its lemmas (D-030)
@@ -270,6 +270,16 @@ production card was right once, `cardKeys` replaces the reading card with a dict
 voice plays, the text stays hidden, the learner types the Bulgarian, checked against `bg` only.
 Two lapses of the dictation card bring the reading card back. With *Sound off*, or *Show text* on
 one card, the reading card is served instead and the dictation card waits.
+
+### 4.3d Hands-free listening (D-034)
+
+*Listen (hands-free)* on the Practise home plays, in *Practice* mode, each sentence's Dutch (Fenna's
+voice, `au_nl`), a pause to answer in one's head, the Bulgarian, and the Bulgarian again in the other
+voice; *Background* plays Bulgarian only, from sentences seen and stories read. Sentences come from
+`C.listenItems` (seen ones, weakest first). Every pause is played as a generated silent WAV on the
+same audio element, because a phone suspends the timers of a page that plays nothing; the Media
+Session API puts the sentence and play/pause/next on the lock screen and headphones. Listening does
+not touch the schedule; minutes per day are kept in `trakia.listened` on the device.
 
 ### 4.4 Rank alignment UI
 

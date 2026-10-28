@@ -33,7 +33,8 @@ def segs(bg, speakers):
 slim_words = [{'rank': w['rank'], 'bg': w['bg'], 'en': w['en'], 'pos': w['pos'], 'cat': w.get('cat', ''), 'forms': w['forms'],
                'learned': w['learned'], 'au': A.clip_key(A.spoken('w:%d' % w['rank'], w['bg'], overrides))}
               for w in words]   # cat: the deck's topic, for sneak-peek distractors (D-031)
-sentences = [dict(s, au=A.clip_key(A.spoken('s:' + s['id'], s['bg'], overrides))) for s in sentences]
+sentences = [dict(s, au=A.clip_key(A.spoken('s:' + s['id'], s['bg'], overrides)), **({'au_nl': A.clip_key(s['nl'])} if s.get('nl') else {}))
+             for s in sentences]   # au_nl: the Dutch prompt of hands-free listening (D-034)
 stories = [dict(st, title=dict(st['title'], au=segs(st['title']['bg'], [])),
                 paragraphs=[dict(p, au=segs(p['bg'], p.get('speakers', []))) for p in st['paragraphs']]) for st in stories]
 learned = max((w['rank'] for w in words if w['learned']), default=0)
