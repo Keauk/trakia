@@ -28,6 +28,7 @@ def fake_collection(path):
         (20, 2, 0, 1, 1, CRT + 100 * 86400 + 60, 1, 0, ''),   # learning, no FSRS state yet
         (21, 2, 1, 0, 0, 5, 0, 0, ''),                        # new: skipped
         (30, 3, 0, 0, 0, 6, 0, 0, ''),
+        (31, 3, 1, 2, -1, 104, 9, 8, json.dumps({'s': 0.5, 'd': 10.0, 'lrt': lrt})),   # suspended: skipped
     ])
     con.commit(); con.close()
 

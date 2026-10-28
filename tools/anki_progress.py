@@ -70,8 +70,9 @@ def records(con, now_ms):
         mids.add(mid)
         d = json.loads(data) if data else {}
         state = STATE.get(typ, 'learning')
-        if queue == -1:
-            counts['suspended'] = counts.get('suspended', 0) + 1
+        if queue == -1:   # suspended in Anki (a leech, or by hand): it stays out
+            counts['suspended, skipped'] = counts.get('suspended, skipped', 0) + 1
+            continue
         if typ == 2:
             due_ms = (crt + due * 86400) * 1000
         elif typ in (1, 3) and due > 1e9:

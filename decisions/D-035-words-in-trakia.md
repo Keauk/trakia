@@ -41,7 +41,7 @@ The learner wants the switch to be immediate: no import step, and their progress
    - *New words per day*: default 10.
    - *Daily reviews limit*: default 150. New words are offered only while today's reviews (word and
      sentence cards due today, done or not) are below it. Reviews themselves are never capped: a
-     capped review only moves the pile to later. The Words button says so when new words pause.
+     capped review only moves the pile to later. The Practise home says so when new words pause.
 4. **The Anki position follows the words.** Once any word card exists, the position is the highest
    rank R such that every word up to R has been started. Settings shows it read-only, and
    sentences, stories and the sneak peek (D-031) follow it without manual input.
@@ -95,7 +95,7 @@ question); audio for the deck's example sentences (open question); words beyond 
   - Per card that is not new: `s`, `d` from the card's FSRS data; `last` = `lrt` × 1000; `state`
     from `type` (1 learning, 2 review, 3 relearning); `due` = (collection `crt` + `due` days) × 1000
     for review cards and `due` seconds × 1000 for learning cards; `reps`, `lapses` from the card.
-    Cards without FSRS data become learning cards, due now.
+    Cards without FSRS data become learning cards, due now; suspended cards stay out.
   - Writes a progress snapshot (`app: 'trakia'`, `progress` only) to a path outside the
     repository, `~/Downloads/trakia-anki-progress.json` by default; **it refuses a path inside the
     repository**: the file holds a person's review history, and the repository is public.
@@ -144,6 +144,9 @@ still to come.
 - The Words button sits under *Practise*, full width, as the second daily task.
 - Space or Enter shows the answer and then counts as Good; keys 1–4 grade.
 - The sneak peek (D-031) no longer says that Anki teaches the next words.
+- A card suspended in Anki (a leech, or by hand) is not brought over.
+- When new words pause, a line on the Practise home and the run's end screen say why, with the
+  number of reviews due today and the limit.
 
 ### Measurements
 - 2026-10-28: the tool on the learner's collection: 460 cards (419 review, 35 learning,

@@ -641,7 +641,12 @@ document.addEventListener('keydown', e => {
 /** @type {{key: string, shown: boolean, n: number, last: string} | null} */ let wr = null;
 const wordQ = () => C.wordQueue(WORDS, progress, settings, Date.now());
 const countsHtml = (/** @type {{fresh: number, learning: number, due: number}} */ c) => `<span class="wc"><span class="wc-new">${c.fresh}</span> · <span class="wc-learn">${c.learning}</span> · <span class="wc-due">${c.due}</span></span>`;
-function renderWordsButton() { $('btn-words').innerHTML = 'Words' + (C.hasWords(progress) ? countsHtml(wordQ().counts) : ''); }
+function renderWordsButton() {
+  const q = C.hasWords(progress) ? wordQ() : null;
+  $('btn-words').innerHTML = 'Words' + (q ? countsHtml(q.counts) : '');
+  $('words-paused').textContent = q && q.paused === 'limit' ? pausedText(q) : ''; $('words-paused').hidden = !(q && q.paused);
+}
+const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New words are paused while the reviews due today (${q.load.reviews}, words and sentences) are above your limit of ${q.dailyMax} (Settings).`;
 /** the Anki position is the highest word with every word before it started */
 function followWords() {
   if (!C.hasWords(progress)) return;
@@ -681,7 +686,7 @@ function wrNext() {
   $('wr-count').innerHTML = 'Words ' + countsHtml(q.counts);
   if (!key) {
     const later = q.nextLearning ? ` A word you are learning comes back in ${fmtIvl(q.nextLearning - now)}.` : '';
-    const why = q.paused === 'limit' ? ` New words wait until tomorrow: ${q.load.reviews} reviews today reach your limit of ${q.dailyMax} (Settings).` : '';
+    const why = q.paused === 'limit' ? ` ${pausedText(q)}` : '';
     $('wr-done-text').textContent = `${wr.n ? wr.n + ' answers. ' : ''}Nothing more is due today.${later}${why} Your position is now word ${settings.rank}.`;
     wrShow('wr-done'); wr.key = ''; sync(); return;
   }

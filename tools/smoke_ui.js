@@ -593,6 +593,7 @@ setTimeout(async () => {
       document.dispatchEvent(new window.KeyboardEvent('keydown', { key: '3' }));
     }
     assert.ok(gradedNew, 'a new word came up');
+    assert.ok($('words-paused').hidden, 'no pause note under the limit');
     assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 31, 'starting word 31 moves the position');
     const lastLog = JSON.parse(window.localStorage.getItem('trakia.log')).slice(-1)[0];
     assert.ok(String(lastLog[1]).startsWith('w:') && lastLog[2] === 2 && lastLog[5] === 3, 'Good is logged: ' + lastLog);
