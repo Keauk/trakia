@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20 };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -105,7 +105,7 @@ function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.
 // ---------- tabs ----------
 /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 function showTab(name) {
-  stopReader(); hideSay();
+  stopReader(); hideSay(); lrStop();
   /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   if (name === 'practise') renderHome(); if (name === 'reading') { closeStory(); renderReading(); } if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
@@ -400,7 +400,8 @@ function renderStats() {
   let streak = 0; for (let d = 0; ; d++) { const k = dayKey(now - d * 86400e3); if (byDay[k]) streak++; else if (d === 0) continue; else break; if (d > 3650) break; }
   const ms = log.filter(l => dayKey(l[0]) === today).map(l => l[0]);
   let minutes = 0; for (let i = 1; i < ms.length; i++) { const gap = ms[i] - ms[i - 1]; if (gap < 5 * 60e3) minutes += gap; }
-  $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streak, 'day streak');
+  const listenedMin = Math.round((LS.get('listened', {})[today] || 0) / 60);
+  $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streak, 'day streak') + (listenedMin ? stat(listenedMin, 'min listened') : '');
   // chart data
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);
@@ -851,7 +852,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('online', () => sync());
 
 // ---------- audio (D-005): pre-generated clips in Kalina's (k) and Borislav's (b) voice ----------
-const VOICE_DIR = { k: 'kalina', b: 'borislav' }, AUDIO_CACHE = 'trakia-audio';
+const VOICE_DIR = { k: 'kalina', b: 'borislav', n: 'fenna' }, AUDIO_CACHE = 'trakia-audio';
 const SAY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
 const clipUrl = (/** @type {string} */ v, /** @type {string} */ key) => `audio/${VOICE_DIR[v]}/${key.slice(0, 2)}/${key}.mp3`;
 const soundOn = () => settings.sound !== false;
@@ -872,12 +873,15 @@ function stopAudio() {
 /** play one clip, fetched whole and played from a Blob URL (a service worker cannot answer the byte-range
  * requests Safari makes for media); onTime gets the position in ms on every frame
  * @param {string} v @param {string} key @param {(ms: number) => void} [onTime] @returns {Promise<'ended' | 'stopped' | 'failed'>} */
-async function playClip(v, key, onTime) {
+function playClip(v, key, onTime) { return playSrc(clipUrl(v, key), onTime); }
+/** play any source on the shared element: a clip URL (fetched as a Blob) or a data: URL (a silence, D-034)
+ * @param {string} url @param {(ms: number) => void} [onTime] @returns {Promise<'ended' | 'stopped' | 'failed'>} */
+async function playSrc(url, onTime) {
   stopAudio();
-  const my = playToken, url = clipUrl(v, key);
+  const my = playToken;
   if (!player || !soundOn()) return 'failed';
   let src = url;
-  if (location.protocol !== 'file:' && typeof fetch === 'function') {
+  if (!url.startsWith('data:') && location.protocol !== 'file:' && typeof fetch === 'function') {
     try { const r = await fetch(url); if (!r.ok) return 'failed'; src = URL.createObjectURL(await r.blob()); } catch (e) { return 'failed'; }
     if (my !== playToken) { URL.revokeObjectURL(src); return 'stopped'; }
     blobUrl = src;
@@ -980,7 +984,7 @@ function applySound() {
   const label = soundOn() ? 'Sound off' : 'Sound on';
   for (const id of ['btn-sound', 'btn-sound-m']) { const b = $(id); b.setAttribute('aria-label', label); b.title = label; }
   if (!soundOn()) {
-    stopAudio(); if (reader) pauseReader();
+    stopAudio(); if (reader) pauseReader(); if (lr && lr.on) lrPause();
     const it = session && !session.drill && !session.pending && session.queue[session.i];
     if (it && C.parseKey(it.key).listen) renderCard();   // a dictation card on screen becomes its reading card
   }
@@ -1012,6 +1016,107 @@ $('btn-audio-dl').addEventListener('click', async () => {
   audioDl = false; renderAudioStatus(failed ? `Done, but ${failed} clips failed (offline?). Try again to fetch the rest.` : '').then(() => { if (!failed) toast('All audio is on this device'); });
 });
 $('btn-audio-rm').addEventListener('click', async () => { if (typeof caches === 'undefined') return; await caches.delete(AUDIO_CACHE); renderAudioStatus(); toast('Downloaded audio removed'); });
+
+// ---------- hands-free listening (D-034): Dutch, a pause, the Bulgarian; or Bulgarian only ----------
+/** @typedef {{bg: string, nl: string, au?: string, au_nl?: string, segs?: AudioSeg[]}} ListenItem */
+/** @type {{mode: string, items: ListenItem[], i: number, on: boolean, skip: boolean, playedMs: number, onSince: number} | null} */ let lr = null;
+/** @type {ReturnType<typeof setInterval> | null} */ let lrTimer = null;   // saves the minutes and redraws the clock while playing
+/** @type {Map<number, string>} */ const SILENCE = new Map();
+/** a WAV of silence, played instead of waiting: a phone keeps a page that plays running with the screen off */
+function silenceUrl(/** @type {number} */ ms) {
+  ms = Math.max(250, Math.round(ms / 250) * 250);
+  const hit = SILENCE.get(ms); if (hit) return hit;
+  const n = ms * 8, b = new Uint8Array(44 + n), d = new DataView(b.buffer), str = (/** @type {number} */ o, /** @type {string} */ s) => { for (let i = 0; i < s.length; i++) b[o + i] = s.charCodeAt(i); };
+  str(0, 'RIFF'); d.setUint32(4, 36 + n, true); str(8, 'WAVEfmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true);
+  d.setUint32(24, 8000, true); d.setUint32(28, 8000, true); d.setUint16(32, 1, true); d.setUint16(34, 8, true); str(36, 'data'); d.setUint32(40, n, true); b.fill(128, 44);
+  let bin = ''; for (let i = 0; i < b.length; i += 8192) bin += String.fromCharCode.apply(null, Array.from(b.subarray(i, i + 8192)));
+  const url = 'data:audio/wav;base64,' + btoa(bin); SILENCE.set(ms, url); return url;
+}
+const LR_HELP = { practice: 'Dutch, then a pause: say the Bulgarian (aloud or in your head), then hear it. Keeps playing with the screen off. Does not change your schedule.', background: 'Bulgarian only, from sentences you have seen and stories you have read. It trains your ear for the sounds; it does not teach new words.' };
+function lrItems(/** @type {string} */ mode) {
+  /** @type {ListenItem[]} */ const items = C.listenItems(SENT, progress, settings, mode, Date.now()).map((/** @type {Sentence} */ s) => ({ bg: s.bg, nl: s.nl, au: s.au, au_nl: s.au_nl }));
+  if (mode === 'background') {   // paragraphs of the stories read, mixed in
+    const paras = STORIES.filter(st => reading[st.id] && reading[st.id].read).flatMap(st => st.paragraphs.map(p => ({ bg: p.bg, nl: p.nl, segs: p.au || [] })));
+    for (const p of paras) items.splice(Math.floor(Math.random() * (items.length + 1)), 0, p);
+  }
+  return items;
+}
+const lrPlayed = () => lr ? lr.playedMs + (lr.on ? Date.now() - lr.onSince : 0) : 0;
+function lrRender(/** @type {boolean} */ reveal) {
+  if (!lr) return;
+  const it = lr.items[lr.i % lr.items.length], m = Math.floor(lrPlayed() / 60e3), sec = Math.floor(lrPlayed() / 1e3) % 60;
+  $('lr-count').textContent = `${lr.mode === 'practice' ? 'Practice' : 'Background'} · ${lr.i % lr.items.length + 1} of ${lr.items.length} · ${m}:${String(sec).padStart(2, '0')}`;
+  $('lr-nl').textContent = lr.mode === 'practice' ? it.nl : '';
+  $('lr-bg').textContent = reveal || lr.mode === 'background' ? it.bg : lr.mode === 'practice' && lr.on ? '…' : '';
+  $('btn-lr-play').textContent = lr.on ? '❚❚ Pause' : '▶ Play';
+  document.querySelectorAll('[data-lmode]').forEach(b => b.classList.toggle('on', /** @type {HTMLElement} */ (b).dataset.lmode === lr?.mode));
+  $('lr-help').textContent = LR_HELP[lr.mode] || '';
+  if ('mediaSession' in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({ title: it.bg, artist: 'Trakia', album: lr.mode === 'practice' ? 'Listen: practice' : 'Listen: background' }); navigator.mediaSession.playbackState = lr.on ? 'playing' : 'paused'; } catch (e) { /* not supported */ } }
+}
+/** the steps of one item: [voice letter, clip key] or ['sil', ms]; 'reveal' marks where the Bulgarian is shown
+ * @returns {any[][]} */
+function lrSteps(/** @type {ListenItem} */ it, /** @type {string} */ mode) {
+  if (it.segs) return /** @type {any[][]} */ (it.segs.map(g => [g[2], g[3]])).concat([['sil', 1500]]);
+  const v = pickVoice(), pause = settings.listenPause && settings.listenPause !== 'auto' ? +settings.listenPause * 1000 : Math.min(9000, 1800 + 70 * it.bg.length);
+  if (mode === 'background') return [[v, it.au, 'reveal'], ['sil', 1200]];
+  /** @type {any[][]} */ const s = [];
+  if (it.au_nl) s.push(['n', it.au_nl]);
+  s.push(['sil', pause], [v, it.au, 'reveal']);
+  if (settings.listenRepeat !== false) s.push(['sil', 900], [otherVoice(v), it.au]);
+  s.push(['sil', 1800]);
+  return s;
+}
+async function lrLoop() {
+  const me = lr; if (!me || !me.items.length) return;
+  while (lr === me && me.on) {
+    const limit = (+settings.listenLimit || 0) * 60e3;
+    if (limit && lrPlayed() >= limit) { lrPause(); toast('Listening done: ' + Math.round(limit / 60e3) + ' minutes'); return; }
+    const it = me.items[me.i % me.items.length]; lrRender(false);
+    for (const st of lrSteps(it, me.mode)) {
+      if (st[2] === 'reveal') lrRender(true);
+      const how = st[0] === 'sil' ? await playSrc(silenceUrl(st[1])) : await playClip(st[0], st[1]);
+      if (lr !== me || !me.on) return;
+      if (me.skip || how === 'failed') break;   // Next, or a clip that is not here (offline): on to the next item
+    }
+    me.skip = false; me.i++;
+  }
+}
+function lrSaveTime() {
+  if (!lr || !lr.on) return;
+  const now = Date.now(), add = (now - lr.onSince) / 1000, all = LS.get('listened', {}), day = dayKey(now);
+  lr.playedMs += now - lr.onSince; lr.onSince = now; all[day] = Math.round((all[day] || 0) + add); LS.set('listened', all);
+}
+function lrPlay() {
+  if (!lr) return;
+  if (!soundOn()) { settings.sound = true; save.settings(); applySound(); $('set-sound').checked = true; }   // pressing play asks for sound
+  if (!lr.items.length) { toast('Nothing to listen to yet: practise a few sentences first'); return; }
+  lr.on = true; lr.onSince = Date.now(); lrLoop();
+  if (!lrTimer) lrTimer = setInterval(() => { if (lr && lr.on) { lrSaveTime(); lrRender($('lr-bg').textContent !== '…'); } }, 15000);
+}
+function lrPause() { if (lrTimer) { clearInterval(lrTimer); lrTimer = null; } if (!lr) return; lrSaveTime(); lr.on = false; stopAudio(); lrRender(false); }
+function lrStop() { if (!lr) return; lrPause(); lr = null; $('listen-run').hidden = true; }
+function lrOpen(/** @type {string} */ mode) {
+  if (lr) lrPause();
+  settings.listenMode = mode; save.settings();
+  lr = { mode, items: lrItems(mode), i: 0, on: false, skip: false, playedMs: lr ? lr.playedMs : 0, onSince: 0 };
+  $('session-home').hidden = true; $('session-done').hidden = true; $('peek-done').hidden = true; $('listen-run').hidden = false;
+  $('set-lr-pause').value = settings.listenPause || 'auto'; $('set-lr-repeat').checked = settings.listenRepeat !== false; $('set-lr-limit').value = String(settings.listenLimit == null ? 20 : settings.listenLimit);
+  lrRender(false);
+}
+$('btn-lr').addEventListener('click', () => lrOpen(settings.listenMode === 'background' ? 'background' : 'practice'));
+$('btn-lr-close').addEventListener('click', () => { lrStop(); $('session-home').hidden = false; renderHome(); });
+$('btn-lr-play').addEventListener('click', () => { if (lr && lr.on) lrPause(); else lrPlay(); });
+$('btn-lr-next').addEventListener('click', () => { if (!lr) return; if (lr.on) { lr.skip = true; stopAudio(); } else { lr.i++; lrRender(false); } });
+document.querySelectorAll('[data-lmode]').forEach(b => b.addEventListener('click', () => { const m = /** @type {HTMLElement} */ (b).dataset.lmode || 'practice'; if (!lr || lr.mode !== m) { const was = !!(lr && lr.on); lrOpen(m); if (was) lrPlay(); } }));
+$('set-lr-pause').addEventListener('change', () => { settings.listenPause = $('set-lr-pause').value; save.settings(); });
+$('set-lr-repeat').addEventListener('change', () => { settings.listenRepeat = $('set-lr-repeat').checked; save.settings(); });
+$('set-lr-limit').addEventListener('change', () => { settings.listenLimit = +$('set-lr-limit').value; save.settings(); });
+// lock screen and headphone buttons
+if ('mediaSession' in navigator) {
+  const on = (/** @type {MediaSessionAction} */ a, /** @type {() => void} */ f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) { /* action not supported */ } };
+  on('play', () => { if (lr && !lr.on) lrPlay(); }); on('pause', () => { if (lr && lr.on) lrPause(); });
+  on('nexttrack', () => $('btn-lr-next').click()); on('stop', () => { if (lr && lr.on) lrPause(); });
+}
 
 // ---------- init ----------
 applyTheme(); applySound(); renderHome(); sync();

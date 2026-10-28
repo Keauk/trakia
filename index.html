@@ -61,6 +61,12 @@ body.mute .say-btn,body.mute .story-audio,body.mute .say-para{display:none}
 .listen-play svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .listen-play.playing{color:var(--primary);border-color:var(--primary)}
 .listen-hint{flex-basis:100%;margin:0;color:var(--muted);font-size:15px}
+/* hands-free listening (D-034) */
+.lr-modes{display:flex;gap:8px;margin:10px 0 6px}
+.lr-modes .btn.on{background:var(--chip-solid-bg);color:var(--chip-solid-fg);border-color:transparent}
+.lr-nl{font:500 18px/1.4 var(--sans);color:var(--muted);margin:14px 0 4px;min-height:25px}
+.lr-bg{font:600 24px/1.35 var(--sans);color:var(--ink);margin:0 0 6px;min-height:33px}
+.lr-settings{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 button.w.say-on{background:var(--revealed-tint);color:var(--revealed)}
 nav button{background:none;border:0;padding:7px 14px;border-radius:7px;font:500 13px/1.4 var(--sans);color:var(--muted);cursor:pointer}
 @media (hover:hover){nav button:hover{color:var(--ink)}}
@@ -315,6 +321,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <button class="btn" id="btn-free">Free practice</button>
         <button class="btn" id="btn-gdrill">Grammar drill</button>
         <button class="btn" id="btn-peek">Sneak peek</button>
+        <button class="btn" id="btn-lr">Listen (hands-free)</button>
       </div>
     </div>
   </div>
@@ -329,6 +336,21 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <div class="opts" id="peek-opts"></div>
       <div id="peek-reveal" hidden><p class="peek-meaning" id="peek-meaning"></p><p class="muted" id="peek-translation"></p></div>
       <div class="row"><button class="btn primary" id="btn-peek-next" hidden>Next</button></div>
+    </div>
+  </div>
+  <div id="listen-run" hidden>
+    <div class="card">
+      <div class="peek-top"><span class="tiny" id="lr-count"></span><button class="link-btn" id="btn-lr-close">Close</button></div>
+      <div class="lr-modes" role="group" aria-label="Mode"><button class="btn small" data-lmode="practice">Practice</button><button class="btn small" data-lmode="background">Background</button></div>
+      <p class="tiny" id="lr-help"></p>
+      <p class="lr-nl" id="lr-nl"></p>
+      <p class="lr-bg" id="lr-bg" lang="bg"></p>
+      <div class="row"><button class="btn primary" id="btn-lr-play">▶ Play</button><button class="btn" id="btn-lr-next">Next ⏭</button></div>
+      <div class="lr-settings">
+        <div class="field"><label for="set-lr-pause">Pause to answer</label><select id="set-lr-pause"><option value="auto">Auto (longer for long sentences)</option><option value="3">3 seconds</option><option value="5">5 seconds</option><option value="8">8 seconds</option></select></div>
+        <div class="toggle"><input type="checkbox" id="set-lr-repeat"><div>Repeat the Bulgarian in the other voice</div></div>
+        <div class="field"><label for="set-lr-limit">Stop after</label><select id="set-lr-limit"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="0">Never</option></select></div>
+      </div>
     </div>
   </div>
   <div id="peek-done" hidden>

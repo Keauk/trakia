@@ -27,6 +27,8 @@ interface Sentence {
   vocative?: string[];
   /** clip key of `bg`, in both voices (D-005) */
   au?: string;
+  /** clip key of `nl` in the Dutch voice, the prompt of hands-free listening (D-034) */
+  au_nl?: string;
 }
 
 interface GrammarTable { headers: string[]; rows: string[][] }
@@ -74,6 +76,8 @@ interface Settings {
   sound: boolean; autoplay: boolean; voices: string; speed: number;
   /** dictation cards take over from mature reading cards (D-005 phase C); shared between devices */
   dictation: boolean;
+  /** hands-free listening (D-034), per device: 'practice' | 'background', pause 'auto' or seconds, repeat the Bulgarian, minutes (0: no limit) */
+  listenMode: string; listenPause: string; listenRepeat: boolean; listenLimit: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 
