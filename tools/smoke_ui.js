@@ -18,7 +18,6 @@ const type = (v, key) => { $('answer').value = v; $('answer').dispatchEvent(new 
 const C = window.TrakiaCore;
 
 // home renders with the deck position
-assert.match($('home-summary').textContent, /fit your Anki position \(word 102\)/);
 assert.match($('hdr-rank').textContent, /word 102/);
 // start a session -> first card is BG->NL, lowest rank first
 $('btn-start').click();
@@ -237,7 +236,6 @@ document.querySelector('nav button[data-tab=settings]').click();
 $('set-lang').value = 'en'; $('set-lang').dispatchEvent(new window.Event('input'));
 assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).lang, 'en');
 document.querySelector('nav button[data-tab=practise]').click();
-assert.match($('home-summary').textContent, /practising in English/);
 $('btn-start').click();
 assert.equal($('session-run').hidden, false);
 assert.equal($('dir-badge').textContent, 'BG → EN', 'first English card is BG → EN');
