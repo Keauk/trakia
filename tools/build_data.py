@@ -31,8 +31,9 @@ def segs(bg, speakers):
 
 
 slim_words = [{'rank': w['rank'], 'bg': w['bg'], 'en': w['en'], 'pos': w['pos'], 'cat': w.get('cat', ''), 'forms': w['forms'],
-               'learned': w['learned'], 'au': A.clip_key(A.spoken('w:%d' % w['rank'], w['bg'], overrides))}
-              for w in words]   # cat: the deck's topic, for sneak-peek distractors (D-031)
+               'learned': w['learned'], 'au': A.clip_key(A.spoken('w:%d' % w['rank'], w['bg'], overrides)),
+               'ex_bg': w.get('sentence_bg', ''), 'ex_en': w.get('sentence_en', '')}
+              for w in words]   # cat: the deck's topic, for sneak-peek distractors (D-031); ex_*: the example on the word card (D-035)
 sentences = [dict(s, au=A.clip_key(A.spoken('s:' + s['id'], s['bg'], overrides)), **({'au_nl': A.clip_key(s['nl'])} if s.get('nl') else {}))
              for s in sentences]   # au_nl: the Dutch prompt of hands-free listening (D-034)
 stories = [dict(st, title=dict(st['title'], au=segs(st['title']['bg'], [])),

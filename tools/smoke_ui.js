@@ -570,5 +570,38 @@ setTimeout(async () => {
   const exported = await blob.text(); assert.ok(!exported.includes(TOKEN)); assert.equal(JSON.parse(exported).progress['ZZ1|bg2nl'].last, later);
   assert.equal(Object.keys(JSON.parse(exported).reading).length, 1, 'read marks travel with the snapshot');
   assert.equal(Object.keys(JSON.parse(exported).peeks).length, 10, 'sneak peeks travel with the snapshot');
+  // deck words (D-035): a new learner seeds the words they know, then flips and grades cards
+  document.querySelector('nav button[data-tab=practise]').click();
+  assert.equal($('btn-words').textContent, 'Words', 'no counts before any word card');
+  $('btn-words').click();
+  assert.ok(!$('wr-start').hidden, 'a new learner is asked where to start');
+  $('wr-known').value = '30'; $('wr-known').dispatchEvent(new window.Event('input'));
+  assert.match($('wr-known-word').textContent, /^up to /);
+  $('btn-wr-begin').click();
+  {
+    const wp = () => Object.keys(JSON.parse(window.localStorage.getItem('trakia.progress'))).filter(k => k.startsWith('w:'));
+    assert.equal(wp().length, 60, 'both cards of words 1–30 seeded');
+    assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 30, 'the position follows the words');
+    let gradedNew = false;
+    for (let i = 0; i < 40 && !gradedNew; i++) {
+      assert.ok(!$('wr-card').hidden, 'a word card is shown');
+      gradedNew = / · new$/.test($('wr-dir').textContent);
+      assert.ok($('wr-grades').hidden && !$('wr-show-row').hidden);
+      document.dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ' }));
+      assert.ok(!$('wr-grades').hidden && $('wr-answer').textContent.length > 0, 'Space shows the answer');
+      assert.ok(['wr-i1', 'wr-i2', 'wr-i3', 'wr-i4'].every(id => $(id).textContent), 'each grade shows its interval');
+      document.dispatchEvent(new window.KeyboardEvent('keydown', { key: '3' }));
+    }
+    assert.ok(gradedNew, 'a new word came up');
+    assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 31, 'starting word 31 moves the position');
+    const lastLog = JSON.parse(window.localStorage.getItem('trakia.log')).slice(-1)[0];
+    assert.ok(String(lastLog[1]).startsWith('w:') && lastLog[2] === 2 && lastLog[5] === 3, 'Good is logged: ' + lastLog);
+    $('btn-wr-stop').click();
+    assert.match($('btn-words').innerHTML, /wc-new/, 'the Words button shows the counts');
+    document.querySelector('nav button[data-tab=settings]').click();
+    assert.ok($('set-rank').disabled && !$('rank-auto').hidden, 'the position is read-only');
+    document.querySelector('nav button[data-tab=stats]').click();
+    assert.match($('stats-progress').innerHTML, /Deck words/);
+  }
   console.log('UI smoke test passed');
 }, 100);

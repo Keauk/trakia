@@ -49,6 +49,7 @@ trakia/
   data/audio.json          manifest of the spoken clips: length, source, word timings of story clips (D-005)
   data/audio_overrides.json  spoken text that differs from the written one (empty so far)
   tools/export_anki_words.py   apkg -> data/words.json
+  tools/anki_progress.py       Anki collection -> a progress file of word cards, outside the repository (D-035)
   tools/validate_sentences.py  generated JSON -> data/sentences.json (lemma check, max_rank, dedupe; word maps, D-030)
   tools/map_sentence_words.py  proposes each sentence's word map (form -> dictionary form) from its lemmas (D-030)
   tools/validate_stories.py    story JSON -> data/stories.json (every word checked against its level, D-026)
@@ -280,6 +281,18 @@ voice; *Background* plays Bulgarian only, from sentences seen and stories read. 
 same audio element, because a phone suspends the timers of a page that plays nothing; the Media
 Session API puts the sentence and play/pause/next on the lock screen and headphones. Listening does
 not touch the schedule; minutes per day are kept in `trakia.listened` on the device.
+
+### 4.3e Deck words (D-035)
+
+*Words* on the Practise home teaches the deck itself: per word a Bulgarian → English and an English
+→ Bulgarian flip card (`w:<rank>|bg2en`, `w:<rank>|en2bg`), graded Again/Hard/Good/Easy with FSRS
+(`C.gradeWord`). `C.wordQueue` gives learning cards, reviews due today and new cards in deck order
+(the English → Bulgarian card a day after the first); new words stop at *New words per day* and while
+the reviews due today, words and sentences together (`C.dayLoad`), reach *Daily reviews limit*.
+Once any word card exists the Anki position is `C.wordRank` (every word up to it started) and the
+slider below is read-only. A new learner picks the words that count as known (`C.seedWords` spreads
+their reviews); an Anki user's own schedule comes over with `tools/anki_progress.py` (a progress
+file outside the repository, merged with *Import progress* or into the sync gist).
 
 ### 4.4 Rank alignment UI
 

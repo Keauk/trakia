@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20 };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20, newWords: 10, dailyMax: 150 };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -130,6 +130,7 @@ function renderHome() {
   $('home-summary').innerHTML = `${elig.length} of ${SENT.length} sentences fit your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}) and grammar stage ${settings.stage || 5}; practising in ${settings.lang === 'mixed' ? 'Dutch and English (mixed)' : LANG_NAME[settings.lang] || 'Dutch'}; ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || unseenElig ? 'Practise' : 'Free practice';
+  renderWordsButton();
 }
 const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
 
@@ -416,10 +417,10 @@ function renderStats() {
   const weak = Object.entries(drills).filter(([k, t]) => t.bad > 0 && items[k]).sort((a, b) => (b[1].bad - b[1].ok) - (a[1].bad - a[1].ok) || b[1].bad - a[1].bad).slice(0, 10);
   $('weak-forms').innerHTML = weak.length ? '<colgroup><col><col style="width:40%"><col style="width:60px"><col style="width:60px"></colgroup><tr><th>form</th><th>answer</th><th>wrong</th><th>right</th></tr>' + weak.map(([k, t]) => `<tr><td>${esc(items[k].prompt)} <span class="tiny">${esc(items[k].hint)}</span></td><td lang="bg">${esc(items[k].answers[0])}</td><td>${t.bad}</td><td>${t.ok}</td></tr>`).join('') : '<tr><td class="tiny">No drill mistakes yet.</td></tr>';
   // progress per direction: stability bands
-  let html = '';
+  let html = wordsStatsHtml(now);
   const elig = SENT.filter(s => C.eligible(s, settings)).length;
   const curLangs = settings.lang === 'mixed' ? ['nl', 'en'] : [settings.lang || 'nl'];
-  const dirsShown = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg', 'listen'].filter(d => curLangs.includes(C.parseKey('x|' + d).lang) || Object.keys(progress).some(k => k.endsWith('|' + d)));
+  const dirsShown = ['bg2nl', 'nl2bg', 'bg2en', 'en2bg', 'listen'].filter(d => curLangs.includes(C.parseKey('x|' + d).lang) || Object.keys(progress).some(k => !k.startsWith('w:') && k.endsWith('|' + d)));
   for (const dir of dirsShown) {
     const bands = [0, 0, 0, 0]; let seen = 0, dueN = 0, recallSum = 0, recallN = 0;
     for (const k in progress) if (k.endsWith('|' + dir) && SENT_BY_ID.has(k.split('|')[0])) {
@@ -533,6 +534,7 @@ function applySnapshot(m) {
   m = Object.assign({}, m, C.compactHistory(m, Date.now()));
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
   progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {};
+  if (C.hasWords(progress)) settings.rank = C.wordRank(progress);   // the position follows the deck words (D-035)
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
   for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks })) LS.set(k, v);
   refreshSentences();
@@ -559,8 +561,8 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool')];
-function afterSettingChange(key) { if (key === 'lang') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool'), bind('set-newwords', 'newWords', 'num'), bind('set-dailymax', 'dailyMax', 'num')];
+function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
@@ -568,7 +570,7 @@ function renderRankHelp() {
 }
 function renderRetentionHelp() { const o = C.fsrsOpts(settings); const ivl = s => Math.max(1, Math.round(s / o.factor * (Math.pow(o.retention, 1 / o.decay) - 1))); $('retention-help').textContent = `a card with 10 days of stability comes back after ${ivl(10)} d, with 60 days after ${ivl(60)} d`; }
 function renderStageHelp() { const total = SENT.filter(s => s.max_rank == null || s.max_rank <= settings.rank + (settings.tolerance || 0)).length, ok = SENT.filter(s => C.eligible(s, settings)).length; $('stage-help').textContent = `${ok} of the ${total} sentences within your Anki position fit this stage.`; }
-function renderSettings() { writers.forEach(w => w()); renderWallpaperFields(); renderAudioStatus(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
+function renderSettings() { writers.forEach(w => w()); const auto = C.hasWords(progress); $('set-rank').disabled = $('set-rank-range').disabled = $('load-words').disabled = auto; $('rank-auto').hidden = !auto; $('rank-tip').hidden = auto; $('rank-label').textContent = auto ? 'Your position: word number' : 'I\'m at word number … in Anki'; renderWallpaperFields(); renderAudioStatus(); renderSyncStatus(); renderRankHelp(); renderRetentionHelp(); renderStageHelp(); $('about').textContent = `Тракия · ${DATA.sentences.length} bundled sentences · ${WORDS.length} words · deck position at export: ${DATA.learnedRank}`; }
 $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Anki position set to ' + r); } catch (err) { toast('Could not read words.json'); }
@@ -619,7 +621,7 @@ function nextPeek() {
   if (!peek || peek.picked == null) return;
   if (peek.i + 1 < peek.items.length) { peek.i++; peek.picked = null; renderPeek(); return; }
   const n = peek.items.length, first = peek.items[0].word.rank, last = peek.items[n - 1].word.rank;
-  $('peek-summary').textContent = `You guessed ${peek.right} of ${n} right. Anki teaches these words next (word ${first}–${last}); when you meet them there, you have already thought about them once.`;
+  $('peek-summary').textContent = `You guessed ${peek.right} of ${n} right. You learn these words next (word ${first}–${last}); when you meet them, you have already thought about them once.`;
   stopPeek(); $('session-home').hidden = true; $('peek-done').hidden = false; sync();
 }
 function stopPeek() { stopAudio(); peek = null; $('peek-run').hidden = true; $('session-home').hidden = false; renderHome(); }
@@ -634,6 +636,119 @@ document.addEventListener('keydown', e => {
   if (peek.picked == null && /^[1-4]$/.test(e.key) && +e.key <= peek.items[peek.i].options.length) { e.preventDefault(); pickPeek(+e.key - 1); }
   else if (peek.picked != null && e.key === 'Enter' && !e.repeat) { e.preventDefault(); nextPeek(); }
 });
+
+// ---------- deck words: flip cards on the FSRS schedule, one daily limit with the sentences (D-035) ----------
+/** @type {{key: string, shown: boolean, n: number, last: string} | null} */ let wr = null;
+const wordQ = () => C.wordQueue(WORDS, progress, settings, Date.now());
+const countsHtml = (/** @type {{fresh: number, learning: number, due: number}} */ c) => `<span class="wc"><span class="wc-new">${c.fresh}</span> · <span class="wc-learn">${c.learning}</span> · <span class="wc-due">${c.due}</span></span>`;
+function renderWordsButton() { $('btn-words').innerHTML = 'Words' + (C.hasWords(progress) ? countsHtml(wordQ().counts) : ''); }
+/** the Anki position is the highest word with every word before it started */
+function followWords() {
+  if (!C.hasWords(progress)) return;
+  const r = C.wordRank(progress); if (r === settings.rank) return;
+  settings.rank = r; save.settings(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
+}
+function fmtIvl(/** @type {number} */ ms) {
+  const d = ms / 86400e3;
+  if (ms < 3600e3) return Math.max(1, Math.round(ms / 60e3)) + ' min';
+  if (d < 1) return Math.round(ms / 3600e3) + ' h';
+  if (d < 31) return Math.round(d) + ' d';
+  if (d < 365) return (d / 30.4).toFixed(1).replace(/\.0$/, '') + ' mo';
+  return (d / 365).toFixed(1).replace(/\.0$/, '') + ' y';
+}
+function wrShow(/** @type {string} */ id) { for (const x of ['wr-start', 'wr-card', 'wr-done']) $(x).hidden = x !== id; }
+function startWords() {
+  wr = { key: '', shown: false, n: 0, last: '' };
+  $('session-home').hidden = true; $('session-done').hidden = true; $('peek-done').hidden = true; $('words-run').hidden = false;
+  if (!C.hasWords(progress)) {   // a new learner: which words do they know already?
+    $('wr-known').value = String(settings.rank || 0); renderKnownWord(); $('wr-count').textContent = 'Words'; wrShow('wr-start');
+  } else { sessions.push(Date.now()); save.sessions(); wrNext(); }
+  window.scrollTo(0, 0);
+}
+function renderKnownWord() { const n = +$('wr-known').value, w = WORD_BY_RANK.get(n); $('wr-known-word').textContent = n > 0 && w ? `up to ${w.bg} – ${w.en}` : 'start from the first word'; }
+function beginWords() {
+  const n = Math.max(0, Math.min(WORDS.length, Math.round(+$('wr-known').value || 0)));
+  if (n > 0) { const seeded = C.seedWords(WORDS, n, Date.now(), settings); for (const k in seeded) if (!progress[k]) progress[k] = seeded[k]; save.progress(); followWords(); }
+  sessions.push(Date.now()); save.sessions(); wrNext();
+}
+/** the next card: learning cards due now, then reviews with a new card after every four, then learning cards ahead */
+function wrNext() {
+  if (!wr) return;
+  const q = wordQ(), now = Date.now(), last = wr.last, notLast = (/** @type {string[]} */ l) => l.filter(k => k !== last);
+  const ready = notLast(q.learning.filter(k => progress[k].due <= now));
+  const newTurn = q.fresh.length && (wr.n % 5 === 4 || !q.due.length);
+  const key = ready[0] || (newTurn ? q.fresh[0] : q.due[0]) || q.fresh[0] || notLast(q.learning)[0] || q.learning[0];
+  $('wr-count').innerHTML = 'Words ' + countsHtml(q.counts);
+  if (!key) {
+    const later = q.nextLearning ? ` A word you are learning comes back in ${fmtIvl(q.nextLearning - now)}.` : '';
+    const why = q.paused === 'limit' ? ` New words wait until tomorrow: ${q.load.reviews} reviews today reach your limit of ${q.dailyMax} (Settings).` : '';
+    $('wr-done-text').textContent = `${wr.n ? wr.n + ' answers. ' : ''}Nothing more is due today.${later}${why} Your position is now word ${settings.rank}.`;
+    wrShow('wr-done'); wr.key = ''; sync(); return;
+  }
+  wr.key = key; wr.shown = false; renderWordCard();
+}
+function renderWordCard() {
+  if (!wr || !wr.key) return;
+  const K = C.parseKey(wr.key), w = WORD_BY_RANK.get(K.rank || 0), p = progress[wr.key], toBg = K.toBg;
+  if (!w) return;
+  wrShow('wr-card');
+  $('wr-dir').textContent = (toBg ? 'English → Bulgarian' : 'Bulgarian → English') + ` · word ${w.rank}` + (!p ? ' · new' : p.state !== 'review' ? ' · learning' : '');
+  $('wr-front').textContent = toBg ? w.en : w.bg; $('wr-front').lang = toBg ? 'en' : 'bg';
+  $('btn-say-wr').hidden = toBg || !w.au; if (w.au) $('btn-say-wr').dataset.au = w.au;
+  $('wr-back').hidden = !wr.shown; $('wr-show-row').hidden = wr.shown; $('wr-grades').hidden = !wr.shown;
+  if (!wr.shown) return;
+  $('wr-answer').innerHTML = toBg ? `<span lang="bg">${esc(w.bg)}</span>${sayBtn(w.au, 'Listen to the word')}` : esc(w.en);
+  $('wr-info').textContent = [w.pos, w.forms && w.forms !== w.bg ? w.forms : '', w.cat || ''].filter(Boolean).join(' · ');
+  $('wr-ex-bg').textContent = w.ex_bg || ''; $('wr-ex-en').textContent = w.ex_en || '';
+  C.wordIntervals(p, Date.now(), settings).forEach((ms, i) => { $('wr-i' + (i + 1)).textContent = fmtIvl(ms); });
+}
+const wordAutoplay = () => soundOn() && settings.autoplay !== false;
+/** Bulgarian → English: hear the word on the front */
+function sayFront() { if (wr && wr.key && !wr.shown && wordAutoplay() && !$('btn-say-wr').hidden) $('btn-say-wr').click(); }
+function flipWord() {
+  if (!wr || !wr.key || wr.shown) return;
+  wr.shown = true; renderWordCard();
+  const b = /** @type {HTMLElement | null} */ (document.querySelector('#wr-answer [data-au]'));
+  if (b && wordAutoplay()) b.click();   // English → Bulgarian: hear the answer
+}
+function gradeWordCard(/** @type {number} */ g) {
+  if (!wr || !wr.key || !wr.shown) return;
+  const now = Date.now(), k = wr.key, was = progress[k], score = g === 1 ? 0 : g === 2 ? 1 : 2;
+  progress[k] = C.gradeWord(was, g, now, settings); save.progress();
+  log.push([now, k, score, 0, score, g]); save.log();
+  if (!was) followWords();
+  wr.last = k; wr.n++; stopAudio(); wrNext(); sayFront();
+}
+function stopWords() { stopAudio(); wr = null; $('words-run').hidden = true; $('session-home').hidden = false; renderHome(); }
+$('btn-words').addEventListener('click', () => { startWords(); sayFront(); });
+$('wr-known').addEventListener('input', renderKnownWord);
+$('btn-wr-begin').addEventListener('click', () => { beginWords(); sayFront(); });
+$('btn-wr-show').addEventListener('click', flipWord);
+$('wr-grades').addEventListener('click', e => { const b = closest(e, '[data-g]'); if (b) gradeWordCard(+(b.dataset.g || 0)); });
+$('btn-wr-stop').addEventListener('click', () => { stopWords(); sync(); });
+$('btn-wr-home').addEventListener('click', stopWords);
+// keys: Space or Enter shows the answer, then 1–4 grade, and Space or Enter is Good
+document.addEventListener('keydown', e => {
+  if (!wr || !wr.key || $('words-run').hidden || isTypingField(e.target) || e.repeat) return;
+  if (!wr.shown && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); flipWord(); }
+  else if (wr.shown && /^[1-4]$/.test(e.key)) { e.preventDefault(); gradeWordCard(+e.key); }
+  else if (wr.shown && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); gradeWordCard(3); }
+});
+/** Stats: the deck words, as a line like the sentence directions */
+function wordsStatsHtml(/** @type {number} */ now) {
+  if (!C.hasWords(progress)) return '';
+  const bands = [0, 0, 0, 0], started = new Set(); let cards = 0, dueN = 0, recallSum = 0, recallN = 0;
+  for (const k in progress) if (k.startsWith('w:')) {
+    const p = progress[k]; cards++; started.add(k.split('|')[0]);
+    if (p.state !== 'review') bands[0]++; else if ((p.s || 0) < 7) bands[1]++; else if ((p.s || 0) < 30) bands[2]++; else bands[3]++;
+    if (p.due <= now) { dueN++; if (p.state === 'review') { recallSum += C.recallNow(p, now, settings); recallN++; } }
+  }
+  const today = dayKey(now), answered = log.filter(l => String(l[1]).startsWith('w:') && dayKey(+l[0]) === today).length;
+  const avg = recallN ? Math.round(100 * recallSum / recallN) + ' %' : '–';
+  let html = `<p style="margin:6px 0 2px"><b>Deck words</b> <span class="tiny">${started.size} of ${WORDS.length} started (${cards} cards) · ${dueN} due now · ${answered} answers today · predicted recall of due cards ${avg}</span></p>`;
+  html += `<div class="bar">${['var(--almost)', 'var(--correct)', 'var(--correct)', 'var(--primary)'].map((c, i) => `<i style="width:${cards ? 100 * bands[i] / cards : 0}%;background:${c};opacity:${i === 1 ? .6 : 1}"></i>`).join('')}</div>`;
+  return html + `<div class="boxes" style="grid-template-columns:repeat(4,1fr)">${['learning', '< 7 d', '7–30 d', '≥ 30 d'].map((l, i) => `<div><b>${bands[i]}</b>${l}</div>`).join('')}</div>`;
+}
 
 // ---------- reading (D-026 stories, D-027 tap a word, D-028 questions) ----------
 const STORIES = DATA.stories || [], LEVELS = [...new Set(STORIES.map(s => s.level))].sort((a, b) => a - b);
@@ -1119,7 +1234,7 @@ if ('mediaSession' in navigator) {
 }
 
 // ---------- init ----------
-applyTheme(); applySound(); renderHome(); sync();
+applyTheme(); applySound(); followWords(); renderHome(); sync();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(reg => reg.update().catch(() => {})).catch(() => {});

@@ -127,7 +127,29 @@ About 2–3 evenings.
   learning on the day of the switch.
 
 ## As built
-Not started.
+Built; the merge of the learner's Anki progress into their gist and the check on their devices are
+still to come.
+- `core.js`: `parseKey` (word keys), `dayLoad`, `wordQueue`, `gradeWord`, `wordIntervals`,
+  `wordRank`, `hasWords`, `seedWords`; `rowToSentence` replaces a colon in an imported id.
+- `ui.js`: the words run (`startWords`, `wrNext`, `renderWordCard`, `flipWord`, `gradeWordCard`),
+  the counts on the *Words* button, `followWords` (at load, after a sync, after a word's first
+  answer), the Stats line *Deck words*, the settings *New words per day* and *Daily reviews limit*;
+  the position field is read-only once word cards exist. `index.html`: `#btn-words`, `#words-run`.
+- `build_data.py` ships the deck's example sentence with each word (`ex_bg`, `ex_en`; data.js
+  grows by about 210 KB).
+- `tools/anki_progress.py` with a test on a fake collection (`tools/test_anki_progress.py`, run by
+  `npm test`).
+
+### Decisions taken
+- The Words button sits under *Practise*, full width, as the second daily task.
+- Space or Enter shows the answer and then counts as Good; keys 1–4 grade.
+- The sneak peek (D-031) no longer says that Anki teaches the next words.
+
+### Measurements
+- 2026-10-28: the tool on the learner's collection: 460 cards (419 review, 35 learning,
+  6 relearning, 1 suspended), 189 due today, words started up to 243. Loaded into a local test
+  browser: position 243, Words 0 new · 41 learning · 148 due; new words paused, since 189 reviews
+  today exceed the limit of 150.
 
 ## Open questions
 - Dutch meanings for the 2,952 words, so Dutch is the practice language for words too? It needs
