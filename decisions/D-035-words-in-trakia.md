@@ -95,7 +95,8 @@ question); audio for the deck's example sentences (open question); words beyond 
   - Per card that is not new: `s`, `d` from the card's FSRS data; `last` = `lrt` × 1000; `state`
     from `type` (1 learning, 2 review, 3 relearning); `due` = (collection `crt` + `due` days) × 1000
     for review cards and `due` seconds × 1000 for learning cards; `reps`, `lapses` from the card.
-    Cards without FSRS data become learning cards, due now; suspended cards stay out.
+    A review card without FSRS data keeps its Anki interval as stability (29 of them on
+    2026-10-28); a learning card without it is due now; suspended cards stay out.
   - Writes a progress snapshot (`app: 'trakia'`, `progress` only) to a path outside the
     repository, `~/Downloads/trakia-anki-progress.json` by default; **it refuses a path inside the
     repository**: the file holds a person's review history, and the repository is public.

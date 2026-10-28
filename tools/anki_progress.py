@@ -60,10 +60,10 @@ def records(con, now_ms):
     """{key: ProgressRecord} for every card that is not new, and a count per state"""
     crt = con.execute('select crt from col').fetchone()[0]
     out, counts = {}, {}
-    rows = con.execute('select c.ord, c.type, c.queue, c.due, c.reps, c.lapses, c.data, n.flds, n.mid '
+    rows = con.execute('select c.ord, c.type, c.queue, c.due, c.ivl, c.reps, c.lapses, c.data, n.flds, n.mid '
                        'from cards c join notes n on n.id = c.nid where c.type != 0')
     mids = set()
-    for ord_, typ, queue, due, reps, lapses, data, flds, mid in rows:
+    for ord_, typ, queue, due, ivl, reps, lapses, data, flds, mid in rows:
         f = flds.split('\x1f')
         if len(f) < 8 or ord_ not in DIRS:
             continue
@@ -80,11 +80,15 @@ def records(con, now_ms):
         else:
             due_ms = now_ms
         last = int(d['lrt']) * 1000 if d.get('lrt') else None
+        if not last and typ == 2:
+            last = int(due_ms - ivl * 86400 * 1000)
         rec = {'box': 0, 'due': int(due_ms), 'reps': reps, 'lapses': lapses, 'streak': 0, 'last': last or now_ms,
                'state': state}
         if d.get('s') is not None and d.get('d') is not None:
             rec['s'], rec['d'] = float(d['s']), float(d['d'])
-        else:   # no FSRS memory state yet: a learning card, due now
+        elif typ == 2:   # a review card without FSRS memory state: its interval stands in for the stability
+            rec['s'], rec['d'] = float(max(ivl, 1)), min(10.0, 5.0 + 0.5 * lapses)
+        else:   # a learning card without FSRS memory state: due now
             rec.update(state='learning', step=0, due=now_ms)
         if rec['state'] != 'review':
             rec['step'] = 0
