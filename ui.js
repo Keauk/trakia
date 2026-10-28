@@ -122,18 +122,20 @@ let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,
 function renderHome() {
   const now = Date.now();
   const elig = SENT.filter(s => C.eligible(s, settings));
-  let due = 0, seen = 0;
-  for (const s of SENT) for (const k of C.cardKeys(s, progress, settings)) { const p = progress[k]; if (p) { seen++; if (p.due <= now) due++; } }
+  let due = 0, learning = 0, seen = 0;
+  for (const s of SENT) for (const k of C.cardKeys(s, progress, settings)) { const p = progress[k]; if (p) { seen++; if (p.due <= now) { due++; if (p.state !== 'review') learning++; } } }
   const today = dayKey(now), todayLog = log.filter(l => dayKey(l[0]) === today), todaySessions = sessions.filter(t => dayKey(t) === today).length;
   const unseenElig = elig.reduce((n, s) => n + C.cardKeys(s, progress, settings).filter(k => !progress[k]).length, 0);
-  $('home-stats').innerHTML = stat(due, 'due now') + stat(unseenElig, 'new available') + stat(todayLog.length, 'answers today') + stat(todaySessions, 'sessions today');
+  $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning });
   const next = C.nextUnlock(SENT, settings);
-  $('home-summary').innerHTML = `${elig.length} of ${SENT.length} sentences fit your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}) and grammar stage ${settings.stage || 5}; practising in ${settings.lang === 'mixed' ? 'Dutch and English (mixed)' : LANG_NAME[settings.lang] || 'Dutch'}; ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
+  $('home-summary').innerHTML = `Today: ${todayLog.length} answers in ${todaySessions} session${todaySessions === 1 ? '' : 's'}. ${elig.length} of ${SENT.length} sentences fit your Anki position (word ${settings.rank}${settings.tolerance ? ' + ' + settings.tolerance : ''}) and grammar stage ${settings.stage || 5}; practising in ${settings.lang === 'mixed' ? 'Dutch and English (mixed)' : LANG_NAME[settings.lang] || 'Dutch'}; ${seen} cards seen.` + (next ? ` Next unlock at word ${next.max_rank}: <b>${esc(WORD_BY_RANK.get(next.max_rank)?.bg || '')}</b>.` : '');
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || unseenElig ? 'Practise' : 'Free practice';
   renderWordsButton();
 }
 const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
+/** the three counts of a task card on the Practise home, coloured as Anki colours them */
+const taskNums = (/** @type {{fresh: number, learning: number, due: number}} */ c) => `<div class="n-new"><b>${c.fresh}</b><span>new</span></div><div class="n-learn"><b>${c.learning}</b><span>learning</span></div><div class="n-due"><b>${c.due}</b><span>due</span></div>`;
 
 function startSession(opts) {
   opts = opts || {};
@@ -646,7 +648,8 @@ const wordQ = () => C.wordQueue(WORDS, progress, settings, Date.now());
 const countsHtml = (/** @type {{fresh: number, learning: number, due: number}} */ c) => `<span class="wc"><span class="wc-new">${c.fresh}</span> · <span class="wc-learn">${c.learning}</span> · <span class="wc-due">${c.due}</span></span>`;
 function renderWordsButton() {
   const q = C.hasWords(progress) ? wordQ() : null;
-  $('btn-words').innerHTML = 'Words' + (q ? countsHtml(q.counts) : '');
+  $('words-nums').innerHTML = taskNums(q ? q.counts : { fresh: 0, learning: 0, due: 0 });
+  $('btn-words').textContent = q ? 'Study words' : 'Start words';
   $('words-paused').textContent = q && q.paused === 'limit' ? pausedText(q) : ''; $('words-paused').hidden = !(q && q.paused);
 }
 const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New words are paused while the reviews due today (${q.load.reviews}, words and sentences) are above your limit of ${q.dailyMax} (Settings).`;

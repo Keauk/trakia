@@ -214,12 +214,33 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding
 .word-graph{display:block;width:100%;height:auto;margin:10px 0 2px;font:11px var(--sans)}
 .word-graph text{fill:var(--faint)}.word-graph path{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.word-graph line{stroke-width:1}
 .graph-key{margin:0 0 6px}.graph-key .k-known{color:var(--correct)}.graph-key .k-started{color:var(--primary)}
+.home-tasks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.home-tasks .card{margin-bottom:0}
+.task{display:flex;flex-direction:column;gap:14px}
+.task h2{margin:0}
+.task .btn{width:100%;margin-top:auto}
+.task-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.task-nums div{background:var(--input-bg);border:1px solid var(--line);border-radius:12px;padding:10px 4px 8px}
+.task-nums b{display:block;font:600 26px/1.1 var(--sans);font-variant-numeric:tabular-nums}
+.task-nums span{display:block;margin-top:3px;font-size:12px;color:var(--muted)}
+.n-new b{color:var(--primary)}.n-learn b{color:var(--wrong)}.n-due b{color:var(--correct)}
+.home-more{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.home-more .btn{padding:11px 8px}
+.home-note{text-align:center;margin:12px 8px 14px;line-height:1.5}
+@media (max-width:640px){.home-tasks{grid-template-columns:1fr}.home-more{grid-template-columns:1fr 1fr}}
 .wc{margin-left:6px;font:600 13px/1 var(--mono)}.wc-new{color:var(--primary)}.wc-learn{color:var(--wrong)}.wc-due{color:var(--correct)}
-.wr-front{font:600 28px/1.3 var(--sans);margin:18px 0 6px;color:var(--ink)}
-.wr-answer{font:600 22px/1.35 var(--sans);margin:14px 0 2px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink)}
-.wr-answer .say-btn{margin-left:4px}
-.wr-ex{font:400 17px/1.45 var(--sans);margin:12px 0 2px;color:var(--ink-2)}
-.wr-grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.wr-front{font:600 42px/1.2 var(--sans);margin:22px 0 10px;color:var(--ink);overflow-wrap:anywhere}
+.wr-answer{font:600 36px/1.2 var(--sans);margin:18px 0 6px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink);overflow-wrap:anywhere}
+.wr-answer .say-btn{margin-left:6px}
+#wr-info{margin:0 0 20px}
+#wr-card{text-align:center}
+#wr-card .say-row{position:relative;justify-content:center}
+#wr-card .say-row .wr-front{flex:none;max-width:100%;padding:0 36px;box-sizing:border-box}
+#btn-say-wr{position:absolute;right:0;top:50%;margin:0;transform:translateY(-50%)}
+#wr-card .row{justify-content:center}
+.wr-ex,#wr-ex-en{font:400 15px/1.45 var(--sans);margin:0;color:var(--muted)}
+#wr-ex-en{font-size:14px;color:var(--faint);padding-top:2px}
+.wr-grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:24px}
 .wr-grades .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px}
 .wr-grades small{font:400 12px/1.2 var(--sans);color:var(--muted)}
 .wr-g1 b{color:var(--wrong)}.wr-g2 b{color:var(--almost)}.wr-g3 b{color:var(--correct)}.wr-g4 b{color:var(--primary)}
@@ -298,7 +319,7 @@ body.running main{padding-top:0;padding-bottom:calc(var(--tabbar-h) + 96px)}
 .next-row .btn.next{width:100%;height:52px;border-radius:12px;padding:0 18px;font-size:16px}
 #toast,#update-bar{bottom:calc(var(--tabbar-h) + 16px)}
 body.running #toast{bottom:calc(var(--tabbar-h) + 92px)}
-.home-actions{display:grid;grid-template-columns:1fr 1fr}.home-actions .primary,.home-actions #btn-words{grid-column:1/-1}
+
 }
 /* while typing on a touch screen the keyboard takes the tab bar's place */
 @media (max-width:767px) and (pointer:coarse){
@@ -327,19 +348,28 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
 
 <section id="tab-practise" class="tab active">
   <div id="session-home">
-    <div class="card">
-      <div class="stats" id="home-stats"></div>
-      <p class="muted" id="home-summary"></p>
-      <p class="tiny" id="words-paused" hidden></p>
-      <div class="row home-actions">
+    <div class="home-tasks">
+      <div class="card task">
+        <h2>Sentences</h2>
+        <div class="task-nums" id="home-stats"></div>
         <button class="btn primary" id="btn-start">Practise</button>
-        <button class="btn" id="btn-words" title="Deck words: new · learning · due">Words</button>
+      </div>
+      <div class="card task">
+        <h2>Words</h2>
+        <div class="task-nums" id="words-nums"></div>
+        <button class="btn primary" id="btn-words">Study words</button>
+      </div>
+    </div>
+    <p class="tiny home-note" id="words-paused" hidden></p>
+    <div class="card">
+      <div class="home-more">
         <button class="btn" id="btn-free">Free practice</button>
         <button class="btn" id="btn-gdrill">Grammar drill</button>
         <button class="btn" id="btn-peek">Sneak peek</button>
-        <button class="btn" id="btn-lr">Listen (hands-free)</button>
+        <button class="btn" id="btn-lr" title="Hands-free listening">Listen hands-free</button>
       </div>
     </div>
+    <p class="tiny home-note" id="home-summary"></p>
   </div>
 
   <div id="peek-run" hidden>
