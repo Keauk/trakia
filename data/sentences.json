@@ -2,8 +2,11 @@
 {
 "id": "A059",
 "bg": "Домът ми е в Амстердам.",
-"nl": "Mijn thuis is in Amsterdam.",
-"nl_alt": [],
+"nl": "Mijn huis is in Amsterdam.",
+"nl_alt": [
+"Mijn huis staat in Amsterdam.",
+"Mijn thuis is in Amsterdam."
+],
 "bg_alt": [
 "Моят дом е в Амстердам."
 ],
@@ -21,7 +24,8 @@
 ],
 "source": "generated-2026-10",
 "nl_loose": [
-"Amsterdam is mijn thuis."
+"Amsterdam is mijn thuis.",
+"Ik woon in Amsterdam."
 ],
 "en_loose": [
 "Amsterdam is my home.",
