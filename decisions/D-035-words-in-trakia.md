@@ -1,6 +1,6 @@
 # D-035: Learn the deck's words in Trakia: word cards on the same FSRS schedule, one daily limit, the Anki position kept up to date
 
-Status: accepted · Created: 2026-10-28 · Area: practise (`ui.js`: the words run; `index.html`: `#words-run`, button on the Practise home), scheduling (`core.js`: `wordQueue`, `wordRank`, `gradeWord`, `seedWords`, `parseKey`), settings (the Anki position), stats, tooling (`tools/anki_progress.py`)
+Status: in progress · Created: 2026-10-28 · Area: practise (`ui.js`: the words run; `index.html`: `#words-run`, button on the Practise home), scheduling (`core.js`: `wordQueue`, `wordRank`, `gradeWord`, `seedWords`, `parseKey`), settings (the Anki position), stats, tooling (`tools/anki_progress.py`)
 
 ## Context
 The learner studies the 2,952 words of the Anki deck *Bulgarian 2952 (mixed)* in Anki and the

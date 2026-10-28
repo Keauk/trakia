@@ -35,3 +35,5 @@ __pycache__/
 *.pyc
 .venv/
 *.tmp
+# a learner's Anki review history (D-035, tools/anki_progress.py): personal data, never in this public repository
+*anki-progress*

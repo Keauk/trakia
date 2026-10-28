@@ -632,4 +632,64 @@ t('D-034 sentences for hands-free listening', () => {
   assert.deepEqual(C.listenItems(S, prog, set, 'background', now, () => 0).map(s => s.id).sort(), ['a', 'b', 'c']);
   assert.deepEqual(C.listenItems(S, {}, set, 'practice', now).map(s => s.id), ['a', 'b', 'c', 'd'], 'nothing seen: the easiest eligible ones');
 });
+// --- deck words (D-035) ---
+const WW = Array.from({ length: 40 }, (_, i) => ({ rank: i + 1, bg: 'дума' + (i + 1), en: 'word ' + (i + 1), pos: 'noun', forms: '' }));
+t('word keys', () => {
+  assert.deepEqual(C.parseKey('w:12|en2bg'), { id: 'w:12', dir: 'en2bg', lang: 'en', toBg: true, listen: false, word: true, rank: 12 });
+  assert.equal(C.parseKey('A059|bg2nl').word, undefined);
+  const ids = require('../data/sentences.json').map(s => s.id);
+  assert.ok(ids.every(id => !id.includes(':')), 'no bundled sentence id has a colon');
+  assert.ok(!C.rowToSentence({ id: 'w:5', bg: 'Да.', nl: 'Ja.' }, C.wordIndex(WW)).id.includes(':'), 'an imported id loses its colon');
+});
+t('wordRank stops at a gap', () => {
+  assert.equal(C.wordRank({}), 0);
+  assert.equal(C.wordRank({ 'w:1|bg2en': {}, 'w:2|en2bg': {}, 'w:4|bg2en': {}, 'A1|bg2nl': {} }), 2);
+  assert.equal(C.hasWords({ 'A1|bg2nl': {} }), false);
+});
+t('gradeWord', () => {
+  const now = new Date(2026, 9, 28, 9).getTime();
+  const p = C.gradeWord(undefined, 3, now);
+  assert.equal(p.first, now); assert.equal(p.reps, 1); assert.equal(p.state, 'review', 'Good on a new card graduates (one 10-minute step)');
+  const again = C.gradeWord(p, 1, now + 5 * 86400e3);
+  assert.equal(again.lapses, 1); assert.equal(again.state, 'relearning'); assert.equal(again.first, now);
+  const fresh = C.gradeWord(undefined, 1, now); assert.equal(fresh.lapses, 0, 'Again on a new card is no lapse'); assert.equal(fresh.state, 'learning');
+  const iv = C.wordIntervals(p, now + 5 * 86400e3);
+  assert.ok(iv[0] < iv[1] && iv[1] < iv[2] && iv[2] < iv[3], 'Again < Hard < Good < Easy: ' + iv);
+});
+t('wordQueue: deck order, siblings next day, limits', () => {
+  const now = new Date(2026, 9, 28, 9).getTime(), D = 86400e3, yesterday = now - D;
+  let prog = {};
+  let q = C.wordQueue(WW, prog, { newWords: 3 }, now);
+  assert.deepEqual(q.fresh, ['w:1|bg2en', 'w:2|bg2en', 'w:3|bg2en'], 'new words in deck order, Bulgarian → English first');
+  prog['w:1|bg2en'] = C.gradeWord(undefined, 3, now);
+  q = C.wordQueue(WW, prog, { newWords: 3 }, now);
+  assert.deepEqual(q.fresh, ['w:2|bg2en', 'w:3|bg2en'], 'a word started today counts, its sibling waits for tomorrow');
+  prog = { 'w:1|bg2en': C.gradeWord(undefined, 3, yesterday) };
+  q = C.wordQueue(WW, prog, { newWords: 2 }, now);
+  assert.deepEqual(q.fresh, ['w:1|en2bg', 'w:2|bg2en', 'w:3|bg2en'], 'the sibling of a word started yesterday comes first');
+  // reviews and learning
+  prog = { 'w:5|bg2en': Object.assign(C.gradeWord(undefined, 3, now - 10 * D), { due: now - D }), 'w:6|bg2en': Object.assign(C.gradeWord(undefined, 1, now - 10 * D), { first: now - 10 * D, due: now + 5 * 60e3 }), 'w:7|bg2en': Object.assign(C.gradeWord(undefined, 3, now - 10 * D), { due: now + 40 * D }) };
+  q = C.wordQueue(WW, prog, { newWords: 0 }, now);
+  assert.deepEqual(q.due, ['w:5|bg2en']); assert.deepEqual(q.learning, ['w:6|bg2en']); assert.deepEqual(q.fresh, ['w:5|en2bg', 'w:6|en2bg', 'w:7|en2bg']);
+  assert.deepEqual(q.counts, { fresh: 3, learning: 1, due: 1 });
+  // the daily limit counts sentence reviews too
+  const busy = Object.assign({}, prog); for (let i = 0; i < 5; i++) busy['S' + i + '|bg2nl'] = { box: 2, due: now - 1, reps: 3, lapses: 0, streak: 1, last: now - D, s: 3, d: 5, state: 'review' };
+  q = C.wordQueue(WW, busy, { newWords: 5, dailyMax: 6 }, now);
+  assert.deepEqual(q.fresh, [], 'no new cards once today\'s reviews reach the limit'); assert.equal(q.paused, 'limit'); assert.equal(q.load.reviews, 7, 'five sentences, a word review, a word in relearning');
+  assert.deepEqual(q.due, ['w:5|bg2en'], 'reviews are never capped');
+});
+t('seedWords spreads the known words', () => {
+  const now = new Date(2026, 9, 28, 9).getTime(), D = 86400e3;
+  const seeded = C.seedWords(WW, 30, now);
+  assert.equal(Object.keys(seeded).length, 60, 'both cards of words 1–30');
+  assert.equal(C.wordRank(seeded), 30);
+  const dues = Object.values(seeded).map(p => p.due);
+  assert.ok(dues.every(d => d > now - D), 'nothing overdue');
+  const today = Object.values(seeded).filter(p => p.due < now + D).length;
+  assert.ok(today < 15, 'only a few due within a day: ' + today);
+  assert.ok(Object.values(seeded).every(p => p.state === 'review' && p.first == null && p.reps === 1));
+  assert.ok(seeded['w:1|bg2en'].s > seeded['w:30|bg2en'].s, 'early words are more stable');
+  const q = C.wordQueue(WW, seeded, { newWords: 10 }, now);
+  assert.equal(q.fresh[0], 'w:31|bg2en', 'learning continues after the known words');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));
