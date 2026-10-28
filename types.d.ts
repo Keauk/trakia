@@ -6,7 +6,9 @@ interface Word { rank: number; bg: string; en: string; pos: string; forms: strin
   /** the deck's topic (food, body, family, …) */
   cat?: string;
   /** clip key of the spoken word, in both voices (D-005) */
-  au?: string }
+  au?: string;
+  /** the deck's example sentence, shown on the back of a word card (D-035) */
+  ex_bg?: string; ex_en?: string }
 
 /** A spoken part of a story title or paragraph (D-005): `bg` offsets from–to, voice k (Kalina) or b (Borislav),
  *  the clip key, and per word [start ms, from, to] for the read-along highlight. */
@@ -78,6 +80,8 @@ interface Settings {
   dictation: boolean;
   /** hands-free listening (D-034), per device: 'practice' | 'background', pause 'auto' or seconds, repeat the Bulgarian, minutes (0: no limit) */
   listenMode: string; listenPause: string; listenRepeat: boolean; listenLimit: number;
+  /** deck words (D-035): new words a day, and no new words while today's reviews reach dailyMax; shared */
+  newWords: number; dailyMax: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 

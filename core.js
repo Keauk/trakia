@@ -563,6 +563,7 @@
     const i = key.lastIndexOf('|'), id = key.slice(0, i), dir = key.slice(i + 1);
     if (dir === 'listen') return { id, dir, lang: 'bg', toBg: true, listen: true };   // dictation: hear Bulgarian, type it (D-005)
     const toBg = dir.endsWith('2bg'), lang = toBg ? dir.slice(0, -3) : dir.slice(3);
+    if (/^w:\d+$/.test(id)) return { id, dir, lang, toBg, listen: false, word: true, rank: +id.slice(2) };   // a deck word (D-035)
     return { id, dir, lang, toBg, listen: false };
   }
   /** accepted answers for a card: the other-language sentence (+ alternatives) or the Bulgarian;
@@ -815,7 +816,7 @@
   function rowToSentence(row, idx) {
     const split = (v, sep) => Array.isArray(v) ? v : String(v || '').split(sep).map(x => x.trim()).filter(Boolean);
     const s = {
-      id: String(row.id || '').trim() || hashId(String(row.bg).trim()),
+      id: String(row.id || '').trim().replace(/:/g, '-') || hashId(String(row.bg).trim()),   // a colon marks word cards (D-035)
       bg: String(row.bg || '').trim(), nl: String(row.nl || '').trim(),
       nl_alt: split(row.nl_alt, '|'), bg_alt: split(row.bg_alt, '|'), en_alt: split(row.en_alt, '|'), bg_alt_en: split(row.bg_alt_en, '|'),
       nl_loose: split(row.nl_loose, '|'), en_loose: split(row.en_loose, '|'),
@@ -1040,6 +1041,100 @@
     return story.level <= (settings.rank || 0) + (settings.tolerance || 0) && grammarOk(story, settings);
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems };
+  // --- deck words (decision D-035) -------------------------------------------------------------
+  // Every deck word has two cards, w:<rank>|bg2en and w:<rank>|en2bg, graded Again/Hard/Good/Easy.
+  const WORD_DIRS = ['bg2en', 'en2bg'];
+  const wordKey = (/** @type {number} */ rank, /** @type {string} */ dir) => 'w:' + rank + '|' + dir;
+  /** start of the local day of `now`, and of the next day @param {number} now */
+  function dayBounds(now) { const d = new Date(now); d.setHours(0, 0, 0, 0); const start = d.getTime(); d.setDate(d.getDate() + 1); return { start, end: d.getTime() }; }
+  /** the highest rank R such that every word 1…R has a card @param {Progress} progress */
+  function wordRank(progress) {
+    const have = new Set();
+    for (const k in progress) { const m = /^w:(\d+)\|/.exec(k); if (m) have.add(+m[1]); }
+    let r = 0; while (have.has(r + 1)) r++;
+    return r;
+  }
+  const hasWords = (/** @type {Progress} */ progress) => Object.keys(progress).some(k => k.startsWith('w:'));
+  /** today's load over all cards: reviews (due before the end of today, or answered today, not new today)
+   *  and the words started today @param {Progress} progress @param {number} now */
+  function dayLoad(progress, now) {
+    const { start, end } = dayBounds(now);
+    let reviews = 0, newWords = 0;
+    for (const k in progress) {
+      const p = progress[k]; if (!p) continue;
+      if (p.first != null && p.first >= start) { if (k.startsWith('w:') && k.endsWith('|bg2en')) newWords++; continue; }
+      if (p.due < end || (p.last || 0) >= start) reviews++;
+    }
+    return { reviews, newWords };
+  }
+  /** what a words run can show now: learning cards due within 20 minutes (Anki's learn-ahead), reviews due
+   *  today (oldest first), and new cards: the English → Bulgarian card of words started before today, then
+   *  new words in deck order, within `newWords` a day and only while today's reviews are below `dailyMax`.
+   *  Counts as Anki shows them: fresh (blue), learning due today (red), due (green).
+   *  @param {Word[]} words @param {Progress} progress @param {Partial<Settings>} settings @param {number} now */
+  function wordQueue(words, progress, settings, now) {
+    const { start, end } = dayBounds(now), load = dayLoad(progress, now);
+    const newWords = settings.newWords == null ? 10 : settings.newWords, dailyMax = settings.dailyMax == null ? 150 : settings.dailyMax;
+    /** @type {{k: string, due: number}[]} */ const learning = [], due = [];
+    let learningToday = 0, nextLearning = Infinity;
+    /** @type {string[]} */ const siblings = [], fresh = [];
+    for (const w of words) {
+      const a = progress[wordKey(w.rank, 'bg2en')], b = progress[wordKey(w.rank, 'en2bg')];
+      if (a && !b && (a.first == null || a.first < start)) siblings.push(wordKey(w.rank, 'en2bg'));
+      for (const [k, p] of [[wordKey(w.rank, 'bg2en'), a], [wordKey(w.rank, 'en2bg'), b]]) {
+        if (!p || typeof k !== 'string' || typeof p !== 'object') continue;
+        if (p.state === 'review') { if (p.due < end) due.push({ k, due: p.due }); }
+        else if (p.due < end) { learningToday++; if (p.due <= now + 20 * MIN) learning.push({ k, due: p.due }); else nextLearning = Math.min(nextLearning, p.due); }
+      }
+    }
+    const room = load.reviews < dailyMax;
+    const left = Math.max(0, newWords - load.newWords);
+    if (room) {
+      fresh.push(...siblings);
+      for (const w of words) { if (fresh.length >= siblings.length + left) break; if (!progress[wordKey(w.rank, 'bg2en')]) fresh.push(wordKey(w.rank, 'bg2en')); }
+    }
+    const byDue = (/** @type {{due: number}} */ x, /** @type {{due: number}} */ y) => x.due - y.due;
+    return {
+      learning: learning.sort(byDue).map(x => x.k), due: due.sort(byDue).map(x => x.k), fresh,
+      counts: { fresh: fresh.length, learning: learningToday, due: due.length },
+      nextLearning: nextLearning === Infinity ? null : nextLearning,
+      paused: !room && (siblings.length || left) ? 'limit' : null, load, dailyMax,
+    };
+  }
+  /** a word card graded 1–4 (Again, Hard, Good, Easy); like applyResult, without the "almost" policy
+   *  @param {ProgressRecord | undefined} p @param {number} rating @param {number} now @param {Partial<Settings>} [settings] @param {() => number} [rand] */
+  function gradeWord(p, rating, now, settings, rand) {
+    const r = Object.assign(newRecord(), p || {});
+    if (!r.reps && !r.first) r.first = now;
+    if (rating === AGAIN) { if (r.state === 'review') r.lapses += 1; r.streak = 0; } else r.streak += 1;
+    r.reps += 1;
+    const c = fsrsReview({ s: r.s, d: r.d, state: r.state, step: r.step, last: r.last }, rating, now, fsrsOpts(settings), rand);
+    r.s = c.s; r.d = c.d; r.state = c.state; r.step = c.step; r.due = c.due; r.last = now;
+    r.box = boxFromRecord(r); r.rating = rating;
+    return r;
+  }
+  /** time until the next review for each rating 1–4, in ms (no fuzz) @param {ProgressRecord | undefined} p @param {number} now @param {Partial<Settings>} [settings] */
+  function wordIntervals(p, now, settings) {
+    return [AGAIN, HARD, GOOD, EASY].map(g => gradeWord(p, g, now, Object.assign({}, settings, { fsrs: Object.assign({}, settings && settings.fsrs, { fuzz: false }) })).due - now);
+  }
+  /** review cards for both cards of words 1…n, for a learner who already knows them: stability falls from 45 days
+   *  (word 1) to 3 days (word n) and each card is part-way through its interval (a fixed fraction from its rank),
+   *  so the reviews spread over the coming weeks instead of all falling today
+   *  @param {Word[]} words @param {number} n @param {number} now @param {Partial<Settings>} [settings] @returns {Progress} */
+  function seedWords(words, n, now, settings) {
+    const o = fsrsOpts(settings), out = /** @type {Progress} */ ({});
+    for (const w of words) {
+      if (w.rank > n) continue;
+      WORD_DIRS.forEach((dir, j) => {
+        const s = 45 - 42 * (n > 1 ? (w.rank - 1) / (n - 1) : 0), ivl = nextIntervalDays(s, o);
+        const frac = 0.15 + 0.8 * ((w.rank * 0.6180339887 + j * 0.5) % 1), last = Math.round(now - frac * ivl * D);
+        out[wordKey(w.rank, dir)] = { box: 0, due: last + ivl * D, reps: 1, lapses: 0, streak: 1, last, s, d: 5, state: 'review', rating: GOOD };
+        out[wordKey(w.rank, dir)].box = boxFromRecord(out[wordKey(w.rank, dir)]);
+      });
+    }
+    return out;
+  }
+
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, wordQueue, gradeWord, wordIntervals, seedWords };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

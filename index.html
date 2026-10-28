@@ -210,6 +210,16 @@ input[type=range]{width:100%}
 kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--input-bg)}
 /* wide screens: the tabs sit on the page centre line, the same as the content column */
 /* sneak peek (D-031) */
+.wc{margin-left:6px;font:600 13px/1 var(--mono)}.wc-new{color:var(--primary)}.wc-learn{color:var(--wrong)}.wc-due{color:var(--correct)}
+.wr-front{font:600 28px/1.3 var(--sans);margin:18px 0 6px;color:var(--ink)}
+.wr-answer{font:600 22px/1.35 var(--sans);margin:14px 0 2px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink)}
+.wr-answer .say-btn{margin-left:4px}
+.wr-ex{font:400 17px/1.45 var(--sans);margin:12px 0 2px;color:var(--ink-2)}
+.wr-grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.wr-grades .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px}
+.wr-grades small{font:400 12px/1.2 var(--sans);color:var(--muted)}
+.wr-g1 b{color:var(--wrong)}.wr-g2 b{color:var(--almost)}.wr-g3 b{color:var(--correct)}.wr-g4 b{color:var(--primary)}
+#set-rank:disabled,#set-rank-range:disabled{opacity:.55}
 .peek-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .peek-sentence{font:500 22px/1.5 var(--sans);margin:14px 0 4px;color:var(--ink)}
 .peek-sentence mark{background:var(--revealed-tint);color:var(--revealed);border-radius:4px;padding:0 2px}
@@ -284,7 +294,7 @@ body.running main{padding-top:0;padding-bottom:calc(var(--tabbar-h) + 96px)}
 .next-row .btn.next{width:100%;height:52px;border-radius:12px;padding:0 18px;font-size:16px}
 #toast,#update-bar{bottom:calc(var(--tabbar-h) + 16px)}
 body.running #toast{bottom:calc(var(--tabbar-h) + 92px)}
-.home-actions{display:grid;grid-template-columns:1fr 1fr}.home-actions .primary{grid-column:1/-1}
+.home-actions{display:grid;grid-template-columns:1fr 1fr}.home-actions .primary,.home-actions #btn-words{grid-column:1/-1}
 }
 /* while typing on a touch screen the keyboard takes the tab bar's place */
 @media (max-width:767px) and (pointer:coarse){
@@ -316,8 +326,10 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <div class="card">
       <div class="stats" id="home-stats"></div>
       <p class="muted" id="home-summary"></p>
+      <p class="tiny" id="words-paused" hidden></p>
       <div class="row home-actions">
         <button class="btn primary" id="btn-start">Practise</button>
+        <button class="btn" id="btn-words" title="Deck words: new · learning · due">Words</button>
         <button class="btn" id="btn-free">Free practice</button>
         <button class="btn" id="btn-gdrill">Grammar drill</button>
         <button class="btn" id="btn-peek">Sneak peek</button>
@@ -329,7 +341,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
   <div id="peek-run" hidden>
     <div class="card">
       <div class="peek-top"><span class="tiny" id="peek-count"></span><button class="link-btn" id="btn-peek-stop">Stop</button></div>
-      <p class="tiny">Anki teaches this word soon. Guess what it means from the sentence: a wrong guess helps you remember it too.</p>
+      <p class="tiny">You learn this word soon. Guess what it means from the sentence: a wrong guess helps you remember it too.</p>
       <div class="say-row"><p class="peek-sentence" id="peek-sentence" lang="bg"></p><button class="say-btn" id="btn-say-peek" aria-label="Listen" title="Listen" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button></div>
       <p class="tiny" id="peek-others"></p>
       <p class="peek-q" id="peek-question"></p>
@@ -350,6 +362,39 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <div class="field"><label for="set-lr-pause">Pause to answer</label><select id="set-lr-pause"><option value="auto">Auto (longer for long sentences)</option><option value="3">3 seconds</option><option value="5">5 seconds</option><option value="8">8 seconds</option></select></div>
         <div class="toggle"><input type="checkbox" id="set-lr-repeat"><div>Repeat the Bulgarian in the other voice</div></div>
         <div class="field"><label for="set-lr-limit">Stop after</label><select id="set-lr-limit"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="0">Never</option></select></div>
+      </div>
+    </div>
+  </div>
+  <div id="words-run" hidden>
+    <div class="card">
+      <div class="peek-top"><span class="tiny" id="wr-count"></span><button class="link-btn" id="btn-wr-stop">Stop</button></div>
+      <div id="wr-start" hidden>
+        <h2>Where do you start?</h2>
+        <p class="muted">The deck has 2,952 words, in the order Anki teaches them. Words you already know count as known: they come back as reviews, spread over the coming weeks. 0 starts at the first word.</p>
+        <div class="field"><label for="wr-known">Words 1 to … count as known</label><div class="inline"><input type="number" id="wr-known" min="0" max="2952" step="1"><span class="tiny" id="wr-known-word"></span></div></div>
+        <div class="row"><button class="btn primary" id="btn-wr-begin">Start</button></div>
+      </div>
+      <div id="wr-card" hidden>
+        <p class="tiny" id="wr-dir"></p>
+        <div class="say-row"><p class="wr-front" id="wr-front"></p><button class="say-btn" id="btn-say-wr" aria-label="Listen to the word" title="Listen to the word" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button></div>
+        <div id="wr-back" hidden>
+          <p class="wr-answer" id="wr-answer"></p>
+          <p class="tiny" id="wr-info"></p>
+          <p class="wr-ex" id="wr-ex-bg" lang="bg"></p>
+          <p class="muted" id="wr-ex-en"></p>
+        </div>
+        <div class="row" id="wr-show-row"><button class="btn primary" id="btn-wr-show">Show answer</button></div>
+        <div class="wr-grades" id="wr-grades" hidden>
+          <button class="btn wr-g1" data-g="1"><b>Again</b><small id="wr-i1"></small></button>
+          <button class="btn wr-g2" data-g="2"><b>Hard</b><small id="wr-i2"></small></button>
+          <button class="btn wr-g3" data-g="3"><b>Good</b><small id="wr-i3"></small></button>
+          <button class="btn wr-g4" data-g="4"><b>Easy</b><small id="wr-i4"></small></button>
+        </div>
+      </div>
+      <div id="wr-done" hidden>
+        <h2>Done for now</h2>
+        <p class="muted" id="wr-done-text"></p>
+        <div class="row"><button class="btn" id="btn-wr-home">Back</button></div>
       </div>
     </div>
   </div>
@@ -525,12 +570,20 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
   <div class="card">
     <h2>Anki alignment</h2>
     <div class="field">
-      <label for="set-rank">I'm at word number … in Anki</label>
+      <label for="set-rank" id="rank-label">I'm at word number … in Anki</label>
       <div class="inline"><input type="number" id="set-rank" min="0" max="2952" step="1"><span class="tiny" id="rank-word"></span></div>
       <input type="range" id="set-rank-range" min="0" max="2952" step="1">
       <div class="help" id="rank-help"></div>
-      <div class="help">Tip: sort the Anki browser by "due" and look at the Rank field of the first new card, or re-export the deck and load the generated words.json here:
+      <div class="help" id="rank-auto" hidden>Set by the deck words you have started (<b>Words</b>, on the Practise home).</div>
+      <div class="help" id="rank-tip">Tip: sort the Anki browser by "due" and look at the Rank field of the first new card, or re-export the deck and load the generated words.json here:
         <label class="btn small" style="display:inline-block;margin-top:4px">Load words.json <input type="file" id="load-words" accept=".json" hidden></label></div>
+    </div>
+    <div class="field">
+      <label for="set-newwords">New words per day</label>
+      <input type="number" id="set-newwords" min="0" max="100" step="1">
+      <label for="set-dailymax">Daily reviews limit</label>
+      <input type="number" id="set-dailymax" min="10" max="1000" step="10">
+      <div class="help">New words stop for the day once the reviews due today, words and sentences together, reach this limit. Reviews themselves are never capped.</div>
     </div>
     <div class="field">
       <label for="set-stage">Grammar stage (match it to the lesson you are on)</label>
