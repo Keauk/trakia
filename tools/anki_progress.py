@@ -21,6 +21,7 @@ DEFAULT_COL = os.path.expanduser('~/Library/Application Support/Anki2/User 1/col
 DEFAULT_OUT = os.path.expanduser('~/Downloads/trakia-anki-progress.json')
 DIRS = {0: 'bg2en', 1: 'en2bg'}
 STATE = {1: 'learning', 2: 'review', 3: 'relearning'}
+KNOWN_DAYS = 7   # as core.js KNOWN_DAYS (D-036)
 
 
 def open_collection(path, tmp):
@@ -80,7 +81,9 @@ def records(con, now_ms):
         else:
             due_ms = now_ms
         last = int(d['lrt']) * 1000 if d.get('lrt') else None
-        if not last and typ == 2:
+        if typ == 2 and last and ivl > 0:   # Anki's due is a day number; Trakia keeps the exact interval from the last review
+            due_ms = last + ivl * 86400 * 1000
+        elif typ == 2:
             last = int(due_ms - ivl * 86400 * 1000)
         rec = {'box': 0, 'due': int(due_ms), 'reps': reps, 'lapses': lapses, 'streak': 0, 'last': last or now_ms,
                'state': state}
@@ -99,6 +102,35 @@ def records(con, now_ms):
     return out, counts
 
 
+def day_key(ms):
+    return time.strftime('%Y-%m-%d', time.localtime(ms / 1000))
+
+
+def word_days(con, now_ms):
+    """{day: [started, known, at]} from Anki's review log (D-036): started = notes reviewed on or before the day;
+    known = notes whose Bulgarian → English card's last review on or before the day set an interval of at least
+    KNOWN_DAYS days (at 90 % retention Anki's interval is about the FSRS stability)"""
+    rows = con.execute('select r.id, c.nid, c.ord, r.ivl from revlog r join cards c on c.id = r.cid order by r.id').fetchall()
+    if not rows:
+        return {}
+    started, ivl, out = set(), {}, {}
+    i, day = 0, day_key(rows[0][0])
+    today = day_key(now_ms)
+    while day <= today:
+        while i < len(rows) and day_key(rows[i][0]) <= day:
+            _, nid, ord_, iv = rows[i]
+            started.add(nid)
+            if ord_ == 0:
+                ivl[nid] = iv
+            i += 1
+        known = sum(1 for v in ivl.values() if v >= KNOWN_DAYS)
+        y, m, d = map(int, day.split('-'))
+        end = int(time.mktime((y, m, d + 1, 0, 0, 0, 0, 0, -1)) * 1000) - 1
+        out[day] = [len(started), known, min(end, now_ms - 1)]
+        day = day_key(end + 1)
+    return out
+
+
 def main(src=DEFAULT_COL, out=DEFAULT_OUT, now_ms=None):
     out = os.path.abspath(os.path.expanduser(out))
     if os.path.commonpath([out, ROOT]) == ROOT:
@@ -109,6 +141,7 @@ def main(src=DEFAULT_COL, out=DEFAULT_OUT, now_ms=None):
     try:
         con = open_collection(os.path.expanduser(src), tmp)
         progress, counts = records(con, now_ms)
+        days = word_days(con, now_ms)
         con.close()
     finally:
         shutil.rmtree(tmp)
@@ -118,9 +151,9 @@ def main(src=DEFAULT_COL, out=DEFAULT_OUT, now_ms=None):
     while f'w:{rank + 1}|bg2en' in progress or f'w:{rank + 1}|en2bg' in progress:
         rank += 1
     with open(out, 'w', encoding='utf-8') as fh:
-        json.dump({'app': 'trakia', 'version': 2, 'progress': dict(sorted(progress.items()))}, fh, ensure_ascii=False)
+        json.dump({'app': 'trakia', 'version': 2, 'progress': dict(sorted(progress.items())), 'wordDays': days}, fh, ensure_ascii=False)
     print(f'{len(progress)} cards ({", ".join(f"{v} {k}" for k, v in sorted(counts.items()))}); '
-          f'{due_today} due today; words started up to {rank} -> {out}')
+          f'{due_today} due today; words started up to {rank}; {len(days)} days of history -> {out}')
     return progress
 
 

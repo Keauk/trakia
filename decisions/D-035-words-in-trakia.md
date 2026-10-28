@@ -93,8 +93,9 @@ question); audio for the deck's example sentences (open question); words beyond 
     Rank field (index 6) gives the rank. Card `ord` 0 is Bulgarian → English and `ord` 1 English →
     Bulgarian; the tool checks this against the template names.
   - Per card that is not new: `s`, `d` from the card's FSRS data; `last` = `lrt` × 1000; `state`
-    from `type` (1 learning, 2 review, 3 relearning); `due` = (collection `crt` + `due` days) × 1000
-    for review cards and `due` seconds × 1000 for learning cards; `reps`, `lapses` from the card.
+    from `type` (1 learning, 2 review, 3 relearning); `due` = `last` + the card's interval for review
+    cards (Anki's `due` is a day number) and `due` seconds × 1000 for learning cards; `reps`,
+    `lapses` from the card.
     A review card without FSRS data keeps its Anki interval as stability (29 of them on
     2026-10-28); a learning card without it is due now; suspended cards stay out.
   - Writes a progress snapshot (`app: 'trakia'`, `progress` only) to a path outside the
@@ -151,7 +152,11 @@ still to come.
 
 ### Measurements
 - 2026-10-28: the tool on the learner's collection: 460 cards (419 review, 35 learning,
-  6 relearning, 1 suspended), 189 due today, words started up to 243. Loaded into a local test
+  6 relearning, 1 suspended), 189 due today, words started up to 243. The 35 "learning" were 29
+  review cards without FSRS state, wrongly made learning cards; fixed, the tool then gave 158 due and
+  11 learning, as Anki's own count of the closed collection.
+- 2026-10-28 12:18: the learner closed Anki; the app was published and the 459 word cards merged
+  into their gist (158 sentence cards unchanged; a backup of the gist kept outside the repository). Loaded into a local test
   browser: position 243, Words 0 new · 41 learning · 148 due; new words paused, since 189 reviews
   today exceed the limit of 150.
 

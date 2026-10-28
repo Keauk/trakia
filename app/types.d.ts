@@ -115,6 +115,8 @@ interface Snapshot {
   days: Record<string, DaySummary>;
   /** words guessed in a sneak peek, by rank (D-031) */
   peeks: Record<string, { at: number; ok: boolean }>;
+  /** per day: words started, words known, when the entry was written (D-036) */
+  wordDays?: Record<string, [number, number, number]>;
 }
 
 /** One compacted day (D-029): answers and drill answers as [wrong, almost, correct], session starts. */

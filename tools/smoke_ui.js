@@ -593,6 +593,8 @@ setTimeout(async () => {
       document.dispatchEvent(new window.KeyboardEvent('keydown', { key: '3' }));
     }
     assert.ok(gradedNew, 'a new word came up');
+    const wd = JSON.parse(window.localStorage.getItem('trakia.wordDays'));
+    assert.deepEqual(wd[C.dayKey(Date.now())].slice(0, 2), [C.wordCounts(JSON.parse(window.localStorage.getItem('trakia.progress'))).started, C.wordCounts(JSON.parse(window.localStorage.getItem('trakia.progress'))).known], 'today\'s known words are kept');
     assert.ok($('words-paused').hidden, 'no pause note under the limit');
     assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 31, 'starting word 31 moves the position');
     const lastLog = JSON.parse(window.localStorage.getItem('trakia.log')).slice(-1)[0];
@@ -603,6 +605,7 @@ setTimeout(async () => {
     assert.ok($('set-rank').disabled && !$('rank-auto').hidden, 'the position is read-only');
     document.querySelector('nav button[data-tab=stats]').click();
     assert.match($('stats-progress').innerHTML, /Deck words/);
+    assert.ok(!$('stats-words-card').hidden && /words known/.test($('stats-words').textContent), 'the known words card');
   }
   console.log('UI smoke test passed');
 }, 100);

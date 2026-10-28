@@ -692,4 +692,11 @@ t('seedWords spreads the known words', () => {
   const q = C.wordQueue(WW, seeded, { newWords: 10 }, now);
   assert.equal(q.fresh[0], 'w:31|bg2en', 'learning continues after the known words');
 });
+t('wordCounts and the known-words history merge (D-036)', () => {
+  const rev = days => ({ box: 2, due: 1 + days * 86400e3, reps: 2, lapses: 0, streak: 1, last: 1, s: days, d: 5, state: 'review' });
+  const prog = { 'w:1|bg2en': rev(8), 'w:1|en2bg': rev(2), 'w:2|bg2en': rev(6.9), 'w:3|en2bg': rev(30), 'w:4|bg2en': Object.assign(rev(20), { state: 'relearning' }), 'A1|bg2nl': rev(50) };
+  assert.deepEqual(C.wordCounts(prog), { started: 4, known: 1 }, 'only a Bulgarian → English review card with 7+ days to its next review counts');
+  const a = { wordDays: { '2026-10-27': [10, 4, 100], '2026-10-28': [12, 5, 300] } }, b = { wordDays: { '2026-10-28': [12, 4, 200], '2026-10-26': [8, 3, 50] }, stamps: { wiped: 60 } };
+  assert.deepEqual(C.mergeSnapshots(a, b).wordDays, { '2026-10-27': [10, 4, 100], '2026-10-28': [12, 5, 300] }, 'the newer entry per day; nothing from before a reset');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

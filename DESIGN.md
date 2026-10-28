@@ -292,7 +292,10 @@ the reviews due today, words and sentences together (`C.dayLoad`), reach *Daily 
 Once any word card exists the Anki position is `C.wordRank` (every word up to it started) and the
 slider below is read-only. A new learner picks the words that count as known (`C.seedWords` spreads
 their reviews); an Anki user's own schedule comes over with `tools/anki_progress.py` (a progress
-file outside the repository, merged with *Import progress* or into the sync gist).
+file outside the repository, merged with *Import progress* or into the sync gist). *Words you know*
+on the Stats tab (D-036) graphs per day the words started and known (Bulgarian → English card with
+its next review a week or more away), kept in `wordDays`; the days before the switch come from
+Anki's review log.
 
 ### 4.4 Rank alignment UI
 

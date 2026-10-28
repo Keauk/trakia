@@ -973,10 +973,14 @@
       for (const f of /** @type {const} */ (['a', 'd'])) { const v = x[f]; if (v) d[f] = [0, 1, 2].map(i => Math.max((d[f] || [0, 0, 0])[i], v[i] || 0)); }
       if (x.s) d.s = Math.max(d.s || 0, x.s);
     }
+    // known words per day (D-036): per day the entry written last, nothing from before a reset
+    /** @type {Record<string, [number, number, number]>} */ const allWordDays = {};
+    for (const side of [L.wordDays || {}, R.wordDays || {}]) for (const k in side) { const e = side[k], had = allWordDays[k]; if (!had || e[2] >= had[2]) allWordDays[k] = e; }
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
       stamps, cleared, reading, days: sortedMap(allDays, normDay), peeks: sortedMap(allPeeks, p => p.at > wiped ? p : undefined),
+      wordDays: sortedMap(allWordDays, e => e[2] > wiped ? e : undefined),
     };
   }
 
@@ -1055,6 +1059,20 @@
     return r;
   }
   const hasWords = (/** @type {Progress} */ progress) => Object.keys(progress).some(k => k.startsWith('w:'));
+  /** a word is known when its Bulgarian → English card is in review and its next review is at least a week after the
+   *  last one (D-036); the interval, not the stability, so that the history from Anki's review log measures the same */
+  const KNOWN_DAYS = 7;
+  /** words started (any card) and known @param {Progress} progress */
+  function wordCounts(progress) {
+    const started = new Set(); let known = 0;
+    for (const k in progress) {
+      if (!k.startsWith('w:')) continue;
+      started.add(k.slice(0, k.indexOf('|')));
+      const p = progress[k];
+      if (k.endsWith('|bg2en') && p && p.state === 'review' && p.due - p.last >= KNOWN_DAYS * D - H) known++;
+    }
+    return { started: started.size, known };
+  }
   /** today's load over all cards: reviews (due before the end of today, or answered today, not new today)
    *  and the words started today @param {Progress} progress @param {number} now */
   function dayLoad(progress, now) {
@@ -1135,6 +1153,6 @@
     return out;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, wordQueue, gradeWord, wordIntervals, seedWords };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, wordCounts };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
