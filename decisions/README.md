@@ -42,6 +42,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-032](D-032-publish-guards.md) | Nothing reaches the phone unchecked: tests before every publish, and no manual cache bump | tooling | done |
 | [D-033](D-033-speak-tab.md) | A Speak tab: say the Bulgarian for a Dutch or English word or sentence, checked by speech recognition | new tab | rejected |
 | [D-034](D-034-hands-free-listening.md) | Hands-free listening: Dutch, a pause to answer in your head, then the Bulgarian; and Bulgarian in the background | practise / audio | in progress |
+| [D-035](D-035-words-in-trakia.md) | Learn the deck's words in Trakia: word cards on the same FSRS schedule, one daily limit, the Anki position kept up to date | practise / scheduling / tooling | accepted |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).
