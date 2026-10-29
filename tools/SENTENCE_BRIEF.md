@@ -96,4 +96,7 @@ quality high; the final file must be a single JSON array. Validate it parses wit
 Your final reply: the number of sentences written and the path. Nothing else.
 
 (For whoever merges the files: `tools/map_sentence_words.py` then proposes each sentence's `words`
-map from its `lemmas`, D-030; map what it cannot place by hand before `validate_sentences.py`.)
+map from its `lemmas`, D-030; map what it cannot place by hand before `validate_sentences.py`.
+Every merged sentence then needs its word-by-word explanation (D-039): write it from
+`tools/EXPLAIN_BRIEF.md` into `data/explanations.json`; `tools/check_explanations.py` (in `npm test`)
+fails on a sentence without one or whose text changed.)

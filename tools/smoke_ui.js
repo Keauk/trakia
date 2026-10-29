@@ -10,6 +10,8 @@ window.confirm = () => true;
 // D-005: jsdom plays no media; play() records the source and ends the clip at once
 const played = []; window.HTMLMediaElement.prototype.pause = function () {};
 window.HTMLMediaElement.prototype.play = function () { played.push(this.src); setTimeout(() => this.onended && this.onended(), 5); return Promise.resolve(); };
+// jsdom does not scroll
+window.Element.prototype.scrollIntoView = function () {};
 // jsdom's Blob has no text()/arrayBuffer(); real browsers do
 window.Blob.prototype.text = function () { return new Promise(r => { const fr = new window.FileReader(); fr.onload = () => r(fr.result); fr.readAsText(this); }); }; window.URL.createObjectURL = () => 'blob:x'; window.URL.revokeObjectURL = () => {};
 for (const f of ['data.js', 'core.js', 'ui.js']) window.eval(fs.readFileSync(path.join(APP, f), 'utf8'));
@@ -44,6 +46,27 @@ assert.equal($('expected').querySelector('mark'), null, 'no highlight for the fi
 assert.equal($('run-card').dataset.state, 'correct'); assert.equal($('verdict').textContent, '✓ Correct');
 assert.equal($('expected').querySelector('mark'), null, 'exact answer: nothing highlighted'); assert.equal($('verdict-note').textContent, '');
 assert.equal($('btn-accept').hidden, true);
+// D-039: Explain the grammar, after the answer: one column per word, a word's explanation on tap, grammar cards linked
+assert.ok(id.ex, 'every sentence has its explanation');
+{
+  assert.equal($('btn-explain').hidden, false); assert.equal($('explain').hidden, true);
+  $('btn-explain').click();
+  assert.equal($('explain').hidden, false); assert.equal($('btn-explain').getAttribute('aria-expanded'), 'true');
+  const cols = $('explain').querySelectorAll('.ex-w'), n = C.storyTokens(id.bg).filter(x => x.w).length;
+  assert.equal(cols.length, n, 'one column per word'); assert.equal($('explain').querySelectorAll('.ex-w.sel').length, 1);
+  assert.equal(cols[0].querySelector('.ex-m').textContent, id.ex[1][0][0], 'the meaning under the word');
+  cols[n - 1].click();
+  assert.equal($('explain').querySelector('.ex-w.sel').dataset.i, String(n - 1), 'the tapped word is selected');
+  assert.ok($('explain').querySelector('.ex-head').textContent.length > 2, 'its explanation is shown');
+  const lab = id.ex[1].findIndex(x => x[1].some(l => window.TRAKIA_DATA.grammarLabels[l].card));
+  if (lab >= 0) {
+    $('explain').querySelectorAll('.ex-w')[lab].click();
+    const a = $('explain').querySelector('[data-gcard]'); assert.ok(a, 'a link to the grammar card');
+    a.click(); assert.ok($('gcard-' + a.dataset.gcard).open, 'the grammar card opens');
+    document.querySelector('nav button[data-tab=practise]').click();
+  }
+  $('btn-explain').click(); assert.equal($('explain').hidden, true);
+}
 {
   const k = Object.keys(id.words).find(f => window.TRAKIA_DATA.words.some(w => C.storyKey(w.bg) === C.storyKey(id.words[f])));
   const w = window.TRAKIA_DATA.words.find(x => C.storyKey(x.bg) === C.storyKey(id.words[k]));

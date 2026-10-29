@@ -601,6 +601,14 @@ t('peekItems: the next words after the position, each in a sentence, with four m
   // merged like the rest of the snapshot: the newer guess per word
   assert.equal(C.mergeSnapshots({ peeks: { 103: { at: 5, ok: true } } }, { peeks: { 103: { at: 3, ok: false } } }).peeks['103'].ok, true);
 });
+t('explanations: B071 word by word (D-039)', () => {
+  const E = require('../data/explanations.json');
+  if (!E.B071) return;   // until the data is complete; check_explanations.py requires every sentence
+  const w = E.B071.w, by = /** @param {string} f */ f => w.find(/** @param {any} x */ x => x.f === f);
+  assert.deepEqual(w.map(/** @param {any} x */ x => x.f), ['В', 'шкафа', 'има', 'чинии', 'и', 'чаши']);
+  assert.ok(by('шкафа').l.includes('the-short')); assert.ok(by('чинии').l.includes('pl')); assert.ok(by('чаши').l.includes('pl'));
+  assert.ok(w.every(/** @param {any} x */ x => x.m), 'a meaning for every word');
+});
 t('peekItems: a plural noun asks with plural meanings, a noun with the article with "the …" (D-037)', () => {
   const P = require('../data/plurals.json');
   const W = require('../data/words.json').map(/** @param {any} w */ w => P[w.rank] ? { ...w, pl: P[w.rank] } : w);

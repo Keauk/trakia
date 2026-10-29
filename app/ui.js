@@ -211,7 +211,7 @@ function checkDrill(giveUp) {
   renderAlts(others);
   const card = GRAMMAR.cards.find(c => c.id === item.card);
   $('gloss').innerHTML = card ? `See: <a href="#" data-gcard="${esc(card.id)}">${esc(card.title)}</a>` : '';
-  $('btn-accept').hidden = true;
+  $('btn-accept').hidden = true; resetExplain(null);
   setTimeout(() => $('btn-next').focus(), 30);
 }
 function nextDrill() {
@@ -236,7 +236,9 @@ $('answer').addEventListener('input', e => {
   }
   fitAnswer();
 });
-$('gloss').addEventListener('click', e => { const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = $('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
+/** open a card of the Grammar tab @param {string | undefined} id */
+function openCard(id) { showTab('grammar'); const el = $('gcard-' + id); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } }
+$('gloss').addEventListener('click', e => { const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); openCard(a.dataset.gcard); });
 function allAccepted(s, dir, key) { return C.acceptedFor(s, dir).concat(userAlts[key] || []); }
 
 function renderCard() {
@@ -272,7 +274,7 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Enter' || !session || !session.pending || e.repeat) return;
   const a = document.activeElement;   // other buttons, the alternatives toggle and links keep their own Enter;
   // a tapped prompt word (D-030) does not, so Enter still moves on after a lookup
-  if (a && a !== $('btn-next') && a !== $('answer') && !a.matches('button.w') && a.matches('button, summary, a, input, select, textarea')) return;
+  if (a && a !== $('btn-next') && a !== $('answer') && !a.matches('button.w, button.ex-w') && a.matches('button, summary, a, input, select, textarea')) return;
   e.preventDefault(); next();
 });
 // Check and Don't know do not take the focus from the answer field: on a phone that would close the keyboard,
@@ -332,11 +334,61 @@ function showFeedback(r, s, dir, accepted, giveUp, outcome, loose) {
   renderExpected(shown, typed, highlight);
   renderAlts(accepted.filter(a => a !== shown), (loose || []).filter(a => a !== shown && a !== r.expected));
   $('gloss').textContent = s.max_rank ? 'rank ' + s.max_rank + (s.rank_estimated ? ' ≈' : '') : '';
-  $('btn-accept').hidden = r.result === 'correct' || giveUp;
+  $('btn-accept').hidden = r.result === 'correct' || giveUp; resetExplain(s);
   if (K.listen) { $('listen-hint').hidden = false; $('btn-listen-hint').hidden = true; $('btn-listen-text').hidden = true; }   // dictation: the meaning, with the answer
   else if (K.toBg) offerSay(s, 'btn-say-exp');   // the Bulgarian answer, once shown (D-005)
   setTimeout(() => $('btn-next').focus(), 30);
 }
+// ---------- explain a sentence word by word: meaning, grammar and why, under each word (D-039) ----------
+const LABELS = DATA.grammarLabels || {};
+/** @type {Sentence | null} */ let exFor = null;
+let exSel = -1;
+/** the Explain link for the sentence just answered, closed; none for a drill or a sentence without an explanation @param {Sentence | null} s */
+function resetExplain(s) {
+  exFor = s && s.ex ? s : null; exSel = -1;
+  $('btn-explain').hidden = !exFor; $('btn-explain').textContent = 'Explain the grammar'; $('btn-explain').setAttribute('aria-expanded', 'false');
+  $('explain').hidden = true; $('explain').innerHTML = '';
+}
+function renderExplain() {
+  const s = exFor; if (!s || !s.ex) return;
+  const [note, ex] = s.ex;
+  /** @type {{t: string, lead: string, tail: string}[]} each word with the punctuation around it */ const cols = [];
+  let lead = '';
+  for (const t of C.storyTokens(s.bg)) { if (t.w) { cols.push({ t: t.t, lead: lead.trim(), tail: '' }); lead = ''; } else if (cols.length) cols[cols.length - 1].tail += t.t; else lead += t.t; }
+  if (exSel < 0) exSel = Math.max(0, ex.findIndex(x => x[1].length));   // start on the first word with something to explain
+  const gloss = cols.map((c, i) => {
+    const [m, ls, end, n] = ex[i] || ['', [], '', ''], cut = end && C.storyKey(c.t).endsWith(C.storyKey(end)) ? end.length : 0;
+    const word = esc(c.lead) + esc(c.t.slice(0, c.t.length - cut)) + (cut ? `<b class="ex-end">${esc(c.t.slice(-cut))}</b>` : '') + esc(c.tail.trim());
+    const chips = ls.map(l => LABELS[l] ? LABELS[l].chip : l).join(' · ');
+    return `<button type="button" class="ex-w${ls.length || n ? '' : ' plain'}${i === exSel ? ' sel' : ''}" data-i="${i}" aria-pressed="${i === exSel}">`
+      + `<span class="ex-bg" lang="bg">${word}</span><span class="ex-m">${esc(m)}</span>${chips ? `<span class="ex-c">${esc(chips)}</span>` : ''}</button>`;
+  }).join('');
+  const sel = cols[exSel] && ex[exSel] ? exDetail(s, cols[exSel].t, ex[exSel]) : '';
+  $('explain').innerHTML = `<div class="ex-gloss">${gloss}</div>${note ? `<p class="ex-note">${esc(note)}</p>` : ''}<div class="ex-detail" aria-live="polite">${sel}</div>`;
+}
+/** the tapped word: its dictionary form, the note on this sentence, one explanation per label, the grammar cards
+ * @param {Sentence} s @param {string} form @param {ExWord} x */
+function exDetail(s, form, [m, ls, , n]) {
+  const k = C.storyKey(form), lem = (s.words || {})[k] || '', [f, forced] = lem.split('#');
+  const w = !lem ? null : forced ? WORD_BY_RANK.get(+forced) : WORD_BY_BG.get(C.storyKey(f));
+  const head = `<p class="ex-head"><b lang="bg">${esc(form)}</b> – ${esc(m)}` + (w && C.storyKey(w.bg) !== k ? `<span class="tiny"> · from <b lang="bg">${esc(w.bg)}</b> – ${esc(w.en)}</span>` : '') + '</p>';
+  /** @type {Set<string>} */ const cards = new Set();
+  const items = ls.map(l => { const L = LABELS[l]; if (!L) return ''; if (L.card) cards.add(L.card); return `<li><span class="ex-chip">${esc(L.chip)}</span>${esc(L.text)}</li>`; }).join('');
+  const links = [...cards].map(id => GRAMMAR.cards.find(c => c.id === id)).filter(c => c).map(c => `<a href="#" data-gcard="${esc(/** @type {GrammarCard} */ (c).id)}">${esc(/** @type {GrammarCard} */ (c).title)}</a>`).join(' · ');
+  return head + (n ? `<p class="ex-n">${esc(n)}</p>` : '') + (items ? `<ul>${items}</ul>` : n ? '' : '<p class="ex-hint">The dictionary form: nothing changed.</p>')
+    + (links ? `<p class="ex-see">See: ${links}</p>` : '');
+}
+$('btn-explain').addEventListener('click', () => {
+  const box = $('explain'), open = box.hidden;
+  box.hidden = !open; $('btn-explain').textContent = open ? 'Hide the explanation' : 'Explain the grammar'; $('btn-explain').setAttribute('aria-expanded', String(open));
+  if (open) { exSel = -1; renderExplain(); }
+});
+$('explain').addEventListener('click', e => {
+  const b = closest(e, '.ex-w');
+  if (b) { exSel = +(b.dataset.i || 0); renderExplain(); /** @type {HTMLElement | null} */ (($('explain').querySelector(`.ex-w[data-i="${exSel}"]`)))?.focus(); return; }
+  const a = closest(e, '[data-gcard]'); if (a) { e.preventDefault(); openCard(a.dataset.gcard); }
+});
+
 function acceptMine() {
   const p = session.pending; if (!p || !p.typed.trim()) return;
   (userAlts[p.key] = userAlts[p.key] || []).push(p.typed.trim()); save.userAlts(); VOCAB = buildVocab();
