@@ -8,7 +8,9 @@ interface Word { rank: number; bg: string; en: string; pos: string; forms: strin
   /** clip key of the spoken word, in both voices (D-005) */
   au?: string;
   /** the deck's example sentence, shown on the back of a word card (D-035) */
-  ex_bg?: string; ex_en?: string }
+  ex_bg?: string; ex_en?: string;
+  /** a noun's plural, Bulgarian and English, from data/plurals.json (D-037) */
+  pl?: [string, string] }
 
 /** A spoken part of a story title or paragraph (D-005): `bg` offsets from–to, voice k (Kalina) or b (Borislav),
  *  the clip key, and per word [start ms, from, to] for the read-along highlight. */
