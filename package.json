@@ -7,7 +7,7 @@
     "build": "python3 tools/build_data.py && python3 tools/stamp_cache.py",
     "publish": "tools/publish.sh",
     "typecheck": "tsc -p tsconfig.json",
-    "check": "python3 tools/check_decisions.py && python3 tools/test_anki_progress.py && python3 tools/validate_sentences.py --check data/words.json data/sentences.json && python3 tools/validate_stories.py -q data/words.json data/stories.json && python3 tools/build_data.py --check && python3 tools/stamp_cache.py --check && python3 tools/build_audio.py --check"
+    "check": "python3 tools/check_decisions.py && python3 tools/test_anki_progress.py && python3 tools/validate_sentences.py --check data/words.json data/sentences.json && python3 tools/validate_stories.py -q data/words.json data/stories.json && python3 tools/check_plurals.py && python3 tools/build_data.py --check && python3 tools/stamp_cache.py --check && python3 tools/build_audio.py --check"
   },
   "repository": {
     "type": "git",

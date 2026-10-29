@@ -988,8 +988,10 @@
   /** up to `n` of the words after the learner's Anki position, each with a practice sentence that uses it and four meanings to choose from.
    * The sentence fits the grammar stage where possible, has the fewest other words beyond the position, then the fewest words; distractors share
    * the deck topic and part of speech where possible (within 400 ranks), else the part of speech or just the neighbourhood (150 ranks). Words in `peeked` are skipped while there are others in the next 60.
+   * A noun shown in its plural (or after a number: два стола) asks with plural meanings and only nouns with a plural as distractors;
+   * a noun with the article asks "the …" with nouns as distractors (D-037).
    * @param {Word[]} words @param {Sentence[]} sentences @param {Partial<Settings>} settings @param {Record<string, any>} peeked @param {number} n @param {() => number} [rand]
-   * @returns {{word: Word, sentence: Sentence, forms: string[], others: Word[], options: Word[], answer: number}[]} */
+   * @returns {{word: Word, sentence: Sentence, forms: string[], shown: string, plural: boolean, article: boolean, others: Word[], options: Word[], labels: string[], answer: number}[]} */
   function peekItems(words, sentences, settings, peeked, n, rand) {
     rand = rand || Math.random; peeked = peeked || {};
     const pos = settings.rank || 0, byBg = new Map(), byRank = new Map(words.map(w => [w.rank, w]));
@@ -1011,8 +1013,10 @@
       if (!best) continue;
       const sw = best.s.words || {};
       const forms = Object.keys(sw).filter(f => wordOf(sw[f]) === w);
+      const shown = forms.find(f => best?.s.bg.toLowerCase().includes(f)) || w.bg;
+      const { plural, article } = nounForm(w, shown, best.s);
       // distractors that make the sentence matter: the same topic and word type first (ракия: other drinks), then the same word type nearby
-      const other = words.filter(x => x !== w && x.en !== w.en);
+      const other = words.filter(x => x !== w && x.en !== w.en && (!plural || x.pl) && (!article || x.pos === 'noun'));
       const tiers = [other.filter(x => w.cat && x.cat === w.cat && x.pos === w.pos && Math.abs(x.rank - w.rank) <= 400),
         other.filter(x => x.pos === w.pos && Math.abs(x.rank - w.rank) <= 150), other.filter(x => Math.abs(x.rank - w.rank) <= 150)];
       const pool = (tiers.find(t => t.length >= 3) || tiers[2]).slice();
@@ -1020,9 +1024,23 @@
       while (distract.length < 3 && pool.length) { const x = pool.splice(Math.floor(rand() * pool.length), 1)[0]; if (!distract.some(d => d.en === x.en)) distract.push(x); }
       const options = distract.slice(), answer = Math.floor(rand() * (options.length + 1));
       options.splice(answer, 0, w);
-      out.push({ word: w, sentence: best.s, forms, others: [...new Set(best.others)], options, answer });
+      const labels = options.map(o => (article ? 'the ' : '') + (plural && o.pl ? o.pl[1] : o.en));
+      out.push({ word: w, sentence: best.s, forms, shown, plural, article, others: [...new Set(best.others)], options, labels, answer });
     }
     return out;
+    /** is the form `shown` of the noun `w` in `bg` plural (чинии, чиниите, два стола) and does it carry the article (чинията, чиниите)
+     * @param {Word} w @param {string} shown @param {Sentence} s */
+    function nounForm(w, shown, s) {
+      if (w.pos !== 'noun') return { plural: false, article: false };
+      const b = storyKey(w.bg), pl = w.pl && storyKey(w.pl[0]);
+      if (pl && (shown === pl + 'те' || shown === pl + 'та')) return { plural: true, article: true };
+      if (pl && shown === pl && pl !== b) return { plural: true, article: false };
+      const toks = storyTokens(s.bg).filter(x => x.w), at = toks.findIndex(x => storyKey(x.t) === shown), prev = at > 0 ? storyKey(toks[at - 1].t) : '';
+      const counted = /^\d+$/.test(prev) || ['няколко', 'колко'].includes(prev) || wordOf((s.words || {})[prev] || prev)?.pos === 'num';
+      if (counted && shown !== b) return { plural: !!pl, article: false };   // два стола: two chairs, not "the chair"
+      const stem = b.endsWith('й') ? b.slice(0, -1) : b, end = shown.startsWith(stem) ? shown.slice(stem.length) : '';
+      return { plural: false, article: shown !== b && (b.endsWith('й') ? ['ят', 'я'] : ['ът', 'а', 'ят', 'я', 'та', 'то']).includes(end) };
+    }
   }
 
   // ---------- reading (D-026, D-027) ----------

@@ -597,17 +597,17 @@ function renderPeek() {
   $('peek-count').textContent = `Sneak peek · ${peek.i + 1} of ${peek.items.length} · word ${w.rank}`;
   $('peek-sentence').innerHTML = C.storyTokens(it.sentence.bg).map(t => t.w && forms.has(C.storyKey(t.t)) ? `<mark>${esc(t.t)}</mark>` : esc(t.t)).join('');
   $('peek-others').innerHTML = it.others.length ? 'Also new: ' + it.others.map(o => `<b lang="bg">${esc(o.bg)}</b> – ${esc(o.en)}`).join(', ') : '';
-  const shown = it.forms.find(f => it.sentence.bg.toLowerCase().includes(f)) || w.bg;
-  $('peek-question').innerHTML = `What does <b lang="bg">${esc(shown)}</b> mean here?`;
+  $('peek-question').innerHTML = `What does <b lang="bg">${esc(it.shown)}</b> mean here?`;
   $('peek-opts').innerHTML = it.options.map((o, j) => {
     const cls = !answered ? '' : j === it.answer ? ' right' : j === peek?.picked ? ' wrong' : '';
-    return `<button class="opt${cls}" data-o="${j}"${answered ? ' disabled' : ''}>${j + 1}. ${esc(o.en)}</button>`;
+    return `<button class="opt${cls}" data-o="${j}"${answered ? ' disabled' : ''}>${j + 1}. ${esc(it.labels[j])}</button>`;
   }).join('');
   $('peek-reveal').hidden = !answered; $('btn-peek-next').hidden = !answered; $('btn-say-peek').hidden = !answered || !it.sentence.au;
   if (it.sentence.au) $('btn-say-peek').dataset.au = it.sentence.au;
   if (answered) {
     const lang = C.langFor(it.sentence.id, settings) === 'en' ? 'en' : 'nl';
-    $('peek-meaning').innerHTML = `<b lang="bg">${esc(w.bg)}</b>${sayBtn(w.au, 'Listen to the word')} – ${esc(w.en)} <span class="tiny">· word ${w.rank}${w.forms ? ' · ' + esc(w.forms) : ''}</span>`;
+    const pl = it.plural && w.pl ? ` · plural <b lang="bg">${esc(w.pl[0])}</b> – ${esc(w.pl[1])}` : '';   // the form the question asked about (D-037)
+    $('peek-meaning').innerHTML = `<b lang="bg">${esc(w.bg)}</b>${sayBtn(w.au, 'Listen to the word')} – ${esc(w.en)}${pl} <span class="tiny">· word ${w.rank}${w.forms && !pl ? ' · ' + esc(w.forms) : ''}</span>`;
     $('peek-translation').textContent = it.sentence[lang] || it.sentence.nl;
     $('btn-peek-next').textContent = peek.i + 1 < peek.items.length ? 'Next' : 'Finish';
   }

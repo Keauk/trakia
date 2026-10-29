@@ -601,6 +601,30 @@ t('peekItems: the next words after the position, each in a sentence, with four m
   // merged like the rest of the snapshot: the newer guess per word
   assert.equal(C.mergeSnapshots({ peeks: { 103: { at: 5, ok: true } } }, { peeks: { 103: { at: 3, ok: false } } }).peeks['103'].ok, true);
 });
+t('peekItems: a plural noun asks with plural meanings, a noun with the article with "the …" (D-037)', () => {
+  const P = require('../data/plurals.json');
+  const W = require('../data/words.json').map(/** @param {any} w */ w => P[w.rank] ? { ...w, pl: P[w.rank] } : w);
+  const find = /** @param {string} bg */ bg => W.find(/** @param {any} w */ w => w.bg === bg);
+  let seed = 7; const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  /** @param {string} lemma @param {string} bg @param {Record<string, string>} words */
+  const ask = (lemma, bg, words) => C.peekItems(W, [{ id: 'x', bg, nl: '', en: '', nl_alt: [], bg_alt: [], en_alt: [], lemmas: Object.values(words), max_rank: find(lemma).rank,
+    tags: [], source: '', words }], { rank: find(lemma).rank - 1, stage: 1 }, {}, 1, rand)[0];
+  const pl = ask('чиния', 'Има чинии.', { чинии: 'чиния' });
+  assert.equal(pl.shown, 'чинии'); assert.ok(pl.plural && !pl.article); assert.equal(pl.labels[pl.answer], 'plates');
+  assert.ok(pl.options.every(o => o.pl) && pl.labels.every((l, j) => l === /** @type {[string, string]} */ (pl.options[j].pl)[1]), 'every option in its plural');
+  const def = ask('чиния', 'Чиниите са мръсни.', { чиниите: 'чиния' });
+  assert.ok(def.plural && def.article); assert.equal(def.labels[def.answer], 'the plates');
+  assert.ok(def.labels.every(l => l.startsWith('the ')) && def.options.every(o => o.pos === 'noun'));
+  const sg = ask('чиния', 'Чинията е мръсна.', { чинията: 'чиния' });
+  assert.ok(!sg.plural && sg.article); assert.equal(sg.labels[sg.answer], 'the plate'); assert.deepEqual(sg.labels, sg.options.map(o => 'the ' + o.en));
+  assert.equal(ask('чай', 'Чаят е горещ.', { чаят: 'чай' }).article, true, 'чай → чаят');
+  const bare = ask('чиния', 'Една чиния.', { една: 'един', чиния: 'чиния' });
+  assert.ok(!bare.plural && !bare.article); assert.deepEqual(bare.labels, bare.options.map(o => o.en));
+  // after a number the short form is the counting form: два стола, two chairs, not "the chair"
+  const two = ask('стол', 'Има два стола.', { има: 'имам', два: 'две', стола: 'стол' });
+  assert.ok(two.plural && !two.article); assert.equal(two.labels[two.answer], 'chairs');
+  assert.ok(ask('стол', 'Столът е тук.', { столът: 'стол' }).article);
+});
 t('D-005 dictation takes over from a mature reading card', () => {
   const s = { id: 'd', bg: 'Обичам кафе.', bg_alt: ['Аз обичам кафе.'], nl: 'Ik hou van koffie.', nl_alt: [], en: 'I like coffee.', en_alt: [], au: 'abc123def456', max_rank: 10, lemmas: [] };
   const set = { lang: 'nl', directions: 'gated' }, mature = { state: 'review', s: 30, box: 6, due: 0, lapses: 0 }, young = { state: 'review', s: 5, box: 3, due: 0 };

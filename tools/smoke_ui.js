@@ -382,6 +382,8 @@ setTimeout(async () => {
       if (i % 2) $('peek-opts').querySelector('.opt[data-o="1"]').click(); else document.dispatchEvent(new window.KeyboardEvent('keydown', { key: '1' }));
       assert.equal($('peek-reveal').hidden, false); assert.ok($('peek-translation').textContent.length > 3, 'translation shown');
       assert.equal($('peek-opts').querySelectorAll('.opt.right').length, 1); assert.match($('peek-meaning').textContent, new RegExp('word ' + rank));
+      const said = $('peek-opts').querySelector('.opt.right').textContent.replace(/^\d\. (the )?/, '');
+      assert.ok($('peek-meaning').textContent.includes(said), 'the right option is the meaning, or the plural, that the reveal gives (D-037)');
       document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
     }
     assert.equal($('peek-run').hidden, true); assert.equal($('peek-done').hidden, false);

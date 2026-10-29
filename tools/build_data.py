@@ -12,6 +12,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 words = json.load(open(os.path.join(root, 'data/words.json'), encoding='utf-8'))
 sentences = json.load(open(os.path.join(root, 'data/sentences.json'), encoding='utf-8'))
 grammar = json.load(open(os.path.join(root, 'data/grammar.json'), encoding='utf-8'))
+plurals = json.load(open(os.path.join(root, 'data/plurals.json'), encoding='utf-8'))   # noun plurals, checked by tools/check_plurals.py (D-037)
 stories_path = os.path.join(root, 'data/stories.json')   # reading stories (D-026), checked by tools/validate_stories.py
 stories = json.load(open(stories_path, encoding='utf-8')) if os.path.exists(stories_path) else []
 # audio (D-005): `au` is the clip key of the spoken text (app/audio/<voice>/<key[:2]>/<key>.mp3, both voices);
@@ -32,8 +33,9 @@ def segs(bg, speakers):
 
 slim_words = [{'rank': w['rank'], 'bg': w['bg'], 'en': w['en'], 'pos': w['pos'], 'cat': w.get('cat', ''), 'forms': w['forms'],
                'learned': w['learned'], 'au': A.clip_key(A.spoken('w:%d' % w['rank'], w['bg'], overrides)),
-               'ex_bg': w.get('sentence_bg', ''), 'ex_en': w.get('sentence_en', '')}
-              for w in words]   # cat: the deck's topic, for sneak-peek distractors (D-031); ex_*: the example on the word card (D-035)
+               'ex_bg': w.get('sentence_bg', ''), 'ex_en': w.get('sentence_en', ''),
+               **({'pl': plurals[str(w['rank'])]} if plurals.get(str(w['rank'])) else {})}
+              for w in words]   # cat: the deck's topic, for sneak-peek distractors (D-031); ex_*: the example on the word card (D-035); pl: [bg, en] plural (D-037)
 sentences = [dict(s, au=A.clip_key(A.spoken('s:' + s['id'], s['bg'], overrides)), **({'au_nl': A.clip_key(s['nl'])} if s.get('nl') else {}))
              for s in sentences]   # au_nl: the Dutch prompt of hands-free listening (D-034)
 stories = [dict(st, title=dict(st['title'], au=segs(st['title']['bg'], [])),
