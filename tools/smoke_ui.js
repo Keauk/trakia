@@ -35,9 +35,12 @@ const id = (() => { const txt = $('prompt').textContent; return window.TRAKIA_DA
 assert.ok(id, 'prompt is a bundled sentence');
 // D-030: the prompt is plain text until the card is answered, then every word can be tapped
 assert.equal($('prompt').querySelector('button.w'), null, 'no lookup before answering');
-// exact answer -> correct
-type(id.nl);
+// D-038: a sentence answer starts with a capital, so a lowercase start is no highlighted difference
+$('answer').value = 'a'; $('answer').dispatchEvent(new window.Event('input')); assert.equal($('answer').value, 'A');
+// exact answer -> correct (typed with a lowercase first letter)
+type(id.nl[0].toLowerCase() + id.nl.slice(1));
 assert.match($('verdict').className, /correct/);
+assert.equal($('expected').querySelector('mark'), null, 'no highlight for the first letter');
 assert.equal($('run-card').dataset.state, 'correct'); assert.equal($('verdict').textContent, '✓ Correct');
 assert.equal($('expected').querySelector('mark'), null, 'exact answer: nothing highlighted'); assert.equal($('verdict-note').textContent, '');
 assert.equal($('btn-accept').hidden, true);
@@ -75,7 +78,7 @@ assert.equal($('run-card').dataset.state, 'wrong'); assert.equal($('verdict-note
 assert.equal($('btn-accept').hidden, false);
 $('btn-accept').click();
 assert.match($('verdict').className, /correct/);
-assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.userAlts'))[s3.id + '|bg2nl'], ['dit is helemaal fout']);
+assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.userAlts'))[s3.id + '|bg2nl'], ['Dit is helemaal fout']);
 type('', 'Enter');
 // fourth: don't know -> wrong and re-queued
 const s4 = window.TRAKIA_DATA.sentences.find(s => s.bg === $('prompt').textContent);
@@ -145,7 +148,7 @@ window.eval("window.__s = JSON.parse(localStorage.getItem('trakia.settings')); w
 document.querySelector('nav button[data-tab=settings]').click(); $('set-translit').checked = true; $('set-translit').dispatchEvent(new window.Event('change'));
 document.querySelector('nav button[data-tab=practise]').click();
 $('answer').value = 'kupih hlyab'; $('answer').dispatchEvent(new window.Event('input'));
-assert.equal($('translit-preview').textContent, 'купих хляб');
+assert.equal($('translit-preview').textContent, 'Купих хляб', 'the first letter is capitalised (D-038)');
 // --- autofill: answer field is a single-line textarea; a keyboard-inserted line break submits
 assert.equal($('answer').tagName, 'TEXTAREA'); assert.equal($('answer').getAttribute('autocomplete'), 'off');
 document.querySelector('nav button[data-tab=practise]').click();
@@ -242,10 +245,11 @@ assert.equal($('dir-badge').textContent, 'BG → EN', 'first English card is BG 
 const sEn = window.TRAKIA_DATA.sentences.find(x => x.bg === $('prompt').textContent);
 assert.ok(sEn, 'prompt is a sentence');
 assert.equal($('answer').placeholder, 'Type the English translation');
-// an accepted answer in lower case still highlights the capitals it lacks (D-015)
+// an accepted answer in lower case still highlights the capitals it lacks after the first letter (D-015), which the field capitalises (D-038)
 type(sEn.en.toLowerCase());
 assert.match($('verdict').className, /correct/, 'English primary accepted in lower case: ' + $('verdict').textContent);
-if (/\p{Lu}/u.test(sEn.en)) { assert.ok($('expected').querySelector('mark'), 'case difference highlighted'); assert.equal($('verdict-note').textContent, 'Accepted — small differences highlighted'); }
+if (/\p{Lu}/u.test(sEn.en.slice(1))) { assert.ok($('expected').querySelector('mark'), 'case difference highlighted'); assert.equal($('verdict-note').textContent, 'Accepted — small differences highlighted'); }
+else assert.equal($('expected').querySelector('mark'), null, 'a lowercase first letter is no difference');
 assert.match($('gloss').textContent, /^rank \d+/, 'only the rank under the answer (D-021): ' + $('gloss').textContent);
 assert.ok(!$('gloss').textContent.includes(sEn.nl), 'no Dutch translation while practising English');
 type('', 'Enter');

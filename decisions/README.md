@@ -45,6 +45,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-035](D-035-words-in-trakia.md) | Learn the deck's words in Trakia: word cards on the same FSRS schedule, one daily limit, the Anki position kept up to date | practise / scheduling / tooling | in progress |
 | [D-036](D-036-known-words-graph.md) | Show how many deck words the learner knows, day by day, in a small graph | stats / tooling | in progress |
 | [D-037](D-037-peek-noun-forms.md) | Sneak peek asks a noun in the form the sentence uses ("plates", "the plate") | practise / data | done |
+| [D-038](D-038-capitalise-first-letter.md) | Capitalise the first letter of a typed sentence answer | practise | done |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

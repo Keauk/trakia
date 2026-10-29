@@ -231,6 +231,9 @@ $('answer').addEventListener('input', e => {
     const pos = a.selectionStart ?? a.value.length; a.value = a.value.replace(/[\r\n]+/g, typedEnter ? '' : ' ').trimEnd(); a.selectionStart = a.selectionEnd = Math.min(pos, a.value.length);
     if (typedEnter && session) { if (session.pending) next(); else checkAnswer(false); return; }   // keyboards that insert a line break instead of sending Enter
   }
+  if (session && !session.drill && /^\p{Ll}/u.test(a.value)) {   // a sentence starts with a capital, whatever the keyboard does (D-038)
+    const s = a.selectionStart, end = a.selectionEnd; a.value = a.value[0].toUpperCase() + a.value.slice(1); a.selectionStart = s; a.selectionEnd = end;
+  }
   fitAnswer();
 });
 $('gloss').addEventListener('click', e => { const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); showTab('grammar'); const el = $('gcard-' + a.dataset.gcard); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } });
