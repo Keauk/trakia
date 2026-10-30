@@ -128,15 +128,15 @@ function renderHome() {
   const unseenElig = elig.reduce((n, s) => n + C.cardKeys(s, progress, settings).filter(k => !progress[k]).length, 0);
   // new sentences pause while today's sentence reviews reach the limit (D-042)
   const load = C.sentenceLoad(SENT, progress, settings, now), max = settings.sentenceMax == null ? 100 : settings.sentenceMax, paused = load.reviews >= max && unseenElig > 0;
-  $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning }, paused);
-  showPause('sent', paused ? `New sentences paused: ${load.reviews} sentence reviews today, limit ${max}.` : '');
+  $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning }, paused ? `New sentences paused: ${load.reviews} sentence reviews today, limit ${max}.` : '');
+  showPause('home-stats', paused);
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || (unseenElig && !paused) ? 'Practise' : 'Free practice';
   renderWordsButton();
 }
 const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
 /** the three counts of a task card on the Practise home, coloured as Anki colours them */
-const taskNums = (/** @type {{fresh: number, learning: number, due: number}} */ c, /** @type {boolean} */ paused = false) => `<div class="n-new${paused ? ' off' : ''}"><b>${c.fresh}</b><span>${paused ? 'paused' : 'new'}</span></div><div class="n-learn"><b>${c.learning}</b><span>learning</span></div><div class="n-due"><b>${c.due}</b><span>due</span></div>`;
+const taskNums = (/** @type {{fresh: number, learning: number, due: number}} */ c, /** @type {string} */ paused = '') => `<div class="n-new${paused ? ' off' : ''}"${paused ? ` title="${esc(paused)}"` : ''}><b>${c.fresh}</b><span>${paused ? 'paused' : 'new'}</span></div><div class="n-learn"><b>${c.learning}</b><span>learning</span></div><div class="n-due"><b>${c.due}</b><span>due</span></div>`;
 
 function startSession(opts) {
   opts = opts || {};
@@ -794,15 +794,14 @@ const countsHtml = (/** @type {{fresh: number, learning: number, due: number}} *
 function renderWordsButton() {
   const q = C.hasWords(progress) ? wordQ() : null;
   const paused = !!(q && q.paused === 'limit');
-  $('words-nums').innerHTML = taskNums(q ? Object.assign({}, q.counts, paused ? { fresh: q.held } : {}) : { fresh: 0, learning: 0, due: 0 }, paused);
+  $('words-nums').innerHTML = taskNums(q ? Object.assign({}, q.counts, paused ? { fresh: q.held } : {}) : { fresh: 0, learning: 0, due: 0 }, q && paused ? pausedText(q) : '');
   $('btn-words').textContent = q ? 'Study words' : 'Start words';
-  showPause('words', q && paused ? pausedText(q) : '');
+  showPause('words-nums', paused);
 }
 const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New words paused: ${q.load.reviews} word reviews today, limit ${q.dailyMax}.`;
-/** mark a task card on the Practise home as paused, with the reason under its numbers (D-042) */
-function showPause(/** @type {'sent' | 'words'} */ which, /** @type {string} */ text) {
-  const el = $(which + '-paused'); el.textContent = text; el.hidden = !text;
-  const card = el.closest('.task'); if (card) card.classList.toggle('paused', !!text);
+/** mark a task card on the Practise home as paused: a dashed edge; the greyed new tile carries the reason (D-042) */
+function showPause(/** @type {string} */ numsId, /** @type {boolean} */ paused) {
+  const card = $(numsId).closest('.task'); if (card) card.classList.toggle('paused', paused);
 }
 /** the Anki position is the highest word with every word before it started */
 function followWords() {
