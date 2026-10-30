@@ -33,11 +33,12 @@ let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 /** @type {Record<string, DaySummary>} */ let dayTotals = LS.get('days', {});   // totals of the days older than the last 30 (D-029)
 /** @type {Record<string, {at: number, ok: boolean}>} */ let peeks = LS.get('peeks', {});   // words guessed in a sneak peek, by rank (D-031)
 /** @type {Record<string, [number, number, number]>} */ let wordDays = LS.get('wordDays', {});   // words started and known per day (D-036)
+/** @type {Record<string, [number, number, number]>} */ let sentDays = LS.get('sentDays', {});   // sentences started and known per day (D-043)
 let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
   settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
   progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals), peeks: () => LS.set('peeks', peeks), wordDays: () => LS.set('wordDays', wordDays),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals), peeks: () => LS.set('peeks', peeks), wordDays: () => LS.set('wordDays', wordDays), sentDays: () => LS.set('sentDays', sentDays),
 };
 // fold answers older than 30 days into day totals (D-029)
 (function compactAtLoad() {
@@ -405,7 +406,7 @@ function next() {
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
   progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
   log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0]);
-  save.progress(); save.log();
+  save.progress(); save.log(); recordSentDay();
   session.counts[p.result]++;
   if (effective === 'wrong' && !item.retry) {
     // with keyboard blocks (D-021) a retry joins the retries typed on the same keyboard
@@ -422,7 +423,7 @@ function endSession() {
   const c = session.counts, total = c.correct + c.almost + c.wrong;
   $('session-run').hidden = true; $('session-done').hidden = false;
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
-  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') : 'No answers recorded.';
+  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : (session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') + ' ' + sentKnownText()) : 'No answers recorded.';
   $('btn-again').textContent = session.drill ? 'Drill again' : 'Practise again';
   session = null; hideSay(); syncRunning(); sync();
 }
@@ -476,6 +477,7 @@ function renderStats() {
   $('weak-forms').innerHTML = weak.length ? '<colgroup><col><col style="width:40%"><col style="width:60px"><col style="width:60px"></colgroup><tr><th>form</th><th>answer</th><th>wrong</th><th>right</th></tr>' + weak.map(([k, t]) => `<tr><td>${esc(items[k].prompt)} <span class="tiny">${esc(items[k].hint)}</span></td><td lang="bg">${esc(items[k].answers[0])}</td><td>${t.bad}</td><td>${t.ok}</td></tr>`).join('') : '<tr><td class="tiny">No drill mistakes yet.</td></tr>';
   // progress per direction: stability bands
   $('stats-words-card').hidden = !C.hasWords(progress);
+  renderSentsKnown(now);
   let html = wordsStatsHtml(now);
   const elig = SENT.filter(s => C.eligible(s, settings)).length;
   const curLangs = settings.lang === 'mixed' ? ['nl', 'en'] : [settings.lang || 'nl'];
@@ -675,17 +677,17 @@ $('import-file').addEventListener('change', async e => {
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 /** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
-function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays }; }
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays }; }
 /** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
 function applySnapshot(m) {
   m = Object.assign({}, m, C.compactHistory(m, Date.now()));
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
-  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {}; wordDays = m.wordDays || {};
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {}; wordDays = m.wordDays || {}; sentDays = m.sentDays || {};
   if (C.hasWords(progress)) settings.rank = C.wordRank(progress);   // the position follows the deck words (D-035)
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
-  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays })) LS.set(k, v);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays })) LS.set(k, v);
   recordWordDay();
-  refreshSentences();
+  refreshSentences(); recordSentDay();
   // redraw what is on screen, without leaving the tab or the session summary
   const tab = document.querySelector('.tab.active');
   if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLib(false); else if (tab && tab.id === 'tab-settings') renderSettings(); else if (tab && tab.id === 'tab-reading' && $('reading-story').hidden) renderReading();
@@ -724,7 +726,7 @@ $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Word position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; wordDays = {}; save.wordDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; wordDays = {}; sentDays = {}; save.wordDays(); save.sentDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
 
 // ---------- sneak peek: guess the next Anki words from a sentence (D-031) ----------
@@ -895,26 +897,33 @@ document.addEventListener('keydown', e => {
   else if (wr.shown && /^[1-4]$/.test(e.key)) { e.preventDefault(); gradeWordCard(+e.key); }
   else if (wr.shown && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); gradeWordCard(3); }
 });
-/** today's words started and known, kept per day for the graph (D-036) */
-function recordWordDay() {
-  if (!C.hasWords(progress)) return;
-  const c = C.wordCounts(progress), k = dayKey(Date.now()), e = wordDays[k];
+/** today's started and known count in a per-day history, when it changed (D-036, D-043)
+ *  @param {Record<string, [number, number, number]>} days @param {{ started: number, known: number }} c @param {() => void} store */
+function putDay(days, c, store) {
+  const k = dayKey(Date.now()), e = days[k];
   if (e && e[0] === c.started && e[1] === c.known) return;
-  wordDays[k] = [c.started, c.known, Date.now()]; save.wordDays();
+  days[k] = [c.started, c.known, Date.now()]; store();
 }
-/** known words now, and the change since the last day before today */
-function knownNow() {
-  const c = C.wordCounts(progress), today = dayKey(Date.now()), before = Object.keys(wordDays).filter(k => k < today).sort().pop();
-  return { known: c.known, started: c.started, delta: before ? c.known - wordDays[before][1] : null };
+function recordWordDay() { if (C.hasWords(progress)) putDay(wordDays, C.wordCounts(progress), save.wordDays); }
+const sentCounts = () => C.sentenceCounts(progress, id => SENT_BY_ID.has(id));
+function recordSentDay() { const c = sentCounts(); if (c.started) putDay(sentDays, c, save.sentDays); }
+/** known now, and the change since the last day before today
+ *  @param {Record<string, [number, number, number]>} days @param {{ started: number, known: number }} c */
+function knownNow(days, c) {
+  const today = dayKey(Date.now()), before = Object.keys(days).filter(k => k < today).sort().pop();
+  return { known: c.known, started: c.started, delta: before ? c.known - days[before][1] : null };
 }
-function knownText() { const n = knownNow(); return `You know ${n.known} words${n.delta ? ` (${n.delta > 0 ? '+' : ''}${n.delta} today)` : ''}.`; }
-/** the last `span` days of words started and known as an inline SVG line graph; a day without an entry carries the day before */
-function wordGraph(/** @type {number} */ now, /** @type {number} */ span) {
-  const keys = Object.keys(wordDays).sort(); if (!keys.length) return '';
+const deltaText = (/** @type {number | null} */ d) => d ? ` (${d > 0 ? '+' : ''}${d} today)` : '';
+function knownText() { const n = knownNow(wordDays, C.wordCounts(progress)); return `You know ${n.known} words${deltaText(n.delta)}.`; }
+function sentKnownText() { const n = knownNow(sentDays, sentCounts()); return `You know ${n.known} sentence${n.known === 1 ? '' : 's'}${deltaText(n.delta)}.`; }
+/** the last `span` days of started and known as an inline SVG line graph; a day without an entry carries the day before
+ *  @param {Record<string, [number, number, number]>} hist @param {number} now @param {number} span @param {string} noun 'words' or 'sentences' */
+function knownGraph(hist, now, span, noun) {
+  const keys = Object.keys(hist).sort(); if (!keys.length) return '';
   const first = keys[0], days = [];
   for (let d = span - 1; d >= 0; d--) { const k = dayKey(now - d * 86400e3); if (k >= first) days.push(k); }
-  let carry = [0, 0]; const pts = days.map(k => { const e = wordDays[k]; if (e) carry = [e[0], e[1]]; return { k, started: carry[0], known: carry[1] }; });
-  if (pts.length < 2) return '';
+  let carry = [0, 0]; const pts = days.map(k => { const e = hist[k]; if (e) carry = [e[0], e[1]]; return { k, started: carry[0], known: carry[1] }; });
+  if (pts.length < 2) return `<p class="tiny">The graph starts tomorrow: one point a day.</p>`;
   const W = 600, H = 160, padL = 34, padB = 20, padT = 8, iw = W - padL - 8, ih = H - padB - padT;
   const max = Math.max(10, ...pts.map(p => p.started)), step = Math.pow(10, Math.floor(Math.log10(max))) * (max / Math.pow(10, Math.floor(Math.log10(max))) > 5 ? 2 : 1) / 2;
   const top = Math.ceil(max / step) * step, x = (/** @type {number} */ i) => padL + iw * i / (pts.length - 1), y = (/** @type {number} */ v) => padT + ih - ih * v / top;
@@ -924,18 +933,24 @@ function wordGraph(/** @type {number} */ now, /** @type {number} */ span) {
   pts.forEach((p, i) => { if ((pts.length - 1 - i) % every === 0) labels += `<text x="${x(i)}" y="${H - 5}" text-anchor="${i === pts.length - 1 ? 'end' : 'middle'}">${p.k.slice(5)}</text>`; });
   const dots = pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.known)}" r="9" fill="transparent"><title>${p.k}: ${p.known} known, ${p.started} started</title></circle>`).join('');
   const last = pts[pts.length - 1];
-  return `<svg class="word-graph" viewBox="0 0 ${W} ${H}" role="img" aria-label="Known words per day: ${last.known} known, ${last.started} started">${grid}${labels}`
+  return `<svg class="word-graph" viewBox="0 0 ${W} ${H}" role="img" aria-label="Known ${noun} per day: ${last.known} known, ${last.started} started">${grid}${labels}`
     + `<path d="${line('started')}" style="stroke:var(--primary)" stroke-dasharray="5 4"/><path d="${line('known')}" style="stroke:var(--correct)"/>`
     + `<circle cx="${x(pts.length - 1)}" cy="${y(last.known)}" r="4" style="fill:var(--correct)"/>${dots}</svg>`
     + `<p class="tiny graph-key"><span class="k-known">━</span> known <span class="k-started">┅</span> started</p>`
     + `<details><summary class="tiny">table view</summary><table><tr><th>day</th><th>known</th><th>started</th></tr>${pts.slice().reverse().map(p => `<tr><td>${p.k}</td><td>${p.known}</td><td>${p.started}</td></tr>`).join('')}</table></details>`;
 }
+/** the two numbers above a known graph @param {{ known: number, started: number, delta: number | null }} kn @param {string} noun */
+const knownStats = (kn, noun) => `<div class="stats">${stat(kn.known + (kn.delta ? ` <small${kn.delta < 0 ? ' class="neg"' : ''}>${kn.delta > 0 ? '+' : ''}${kn.delta} today</small>` : ''), noun + ' known')}${stat(kn.started, noun + ' started')}</div>`;
+/** Stats: the card Sentences you know (D-043) */
+function renderSentsKnown(/** @type {number} */ now) {
+  const c = sentCounts(); $('stats-sents-card').hidden = !c.started; if (!c.started) return;
+  $('stats-sents').innerHTML = knownStats(knownNow(sentDays, c), 'sentences') + knownGraph(sentDays, now, 60, 'sentences')
+    + `<p class="tiny">Known: you understand the Bulgarian sentence well enough that its next review (Bulgarian → Dutch or English, or dictation once that takes over) is ${C.KNOWN_DAYS} days or more away. The bars below show each direction.</p>`;
+}
 /** Stats: the deck words, as a line like the sentence directions */
 function wordsStatsHtml(/** @type {number} */ now) {
   if (!C.hasWords(progress)) return '';
-  const kn = knownNow();
-  $('stats-words').innerHTML = `<div class="stats">${stat(kn.known + (kn.delta ? ` <small${kn.delta < 0 ? ' class="neg"' : ''}>${kn.delta > 0 ? '+' : ''}${kn.delta} today</small>` : ''), 'words known')}${stat(kn.started, 'words started')}</div>`
-    + wordGraph(now, 60) + `<p class="tiny">Known: you recognise the Bulgarian word well enough that its next review (Bulgarian → English) is ${C.KNOWN_DAYS} days or more away.</p>`;
+  $('stats-words').innerHTML = knownStats(knownNow(wordDays, C.wordCounts(progress)), 'words') + knownGraph(wordDays, now, 60, 'words') + `<p class="tiny">Known: you recognise the Bulgarian word well enough that its next review (Bulgarian → English) is ${C.KNOWN_DAYS} days or more away.</p>`;
   const bands = [0, 0, 0, 0], started = new Set(); let cards = 0, dueN = 0, recallSum = 0, recallN = 0;
   for (const k in progress) if (k.startsWith('w:')) {
     const p = progress[k]; cards++; started.add(k.split('|')[0]);
@@ -1436,7 +1451,7 @@ if ('mediaSession' in navigator) {
 }
 
 // ---------- init ----------
-applyTheme(); applySound(); followWords(); recordWordDay(); renderHome(); sync();
+applyTheme(); applySound(); followWords(); recordWordDay(); recordSentDay(); renderHome(); sync();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(reg => reg.update().catch(() => {})).catch(() => {});
