@@ -105,6 +105,11 @@ interface ProgressRecord {
 
 type Progress = Record<string, ProgressRecord>;
 
+/** A started deck word as the Library's word list shows it (D-040): its two cards (a = Bulgarian → English,
+ *  b = English → Bulgarian), known by the D-036 rule, the state and interval (ms) of card a, and the times (ms)
+ *  of the last answer and of the last Again within C.FORGOT_DAYS (0 when none). */
+interface WordRow { w: Word; a?: ProgressRecord; b?: ProgressRecord; known: boolean; state: string; ivl: number; lastSeen: number; forgot: number }
+
 /** Everything that travels between devices: the export file and the synced gist (D-025). */
 interface Snapshot {
   app: 'trakia'; version: number; exported?: string;

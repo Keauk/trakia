@@ -109,7 +109,7 @@ function showTab(name) {
   stopReader(); hideSay(); lrStop();
   /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
-  if (name === 'practise') renderHome(); if (name === 'reading') { closeStory(); renderReading(); } if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLibrary(true); if (name === 'settings') renderSettings();
+  if (name === 'practise') renderHome(); if (name === 'reading') { closeStory(); renderReading(); } if (name === 'grammar') renderGrammar(); if (name === 'stats') renderStats(); if (name === 'library') renderLib(true); if (name === 'settings') renderSettings();
   syncRunning(); window.scrollTo(0, 0);
 }
 // phones: while a text field has focus the on-screen keyboard is up, so the tab bar steps aside (CSS, D-015)
@@ -548,6 +548,94 @@ function renderLibrary(reset) {
   $('lib-table').innerHTML = '<colgroup><col style="width:56px"><col><col style="width:70px"><col style="width:70px"></colgroup>' + head + rows.slice(0, libShown).map(s => (() => { const o = otherText(s); return `<tr class="clickable" data-id="${esc(s.id)}"><td>${s.max_rank == null ? '?' : s.max_rank}${s.rank_estimated ? '≈' : ''}</td><td><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></td><td>${readCol(s, o.lang)}</td><td>${status(s, o.lang + '2bg')}</td></tr>`; })()).join('');
   $('lib-more').hidden = rows.length <= libShown;
 }
+// ---------- library: the deck words (D-040) ----------
+/** @type {'sentences' | 'words'} */ let libView = LS.get('libView', 'sentences') === 'words' ? 'words' : 'sentences';
+/** @type {'all' | 'learning' | 'known' | 'forgotten'} */ let lwFilter = 'all';
+let lwShown = 60, lwOpen = 0;
+const LW_FILTERS = /** @type {const} */ ([['all', 'All'], ['learning', 'Learning'], ['known', 'Known'], ['forgotten', 'Forgotten']]);
+const LW_NOTES = {
+  all: 'Every word you have started. The bars show how long until the Bulgarian → English card comes back; a week or more is known.',
+  learning: 'Started, but the Bulgarian → English card comes back within a week, or is still in its first steps.',
+  known: 'The Bulgarian → English card comes back after a week or more: the words in “You know N words”.',
+  forgotten: `Answered Again on either card in the last ${C.FORGOT_DAYS} days, most recent first. A forgotten word counts as known again once it comes back after a week.`,
+};
+/** the Library in the view the learner picked: sentences or words */
+function renderLib(/** @type {boolean} */ reset) {
+  $('lib-view').querySelectorAll('button').forEach(b => { const on = /** @type {HTMLElement} */ (b).dataset.view === libView; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  $('lib-words').hidden = libView !== 'words'; $('lib-sentences').hidden = $('lib-import').hidden = libView === 'words';
+  if (libView === 'words') renderLibWords(reset); else renderLibrary(reset);
+}
+$('lib-view').addEventListener('click', e => {
+  const b = closest(e, '[data-view]'); if (!b || b.dataset.view === libView) return;
+  libView = b.dataset.view === 'words' ? 'words' : 'sentences'; LS.set('libView', libView); renderLib(true);
+});
+$('lw-search').addEventListener('input', () => renderLibWords(true)); $('lw-sort').addEventListener('change', () => renderLibWords(true));
+$('lw-chips').addEventListener('click', e => { const b = closest(e, '[data-f]'), f = LW_FILTERS.find(x => x[0] === (b && b.dataset.f)); if (f) { lwFilter = f[0]; renderLibWords(true); } });
+$('lw-more').addEventListener('click', () => { lwShown += 100; renderLibWords(false); });
+$('lw-list').addEventListener('click', e => {
+  const b = closest(e, '.wrow'); if (!b) return;
+  const r = +(b.dataset.rank || 0); lwOpen = lwOpen === r ? 0 : r; renderLibWords(false);
+  const nb = /** @type {HTMLElement | null} */ ($('lw-list').querySelector(`.wrow[data-rank="${r}"]`)); if (nb) nb.focus({ preventScroll: true });
+});
+/** the strength meter's level, from the Bulgarian → English card: 1 in its first steps, 2 under a week, 3 under a month, 4 longer */
+const wordLevel = (/** @type {WordRow} */ r) => !r.a ? 0 : r.state !== 'review' ? 1 : !r.known ? 2 : r.ivl < 30 * 86400e3 ? 3 : 4;
+function wordStateLabel(/** @type {WordRow} */ r) {
+  if (!r.a) return 'BG→EN new';
+  if (r.state !== 'review') return r.state === 'relearning' ? 'relearning' : 'learning';
+  return (r.known ? 'known · ' : 'young · ') + fmtIvl(r.ivl);
+}
+const shortDate = (/** @type {number} */ t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+/** one card's progress in the word's details */
+function wordCardText(/** @type {ProgressRecord | undefined} */ p, /** @type {number} */ now) {
+  if (!p) return 'not started';
+  const next = p.due <= now ? 'due now' : 'next in ' + fmtIvl(p.due - now);
+  const st = p.state === 'review' ? `${next} · stability ${fmtDays(p.s)} · recall now ${Math.round(100 * C.recallNow(p, now, settings))} %` : `${p.state} (step ${(p.step || 0) + 1}) · ${next}`;
+  return `${st} · ${p.reps} answers · ${p.lapses} ${p.lapses === 1 ? 'lapse' : 'lapses'}`;
+}
+/** practice sentences whose lemmas include the word, simplest first */
+function sentencesWith(/** @type {Word} */ w, /** @type {number} */ max) {
+  const l = C.normalise(w.bg, 'bg');
+  return SENT.filter(s => (s.lemmas || []).some(x => C.normalise(x.split('#')[0], 'bg') === l))
+    .sort((a, b) => (a.max_rank == null ? 1e9 : a.max_rank) - (b.max_rank == null ? 1e9 : b.max_rank) || a.bg.length - b.bg.length).slice(0, max);
+}
+function wordDetail(/** @type {WordRow} */ r, /** @type {number} */ now) {
+  const w = r.w, info = [w.pos, w.forms && w.forms !== w.bg ? w.forms : '', w.cat || ''].filter(Boolean).map(esc).join(' · ');
+  const sents = sentencesWith(w, 3);
+  return `<div class="wdet">
+    <p class="winfo">${soundOn() ? sayBtn(w.au, 'Listen to the word') : ''}<span>${info}${w.pl ? `${info ? ' · ' : ''}plural <span lang="bg">${esc(w.pl[0])}</span> (${esc(w.pl[1])})` : ''}</span></p>
+    ${w.ex_bg ? `<p class="wex"><span lang="bg" style="color:var(--ink)">${esc(w.ex_bg)}</span>${w.ex_en ? `<span>${esc(w.ex_en)}</span>` : ''}</p>` : ''}
+    <dl class="wcards"><dt>BG → EN</dt><dd>${wordCardText(r.a, now)}</dd><dt>EN → BG</dt><dd>${wordCardText(r.b, now)}</dd></dl>
+    ${r.forgot ? `<p style="color:var(--wrong)">Forgotten on ${shortDate(r.forgot)}.</p>` : ''}
+    ${sents.length ? `<div><h3>In practice sentences</h3><ul>${sents.map(s => { const o = otherText(s); return `<li><span lang="bg">${esc(s.bg)}</span><span class="sub" lang="${o.lang}">${esc(o.text)}</span></li>`; }).join('')}</ul></div>` : ''}
+  </div>`;
+}
+function renderLibWords(/** @type {boolean} */ reset) {
+  if (reset) { lwShown = 60; lwOpen = 0; }
+  const now = Date.now(), all = C.wordList(progress, WORDS, log, now);
+  if (!all.length) {
+    $('lw-chips').innerHTML = ''; $('lw-note').textContent = ''; $('lw-more').hidden = true;
+    $('lw-list').innerHTML = '<li class="lw-empty">No words started yet. Start them on the Practise tab, under <b>Words</b>.</li>';
+    return;
+  }
+  /** @type {Record<string, (r: WordRow) => boolean>} */
+  const keep = { all: () => true, learning: r => !r.known, known: r => r.known, forgotten: r => r.forgot > 0 };
+  $('lw-chips').innerHTML = LW_FILTERS.map(([f, label]) => `<button type="button" class="chip${f === lwFilter ? ' solid' : ''}" data-f="${f}" aria-pressed="${f === lwFilter}">${label}<b>${all.filter(keep[f]).length}</b></button>`).join('');
+  $('lw-note').textContent = LW_NOTES[lwFilter];
+  const q = C.normalise($('lw-search').value, 'nl');
+  let rows = all.filter(keep[lwFilter]);
+  if (q) rows = rows.filter(r => C.normalise(r.w.bg, 'nl').includes(q) || C.normalise(r.w.en, 'nl').includes(q) || String(r.w.rank) === q);
+  const sort = lwFilter === 'forgotten' ? 'forgot' : $('lw-sort').value;
+  if (sort === 'forgot') rows.sort((a, b) => b.forgot - a.forgot);
+  else if (sort === 'weak') rows.sort((a, b) => wordLevel(a) - wordLevel(b) || a.ivl - b.ivl || a.w.rank - b.w.rank);
+  else if (sort === 'recent') rows.sort((a, b) => b.lastSeen - a.lastSeen);
+  $('lw-sort').hidden = lwFilter === 'forgotten';
+  $('lw-list').innerHTML = rows.length ? rows.slice(0, lwShown).map(r => {
+    const open = r.w.rank === lwOpen, lv = wordLevel(r);
+    const tag = lwFilter === 'forgotten' && r.forgot ? `<small class="forgot">forgot ${shortDate(r.forgot)}</small>` : `<small>${wordStateLabel(r)}</small>`;
+    return `<li${open ? ' class="open"' : ''}><button type="button" class="wrow" data-rank="${r.w.rank}" aria-expanded="${open}"><span class="rk">${r.w.rank}</span><span><span class="wbg" lang="bg">${esc(r.w.bg)}</span><span class="wen">${esc(r.w.en)}</span></span><span class="wst"><span class="meter" data-l="${lv}" role="img" aria-label="strength ${lv} of 4"><i></i><i></i><i></i><i></i></span>${tag}</span></button>${open ? wordDetail(r, now) : ''}</li>`;
+  }).join('') : `<li class="lw-empty">${q ? 'No word matches “' + esc($('lw-search').value) + '”.' : lwFilter === 'forgotten' ? `Nothing forgotten in the last ${C.FORGOT_DAYS} days.` : 'No words here yet.'}</li>`;
+  $('lw-more').hidden = rows.length <= lwShown;
+}
 $('lib-table').addEventListener('click', e => {
   const tr = closest(e, 'tr.clickable'); if (!tr) return;
   const open = tr.nextElementSibling && tr.nextElementSibling.classList.contains('lib-row-detail');
@@ -597,7 +685,7 @@ function applySnapshot(m) {
   refreshSentences();
   // redraw what is on screen, without leaving the tab or the session summary
   const tab = document.querySelector('.tab.active');
-  if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLibrary(false); else if (tab && tab.id === 'tab-settings') renderSettings(); else if (tab && tab.id === 'tab-reading' && $('reading-story').hidden) renderReading();
+  if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLib(false); else if (tab && tab.id === 'tab-settings') renderSettings(); else if (tab && tab.id === 'tab-reading' && $('reading-story').hidden) renderReading();
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   wrRefresh();
 }

@@ -1080,16 +1080,38 @@
   /** a word is known when its Bulgarian → English card is in review and its next review is at least a week after the
    *  last one (D-036); the interval, not the stability, so that the history from Anki's review log measures the same */
   const KNOWN_DAYS = 7;
+  /** is this Bulgarian → English card one of a known word (D-036) @param {ProgressRecord | undefined} p */
+  const isKnownWord = p => !!p && p.state === 'review' && p.due - p.last >= KNOWN_DAYS * D - H;
   /** words started (any card) and known @param {Progress} progress */
   function wordCounts(progress) {
     const started = new Set(); let known = 0;
     for (const k in progress) {
       if (!k.startsWith('w:')) continue;
       started.add(k.slice(0, k.indexOf('|')));
-      const p = progress[k];
-      if (k.endsWith('|bg2en') && p && p.state === 'review' && p.due - p.last >= KNOWN_DAYS * D - H) known++;
+      if (k.endsWith('|bg2en') && isKnownWord(progress[k])) known++;
     }
     return { started: started.size, known };
+  }
+  /** a word answered Again within this many days counts as forgotten in the Library (D-040) */
+  const FORGOT_DAYS = 14;
+  /** every started deck word, in deck order, with what the Library's word list shows (D-040): known (the D-036 rule),
+   *  the Bulgarian → English card's state and interval, the last answer, and the last Again within FORGOT_DAYS
+   *  @param {Progress} progress @param {Word[]} words @param {(number | string)[][]} log @param {number} now
+   *  @returns {WordRow[]} */
+  function wordList(progress, words, log, now) {
+    /** @type {Map<number, number>} */ const forgot = new Map();
+    for (const l of log || []) {
+      const m = /^w:(\d+)\|/.exec(String(l[1]));
+      if (m && +l[5] === 1 && +l[0] >= now - FORGOT_DAYS * D) forgot.set(+m[1], Math.max(forgot.get(+m[1]) || 0, +l[0]));
+    }
+    /** @type {WordRow[]} */ const out = [];
+    for (const w of words) {
+      const a = progress[wordKey(w.rank, 'bg2en')], b = progress[wordKey(w.rank, 'en2bg')];
+      if (!a && !b) continue;
+      out.push({ w, a, b, known: isKnownWord(a), state: a ? a.state || 'review' : 'new', ivl: a ? Math.max(0, a.due - a.last) : 0,
+        lastSeen: Math.max(a ? a.last : 0, b ? b.last : 0), forgot: forgot.get(w.rank) || 0 });
+    }
+    return out;
   }
   /** today's load over all cards: reviews (due before the end of today, or answered today, not new today)
    *  and the words started today @param {Progress} progress @param {number} now */
@@ -1171,6 +1193,6 @@
     return out;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, wordCounts };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
