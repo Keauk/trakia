@@ -643,6 +643,36 @@ setTimeout(async () => {
     document.querySelector('nav button[data-tab=stats]').click();
     assert.match($('stats-progress').innerHTML, /Deck words/);
     assert.ok(!$('stats-words-card').hidden && /words known/.test($('stats-words').textContent), 'the known words card');
+    // the Library lists the started words with their meaning (D-040)
+    document.querySelector('nav button[data-tab=library]').click();
+    document.querySelector('#lib-view [data-view=words]').click();
+    assert.ok($('lib-sentences').hidden && $('lib-import').hidden && !$('lib-words').hidden, 'the Words view replaces the sentences');
+    const wc = C.wordCounts(JSON.parse(window.localStorage.getItem('trakia.progress')));
+    const chip = f => +document.querySelector(`#lw-chips [data-f=${f}] b`).textContent;
+    assert.equal(chip('all'), wc.started); assert.equal(chip('known'), wc.known, 'Known agrees with "You know N words"');
+    assert.equal(chip('learning'), wc.started - wc.known);
+    assert.equal(document.querySelectorAll('#lw-list .wrow').length, Math.min(60, wc.started));
+    assert.equal(chip('forgotten'), 0);
+    // forget one word in a words run, then find it under Forgotten
+    document.querySelector('nav button[data-tab=practise]').click(); $('btn-words').click();
+    assert.ok(!$('wr-card').hidden, 'a word card to forget');
+    const forgotRank = /word (\d+)/.exec($('wr-dir').textContent)[1];
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ' })); document.dispatchEvent(new window.KeyboardEvent('keydown', { key: '1' }));
+    $('btn-wr-home').click();
+    document.querySelector('nav button[data-tab=library]').click();
+    document.querySelector('#lw-chips [data-f=forgotten]').click();
+    assert.deepEqual([...document.querySelectorAll('#lw-list .wrow')].map(b => b.dataset.rank), [forgotRank], 'Forgotten lists the word graded Again');
+    document.querySelector('#lw-list .wrow').click();
+    assert.match(document.querySelector('#lw-list .wdet').textContent, /BG → EN[\s\S]*EN → BG/, 'a tap opens the details');
+    document.querySelector('#lw-chips [data-f=all]').click();
+    const w3 = window.TRAKIA_DATA.words.find(w => w.rank === 3);
+    $('lw-search').value = w3.bg; $('lw-search').dispatchEvent(new window.Event('input'));
+    const found = [...document.querySelectorAll('#lw-list .wrow')].map(b => b.dataset.rank);
+    assert.ok(found.includes('3') && found.length < wc.started, 'search narrows the list: ' + found);
+    document.querySelector('nav button[data-tab=stats]').click(); document.querySelector('nav button[data-tab=library]').click();
+    assert.ok(!$('lib-words').hidden && window.localStorage.getItem('trakia.libView') === '"words"', 'the view is kept');
+    document.querySelector('#lib-view [data-view=sentences]').click();
+    assert.ok(!$('lib-sentences').hidden && $('lib-words').hidden);
   }
   console.log('UI smoke test passed');
 }, 100);

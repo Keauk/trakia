@@ -188,6 +188,48 @@ td,th{overflow-wrap:anywhere}
 .card table{max-width:100%}
 .sub{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 tr.clickable{cursor:pointer}
+/* library: the Sentences / Words switch and the word list (D-040) */
+.lib-switch{display:flex;gap:2px;background:var(--nav-track);padding:3px;border-radius:10px;width:max-content;max-width:100%;margin:0 0 14px}
+.lib-switch button{background:none;border:0;padding:7px 18px;border-radius:7px;font:500 14px/1.4 var(--sans);color:var(--muted);cursor:pointer}
+.lib-switch button.on{background:var(--nav-active);color:var(--ink);box-shadow:var(--nav-active-shadow)}
+.lib-switch button:focus-visible,button.chip:focus-visible,.wrow:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@media (hover:hover){.lib-switch button:hover{color:var(--ink)}}
+button.chip{cursor:pointer;font-size:13px;padding:5px 12px}
+button.chip b{font-weight:600;margin-left:5px;font-variant-numeric:tabular-nums}
+.lw-bar{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin:12px 0 0}
+#lw-sort{width:auto;margin-left:auto;padding:5px 10px;font-size:13px;border-width:1px}
+.wlist{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--line)}
+.wlist li{border-bottom:1px solid var(--line)}
+.wlist li.open{background:var(--nav-track);border-radius:12px;border-bottom-color:transparent;margin:4px 0}
+.wrow:focus:not(:focus-visible){outline:none}
+.wrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:11px 8px;background:none;border:0;border-radius:10px;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+@media (hover:hover){.wrow:hover{background:var(--nav-track)}}
+.wrow .rk{font:400 12px var(--mono);color:var(--faint);font-variant-numeric:tabular-nums}
+.wrow .wbg{display:block;font:600 17px/1.3 var(--sans);overflow-wrap:anywhere}
+.wrow .wen{display:block;color:var(--muted);font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.wst{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.wst small{font:500 11px/1 var(--mono);color:var(--faint);white-space:nowrap}
+.wst small.forgot{color:var(--wrong)}
+.meter{display:flex;gap:3px}
+.meter i{width:7px;height:14px;border-radius:2px;background:var(--seg-todo)}
+.meter[data-l="1"] i:nth-child(-n+1){background:var(--wrong)}
+.meter[data-l="2"] i:nth-child(-n+2){background:var(--almost)}
+.meter[data-l="3"] i:nth-child(-n+3),.meter[data-l="4"] i{background:var(--correct)}
+.wdet{padding:0 14px 16px 58px;display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--ink-2)}
+.wdet .winfo{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}
+.wdet .winfo .say-btn{margin-left:-6px}
+.wdet p{margin:0}
+.wdet .wex{border-left:3px solid var(--line);padding-left:10px;color:var(--ink)}
+.wdet .wex span{display:block;color:var(--muted)}
+.wdet li{border:0}
+.wcards{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0}
+.wcards dt{font:500 12px/1.6 var(--mono);color:var(--faint);white-space:nowrap}
+.wcards dd{margin:0}
+.wdet h3{margin:0 0 4px;font:600 12px/1.4 var(--sans);color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+.wdet ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.wdet ul .sub{font-size:13px}
+.lw-empty{color:var(--muted);text-align:center;padding:28px 8px}
+@media (max-width:480px){.wrow{grid-template-columns:28px minmax(0,1fr) auto;gap:10px}.wdet{padding-left:12px}button.chip{padding:4px 10px}}
 .boxes{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:8px 0}
 .boxes div{text-align:center;font-size:12px;color:var(--muted)}
 .boxes b{display:block;font-size:16px;color:var(--ink)}
@@ -592,7 +634,24 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
 </section>
 
 <section id="tab-library" class="tab">
-  <div class="card">
+  <div class="lib-switch" id="lib-view" role="group" aria-label="Show">
+    <button type="button" data-view="sentences" class="on" aria-pressed="true">Sentences</button><button type="button" data-view="words" aria-pressed="false">Words</button>
+  </div>
+  <div class="card" id="lib-words" hidden>
+    <input type="search" id="lw-search" name="trakia-word-search" autocomplete="off" autocorrect="off" spellcheck="false" data-form-type="other" placeholder="Search Bulgarian or English…" aria-label="Search words">
+    <div class="lw-bar">
+      <div class="chips-row" id="lw-chips" role="group" aria-label="Filter"></div>
+      <select id="lw-sort" aria-label="Sort">
+        <option value="rank">Deck order</option>
+        <option value="weak">Weakest first</option>
+        <option value="recent">Recently practised</option>
+      </select>
+    </div>
+    <p class="tiny" id="lw-note"></p>
+    <ul class="wlist" id="lw-list"></ul>
+    <div class="row"><button class="btn small" id="lw-more" hidden>Show more</button></div>
+  </div>
+  <div class="card" id="lib-sentences">
     <div class="row" style="margin-top:0">
       <select id="lib-filter" style="width:auto">
         <option value="eligible">Eligible now</option>
@@ -611,7 +670,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
     <table id="lib-table" class="fixed"></table>
     <div class="row"><button class="btn small" id="lib-more" hidden>Show more</button></div>
   </div>
-  <div class="card">
+  <div class="card" id="lib-import">
     <h2>Import sentences</h2>
     <p class="muted">JSON (array of objects), CSV/TSV or Excel (.xlsx). Columns: <b>bg</b>, <b>nl</b> required; optional <b>nl_alt</b>, <b>bg_alt</b>, <b>en_alt</b> (separate alternatives with <kbd>|</kbd>), <b>en</b>, <b>lemmas</b> (comma-separated dictionary forms, used to compute the rank), <b>tags</b>, <b>id</b>. Rows without lemmas get an estimated rank (≈).</p>
     <div class="row"><input type="file" id="import-file" accept=".json,.csv,.tsv,.txt,.xlsx,.xls"></div>

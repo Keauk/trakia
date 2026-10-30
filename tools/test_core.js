@@ -731,4 +731,18 @@ t('wordCounts and the known-words history merge (D-036)', () => {
   const a = { wordDays: { '2026-10-27': [10, 4, 100], '2026-10-28': [12, 5, 300] } }, b = { wordDays: { '2026-10-28': [12, 4, 200], '2026-10-26': [8, 3, 50] }, stamps: { wiped: 60 } };
   assert.deepEqual(C.mergeSnapshots(a, b).wordDays, { '2026-10-27': [10, 4, 100], '2026-10-28': [12, 5, 300] }, 'the newer entry per day; nothing from before a reset');
 });
+t('isKnownWord and the Library word list (D-040)', () => {
+  const D = 86400e3, now = 100 * D;
+  const rev = days => ({ box: 2, due: now - D + days * D, reps: 2, lapses: 0, streak: 1, last: now - D, s: days, d: 5, state: 'review' });
+  assert.ok(C.isKnownWord(rev(7)) && !C.isKnownWord(rev(6.9)) && !C.isKnownWord(undefined) && !C.isKnownWord(Object.assign(rev(20), { state: 'relearning' })));
+  const words = [1, 2, 3, 4].map(r => ({ rank: r, bg: 'w' + r, en: 'e' + r, pos: '', forms: '' }));
+  const prog = { 'w:1|bg2en': rev(8), 'w:1|en2bg': rev(2), 'w:2|en2bg': rev(30), 'w:3|bg2en': Object.assign(rev(3), { state: 'relearning' }) };
+  const log = [[now - 2 * D, 'w:3|bg2en', 0, 0, 0, 1], [now - 20 * D, 'w:1|bg2en', 0, 0, 0, 1], [now - D, 'w:2|en2bg', 2, 0, 2, 3], [now - D, 'A1|bg2nl', 0, 0, 0, 1]];
+  const rows = C.wordList(prog, words, log, now);
+  assert.deepEqual(rows.map(r => r.w.rank), [1, 2, 3], 'only started words, in deck order');
+  assert.deepEqual(rows.map(r => r.known), [true, false, false], 'known follows the Bulgarian → English card only');
+  assert.deepEqual(rows.map(r => r.state), ['review', 'new', 'relearning']);
+  assert.deepEqual(rows.map(r => r.forgot), [0, 0, now - 2 * D], 'an Again within 14 days counts, an older one does not');
+  assert.equal(rows.filter(r => r.known).length, C.wordCounts(prog).known, 'the list agrees with the count');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));
