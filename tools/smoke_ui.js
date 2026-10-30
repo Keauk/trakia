@@ -133,6 +133,9 @@ $('btn-quit').click();
 assert.equal($('session-done').hidden, false);
 assert.ok(!document.body.classList.contains('running'));
 assert.match($('done-stats').textContent, /correct/);
+// the logo opens the Practise tab (D-041)
+document.querySelector('nav button[data-tab=stats]').click(); $('logo').click();
+assert.ok($('tab-practise').classList.contains('active') && document.querySelector('nav button[data-tab=practise]').classList.contains('active'), 'the logo goes to Practise');
 // stats + library + settings tabs render without throwing
 document.querySelector('nav button[data-tab=stats]').click();
 assert.match($('stats-today').textContent, /answers/);

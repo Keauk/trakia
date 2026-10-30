@@ -29,6 +29,9 @@ a{color:inherit}a:hover{opacity:.8}
 header{position:sticky;top:0;z-index:5;background:var(--header);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
 .hrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px}
 h1{font:700 24px/1.2 var(--serif);margin:0;color:var(--ink)}
+/* the logo opens the Practise tab (D-041) */
+.logo{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;border-radius:6px}
+.logo:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 #hdr-rank{font:400 12px var(--mono);color:var(--faint);white-space:nowrap}
 nav{display:flex;gap:2px;background:var(--nav-track);padding:3px;border-radius:10px}
 .hright{display:flex;align-items:center;gap:19px}
@@ -397,7 +400,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
 <div id="wallpaper" class="wallpaper" hidden><canvas id="wp-fire" width="120" height="72"></canvas><video id="wp-video" muted loop playsinline preload="auto" hidden></video></div>
 <header>
   <div class="hrow">
-    <h1>Тракия</h1>
+    <h1><button type="button" id="logo" class="logo" aria-label="Тракия, go to Practise" title="Practise">Тракия</button></h1>
     <nav>
       <button data-tab="practise" class="active">Practise</button>
       <button data-tab="reading">Reading</button>

@@ -105,6 +105,7 @@ function fmtAgo(ms) { if (ms < 60e3) return 'now'; if (ms < 3600e3) return Math.
 
 // ---------- tabs ----------
 /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+$('logo').addEventListener('click', () => showTab('practise'));   // the logo goes home (D-041)
 function showTab(name) {
   stopReader(); hideSay(); lrStop();
   /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('nav button')).forEach(b => b.classList.toggle('active', b.dataset.tab === name));

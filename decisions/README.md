@@ -48,6 +48,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-038](D-038-capitalise-first-letter.md) | Capitalise the first letter of a typed sentence answer | practise | done |
 | [D-039](D-039-explain-sentence.md) | Explain a practice sentence word by word: what changed from the dictionary form, and why | data / practise UI | done |
 | [D-040](D-040-library-words.md) | List the deck words the learner knows and is learning in the Library, with their meaning | library | in progress |
+| [D-041](D-041-logo-goes-home.md) | Tap the Тракия logo to go to the Practise tab | header | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).
