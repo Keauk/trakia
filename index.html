@@ -118,7 +118,7 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .run-card[data-state=almost]{--st:var(--almost);--st-tint:var(--almost-tint)}
 .run-card[data-state=wrong]{--st:var(--wrong);--st-tint:var(--wrong-tint)}
 .run-card[data-state=revealed]{--st:var(--revealed);--st-tint:var(--revealed-tint)}
-.result{background:var(--st-tint);border-top:1px solid var(--st);padding:20px 30px;display:flex;gap:24px;align-items:flex-start;justify-content:space-between}
+.result{background:var(--st-tint);border-top:1px solid var(--st);padding:20px 30px;display:flex;flex-wrap:wrap;gap:20px 24px;align-items:flex-start;justify-content:space-between}
 .result-main{display:flex;flex-direction:column;gap:8px;min-width:0}
 .status{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px}
 .verdict{font:700 15px/1.4 var(--sans);color:var(--st)}
@@ -149,8 +149,8 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .link-btn:hover{color:var(--ink-2);text-decoration-color:currentColor}
 .gloss{font:400 12px/1.5 var(--mono);color:var(--faint);margin:0}
 /* word-by-word explanation (D-039): an interlinear gloss, the meaning and grammar right under each word; the changed ending bold and underlined, not colour alone */
-.ex{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;max-width:640px}
-.ex-gloss{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:flex-start}
+.ex{flex:1 0 100%;margin:0 -30px -20px;padding:16px 30px 20px;background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.ex-gloss{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:flex-start;margin:0 -6px}
 .ex-w{background:none;border:1px solid transparent;border-radius:8px;padding:4px 6px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;cursor:pointer;text-align:left;color:var(--ink);font:inherit;max-width:100%}
 .ex-w:hover{background:var(--input-bg)}
 .ex-w.sel{border-color:var(--primary);background:var(--revealed-tint)}
@@ -333,7 +333,8 @@ body.running main{padding-top:0;padding-bottom:calc(var(--tabbar-h) + 96px)}
 .newwords{margin-top:-4px}
 #answer{font-size:18px;padding:14px}
 .preview{margin-top:-4px}
-.result{flex-direction:column;gap:8px;padding:16px 18px}
+.result{flex-direction:column;flex-wrap:nowrap;gap:8px;padding:16px 18px}
+.ex{align-self:stretch;margin:8px -18px -16px;padding:14px 18px 16px}
 .expected{font-size:19px}
 .actions,.next-row{position:fixed;left:0;right:0;bottom:var(--tabbar-h);z-index:4;display:flex;gap:10px;padding:12px 16px;background:var(--bg)}
 .actions .btn{flex:none;height:52px;border-radius:12px;padding:0 18px;font-size:15px}
@@ -503,10 +504,10 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
             <button class="link-btn" id="btn-accept">My answer was correct</button>
             <button class="link-btn" id="btn-explain" aria-controls="explain" aria-expanded="false" hidden>Explain the grammar</button>
           </div>
-          <div id="explain" class="ex" hidden></div>
           <p id="gloss" class="gloss"></p>
         </div>
         <div class="next-row"><button class="btn next" id="btn-next">Continue<span class="d-only"> ↵</span></button></div>
+        <div id="explain" class="ex" hidden></div>
       </div>
     </div>
   </div>
