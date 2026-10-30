@@ -129,7 +129,6 @@ function renderHome() {
   // new sentences pause while today's sentence reviews reach the limit (D-042)
   const load = C.sentenceLoad(SENT, progress, settings, now), max = settings.sentenceMax == null ? 100 : settings.sentenceMax, paused = load.reviews >= max && unseenElig > 0;
   $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning }, paused ? `New sentences paused: ${load.reviews} sentence reviews today, limit ${max}.` : '');
-  showPause('home-stats', paused);
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || (unseenElig && !paused) ? 'Practise' : 'Free practice';
   renderWordsButton();
@@ -796,13 +795,8 @@ function renderWordsButton() {
   const paused = !!(q && q.paused === 'limit');
   $('words-nums').innerHTML = taskNums(q ? Object.assign({}, q.counts, paused ? { fresh: q.held } : {}) : { fresh: 0, learning: 0, due: 0 }, q && paused ? pausedText(q) : '');
   $('btn-words').textContent = q ? 'Study words' : 'Start words';
-  showPause('words-nums', paused);
 }
 const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New words paused: ${q.load.reviews} word reviews today, limit ${q.dailyMax}.`;
-/** mark a task card on the Practise home as paused: a dashed edge; the greyed new tile carries the reason (D-042) */
-function showPause(/** @type {string} */ numsId, /** @type {boolean} */ paused) {
-  const card = $(numsId).closest('.task'); if (card) card.classList.toggle('paused', paused);
-}
 /** the Anki position is the highest word with every word before it started */
 function followWords() {
   if (!C.hasWords(progress)) return;

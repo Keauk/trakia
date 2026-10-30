@@ -281,7 +281,7 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding
 .word-graph{display:block;width:100%;height:auto;margin:10px 0 2px;font:11px var(--sans)}
 .word-graph text{fill:var(--faint)}.word-graph path{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.word-graph line{stroke-width:1}
 .graph-key{margin:0 0 6px}.graph-key .k-known{color:var(--correct)}.graph-key .k-started{color:var(--primary)}
-.home-tasks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.home-tasks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .home-tasks .card{margin-bottom:0}
 .task{display:flex;flex-direction:column;gap:14px}
 .task h2{margin:0}
@@ -291,14 +291,11 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding
 .task-nums b{display:block;font:600 26px/1.1 var(--sans);font-variant-numeric:tabular-nums}
 .task-nums span{display:block;margin-top:3px;font-size:12px;color:var(--muted)}
 .n-new b{color:var(--primary)}.n-learn b{color:var(--wrong)}.n-due b{color:var(--correct)}
-/* a paused task card (D-042): a grey dashed left edge, the new count greyed; the reason is the tile's tooltip */
-.task{position:relative}
-.task.paused::before{content:'';position:absolute;left:0;top:22px;bottom:22px;border-left:3px dashed var(--faint);opacity:.7}
+/* a paused task card (D-042): the new count greyed and struck through; the reason is the tile's tooltip */
 .task-nums .off b{color:var(--faint);text-decoration:line-through;text-decoration-thickness:2px}
 .task-nums .off span{color:var(--faint)}
 .home-more{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .home-more .btn{padding:11px 8px}
-.home-note{text-align:center;margin:12px 8px 14px;line-height:1.5}
 @media (max-width:640px){.home-tasks{grid-template-columns:1fr}.home-more{grid-template-columns:1fr 1fr}}
 .wc{margin-left:6px;font:600 13px/1 var(--mono)}.wc-new{color:var(--primary)}.wc-learn{color:var(--wrong)}.wc-due{color:var(--correct)}
 .wr-front{font:600 42px/1.2 var(--sans);margin:22px 0 10px;color:var(--ink);overflow-wrap:anywhere}
