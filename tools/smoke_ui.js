@@ -139,14 +139,13 @@ assert.ok($('tab-practise').classList.contains('active') && document.querySelect
 {
   // D-042: sentence reviews at their limit pause new sentences, not new words; the paused card says so
   const setMax = v => { $('set-sentmax').value = String(v); $('set-sentmax').dispatchEvent(new window.Event('input')); };
-  const sentCard = $('home-stats').closest('.task'), wordCard = $('words-nums').closest('.task');
   setMax(0);
   const off = document.querySelector('#home-stats .n-new.off');
-  assert.ok(sentCard.classList.contains('paused') && off && /paused/.test(off.textContent), 'the Sentences card is marked and its new count greyed and labelled');
+  assert.ok(off && /paused/.test(off.textContent), 'the Sentences card greys and labels its new count');
   assert.match(off.title, /^New sentences paused: \d+ sentence reviews today, limit 0\.$/, 'the reason is the tile\'s tooltip');
-  assert.ok(!wordCard.classList.contains('paused'), 'sentences do not pause words');
+  assert.ok(!document.querySelector('#words-nums .n-new.off'), 'sentences do not pause words');
   setMax(100);
-  assert.ok(!sentCard.classList.contains('paused') && !document.querySelector('#home-stats .n-new.off'));
+  assert.ok(!document.querySelector('#home-stats .n-new.off'));
 }
 // stats + library + settings tabs render without throwing
 document.querySelector('nav button[data-tab=stats]').click();
@@ -637,7 +636,7 @@ setTimeout(async () => {
     assert.ok(gradedNew, 'a new word came up');
     const wd = JSON.parse(window.localStorage.getItem('trakia.wordDays'));
     assert.deepEqual(wd[C.dayKey(Date.now())].slice(0, 2), [C.wordCounts(JSON.parse(window.localStorage.getItem('trakia.progress'))).started, C.wordCounts(JSON.parse(window.localStorage.getItem('trakia.progress'))).known], 'today\'s known words are kept');
-    assert.ok(!$('words-nums').closest('.task').classList.contains('paused'), 'no pause under the limit');
+    assert.ok(!document.querySelector('#words-nums .n-new.off'), 'no pause under the limit');
     assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).rank, 31, 'starting word 31 moves the position');
     const lastLog = JSON.parse(window.localStorage.getItem('trakia.log')).slice(-1)[0];
     assert.ok(String(lastLog[1]).startsWith('w:') && lastLog[2] === 2 && lastLog[5] === 3, 'Good is logged: ' + lastLog);

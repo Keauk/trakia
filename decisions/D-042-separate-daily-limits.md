@@ -19,11 +19,10 @@ wait for their own pile.
    (`sentenceMax`, default 100, shared) counts sentence cards due today, done or not. At or above it,
    a session holds no new sentence cards; reviews still come. A session with nothing due becomes
    free practice, as today.
-3. **The Practise home shows which is paused.** A paused task card (Sentences, Words or both) gets:
-   - a grey dashed line along its left edge;
-   - its *new* number greyed and struck through, labelled *paused*; hovering it shows the numbers
-     ("New sentences paused: 112 sentence reviews today, limit 100.").
-   No line of text: the card stays as calm as an active one. The note under the two cards goes.
+3. **The Practise home shows which is paused.** On a paused task card (Sentences, Words or both)
+   the *new* number is greyed and struck through, labelled *paused*; hovering it shows the numbers
+   ("New sentences paused: 112 sentence reviews today, limit 100."). No line of text and no other
+   mark: the card stays as calm as an active one. The note under the two cards goes.
 4. The end screen of a words run says why new words paused, with the word numbers.
 
 Not proposed: a cap on reviews, a total limit over words and sentences, pausing sentences because
@@ -37,8 +36,7 @@ of the word pile.
   of today or answered today, not first answered today. Cards of another language do not count.
 - `buildSession` takes the pause from `sentenceLoad` and `settings.sentenceMax` (default 100): new
   slots become 0. It returns `paused` and `load`.
-- `renderHome`, `renderWordsButton`: `.task.paused` on the card; the *new* tile gets `.off` and the
-  reason as its `title`. The *Practise* button says *Free practice* when nothing is
+- `renderHome`, `renderWordsButton`: the *new* tile gets `.off` and the reason as its `title`. The *Practise* button says *Free practice* when nothing is
   due and new sentences are paused.
 - Settings: the field *Daily reviews limit* becomes *Daily word reviews limit*; a field *Daily
   sentence reviews limit* joins it, with one help line for both.
@@ -47,8 +45,8 @@ of the word pile.
 - Unit tests: sentence reviews no longer pause new words; word reviews at the limit do;
   `sentenceLoad` counts only the practised cards due today; `buildSession` holds no new cards at
   `sentenceMax` and still holds the reviews.
-- Smoke test: with sentence reviews above the limit, the Sentences card has the dashed edge class
-  and a greyed *new* with the reason as its tooltip; the Words card does not.
+- Smoke test: with sentence reviews above the limit, the Sentences card has a greyed *new* with the
+  reason as its tooltip; the Words card does not.
 - On the phone: the paused card is clear at a glance, in light and dark mode.
 - `npm test` passes.
 
@@ -61,9 +59,10 @@ Built and published; the check on the learner's phone is still to come.
 - `core.js`: `reviewToday`; `dayLoad` counts word cards only; `sentenceLoad`; `buildSession` holds
   no new cards at `sentenceMax` and returns `paused`, `load`, `sentenceMax`; `wordQueue` returns
   `held`. `types.d.ts`: `sentenceMax`.
-- `ui.js`: `showPause` marks a task card; `taskNums` greys the *new* tile; `renderHome` and
-  `renderWordsButton` use them; the setting `sentenceMax` (default 100).
-- `index.html`: the dashed edge and the greyed tile; the two settings with one help line.
+- `ui.js`: `taskNums` greys the *new* tile; `renderHome` and `renderWordsButton` use it; the
+  setting `sentenceMax` (default 100).
+- `index.html`: the greyed tile; the two settings with one help line; the gap under the task cards
+  that the removed note used to give.
 - Checked at 375 px (dark) and 1100 px (light) with both cards paused.
 
 ### Decisions taken
@@ -74,6 +73,7 @@ Built and published; the check on the learner's phone is still to come.
 - 2026-10-30, after the learner's look on the phone: the line of text under the numbers ("New
   sentences paused: 109 sentence reviews today, limit 100.") read as too busy and went; the
   numbers moved to the tooltip of the greyed tile. The end screen of a words run keeps its sentence.
+  The grey dashed left edge added nothing next to the greyed tile and went too.
 
 ## Open questions
 - Is 100 the right default for the sentence limit?
