@@ -704,7 +704,9 @@
     rand = rand || Math.random;
     const byId = new Map(sentences.map(s => [s.id, s]));
     const size = settings.sessionSize == null ? 20 : settings.sessionSize;
-    const cap = Math.min(size, settings.newPerSession == null ? 10 : settings.newPerSession), reserve = Math.min(cap, NEW_RESERVE, Math.floor(size / 4));   // a tiny session stays mostly reviews
+    // new sentences pause while today's sentence reviews reach sentenceMax (D-042)
+    const load = sentenceLoad(sentences, progress, settings, now), sentenceMax = settings.sentenceMax == null ? 100 : settings.sentenceMax, paused = load.reviews >= sentenceMax;
+    const cap = paused ? 0 : Math.min(size, settings.newPerSession == null ? 10 : settings.newPerSession), reserve = Math.min(cap, NEW_RESERVE, Math.floor(size / 4));   // a tiny session stays mostly reviews
     // when each sentence was last answered, per card, for the rest rule
     /** @type {Map<string, [string, number][]>} */ const answered = new Map();
     for (const k in progress) { const p = progress[k]; if (!p || !p.last) continue; const id = parseKey(k).id, list = answered.get(id); if (list) list.push([k, p.last]); else answered.set(id, [[k, p.last]]); }
@@ -750,7 +752,7 @@
       const n = settings.freeSize || (settings.sessionSize == null ? 20 : settings.sessionSize) || 20;
       queue = spreadOut(fullBlocks(onePerSentence(seen).slice(0, n), [], run), byId, run);
     }
-    return { queue, free, nDue: due.length, nNew: fresh.length };
+    return { queue, free, nDue: due.length, nNew: fresh.length, paused, load, sentenceMax };
   }
 
   /**
@@ -1113,22 +1115,33 @@
     }
     return out;
   }
-  /** today's load over all cards: reviews (due before the end of today, or answered today, not new today)
-   *  and the words started today @param {Progress} progress @param {number} now */
+  /** is this card a review today: due before the end of today or answered today, and not first answered today
+   *  @param {ProgressRecord} p @param {{start: number, end: number}} day */
+  const reviewToday = (p, day) => !(p.first != null && p.first >= day.start) && (p.due < day.end || (p.last || 0) >= day.start);
+  /** today's load of the word cards: reviews (see reviewToday) and the words started today; sentence cards do
+   *  not count, so a pile of sentences never holds back new words (D-042) @param {Progress} progress @param {number} now */
   function dayLoad(progress, now) {
-    const { start, end } = dayBounds(now);
+    const day = dayBounds(now);
     let reviews = 0, newWords = 0;
     for (const k in progress) {
-      const p = progress[k]; if (!p) continue;
-      if (p.first != null && p.first >= start) { if (k.startsWith('w:') && k.endsWith('|bg2en')) newWords++; continue; }
-      if (p.due < end || (p.last || 0) >= start) reviews++;
+      const p = progress[k]; if (!p || !k.startsWith('w:')) continue;
+      if (p.first != null && p.first >= day.start) { if (k.endsWith('|bg2en')) newWords++; continue; }
+      if (reviewToday(p, day)) reviews++;
     }
     return { reviews, newWords };
+  }
+  /** today's sentence reviews (see reviewToday) over the cards the learner practises (cardKeys), for the
+   *  sentence pause (D-042) @param {Sentence[]} sentences @param {Progress} progress @param {Partial<Settings>} settings @param {number} now */
+  function sentenceLoad(sentences, progress, settings, now) {
+    const day = dayBounds(now);
+    let reviews = 0;
+    for (const s of sentences) for (const k of cardKeys(s, progress, settings)) { const p = progress[k]; if (p && reviewToday(p, day)) reviews++; }
+    return { reviews };
   }
   /** what a words run can show now: learning cards due within 20 minutes (Anki's learn-ahead), reviews due
    *  today (oldest first), and new cards: the English → Bulgarian card of words started before today, then
    *  new words in deck order, within `newWords` a day and only while today's reviews are below `dailyMax`.
-   *  Counts as Anki shows them: fresh (blue), learning due today (red), due (green).
+   *  Counts as Anki shows them: fresh (blue), learning due today (red), due (green). `held`: the new cards the pause holds back.
    *  @param {Word[]} words @param {Progress} progress @param {Partial<Settings>} settings @param {number} now */
   function wordQueue(words, progress, settings, now) {
     const { start, end } = dayBounds(now), load = dayLoad(progress, now);
@@ -1156,7 +1169,7 @@
       learning: learning.sort(byDue).map(x => x.k), due: due.sort(byDue).map(x => x.k), fresh,
       counts: { fresh: fresh.length, learning: learningToday, due: due.length },
       nextLearning: nextLearning === Infinity ? null : nextLearning,
-      paused: !room && (siblings.length || left) ? 'limit' : null, load, dailyMax,
+      paused: !room && (siblings.length || left) ? 'limit' : null, held: room ? 0 : siblings.length + left, load, dailyMax,
     };
   }
   /** a word card graded 1–4 (Again, Hard, Good, Easy); like applyResult, without the "almost" policy
@@ -1193,6 +1206,6 @@
     return out;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, FORGOT_DAYS, wordList };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
