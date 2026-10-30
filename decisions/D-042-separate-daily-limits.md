@@ -21,9 +21,9 @@ wait for their own pile.
    free practice, as today.
 3. **The Practise home shows which is paused.** A paused task card (Sentences, Words or both) gets:
    - a grey dashed line along its left edge;
-   - its *new* number greyed, labelled *paused*;
-   - one line under the numbers: "New sentences paused: 112 sentence reviews today, limit 100."
-   The note under the two cards goes; each card carries its own.
+   - its *new* number greyed and struck through, labelled *paused*; hovering it shows the numbers
+     ("New sentences paused: 112 sentence reviews today, limit 100.").
+   No line of text: the card stays as calm as an active one. The note under the two cards goes.
 4. The end screen of a words run says why new words paused, with the word numbers.
 
 Not proposed: a cap on reviews, a total limit over words and sentences, pausing sentences because
@@ -37,8 +37,8 @@ of the word pile.
   of today or answered today, not first answered today. Cards of another language do not count.
 - `buildSession` takes the pause from `sentenceLoad` and `settings.sentenceMax` (default 100): new
   slots become 0. It returns `paused` and `load`.
-- `renderHome`: `.task.paused` on the card; the *new* tile gets `.off`; `#sent-paused` and
-  `#words-paused` sit inside their cards. The *Practise* button says *Free practice* when nothing is
+- `renderHome`, `renderWordsButton`: `.task.paused` on the card; the *new* tile gets `.off` and the
+  reason as its `title`. The *Practise* button says *Free practice* when nothing is
   due and new sentences are paused.
 - Settings: the field *Daily reviews limit* becomes *Daily word reviews limit*; a field *Daily
   sentence reviews limit* joins it, with one help line for both.
@@ -47,8 +47,8 @@ of the word pile.
 - Unit tests: sentence reviews no longer pause new words; word reviews at the limit do;
   `sentenceLoad` counts only the practised cards due today; `buildSession` holds no new cards at
   `sentenceMax` and still holds the reviews.
-- Smoke test: with sentence reviews above the limit, the Sentences card shows the pause line, the
-  dashed edge class and a greyed *new*; the Words card does not.
+- Smoke test: with sentence reviews above the limit, the Sentences card has the dashed edge class
+  and a greyed *new* with the reason as its tooltip; the Words card does not.
 - On the phone: the paused card is clear at a glance, in light and dark mode.
 - `npm test` passes.
 
@@ -63,16 +63,17 @@ Built and published; the check on the learner's phone is still to come.
   `held`. `types.d.ts`: `sentenceMax`.
 - `ui.js`: `showPause` marks a task card; `taskNums` greys the *new* tile; `renderHome` and
   `renderWordsButton` use them; the setting `sentenceMax` (default 100).
-- `index.html`: `#sent-paused` and `#words-paused` inside their cards; the dashed edge and the pause
-  line; the two settings with one help line.
+- `index.html`: the dashed edge and the greyed tile; the two settings with one help line.
 - Checked at 375 px (dark) and 1100 px (light) with both cards paused.
 
 ### Decisions taken
 - A paused card's *new* tile shows the new cards held back today, struck through: for sentences
   the unseen cards, for words the words still allowed today (`held`), not Anki's 0.
-- The pause line shows only while new cards wait: a sentence pile over the limit with no unseen
+- A card shows as paused only while new cards wait: a sentence pile over the limit with no unseen
   sentence shows no pause.
-- The short pause line names the numbers only; the Settings help says where the limits live.
+- 2026-10-30, after the learner's look on the phone: the line of text under the numbers ("New
+  sentences paused: 109 sentence reviews today, limit 100.") read as too busy and went; the
+  numbers moved to the tooltip of the greyed tile. The end screen of a words run keeps its sentence.
 
 ## Open questions
 - Is 100 the right default for the sentence limit?

@@ -291,13 +291,11 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding
 .task-nums b{display:block;font:600 26px/1.1 var(--sans);font-variant-numeric:tabular-nums}
 .task-nums span{display:block;margin-top:3px;font-size:12px;color:var(--muted)}
 .n-new b{color:var(--primary)}.n-learn b{color:var(--wrong)}.n-due b{color:var(--correct)}
-/* a paused task card (D-042): a grey dashed left edge, the new count greyed, the reason under the numbers */
+/* a paused task card (D-042): a grey dashed left edge, the new count greyed; the reason is the tile's tooltip */
 .task{position:relative}
 .task.paused::before{content:'';position:absolute;left:0;top:22px;bottom:22px;border-left:3px dashed var(--faint);opacity:.7}
 .task-nums .off b{color:var(--faint);text-decoration:line-through;text-decoration-thickness:2px}
 .task-nums .off span{color:var(--faint)}
-.task-paused{margin:-4px 0 0;display:flex;gap:7px;align-items:flex-start;font-size:13px;line-height:1.4;color:var(--muted)}
-.task-paused::before{content:'';flex:none;width:9px;height:11px;margin-top:3px;border:solid var(--faint);border-width:0 3px}
 .home-more{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .home-more .btn{padding:11px 8px}
 .home-note{text-align:center;margin:12px 8px 14px;line-height:1.5}
@@ -427,13 +425,11 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <div class="card task">
         <h2>Sentences</h2>
         <div class="task-nums" id="home-stats"></div>
-        <p class="task-paused" id="sent-paused" hidden></p>
         <button class="btn primary" id="btn-start">Practise</button>
       </div>
       <div class="card task">
         <h2>Words</h2>
         <div class="task-nums" id="words-nums"></div>
-        <p class="task-paused" id="words-paused" hidden></p>
         <button class="btn primary" id="btn-words">Study words</button>
       </div>
     </div>
