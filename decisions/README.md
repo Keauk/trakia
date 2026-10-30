@@ -50,6 +50,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-040](D-040-library-words.md) | List the deck words the learner knows and is learning in the Library, with their meaning | library | in progress |
 | [D-041](D-041-logo-goes-home.md) | Tap the Тракия logo to go to the Practise tab | header | in progress |
 | [D-042](D-042-separate-daily-limits.md) | Pause new words on word reviews only, pause new sentences on sentence reviews, and show which is paused | scheduling / practise home | in progress |
+| [D-043](D-043-sentences-you-know.md) | Show how many sentences the learner knows, day by day, in a graph like the words graph | stats | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

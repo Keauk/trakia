@@ -133,6 +133,16 @@ $('btn-quit').click();
 assert.equal($('session-done').hidden, false);
 assert.ok(!document.body.classList.contains('running'));
 assert.match($('done-stats').textContent, /correct/);
+{
+  // D-043: the sentences known, kept per day, on the end screen and the Stats tab
+  const ids = new Set(window.TRAKIA_DATA.sentences.map(s => s.id)), c = C.sentenceCounts(JSON.parse(window.localStorage.getItem('trakia.progress')), id => ids.has(id));
+  assert.ok(c.started >= 4);
+  assert.deepEqual(JSON.parse(window.localStorage.getItem('trakia.sentDays'))[C.dayKey(Date.now())].slice(0, 2), [c.started, c.known], 'today\'s known sentences are kept');
+  assert.match($('done-summary').textContent, new RegExp(`You know ${c.known} sentences?\\.`), 'the end screen says how many sentences are known');
+  document.querySelector('nav button[data-tab=stats]').click();
+  assert.ok(!$('stats-sents-card').hidden && /sentences known/.test($('stats-sents').textContent), 'the known sentences card');
+  assert.match($('stats-sents').textContent, /graph starts tomorrow/, 'one day is not a graph yet');
+}
 // the logo opens the Practise tab (D-041)
 document.querySelector('nav button[data-tab=stats]').click(); $('logo').click();
 assert.ok($('tab-practise').classList.contains('active') && document.querySelector('nav button[data-tab=practise]').classList.contains('active'), 'the logo goes to Practise');
@@ -657,6 +667,14 @@ setTimeout(async () => {
     document.querySelector('nav button[data-tab=stats]').click();
     assert.match($('stats-progress').innerHTML, /Deck words/);
     assert.ok(!$('stats-words-card').hidden && /words known/.test($('stats-words').textContent), 'the known words card');
+    {
+      // D-043: with a second day the sentences card draws the graph of the words card
+      const f = new window.File([JSON.stringify({ app: 'trakia', version: 2, sentDays: { [C.dayKey(Date.now() - 86400e3)]: [1, 0, 5] } })], 'p.json', { type: 'application/json' });
+      Object.defineProperty($('import-progress'), 'files', { value: [f], configurable: true }); $('import-progress').dispatchEvent(new window.Event('change'));
+      for (let i = 0; i < 50 && !$('stats-sents').querySelector('svg'); i++) { await new Promise(r => setTimeout(r, 10)); document.querySelector('nav button[data-tab=stats]').click(); }
+      assert.match($('stats-sents').querySelector('svg').getAttribute('aria-label'), /^Known sentences per day/, 'the graph, as the words graph');
+      assert.ok($('stats-sents').querySelector('.graph-key'), 'with the same key');
+    }
     // the Library lists the started words with their meaning (D-040)
     document.querySelector('nav button[data-tab=library]').click();
     document.querySelector('#lib-view [data-view=words]').click();

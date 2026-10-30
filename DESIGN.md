@@ -295,7 +295,9 @@ their reviews); an Anki user's own schedule comes over with `tools/anki_progress
 file outside the repository, merged with *Import progress* or into the sync gist). *Words you know*
 on the Stats tab (D-036) graphs per day the words started and known (Bulgarian → English card with
 its next review a week or more away), kept in `wordDays`; the days before the switch come from
-Anki's review log.
+Anki's review log. *Sentences you know* (D-043) does the same for sentences (`C.sentenceCounts`:
+the reading card, or the dictation card that took its place, a week or more away), kept in
+`sentDays` from 2026-10-30 on; both cards draw with `knownGraph`.
 
 ### 4.4 Rank alignment UI
 

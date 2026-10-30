@@ -733,6 +733,14 @@ t('wordCounts and the known-words history merge (D-036)', () => {
   const a = { wordDays: { '2026-10-27': [10, 4, 100], '2026-10-28': [12, 5, 300] } }, b = { wordDays: { '2026-10-28': [12, 4, 200], '2026-10-26': [8, 3, 50] }, stamps: { wiped: 60 } };
   assert.deepEqual(C.mergeSnapshots(a, b).wordDays, { '2026-10-27': [10, 4, 100], '2026-10-28': [12, 5, 300] }, 'the newer entry per day; nothing from before a reset');
 });
+t('sentenceCounts and the known-sentences history merge (D-043)', () => {
+  const rev = days => ({ box: 2, due: 1 + days * 86400e3, reps: 2, lapses: 0, streak: 1, last: 1, s: days, d: 5, state: 'review' });
+  const prog = { 'A|bg2nl': rev(8), 'A|nl2bg': rev(9), 'A|listen': rev(30), 'B|bg2nl': rev(6.9), 'C|nl2bg': rev(30), 'D|bg2en': rev(7), 'E|listen': rev(10), 'F|bg2nl': Object.assign(rev(20), { state: 'relearning' }), 'G|bg2nl': rev(50), 'w:1|bg2en': rev(50) };
+  assert.deepEqual(C.sentenceCounts(prog), { started: 7, known: 4 }, 'reading or dictation card a week or more away; a sentence once; no word cards');
+  assert.deepEqual(C.sentenceCounts(prog, id => id !== 'G'), { started: 6, known: 3 }, 'a deleted sentence does not count');
+  const a = { sentDays: { '2026-10-30': [10, 4, 300] } }, b = { sentDays: { '2026-10-30': [9, 4, 200], '2026-10-26': [8, 3, 50] }, stamps: { wiped: 60 } };
+  assert.deepEqual(C.mergeSnapshots(a, b).sentDays, { '2026-10-30': [10, 4, 300] }, 'the newer entry per day; nothing from before a reset');
+});
 t('isKnownWord and the Library word list (D-040)', () => {
   const D = 86400e3, now = 100 * D;
   const rev = days => ({ box: 2, due: now - D + days * D, reps: 2, lapses: 0, streak: 1, last: now - D, s: days, d: 5, state: 'review' });

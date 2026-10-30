@@ -975,14 +975,17 @@
       for (const f of /** @type {const} */ (['a', 'd'])) { const v = x[f]; if (v) d[f] = [0, 1, 2].map(i => Math.max((d[f] || [0, 0, 0])[i], v[i] || 0)); }
       if (x.s) d.s = Math.max(d.s || 0, x.s);
     }
-    // known words per day (D-036): per day the entry written last, nothing from before a reset
-    /** @type {Record<string, [number, number, number]>} */ const allWordDays = {};
-    for (const side of [L.wordDays || {}, R.wordDays || {}]) for (const k in side) { const e = side[k], had = allWordDays[k]; if (!had || e[2] >= had[2]) allWordDays[k] = e; }
+    // known words (D-036) and sentences (D-043) per day: per day the entry written last, nothing from before a reset
+    const knownDays = (/** @type {'wordDays' | 'sentDays'} */ f) => {
+      /** @type {Record<string, [number, number, number]>} */ const all = {};
+      for (const side of [L[f] || {}, R[f] || {}]) for (const k in side) { const e = side[k], had = all[k]; if (!had || e[2] >= had[2]) all[k] = e; }
+      return sortedMap(all, e => e[2] > wiped ? e : undefined);
+    };
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
       stamps, cleared, reading, days: sortedMap(allDays, normDay), peeks: sortedMap(allPeeks, p => p.at > wiped ? p : undefined),
-      wordDays: sortedMap(allWordDays, e => e[2] > wiped ? e : undefined),
+      wordDays: knownDays('wordDays'), sentDays: knownDays('sentDays'),
     };
   }
 
@@ -1093,6 +1096,20 @@
       if (k.endsWith('|bg2en') && isKnownWord(progress[k])) known++;
     }
     return { started: started.size, known };
+  }
+  /** sentences started (any card) and known (D-043): known when the reading card, or the dictation card that took its
+   *  place (D-005), passes the word rule of D-036; a sentence counts once @param {Progress} progress
+   *  @param {(id: string) => boolean} [has] keeps only the sentences still in the library */
+  function sentenceCounts(progress, has) {
+    const started = new Set(), known = new Set();
+    for (const k in progress) {
+      if (k.startsWith('w:')) continue;
+      const i = k.indexOf('|'), id = k.slice(0, i), dir = k.slice(i + 1);
+      if (has && !has(id)) continue;
+      started.add(id);
+      if ((dir === 'bg2nl' || dir === 'bg2en' || dir === 'listen') && isKnownWord(progress[k])) known.add(id);
+    }
+    return { started: started.size, known: known.size };
   }
   /** a word answered Again within this many days counts as forgotten in the Library (D-040) */
   const FORGOT_DAYS = 14;
@@ -1206,6 +1223,6 @@
     return out;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, FORGOT_DAYS, wordList };
+  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
