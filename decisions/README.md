@@ -42,13 +42,14 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-032](D-032-publish-guards.md) | Nothing reaches the phone unchecked: tests before every publish, and no manual cache bump | tooling | done |
 | [D-033](D-033-speak-tab.md) | A Speak tab: say the Bulgarian for a Dutch or English word or sentence, checked by speech recognition | new tab | rejected |
 | [D-034](D-034-hands-free-listening.md) | Hands-free listening: Dutch, a pause to answer in your head, then the Bulgarian; and Bulgarian in the background | practise / audio | in progress |
-| [D-035](D-035-words-in-trakia.md) | Learn the deck's words in Trakia: word cards on the same FSRS schedule, one daily limit, the Anki position kept up to date | practise / scheduling / tooling | in progress |
+| [D-035](D-035-words-in-trakia.md) | Learn the deck's words in Trakia: word cards on the same FSRS schedule, a daily limit, the Anki position kept up to date | practise / scheduling / tooling | in progress |
 | [D-036](D-036-known-words-graph.md) | Show how many deck words the learner knows, day by day, in a small graph | stats / tooling | in progress |
 | [D-037](D-037-peek-noun-forms.md) | Sneak peek asks a noun in the form the sentence uses ("plates", "the plate") | practise / data | done |
 | [D-038](D-038-capitalise-first-letter.md) | Capitalise the first letter of a typed sentence answer | practise | done |
 | [D-039](D-039-explain-sentence.md) | Explain a practice sentence word by word: what changed from the dictionary form, and why | data / practise UI | done |
 | [D-040](D-040-library-words.md) | List the deck words the learner knows and is learning in the Library, with their meaning | library | in progress |
 | [D-041](D-041-logo-goes-home.md) | Tap the Тракия logo to go to the Practise tab | header | in progress |
+| [D-042](D-042-separate-daily-limits.md) | Pause new words on word reviews only, pause new sentences on sentence reviews, and show which is paused | scheduling / practise home | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

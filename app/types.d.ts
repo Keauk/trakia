@@ -87,8 +87,10 @@ interface Settings {
   dictation: boolean;
   /** hands-free listening (D-034), per device: 'practice' | 'background', pause 'auto' or seconds, repeat the Bulgarian, minutes (0: no limit) */
   listenMode: string; listenPause: string; listenRepeat: boolean; listenLimit: number;
-  /** deck words (D-035): new words a day, and no new words while today's reviews reach dailyMax; shared */
+  /** deck words (D-035): new words a day, and no new words while today's word reviews reach dailyMax; shared */
   newWords: number; dailyMax: number;
+  /** no new sentence cards while today's sentence reviews reach sentenceMax (D-042); shared */
+  sentenceMax: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 

@@ -136,6 +136,17 @@ assert.match($('done-stats').textContent, /correct/);
 // the logo opens the Practise tab (D-041)
 document.querySelector('nav button[data-tab=stats]').click(); $('logo').click();
 assert.ok($('tab-practise').classList.contains('active') && document.querySelector('nav button[data-tab=practise]').classList.contains('active'), 'the logo goes to Practise');
+{
+  // D-042: sentence reviews at their limit pause new sentences, not new words; the paused card says so
+  const setMax = v => { $('set-sentmax').value = String(v); $('set-sentmax').dispatchEvent(new window.Event('input')); };
+  const sentCard = $('sent-paused').closest('.task'), wordCard = $('words-paused').closest('.task');
+  setMax(0);
+  assert.ok(!$('sent-paused').hidden && sentCard.classList.contains('paused') && /^New sentences paused: \d+ sentence reviews today, limit 0\.$/.test($('sent-paused').textContent), 'the Sentences card shows the pause: ' + $('sent-paused').textContent);
+  assert.ok(document.querySelector('#home-stats .n-new.off') && /paused/.test($('home-stats').textContent), 'the new count is greyed and labelled');
+  assert.ok($('words-paused').hidden && !wordCard.classList.contains('paused'), 'sentences do not pause words');
+  setMax(100);
+  assert.ok($('sent-paused').hidden && !sentCard.classList.contains('paused') && !document.querySelector('#home-stats .n-new.off'));
+}
 // stats + library + settings tabs render without throwing
 document.querySelector('nav button[data-tab=stats]').click();
 assert.match($('stats-today').textContent, /answers/);

@@ -1,4 +1,4 @@
-# D-035: Learn the deck's words in Trakia: word cards on the same FSRS schedule, one daily limit, the Anki position kept up to date
+# D-035: Learn the deck's words in Trakia: word cards on the same FSRS schedule, a daily limit, the Anki position kept up to date
 
 Status: in progress · Created: 2026-10-28 · Area: practise (`ui.js`: the words run; `index.html`: `#words-run`, button on the Practise home), scheduling (`core.js`: `wordQueue`, `wordRank`, `gradeWord`, `seedWords`, `parseKey`), settings (the Anki position), stats, tooling (`tools/anki_progress.py`)
 
@@ -37,11 +37,12 @@ The learner wants the switch to be immediate: no import step, and their progress
      The run ends when nothing is left for today.
 2. **New words in deck order.** A new word starts with its Bulgarian → English card; its English →
    Bulgarian card joins from the next day (Anki's "bury siblings").
-3. **One daily limit for words and sentences.** Settings (shared, synced):
+3. **A daily limit on new words.** Settings (shared, synced):
    - *New words per day*: default 10.
-   - *Daily reviews limit*: default 150. New words are offered only while today's reviews (word and
-     sentence cards due today, done or not) are below it. Reviews themselves are never capped: a
-     capped review only moves the pile to later. The Practise home says so when new words pause.
+   - *Daily word reviews limit*: default 150. New words are offered only while today's word reviews
+     (word cards due today, done or not) are below it. Sentence reviews do not count: words lead,
+     sentences follow (D-042). Reviews themselves are never capped: a capped review only moves the
+     pile to later. The Words card on the Practise home says so when new words pause.
 4. **The Anki position follows the words.** Once any word card exists, the position is the highest
    rank R such that every word up to R has been started. Settings shows it read-only, and
    sentences, stories and the sneak peek (D-031) follow it without manual input.
@@ -77,7 +78,7 @@ question); audio for the deck's example sentences (open question); words beyond 
     relearning cards due within 20 minutes (Anki's learn-ahead); review cards due by the end of
     today, oldest due first; fresh cards: English → Bulgarian siblings of words started before
     today, then new words by rank, at most `newWords` − new words today, and none while the
-    reviews today reach `dailyMax` (`paused` says why).
+    word reviews today reach `dailyMax` (`paused` says why).
   - `wordRank(progress)`: the highest rank R such that every rank 1…R has a word card.
   - `seedWords(words, n, now, settings)`: review records for both cards of words 1…n. Stability
     falls linearly from 45 days (rank 1) to 3 days (rank n); `last` = now − age, with age a fixed
@@ -149,6 +150,9 @@ still to come.
 - A card suspended in Anki (a leech, or by hand) is not brought over.
 - When new words pause, a line on the Practise home and the run's end screen say why, with the
   number of reviews due today and the limit.
+- 2026-10-30: the limit first counted word and sentence reviews together, so a pile of sentence
+  reviews stopped new words. It now counts word reviews only; sentences get their own pause
+  (D-042).
 
 ### Measurements
 - 2026-10-28: the tool on the learner's collection: 460 cards (419 review, 35 learning,

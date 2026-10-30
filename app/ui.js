@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20, newWords: 10, dailyMax: 150 };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20, newWords: 10, dailyMax: 150, sentenceMax: 100 };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -126,14 +126,17 @@ function renderHome() {
   let due = 0, learning = 0;
   for (const s of SENT) for (const k of C.cardKeys(s, progress, settings)) { const p = progress[k]; if (p && p.due <= now) { due++; if (p.state !== 'review') learning++; } }
   const unseenElig = elig.reduce((n, s) => n + C.cardKeys(s, progress, settings).filter(k => !progress[k]).length, 0);
-  $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning });
+  // new sentences pause while today's sentence reviews reach the limit (D-042)
+  const load = C.sentenceLoad(SENT, progress, settings, now), max = settings.sentenceMax == null ? 100 : settings.sentenceMax, paused = load.reviews >= max && unseenElig > 0;
+  $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning }, paused);
+  showPause('sent', paused ? `New sentences paused: ${load.reviews} sentence reviews today, limit ${max}.` : '');
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
-  $('btn-start').textContent = due || unseenElig ? 'Practise' : 'Free practice';
+  $('btn-start').textContent = due || (unseenElig && !paused) ? 'Practise' : 'Free practice';
   renderWordsButton();
 }
 const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
 /** the three counts of a task card on the Practise home, coloured as Anki colours them */
-const taskNums = (/** @type {{fresh: number, learning: number, due: number}} */ c) => `<div class="n-new"><b>${c.fresh}</b><span>new</span></div><div class="n-learn"><b>${c.learning}</b><span>learning</span></div><div class="n-due"><b>${c.due}</b><span>due</span></div>`;
+const taskNums = (/** @type {{fresh: number, learning: number, due: number}} */ c, /** @type {boolean} */ paused = false) => `<div class="n-new${paused ? ' off' : ''}"><b>${c.fresh}</b><span>${paused ? 'paused' : 'new'}</span></div><div class="n-learn"><b>${c.learning}</b><span>learning</span></div><div class="n-due"><b>${c.due}</b><span>due</span></div>`;
 
 function startSession(opts) {
   opts = opts || {};
@@ -708,8 +711,8 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool'), bind('set-newwords', 'newWords', 'num'), bind('set-dailymax', 'dailyMax', 'num')];
-function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool'), bind('set-newwords', 'newWords', 'num'), bind('set-dailymax', 'dailyMax', 'num'), bind('set-sentmax', 'sentenceMax', 'num')];
+function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax' || key === 'sentenceMax') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
@@ -790,11 +793,17 @@ const wordQ = () => C.wordQueue(WORDS, progress, settings, Date.now());
 const countsHtml = (/** @type {{fresh: number, learning: number, due: number}} */ c) => `<span class="wc"><span class="wc-new">${c.fresh}</span> · <span class="wc-learn">${c.learning}</span> · <span class="wc-due">${c.due}</span></span>`;
 function renderWordsButton() {
   const q = C.hasWords(progress) ? wordQ() : null;
-  $('words-nums').innerHTML = taskNums(q ? q.counts : { fresh: 0, learning: 0, due: 0 });
+  const paused = !!(q && q.paused === 'limit');
+  $('words-nums').innerHTML = taskNums(q ? Object.assign({}, q.counts, paused ? { fresh: q.held } : {}) : { fresh: 0, learning: 0, due: 0 }, paused);
   $('btn-words').textContent = q ? 'Study words' : 'Start words';
-  $('words-paused').textContent = q && q.paused === 'limit' ? pausedText(q) : ''; $('words-paused').hidden = !(q && q.paused);
+  showPause('words', q && paused ? pausedText(q) : '');
 }
-const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New words are paused while the reviews due today (${q.load.reviews}, words and sentences) are above your limit of ${q.dailyMax} (Settings).`;
+const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New words paused: ${q.load.reviews} word reviews today, limit ${q.dailyMax}.`;
+/** mark a task card on the Practise home as paused, with the reason under its numbers (D-042) */
+function showPause(/** @type {'sent' | 'words'} */ which, /** @type {string} */ text) {
+  const el = $(which + '-paused'); el.textContent = text; el.hidden = !text;
+  const card = el.closest('.task'); if (card) card.classList.toggle('paused', !!text);
+}
 /** the Anki position is the highest word with every word before it started */
 function followWords() {
   if (!C.hasWords(progress)) return;

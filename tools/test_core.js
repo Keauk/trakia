@@ -704,10 +704,12 @@ t('wordQueue: deck order, siblings next day, limits', () => {
   q = C.wordQueue(WW, prog, { newWords: 0 }, now);
   assert.deepEqual(q.due, ['w:5|bg2en']); assert.deepEqual(q.learning, ['w:6|bg2en']); assert.deepEqual(q.fresh, ['w:5|en2bg', 'w:6|en2bg', 'w:7|en2bg']);
   assert.deepEqual(q.counts, { fresh: 3, learning: 1, due: 1 });
-  // the daily limit counts sentence reviews too
+  // the daily limit counts word reviews only: a pile of sentence reviews does not pause new words (D-042)
   const busy = Object.assign({}, prog); for (let i = 0; i < 5; i++) busy['S' + i + '|bg2nl'] = { box: 2, due: now - 1, reps: 3, lapses: 0, streak: 1, last: now - D, s: 3, d: 5, state: 'review' };
   q = C.wordQueue(WW, busy, { newWords: 5, dailyMax: 6 }, now);
-  assert.deepEqual(q.fresh, [], 'no new cards once today\'s reviews reach the limit'); assert.equal(q.paused, 'limit'); assert.equal(q.load.reviews, 7, 'five sentences, a word review, a word in relearning');
+  assert.equal(q.paused, null, 'sentence reviews do not pause new words'); assert.equal(q.load.reviews, 2, 'a word review and a word in relearning');
+  q = C.wordQueue(WW, busy, { newWords: 5, dailyMax: 2 }, now);
+  assert.deepEqual(q.fresh, [], 'no new cards once today\'s word reviews reach the limit'); assert.equal(q.paused, 'limit'); assert.equal(q.held, 8, 'three siblings and five new words held back');
   assert.deepEqual(q.due, ['w:5|bg2en'], 'reviews are never capped');
 });
 t('seedWords spreads the known words', () => {
@@ -744,5 +746,17 @@ t('isKnownWord and the Library word list (D-040)', () => {
   assert.deepEqual(rows.map(r => r.state), ['review', 'new', 'relearning']);
   assert.deepEqual(rows.map(r => r.forgot), [0, 0, now - 2 * D], 'an Again within 14 days counts, an older one does not');
   assert.equal(rows.filter(r => r.known).length, C.wordCounts(prog).known, 'the list agrees with the count');
+});
+t('new sentences pause on sentence reviews (D-042)', () => {
+  const now = new Date(2026, 9, 30, 12).getTime(), D = 86400e3;
+  const S = [{ id: 'a', max_rank: 10 }, { id: 'b', max_rank: 20 }, { id: 'c', max_rank: 30 }, { id: 'x', max_rank: 40 }];
+  const rev = due => ({ box: 2, due, reps: 3, lapses: 0, streak: 1, last: now - 3 * D, s: 3, d: 5, state: 'review' });
+  const prog = { 'a|bg2nl': rev(now - D), 'b|bg2nl': rev(now + 3600e3), 'c|bg2nl': rev(now + 5 * D), 'a|bg2en': rev(now - D), 'w:1|bg2en': rev(now - D) };
+  const set = { rank: 100, directions: 'bg2nl', newOrder: 'strict', newPerSession: 10 };
+  assert.equal(C.sentenceLoad(S, prog, set, now).reviews, 2, 'due today in the practised language; not later, not another language, not words');
+  let s = C.buildSession(S, prog, Object.assign({ sentenceMax: 2 }, set), now, () => 0.5);
+  assert.equal(s.paused, true); assert.deepEqual(s.queue, ['a|bg2nl'], 'at the limit: the review comes, no new sentence');
+  s = C.buildSession(S, prog, Object.assign({ sentenceMax: 3 }, set), now, () => 0.5);
+  assert.equal(s.paused, false); assert.deepEqual(s.queue, ['a|bg2nl', 'x|bg2nl'], 'under the limit a new sentence comes');
 });
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));
