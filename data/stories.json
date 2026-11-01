@@ -708,9 +708,9 @@
     ]
    },
    {
-    "bg": "Мария прави супа с пиле, ориз и малко чесън. Петър яде цялата супа. „Много е хубава!“, казва той. „Сега мога да пия и лекарството.“",
-    "nl": "Maria maakt soep met kip, rijst en een beetje knoflook. Petar eet de hele soep op. ‘Die is heel lekker!’ zegt hij. ‘Nu kan ik ook het medicijn innemen.’",
-    "en": "Maria makes soup with chicken, rice and a little garlic. Petar eats the whole soup. ‘It's very good!’ he says. ‘Now I can take the medicine too.’",
+    "bg": "Мария прави супа с пиле, ориз и малко чесън. Петър яде и яде, и вече няма супа. „Много е хубава!“, казва той. „Сега мога да пия и лекарството.“",
+    "nl": "Maria maakt soep met kip, rijst en een beetje knoflook. Petar eet en eet, en dan is de soep op. ‘Die is heel lekker!’ zegt hij. ‘Nu kan ik ook het medicijn innemen.’",
+    "en": "Maria makes soup with chicken, rice and a little garlic. Petar eats and eats, and then the soup is gone. ‘It's very good!’ he says. ‘Now I can take the medicine too.’",
     "speakers": [
      "Петър",
      "Петър"
@@ -778,7 +778,6 @@
    "ориз": "ориз",
    "малко": "малко",
    "чесън": "чесън",
-   "цялата": "цял",
    "много": "много",
    "хубава": "хубав",
    "сега": "сега",
