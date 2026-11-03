@@ -360,6 +360,19 @@ $('btn-home').click();
 document.querySelector('nav button[data-tab=settings]').click();
 $('set-run').value = '1'; $('set-run').dispatchEvent(new window.Event('input'));
 document.querySelector('nav button[data-tab=practise]').click();
+// D-044: a missed sentence comes back until it is right, at most 3 times, and only two misses count against it
+{
+  const before = JSON.parse(window.localStorage.getItem('trakia.progress'));
+  $('btn-start').click();
+  const first = $('prompt').textContent; let shown = 0, answers = 0;
+  for (; answers < 200 && !$('session-run').hidden; answers++) { if ($('prompt').textContent === first) shown++; $('btn-dontknow').click(); $('btn-next').click(); }
+  assert.equal($('session-run').hidden, true, 'the session ends: ' + answers + ' answers');
+  assert.equal(shown, 4, 'first try and 3 retries');
+  const after = JSON.parse(window.localStorage.getItem('trakia.progress'));
+  const added = Object.keys(after).map(k => after[k].lapses - ((before[k] || {}).lapses || 0)).filter(x => x > 0);
+  assert.ok(added.length && added.every(x => x === 2), 'two lapses per sentence, not four: ' + added.join());
+  $('btn-home').click();
+}
 // import a CSV with lemmas and one estimated row
 const csv = 'bg,nl,nl_alt,lemmas\n"Дай ми хляб.",Geef me brood.,Geef mij brood.,"аз, хляб"\n"Това е тест.",Dit is een test.,,\n';
 const file = new window.File([csv], 'extra.csv', { type: 'text/csv' });

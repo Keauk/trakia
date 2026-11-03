@@ -767,4 +767,12 @@ t('new sentences pause on sentence reviews (D-042)', () => {
   s = C.buildSession(S, prog, Object.assign({ sentenceMax: 3 }, set), now, () => 0.5);
   assert.equal(s.paused, false); assert.deepEqual(s.queue, ['a|bg2nl', 'x|bg2nl'], 'under the limit a new sentence comes');
 });
+t('a missed sentence comes back until it is right, at most 3 times (D-044)', () => {
+  assert.equal(C.MAX_RETRIES, 3);
+  assert.deepEqual(C.retryPlan('wrong'), { again: 1, apply: true }, 'first miss: a retry, and it counts');
+  assert.deepEqual(C.retryPlan('wrong', 1), { again: 2, apply: true }, 'miss on the first retry: it still counts');
+  assert.deepEqual(C.retryPlan('wrong', 2), { again: 3, apply: false }, 'miss on the second retry: no more penalty');
+  assert.deepEqual(C.retryPlan('wrong', 3), { again: 0, apply: false }, 'at the cap: no more retries');
+  for (const r of ['correct', 'almost']) for (const tries of [undefined, 1, 2, 3]) assert.deepEqual(C.retryPlan(r, tries), { again: 0, apply: true }, r + ' ends the retries and counts');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

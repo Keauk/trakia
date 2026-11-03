@@ -120,7 +120,7 @@ document.addEventListener('focusin', e => document.body.classList.toggle('typing
 document.addEventListener('focusout', () => setTimeout(() => document.body.classList.toggle('typing', isTypingField(document.activeElement)), 0));
 
 // ---------- practise ----------
-let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,wrong}, pending}
+let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,wrong}, pending}; retry: the retry number (D-044)
 function renderHome() {
   const now = Date.now();
   const elig = SENT.filter(s => C.eligible(s, settings));
@@ -404,15 +404,16 @@ function next() {
   if (session.drill) return nextDrill();
   const item = session.queue[session.i];
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
-  progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
+  const plan = C.retryPlan(effective, item.retry);
+  if (plan.apply || !progress[p.key]) progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
   log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0]);
   save.progress(); save.log(); recordSentDay();
   session.counts[p.result]++;
-  if (effective === 'wrong' && !item.retry) {
+  if (plan.again) {
     // with keyboard blocks (D-021) a retry joins the retries typed on the same keyboard
     let at = session.queue.length;
     if ((settings.dirRun || 1) > 1) { const kb = C.parseKey(p.key).toBg; for (let j = session.queue.length - 1; j > session.i; j--) { const q = session.queue[j]; if (q.retry && C.parseKey(q.key).toBg === kb) { at = j + 1; break; } } }
-    session.queue.splice(at, 0, { key: p.key, retry: true });
+    session.queue.splice(at, 0, { key: p.key, retry: plan.again });
   }
   session.i++; renderCard();
 }

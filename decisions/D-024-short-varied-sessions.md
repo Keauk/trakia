@@ -127,6 +127,8 @@ was asserted. Risks:
 - The reserve is capped at a quarter of the session, so a tiny session is not all new cards.
 - The rest applies only to the other direction of a due card, not to the card itself, so the
   scheduler's 10-minute relearning step for a twice-missed card still works.
+- 2026-11-03: D-044 replaces "comes back once": a missed sentence now comes back until it is right,
+  at most 3 times in a session.
 
 ### Measurements
 Simulation, 2026-10-25: the real `buildSession` and `applyResult`, rank 300, stage 1 (469 eligible),

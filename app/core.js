@@ -504,6 +504,17 @@
     return p;
   }
 
+  /** how often a missed sentence comes back in one session (D-044) */
+  const MAX_RETRIES = 3;
+  /** what a session does after an answer (D-044): `again` is the retry number to queue (0: none), `apply` says whether the answer
+   * changes the card. Only the first miss and a miss on the first retry count against the card.
+   * @param {'correct' | 'almost' | 'wrong'} effective @param {number} [retry] the retry this answer was (0 or absent: the first try)
+   * @returns {{again: number, apply: boolean}} */
+  function retryPlan(effective, retry) {
+    const tries = retry || 0, wrong = effective === 'wrong';
+    return { again: wrong && tries < MAX_RETRIES ? tries + 1 : 0, apply: !wrong || tries < 2 };
+  }
+
   // grammar stages (decision D-008): a sentence is eligible only if all its tagged grammar features
   // are allowed at the learner's stage. Untagged sentences pass. Informational tags never gate.
   const STAGES = {
@@ -1223,6 +1234,6 @@
     return out;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
+  const api = { MAX_RETRIES, retryPlan, INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
