@@ -44,7 +44,7 @@ trakia/
   DESIGN.md, README.md
   data/words.json          exported from the apkg (2952 entries, ordered by rank)
   data/sentences.json      2656 generated sentences (validated, with max_rank)
-  data/stories.json        30 reading stories, 3 per level 100–1000 (D-026, D-046, D-048), with word map and questions
+  data/stories.json        44 reading stories: 3 per level 100–1000 and 2 per level 350–950 (D-026, D-046, D-048, D-050), with word map and questions
   data/cast.json           story speakers -> m/f: men's lines are read by Borislav (D-005)
   data/audio.json          manifest of the spoken clips: length, source, word timings of story clips (D-005)
   data/audio_overrides.json  spoken text that differs from the written one (empty so far)
@@ -242,7 +242,7 @@ translation. Guessing before Anki teaches the word uses the pretesting effect. P
 
 ### 4.3a Reading (D-026, D-027, D-028)
 
-Thirty stories about one family, three per level 100–1000 (D-046, D-048); a story is open when its level is within
+Forty-four stories about one family: three per level 100–1000 (D-046, D-048) and two per level 350–950 (D-050); a story is open when its level is within
 the Anki position plus tolerance and its grammar within the stage (`C.storyEligible`). Each story
 maps every word form in its text to a dictionary form (`words`), which lets the validator check every
 running word against the level and lets the reader look up any tapped word (`C.storyTokens`,

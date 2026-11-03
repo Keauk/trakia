@@ -43,7 +43,11 @@ level 100 the grandparents and the neighbour can only appear as glossed words, s
 ## Shape
 - Length: level 100 about 70–110 words, 200 about 110–160, 300 about 150–200, 400 about 180–240,
   500 about 200–280, 600 about 220–300, 700 about 240–320, 800 about 260–340, 900 about 280–360,
-  1000 about 300–380. Three to six paragraphs.
+  1000 about 300–380. The levels between them: 350 about 165–220, 450 about 190–260, 550 about
+  210–290, 650 about 230–310, 750 about 250–330, 850 about 270–350, 950 about 290–370. Three to six
+  paragraphs.
+- Target words (D-050): a batch may come with a list of words that no story uses yet. Work in as many
+  as sound natural. Skip a word rather than force it.
 - A real little story: a situation, something that goes wrong or changes, an ending. Dialogue
   lines in quotes ("…" or „…") are welcome. Use the newer words of the level (the upper half of
   the range) generously, so each level exercises what the learner just learned.
