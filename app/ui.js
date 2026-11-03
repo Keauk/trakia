@@ -285,6 +285,47 @@ function renderCard() {
 function toBgCard() { const it = session && session.queue[session.i]; return !!(it && !session.drill && C.parseKey(it.key).toBg); }
 function typedValue() { const v = $('answer').value; return settings.translit && toBgCard() ? C.translit(v) : v; }
 $('answer').addEventListener('input', () => { if (!session || session.drill) return; if (settings.translit && toBgCard()) $('translit-preview').textContent = C.translit($('answer').value); });
+// ѝ (her): a lone и offers ѝ in a tiny dropdown. Tab or a tap takes it, anything else leaves the и (D-047)
+let yiAt = -1;   // the position of the и on offer, -1 when the dropdown is closed
+function hideYi() { yiAt = -1; $('yi-pop').hidden = true; }
+function yiHere() { const a = $('answer'); return a.disabled || a.selectionStart !== a.selectionEnd ? -1 : C.loneYi(a.value, a.selectionStart ?? a.value.length, !!session && settings.translit && (!!session.drill || toBgCard())); }
+/** where the caret of a textarea is in the window: it does not say, so measure a hidden copy of its text with a marker at the caret
+ *  @param {AppElement} a */
+function caretBox(a) {
+  const cs = getComputedStyle(a), copy = document.createElement('div'), mark = document.createElement('span');
+  copy.style.cssText = `position:absolute;visibility:hidden;box-sizing:border-box;white-space:pre-wrap;overflow-wrap:break-word;width:${a.offsetWidth}px;font:${cs.fontWeight} ${cs.fontSize}/${cs.lineHeight} ${cs.fontFamily};padding:${cs.paddingTop} ${cs.paddingRight} ${cs.paddingBottom} ${cs.paddingLeft};border:${cs.borderTopWidth} solid`;
+  copy.textContent = a.value.slice(0, a.selectionEnd ?? a.value.length); mark.textContent = '​'; copy.append(mark);
+  document.body.append(copy);
+  const r = a.getBoundingClientRect(), top = r.top + mark.offsetTop, box = { left: r.left + mark.offsetLeft, top, bottom: top + mark.offsetHeight };
+  copy.remove(); return box;
+}
+/** @param {number} at */
+function showYi(at) {
+  yiAt = at;
+  const pop = $('yi-pop'), box = caretBox($('answer')), vv = window.visualViewport; pop.hidden = false;   // the phone keyboard shrinks the visual viewport only
+  const w = pop.offsetWidth, h = pop.offsetHeight, room = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  pop.style.left = Math.max(8, Math.min(box.left - 8, window.innerWidth - w - 8)) + window.scrollX + 'px';
+  pop.style.top = (box.bottom + 4 + h < room ? box.bottom + 4 : box.top - h - 4) + window.scrollY + 'px';
+}
+function acceptYi() {
+  const a = $('answer'), at = yiAt; if (at < 0) return;
+  a.value = a.value.slice(0, at) + 'ѝ' + a.value.slice(at + 1); a.selectionStart = a.selectionEnd = at + 1;
+  a.dispatchEvent(new Event('input'));   // the preview and the height follow; no и is left, so the dropdown closes
+}
+$('answer').addEventListener('input', e => {
+  const it = /** @type {InputEvent} */ (e).inputType, at = yiHere();   // only typing opens it, not a deletion or a paste
+  if (at >= 0 && (!it || it === 'insertText' || it === 'insertCompositionText')) showYi(at); else hideYi();
+});
+$('answer').addEventListener('keydown', e => {
+  if (yiAt < 0) return;
+  if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); acceptYi(); } else if (e.key === 'Escape') hideYi();
+});
+for (const ev of ['keyup', 'click']) $('answer').addEventListener(ev, () => { if (yiAt >= 0 && yiHere() !== yiAt) hideYi(); });   // the caret moved away
+$('answer').addEventListener('blur', hideYi); window.addEventListener('resize', hideYi);
+$('yi-pop').addEventListener('mousedown', e => e.preventDefault());   // keep the focus, and on a phone the keyboard
+$('yi-pop').addEventListener('click', acceptYi);
+// a tap elsewhere closes it too: not every browser takes the focus from the field when a button is tapped
+document.addEventListener('click', e => { if (yiAt >= 0 && e.target !== $('answer') && !(e.target instanceof Node && $('yi-pop').contains(e.target))) hideYi(); }, true);
 // Enter checks, and continues once the result shows. The field's own handler stops the event, so the
 // document handler below cannot see the same keypress again after checking disables the field; a held key does not repeat.
 $('answer').addEventListener('keydown', e => { if (e.key !== 'Enter') return; e.preventDefault(); e.stopPropagation(); if (e.repeat || !session) return; if (session.pending) next(); else checkAnswer(false); });
@@ -312,6 +353,7 @@ $('btn-again').addEventListener('click', () => { if (lastWasDrill) startDrill();
 $('btn-home').addEventListener('click', () => { $('session-done').hidden = true; $('session-home').hidden = false; renderHome(); });
 
 function checkAnswer(giveUp) {
+  hideYi();
   if (session.drill) return checkDrill(giveUp);
   const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key, K = C.parseKey(key);
   const lang = K.toBg ? 'bg' : K.lang;

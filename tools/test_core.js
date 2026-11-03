@@ -60,8 +60,18 @@ t('wordMarks: extra typed words (D-019)', () => {
   assert.equal(line('Ja echt zegt hij', 'Ja — zegt hij'), 'Ja -echt- — zegt hij');
   assert.equal(line('', 'Ja.'), '[Ja.]');
 });
+t('loneYi (D-047)', () => {
+  const end = (s, latin) => C.loneYi(s, s.length, latin);
+  assert.equal(end('и'), 0); assert.equal(end('Дадох и'), 6); assert.equal(end('(и'), 1); assert.equal(end('стаята, и'), 8);
+  assert.equal(end('Ви'), -1, 'the end of a word'); assert.equal(end('Дадох'), -1); assert.equal(end(''), -1); assert.equal(end('И'), -1, 'no capital');
+  assert.equal(end('Дадох ѝ'), -1, 'already ѝ'); assert.equal(end('Дадох и '), -1, 'a space closed it');
+  assert.equal(C.loneYi('Дадох и книга', 7), 6, 'a word of its own in the middle of the text');
+  assert.equal(C.loneYi('имам', 1), -1, 'a letter after the caret');
+  assert.equal(end('dadoh i'), -1, 'a Latin i only on the Latin keyboard'); assert.equal(end('dadoh i', true), 6); assert.equal(end('hi', true), -1); assert.equal(end('Дадох и', true), 6);
+});
 t('translit', () => {
   assert.equal(C.translit('Kupih hlyab i mlyako'), 'Купих хляб и мляко');
+  assert.equal(C.translit('kupih ѝ'), 'купих ѝ', 'an accepted ѝ (D-047) stays');
   assert.equal(C.translit('Shte dojda s priyatel. Zdravej!'), 'Ще дойда с приятел. Здравей!');
   assert.equal(C.translit('chasha chaj, kashkaval, yod'), 'чаша чай, кашкавал, ьод');
 });

@@ -54,6 +54,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-044](D-044-retry-until-right.md) | Bring a missed sentence back until it is right, at most 3 times in a session | session | in progress |
 | [D-045](D-045-forgiving-streak.md) | Show a forgiving streak in the top bar, with rest days, and count all study | top bar / stats / sync | in progress |
 | [D-046](D-046-stories-past-500.md) | Continue the Reading tab past word 500, with three stories each at levels 600 and 700 | reading / content | done |
+| [D-047](D-047-yi-dropdown.md) | Offer ѝ in a tiny dropdown when the learner types a lone и | practise | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

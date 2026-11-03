@@ -39,6 +39,28 @@ assert.ok(id, 'prompt is a bundled sentence');
 assert.equal($('prompt').querySelector('button.w'), null, 'no lookup before answering');
 // D-038: a sentence answer starts with a capital, so a lowercase start is no highlighted difference
 $('answer').value = 'a'; $('answer').dispatchEvent(new window.Event('input')); assert.equal($('answer').value, 'A');
+// D-047: a lone и offers ѝ at once: Tab or a tap takes it, anything else leaves the и
+const putAnswer = (v, inputType = 'insertText') => { $('answer').value = v; $('answer').dispatchEvent(new window.InputEvent('input', { inputType })); };
+const tabAnswer = () => { const e = new window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }); $('answer').dispatchEvent(e); return e.defaultPrevented; };
+{
+  const a = $('answer'), pop = $('yi-pop');
+  assert.equal(pop.hidden, true, 'closed at the start'); assert.equal(tabAnswer(), false, 'nothing on offer: Tab moves the focus as before');
+  putAnswer('Дадох и'); assert.equal(pop.hidden, false, 'a lone и opens it');
+  assert.equal(tabAnswer(), true, 'Tab is taken'); assert.equal(a.value, 'Дадох ѝ'); assert.equal(pop.hidden, true); assert.equal(a.selectionStart, 7, 'the caret stays after it');
+  assert.equal(tabAnswer(), false, 'and is free again');
+  putAnswer('Дадох и'); pop.click(); assert.equal(a.value, 'Дадох ѝ', 'a tap takes it'); assert.equal(pop.hidden, true);
+  for (const v of ['Дадох им', 'Дадох и ', 'Дадох и,']) { putAnswer('Дадох и'); assert.equal(pop.hidden, false); putAnswer(v); assert.equal(pop.hidden, true, v); assert.equal(a.value, v); }
+  putAnswer('Ви'); assert.equal(pop.hidden, true, 'inside a word');
+  putAnswer('и'); assert.equal(a.value, 'И'); assert.equal(pop.hidden, true, 'the capital of a sentence (D-038): ѝ never starts one');
+  putAnswer('Дадох и', 'deleteContentBackward'); assert.equal(pop.hidden, true, 'a deletion does not open it');
+  putAnswer('Дадох и', 'insertFromPaste'); assert.equal(pop.hidden, true, 'nor does a paste');
+  putAnswer('Дадох и'); a.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); assert.equal(pop.hidden, true, 'Escape closes it'); assert.equal(a.value, 'Дадох и');
+  putAnswer('Дадох и'); a.dispatchEvent(new window.Event('blur')); assert.equal(pop.hidden, true, 'leaving the field closes it');
+  putAnswer('Дадох и'); a.selectionStart = a.selectionEnd = 2; a.dispatchEvent(new window.Event('keyup')); assert.equal(pop.hidden, true, 'moving the caret closes it');
+  putAnswer('Дадох и'); document.querySelector('nav button[data-tab=stats]').click(); assert.equal(pop.hidden, true, 'another tab closes it');
+  document.querySelector('nav button[data-tab=practise]').click();
+  a.value = ''; a.dispatchEvent(new window.Event('input'));
+}
 // exact answer -> correct (typed with a lowercase first letter)
 type(id.nl[0].toLowerCase() + id.nl.slice(1));
 assert.match($('verdict').className, /correct/);
@@ -196,9 +218,19 @@ document.querySelector('nav button[data-tab=settings]').click(); $('set-translit
 document.querySelector('nav button[data-tab=practise]').click();
 $('answer').value = 'kupih hlyab'; $('answer').dispatchEvent(new window.Event('input'));
 assert.equal($('translit-preview').textContent, 'Купих хляб', 'the first letter is capitalised (D-038)');
+// D-047: on the Latin keyboard a lone i stands for и, and the preview keeps the ѝ
+putAnswer('kupih i'); assert.equal($('yi-pop').hidden, false); tabAnswer();
+assert.equal($('answer').value, 'Kupih ѝ'); assert.equal($('translit-preview').textContent, 'Купих ѝ');
 // --- autofill: answer field is a single-line textarea; a keyboard-inserted line break submits
 assert.equal($('answer').tagName, 'TEXTAREA'); assert.equal($('answer').getAttribute('autocomplete'), 'off');
 document.querySelector('nav button[data-tab=practise]').click();
+$('btn-home').click(); $('btn-start').click();
+// D-047: Enter checks the answer with the и, and closes the dropdown
+putAnswer('Дадох и'); assert.equal($('yi-pop').hidden, false);
+$('answer').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+assert.equal($('feedback').hidden, false); assert.equal($('yi-pop').hidden, true); assert.equal($('answer').value, 'Дадох и');
+$('btn-quit').click(); $('btn-home').click(); $('btn-start').click();
+putAnswer('Дадох и'); assert.equal($('yi-pop').hidden, false); $('btn-quit').click(); assert.equal($('yi-pop').hidden, true, 'quitting the session closes it');
 $('btn-home').click(); $('btn-start').click();
 $('answer').value = 'iets\n'; $('answer').dispatchEvent(new window.InputEvent('input', { inputType: 'insertLineBreak' }));
 assert.equal($('feedback').hidden, false, 'line break from the keyboard submits the answer');
@@ -251,6 +283,8 @@ $('btn-home').click();
 $('btn-gdrill').click();
 assert.equal($('session-run').hidden, false); assert.equal($('dir-badge').textContent, 'Grammar drill');
 assert.equal($('counter').textContent, '1 of 15');
+// D-047: a drill keeps the small first letter, so a drill answer "ѝ" can be typed
+putAnswer('и'); assert.equal($('yi-pop').hidden, false); tabAnswer(); assert.equal($('answer').value, 'ѝ'); putAnswer('');
 // answer the first item correctly using the generated answer, the second wrongly
 const drillItems = Object.fromEntries(C.drillItems(window.TRAKIA_DATA.grammar, 5).map(it => [it.prompt + '|' + it.hint, it]));
 let it = drillItems[$('prompt').textContent + '|' + $('newwords').textContent];
