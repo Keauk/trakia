@@ -22,7 +22,9 @@
 :root[data-theme=dark]{color-scheme:dark;--bg:#111214;--header:#16171a;--line:#26282c;--card:#1a1c1f;--card-shadow:0 0 0 1px #26282c;--ink:#f4f3f0;--ink-2:#c9ccd1;--muted:#9a9ea5;--faint:#73777e;--nav-track:#1f2124;--nav-active:#2a2c31;--nav-active-shadow:none;--chip-solid-bg:oklch(0.78 0.11 265 / 0.15);--chip-solid-fg:oklch(0.82 0.09 265);--chip-bg:#25272b;--chip-border:#25272b;--input-bg:#141517;--input-border:#33353b;--btn2-bg:transparent;--btn2-border:#34373c;--btn2-hover:#202226;--primary:oklch(0.78 0.11 265);--primary-hover:oklch(0.83 0.1 265);--primary-fg:#0f1120;--tab-active:#f2f1ee;--correct:oklch(0.8 0.14 155);--correct-tint:oklch(0.8 0.14 155 / 0.1);--almost:oklch(0.82 0.13 80);--almost-tint:oklch(0.82 0.13 80 / 0.1);--wrong:oklch(0.75 0.14 25);--wrong-tint:oklch(0.75 0.14 25 / 0.1);--revealed:oklch(0.78 0.11 265);--revealed-tint:oklch(0.78 0.11 265 / 0.1);--next-fg:#111214;--diff:oklch(0.8 0.14 155 / 0.25);--seg-done:oklch(0.78 0.11 265);--seg-cur:#f2f1ee;--seg-todo:#2a2c31}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);font-feature-settings:"locl" 0;-webkit-text-size-adjust:100%}
+/* standard Cyrillic letterforms, also for ѝ, which comes from a system font. !important: every font: shorthand resets this feature */
+*,::before,::after{font-feature-settings:"locl" 0!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);-webkit-text-size-adjust:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:inherit}a:hover{opacity:.8}
 /* top bar: wordmark, pill tabs, deck position */
