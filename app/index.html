@@ -296,6 +296,7 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding
 .task-nums .off span{color:var(--faint)}
 .home-more{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .home-more .btn{padding:11px 8px}
+#home-streak{margin:12px 0 0;text-align:center}
 @media (max-width:640px){.home-tasks{grid-template-columns:1fr}.home-more{grid-template-columns:1fr 1fr}}
 .wc{margin-left:6px;font:600 13px/1 var(--mono)}.wc-new{color:var(--primary)}.wc-learn{color:var(--wrong)}.wc-due{color:var(--correct)}
 .wr-front{font:600 42px/1.2 var(--sans);margin:22px 0 10px;color:var(--ink);overflow-wrap:anywhere}
@@ -437,6 +438,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <button class="btn" id="btn-peek">Sneak peek</button>
         <button class="btn" id="btn-lr" title="Hands-free listening">Listen hands-free</button>
       </div>
+      <p class="tiny" id="home-streak" hidden></p>
     </div>
   </div>
 
@@ -715,6 +717,11 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <label for="set-sentmax">Daily sentence reviews limit</label>
       <input type="number" id="set-sentmax" min="10" max="1000" step="10">
       <div class="help">New words stop for the day once today's word reviews reach their limit; new sentences stop once today's sentence reviews reach theirs. Each pile pauses only its own new cards. Reviews themselves are never capped.</div>
+    </div>
+    <div class="field">
+      <label for="set-restdays">Rest days in any 7 days</label>
+      <select id="set-restdays"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>
+      <div class="help">A day without study does not end your streak while it stays within this limit. A rest day keeps the streak but does not add to it. All study counts: answers, grammar drills, sneak peek, a story marked as read, story questions, and a minute of hands-free listening.</div>
     </div>
     <div class="field">
       <label for="set-stage">Grammar stage (match it to the lesson you are on)</label>

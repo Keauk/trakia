@@ -360,6 +360,23 @@ $('btn-home').click();
 document.querySelector('nav button[data-tab=settings]').click();
 $('set-run').value = '1'; $('set-run').dispatchEvent(new window.Event('input'));
 document.querySelector('nav button[data-tab=practise]').click();
+// D-045: the Practise tab and the Stats tab show the same streak, and the setting changes the line
+{
+  const line = $('home-streak');
+  assert.equal(line.hidden, false); assert.match(line.textContent, /^\d+-day streak · 2 rest days left$/);
+  const days = line.textContent.match(/^\d+/)[0];
+  document.querySelector('nav button[data-tab=stats]').click();
+  assert.match($('stats-today').textContent, new RegExp(days + '\\s*day streak'));
+  document.querySelector('nav button[data-tab=settings]').click();
+  assert.equal($('set-restdays').value, '2', 'two rest days by default');
+  $('set-restdays').value = '0'; $('set-restdays').dispatchEvent(new window.Event('input'));
+  assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).restDays, 0, 'stored as a number');
+  document.querySelector('nav button[data-tab=practise]').click();
+  assert.match(line.textContent, /^\d+-day streak$/, 'no rest days: no mention of them');
+  document.querySelector('nav button[data-tab=settings]').click();
+  $('set-restdays').value = '2'; $('set-restdays').dispatchEvent(new window.Event('input'));
+  document.querySelector('nav button[data-tab=practise]').click();
+}
 // import a CSV with lemmas and one estimated row
 const csv = 'bg,nl,nl_alt,lemmas\n"Дай ми хляб.",Geef me brood.,Geef mij brood.,"аз, хляб"\n"Това е тест.",Dit is een test.,,\n';
 const file = new window.File([csv], 'extra.csv', { type: 'text/csv' });
@@ -418,6 +435,7 @@ setTimeout(async () => {
     const rec = JSON.parse(window.localStorage.getItem('trakia.reading'))[st.id];
     assert.ok(rec.read > 0); assert.deepEqual([rec.quiz.score, rec.quiz.total], [1, st.questions.length]);
     assert.equal($('btn-story-read').textContent, 'Read ✓');
+    assert.ok(JSON.parse(window.localStorage.getItem('trakia.studyDays'))[C.dayKey(Date.now())], 'finishing a story notes today as study (D-045)');
     $('btn-story-back').click();
     assert.match(document.querySelector(`#reading-list [data-story="${st.id}"]`).textContent, /read ✓/);
     document.querySelector('nav button[data-tab=stats]').click();

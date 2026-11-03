@@ -887,6 +887,31 @@
   // ---------- history: recent answers in full, older days as totals (D-029) ----------
   /** the local calendar day of a timestamp, "YYYY-MM-DD" */
   function dayKey(/** @type {number} */ ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  /** the days with study (D-045): typed and word answers and drill answers, also those folded into day totals, and the other study noted in `studyDays`
+   * @param {{log?: (number | string)[][], drillLog?: (number | string)[][], days?: Record<string, DaySummary>, studyDays?: Record<string, number>}} st @returns {Set<string>} */
+  function studiedDays(st) {
+    const out = new Set(Object.keys(st.studyDays || {}));
+    for (const e of (st.log || []).concat(st.drillLog || [])) out.add(dayKey(+e[0]));
+    const days = st.days || {}, any = (/** @type {number[] | undefined} */ a) => !!a && a.some(n => n > 0);
+    for (const k in days) if (any(days[k].a) || any(days[k].d)) out.add(k);
+    return out;
+  }
+  /** the streak (D-045): `days` with study, where a missed day is a rest day while any 7 days in a row hold at most `restDays` of them. Today cannot break it.
+   * `restLeft`: the rest days still free for the next day that could be missed. Missed days before the streak began use up nothing.
+   * @param {Set<string>} studied @param {number} now @param {number} restDays @returns {{days: number, restLeft: number}} */
+  function streak(studied, now, restDays) {
+    const t = new Date(now), at = (/** @type {number} */ back) => dayKey(new Date(t.getFullYear(), t.getMonth(), t.getDate() - back, 12).getTime());
+    const missed = /** @type {number[]} */ ([]);
+    let days = 0, oldest = -1;
+    for (let d = 0; d <= 3650; d++) {
+      if (studied.has(at(d))) { days++; oldest = d; continue; }
+      if (d === 0) continue;
+      if (missed.filter(m => d - m < 7).length >= restDays) break;
+      missed.push(d);
+    }
+    const reach = studied.has(at(0)) ? 5 : 6;   // the seven days that hold the next day that could be missed
+    return { days, restLeft: Math.max(0, restDays - missed.filter(m => m < oldest && m <= reach).length) };
+  }
   /** fold every answer, drill answer and session start of a day before the last `keepDays` days into that day's totals.
    * A total takes the larger of the old total and the count, never the sum, so a day compacted on two devices is not counted twice.
    * @param {{log?: (number | string)[][], drillLog?: (number | string)[][], sessions?: number[], days?: Record<string, DaySummary>}} st @param {number} now @param {number} [keepDays]
@@ -981,11 +1006,14 @@
       for (const side of [L[f] || {}, R[f] || {}]) for (const k in side) { const e = side[k], had = all[k]; if (!had || e[2] >= had[2]) all[k] = e; }
       return sortedMap(all, e => e[2] > wiped ? e : undefined);
     };
+    // other days of study (D-045): per day the newer time, nothing from before a reset
+    /** @type {Record<string, number>} */ const allStudy = {};
+    for (const side of [L.studyDays || {}, R.studyDays || {}]) for (const k in side) allStudy[k] = Math.max(allStudy[k] || 0, side[k]);
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
       stamps, cleared, reading, days: sortedMap(allDays, normDay), peeks: sortedMap(allPeeks, p => p.at > wiped ? p : undefined),
-      wordDays: knownDays('wordDays'), sentDays: knownDays('sentDays'),
+      wordDays: knownDays('wordDays'), sentDays: knownDays('sentDays'), studyDays: sortedMap(allStudy, ts => ts > wiped ? ts : undefined),
     };
   }
 
@@ -1223,6 +1251,6 @@
     return out;
   }
 
-  const api = { INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
+  const api = { streak, studiedDays, INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
