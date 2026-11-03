@@ -117,5 +117,6 @@ it. Bulgarian quality: stories are written by agents under the brief and checked
 - Read the story aloud with the browser's Bulgarian voice, together with D-005?
 - Offer story sentences as practice cards (*Add to practice*), so reading feeds the typing
   trainer?
-- Continue past 500 in steps of 100 as the learner advances in Anki, and add stories in later
-  grammar stages?
+- ~~Continue past 500 in steps of 100 as the learner advances in Anki?~~ Yes: D-046 adds levels 600
+  and 700.
+- Add stories in later grammar stages? D-046 keeps this question open.

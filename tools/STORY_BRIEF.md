@@ -19,7 +19,8 @@ and meaning, and asks comprehension questions at the end.
    the deck at all). Put each such dictionary form in `extra` with its meaning in Dutch and English.
    Use them only where the story would be stilted without them. The validator prints the share.
 4. Grammar: **present tense only**, plus да-clauses (искам да …, трябва да …, мога да …). No past
-   tense, no future with ще, no imperatives (Ела!, Дай!), no conditional. Narrate in the present
+   tense, no future with ще, no imperatives (Ела!, Дай!; the fixed deck phrases Заповядайте,
+   Извинете and Извинявай are allowed), no conditional. Narrate in the present
    ("Иван отива в кухнята."). Polite or informal questions are fine.
 
 ## Language quality
@@ -41,7 +42,7 @@ level 100 the grandparents and the neighbour can only appear as glossed words, s
 
 ## Shape
 - Length: level 100 about 70–110 words, 200 about 110–160, 300 about 150–200, 400 about 180–240,
-  500 about 200–280. Three to six paragraphs.
+  500 about 200–280, 600 about 220–300, 700 about 240–320. Three to six paragraphs.
 - A real little story: a situation, something that goes wrong or changes, an ending. Dialogue
   lines in quotes ("…" or „…") are welcome. Use the newer words of the level (the upper half of
   the range) generously, so each level exercises what the learner just learned.
