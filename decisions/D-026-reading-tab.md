@@ -26,7 +26,8 @@ Reading research puts comfortable, unassisted comprehension at 95–98 % known w
    (parents, two children, grandparents in Plovdiv, a neighbour), so later stories build on
    earlier ones. Each story stands on its own.
 5. The tab shows the stories that fit the learner: every level up to their Anki position (plus
-   the tolerance setting) whose grammar fits their stage. The highest open level comes first.
+   the tolerance setting) whose grammar fits their stage. The lowest open level comes first, so
+   the stories run from easy to hard.
    Higher levels are listed as locked, with the word number that unlocks them.
 6. Opening a story shows the title and the Bulgarian text paragraph by paragraph. The translation
    in the practice language (Dutch or English; *Mixed* picks one per story) is hidden behind a
@@ -105,6 +106,8 @@ it. Bulgarian quality: stories are written by agents under the brief and checked
   although it is formally an imperative.
 - A form with two meanings in one story maps to the one it has most often there (`сестра` in
   R400a means sister, also inside `медицинска сестра`).
+- 2026-11-03: open levels now run lowest first (100 before 200), at the learner's request. The
+  proposal first had the highest open level on top, which put level 200 above level 100.
 
 ### Measurements
 - 2026-10-26: 96–109 words at level 100, 127–134 at 200, 163–199 at 300, 201–237 at 400,

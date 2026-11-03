@@ -984,7 +984,7 @@ function renderReading() {
     const why = isOpen ? '' : L > reach ? ` · unlocks at word ${L} (you are at word ${settings.rank})` : ' · needs a higher grammar stage';
     return `<div class="card${isOpen ? '' : ' locked'}"><h2>Level ${L}</h2><p class="tiny">Words 1–${L}${why}</p><div class="story-list">${rows}</div></div>`;
   };
-  const openLevels = LEVELS.filter(L => STORIES.some(st => st.level === L && open.includes(st))).reverse();
+  const openLevels = LEVELS.filter(L => STORIES.some(st => st.level === L && open.includes(st)));
   const locked = LEVELS.filter(L => !openLevels.includes(L));
   $('reading-list').innerHTML = `<div class="card"><h2>Reading</h2><p class="muted">Short stories about the Petrov family, written with the words you know. ${open.length ? `${open.length} of ${STORIES.length} stories are open at word ${settings.rank}.` : `The first stories open at word ${LEVELS[0] || 100}.`} Each ends with a few questions.</p></div>`
     + openLevels.map(L => level(L, true)).join('') + locked.map(L => level(L, false)).join('');

@@ -387,6 +387,11 @@ setTimeout(async () => {
     assert.ok(STORIES.length >= 15 && open.length >= 3, 'stories bundled and the level-100 ones open: ' + open.length);
     assert.equal(document.querySelectorAll('#reading-list .story-row:not([disabled])').length, open.length);
     assert.match($('reading-list').textContent, /unlocks at word 200/);
+    // two open levels: the lowest comes first (D-026)
+    const setRank = (/** @type {string} */ v) => { $('set-rank').value = v; $('set-rank').dispatchEvent(new window.Event('input')); document.querySelector('nav button[data-tab=reading]').click(); };
+    setRank('250');
+    assert.deepEqual([...document.querySelectorAll('#reading-list .card:not(.locked) h2')].map(h => h.textContent).filter(t => t.startsWith('Level')), ['Level 100', 'Level 200']);
+    setRank('150');
     const st = open[0];
     document.querySelector(`#reading-list [data-story="${st.id}"]`).click();
     assert.equal($('reading-story').hidden, false); assert.equal($('story-title').textContent, st.title.bg);
