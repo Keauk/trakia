@@ -16,7 +16,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem('trakia.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('trakia.' + k, JSON.stringify(v)); } catch (e) { toast('Could not save (storage full or blocked)'); } },
 };
-const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20, newWords: 10, dailyMax: 150, sentenceMax: 100 };
+const DEFAULTS = { rank: DATA.learnedRank || 0, tolerance: 0, sessionSize: 20, newPerSession: 10, directions: 'gated', newOrder: 'mixed', lang: 'nl', typoPct: 10, bagOfWords: true, almostPolicy: 'staged', almostFreePasses: 2, retention: 0.9, maxInterval: 365, stage: 1, strictPunct: false, strictYi: false, stripAccents: true, strictForms: true, translit: false, theme: 'auto', dirRun: 1, wallpaper: 'none', wallpaperUrl: '', wallpaperDim: 55, sound: true, autoplay: true, voices: 'both', speed: 1, dictation: true, listenMode: 'practice', listenPause: 'auto', listenRepeat: true, listenLimit: 20, newWords: 10, dailyMax: 150, sentenceMax: 100, restDays: 2 };
 let settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let progress = LS.get('progress', {});
 (function migrate() { let n = 0; for (const k in progress) if (progress[k] && progress[k].s == null) { progress[k] = C.migrateRecord(progress[k]); n++; } if (n) { try { localStorage.setItem('trakia.progress', JSON.stringify(progress)); } catch (e) {} } })();
@@ -34,11 +34,12 @@ let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 /** @type {Record<string, {at: number, ok: boolean}>} */ let peeks = LS.get('peeks', {});   // words guessed in a sneak peek, by rank (D-031)
 /** @type {Record<string, [number, number, number]>} */ let wordDays = LS.get('wordDays', {});   // words started and known per day (D-036)
 /** @type {Record<string, [number, number, number]>} */ let sentDays = LS.get('sentDays', {});   // sentences started and known per day (D-043)
+/** @type {Record<string, number>} */ let studyDays = LS.get('studyDays', {});   // days of study that the answer logs do not hold (D-045)
 let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
   settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
   progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
-  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals), peeks: () => LS.set('peeks', peeks), wordDays: () => LS.set('wordDays', wordDays), sentDays: () => LS.set('sentDays', sentDays),
+  userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals), peeks: () => LS.set('peeks', peeks), wordDays: () => LS.set('wordDays', wordDays), sentDays: () => LS.set('sentDays', sentDays), studyDays: () => LS.set('studyDays', studyDays),
 };
 // fold answers older than 30 days into day totals (D-029)
 (function compactAtLoad() {
@@ -121,6 +122,10 @@ document.addEventListener('focusout', () => setTimeout(() => document.body.class
 
 // ---------- practise ----------
 let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,wrong}, pending}; retry: the retry number (D-044)
+/** the streak now (D-045) */
+function streakNow() { return C.streak(C.studiedDays({ log, drillLog, days: dayTotals, studyDays }), Date.now(), settings.restDays == null ? 2 : settings.restDays); }
+/** note today as a day of study, for study that the answer logs do not hold (D-045) */
+function markStudied() { const k = dayKey(Date.now()); if (!studyDays[k]) { studyDays[k] = Date.now(); save.studyDays(); } }
 function renderHome() {
   const now = Date.now();
   const elig = SENT.filter(s => C.eligible(s, settings));
@@ -132,6 +137,8 @@ function renderHome() {
   $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning }, paused ? `New sentences paused: ${load.reviews} sentence reviews today, limit ${max}.` : '');
   $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
   $('btn-start').textContent = due || (unseenElig && !paused) ? 'Practise' : 'Free practice';
+  const st = streakNow(), line = $('home-streak');
+  line.hidden = !st.days; line.textContent = `${st.days}-day streak` + (settings.restDays ? ` · ${st.restLeft} rest day${st.restLeft === 1 ? '' : 's'} left` : '');
   renderWordsButton();
 }
 const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
@@ -458,11 +465,10 @@ function renderStats() {
   for (const l of log) { const k = dayKey(l[0]); (byDay[k] = byDay[k] || [0, 0, 0])[l[2]]++; }
   for (const k in dayTotals) { const a = dayTotals[k].a; if (a) byDay[k] = [0, 1, 2].map(i => Math.max((byDay[k] || [0, 0, 0])[i], a[i])); }   // older days as totals (D-029)
   const t = byDay[today] || [0, 0, 0], tot = t[0] + t[1] + t[2];
-  let streak = 0; for (let d = 0; ; d++) { const k = dayKey(now - d * 86400e3); if (byDay[k]) streak++; else if (d === 0) continue; else break; if (d > 3650) break; }
   const ms = log.filter(l => dayKey(l[0]) === today).map(l => l[0]);
   let minutes = 0; for (let i = 1; i < ms.length; i++) { const gap = ms[i] - ms[i - 1]; if (gap < 5 * 60e3) minutes += gap; }
   const listenedMin = Math.round((LS.get('listened', {})[today] || 0) / 60);
-  $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streak, 'day streak') + (listenedMin ? stat(listenedMin, 'min listened') : '');
+  $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streakNow().days, 'day streak') + (listenedMin ? stat(listenedMin, 'min listened') : '');
   // chart data
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);
@@ -678,15 +684,15 @@ $('import-file').addEventListener('change', async e => {
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 /** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
-function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays }; }
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays, studyDays }; }
 /** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
 function applySnapshot(m) {
   m = Object.assign({}, m, C.compactHistory(m, Date.now()));
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
-  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {}; wordDays = m.wordDays || {}; sentDays = m.sentDays || {};
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {}; wordDays = m.wordDays || {}; sentDays = m.sentDays || {}; studyDays = m.studyDays || {};
   if (C.hasWords(progress)) settings.rank = C.wordRank(progress);   // the position follows the deck words (D-035)
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
-  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays })) LS.set(k, v);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays, studyDays })) LS.set(k, v);
   recordWordDay();
   refreshSentences(); recordSentDay();
   // redraw what is on screen, without leaving the tab or the session summary
@@ -713,8 +719,8 @@ const bind = (id, key, type) => {
   el.addEventListener(type === 'bool' ? 'change' : 'input', () => { settings[key] = read(); save.settings(); afterSettingChange(key); });
   return write;
 };
-const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool'), bind('set-newwords', 'newWords', 'num'), bind('set-dailymax', 'dailyMax', 'num'), bind('set-sentmax', 'sentenceMax', 'num')];
-function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax' || key === 'sentenceMax') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool'), bind('set-newwords', 'newWords', 'num'), bind('set-dailymax', 'dailyMax', 'num'), bind('set-sentmax', 'sentenceMax', 'num'), bind('set-restdays', 'restDays', 'num')];
+function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax' || key === 'sentenceMax' || key === 'restDays') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
@@ -727,7 +733,7 @@ $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Word position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; wordDays = {}; sentDays = {}; save.wordDays(); save.sentDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; wordDays = {}; sentDays = {}; studyDays = {}; save.wordDays(); save.sentDays(); save.studyDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
 
 // ---------- sneak peek: guess the next Anki words from a sentence (D-031) ----------
@@ -765,7 +771,7 @@ function pickPeek(/** @type {number} */ j) {
   if (!peek || peek.picked != null) return;
   const it = peek.items[peek.i], ok = j === it.answer;
   peek.picked = j; if (ok) peek.right++;
-  peeks[it.word.rank] = { at: Date.now(), ok }; save.peeks();
+  peeks[it.word.rank] = { at: Date.now(), ok }; save.peeks(); markStudied();
   renderPeek(); $('btn-peek-next').focus();
   if (it.sentence.au && soundOn() && settings.autoplay !== false) $('btn-say-peek').click();   // hear the sentence with the answer
 }
@@ -1090,13 +1096,13 @@ $('story-quiz').addEventListener('click', e => {
   quiz.picks[i] = +(b.dataset.o || 0);
   if (quiz.picks.every(p => p != null)) {
     const st = story, now = Date.now(), score = st.questions.filter((q, j) => quiz && quiz.picks[j] === q.answer).length;
-    reading[st.id] = { read: (reading[st.id] || {}).read || now, quiz: { at: now, score, total: st.questions.length } }; save.reading(); renderReadMark();
+    reading[st.id] = { read: (reading[st.id] || {}).read || now, quiz: { at: now, score, total: st.questions.length } }; save.reading(); markStudied(); renderReadMark();
   }
   renderQuiz();
 });
 $('btn-quiz-again').addEventListener('click', () => startQuiz(attempt + 1));
 function renderReadMark() { const r = story && reading[story.id]; $('btn-story-read').textContent = r && r.read ? 'Read ✓' : 'Mark as read'; $('btn-story-read').disabled = !!(r && r.read); }
-$('btn-story-read').addEventListener('click', () => { if (!story) return; reading[story.id] = Object.assign({}, reading[story.id], { read: Date.now() }); save.reading(); renderReadMark(); toast('Marked as read'); });
+$('btn-story-read').addEventListener('click', () => { if (!story) return; reading[story.id] = Object.assign({}, reading[story.id], { read: Date.now() }); save.reading(); markStudied(); renderReadMark(); toast('Marked as read'); });
 function renderReadingStats() {
   const open = STORIES.filter(st => C.storyEligible(st, settings)), read = open.filter(st => reading[st.id] && reading[st.id].read).length;
   const scored = Object.values(reading).map(r => r.quiz).filter(q => q && q.total), pct = scored.length ? Math.round(100 * scored.reduce((a, q) => a + (q ? q.score / q.total : 0), 0) / scored.length) + '%' : '–';
@@ -1417,7 +1423,7 @@ async function lrLoop() {
 function lrSaveTime() {
   if (!lr || !lr.on) return;
   const now = Date.now(), add = (now - lr.onSince) / 1000, all = LS.get('listened', {}), day = dayKey(now);
-  lr.playedMs += now - lr.onSince; lr.onSince = now; all[day] = Math.round((all[day] || 0) + add); LS.set('listened', all);
+  lr.playedMs += now - lr.onSince; lr.onSince = now; all[day] = Math.round((all[day] || 0) + add); LS.set('listened', all); if (all[day] >= 60) markStudied();
 }
 function lrPlay() {
   if (!lr) return;

@@ -52,6 +52,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-042](D-042-separate-daily-limits.md) | Pause new words on word reviews only, pause new sentences on sentence reviews, and show which is paused | scheduling / practise home | in progress |
 | [D-043](D-043-sentences-you-know.md) | Show how many sentences the learner knows, day by day, in a graph like the words graph | stats | in progress |
 | [D-044](D-044-retry-until-right.md) | Bring a missed sentence back until it is right, at most 3 times in a session | session | in progress |
+| [D-045](D-045-forgiving-streak.md) | Show a forgiving streak on the Practise tab, with rest days, and count all study | practise home / stats / sync | in progress |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

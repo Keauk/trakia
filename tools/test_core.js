@@ -775,4 +775,45 @@ t('a missed sentence comes back until it is right, at most 3 times (D-044)', () 
   assert.deepEqual(C.retryPlan('wrong', 3), { again: 0, apply: false }, 'at the cap: no more retries');
   for (const r of ['correct', 'almost']) for (const tries of [undefined, 1, 2, 3]) assert.deepEqual(C.retryPlan(r, tries), { again: 0, apply: true }, r + ' ends the retries and counts');
 });
+t('a forgiving streak: study days, rest days, the 7-day window (D-045)', () => {
+  const now = new Date(2026, 10, 15, 18).getTime(), key = d => C.dayKey(new Date(2026, 10, 15 - d, 12).getTime());
+  const run = (back, rest) => C.streak(new Set(back.map(key)), now, rest == null ? 2 : rest);
+  assert.deepEqual(run([]), { days: 0, restLeft: 2 }, 'no study at all');
+  assert.deepEqual(run([0]), { days: 1, restLeft: 2 }, 'the missed days before the streak began use up nothing');
+  assert.equal(run([0, 1, 2]).days, 3, 'days in a row');
+  assert.equal(run([1, 2]).days, 2, 'today does not break it before it ends');
+  assert.deepEqual(run([0, 2, 3]), { days: 3, restLeft: 1 }, 'a rest day keeps the streak, does not add to it, and is used up');
+  assert.equal(run([0, 3, 4]).days, 3, 'two rest days in a row');
+  assert.equal(run([0, 4, 5]).days, 1, 'a third missed day in 7 ends it');
+  assert.equal(run([0, 2, 4, 5]).days, 4, 'two scattered rest days');
+  assert.equal(run([0, 2, 4, 6, 7]).days, 3, 'a third scattered one in 7 ends it');
+  assert.equal(run(Array.from({ length: 26 }, (_, d) => d).filter(d => ![8, 16, 24].includes(d))).days, 23, 'rest days older than 7 days free the limit again: missed 8, 16, 24');
+  // the edge of the window: missed on days 1, 2 and 7 is three in 7 days; on 1, 2 and 8 it is not
+  assert.equal(run([0, 3, 4, 5, 6, 8, 9]).days, 5, 'missed 1, 2, 7: ends at the third');
+  assert.equal(run([0, 3, 4, 5, 6, 7, 9, 10]).days, 8, 'missed 1, 2, 8: goes on');
+  assert.equal(run([0, 1, 3], 0).days, 2, 'with limit 0 one missed day ends it');
+  assert.deepEqual(run([0, 1], 0), { days: 2, restLeft: 0 });
+  assert.equal(run([0, 2, 3], 1).days, 3, 'limit 1: one rest day');
+  assert.equal(run([0, 3, 4], 1).days, 1, 'limit 1: not two');
+  // rest days left, for the next day that could be missed
+  assert.equal(run([1, 2, 3]).restLeft, 2, 'nothing missed');
+  assert.equal(run([2, 3]).restLeft, 1, 'yesterday missed');
+  assert.equal(run([3, 4]).restLeft, 0, 'two missed; today would be the third');
+  assert.equal(run([0, 1, 2, 3, 4, 5, 7]).restLeft, 2, 'studied today: a day missed 6 days ago is out of the window of tomorrow');
+  assert.equal(run([1, 2, 3, 4, 5, 7]).restLeft, 1, 'not studied today: a day missed 6 days ago is in the window of today');
+  // a change to summer time: the night of 29 March 2026 in Europe has 23 hours, and no day is skipped
+  const dst = new Date(2026, 2, 30, 0, 30).getTime(), back = d => C.dayKey(new Date(2026, 2, 30 - d, 12).getTime());
+  assert.equal(C.streak(new Set([0, 1, 2, 3].map(back)), dst, 0).days, 4);
+});
+t('the days with study come from every source (D-045)', () => {
+  const ts = new Date(2026, 10, 10, 9).getTime(), day = C.dayKey(ts);
+  assert.deepEqual([...C.studiedDays({ log: [[ts, 'a|bg2nl', 2]] })], [day], 'an answer');
+  assert.deepEqual([...C.studiedDays({ drillLog: [[ts, 'x', 0]] })], [day], 'a drill answer');
+  assert.deepEqual([...C.studiedDays({ days: { '2026-01-02': { a: [0, 0, 1] }, '2026-01-03': { d: [1, 0, 0] }, '2026-01-04': { s: 2 }, '2026-01-05': { a: [0, 0, 0] } } })], ['2026-01-02', '2026-01-03'], 'folded totals; a started session alone is no study');
+  assert.deepEqual([...C.studiedDays({ studyDays: { [day]: ts } })], [day], 'noted study');
+  assert.equal(C.studiedDays({}).size, 0);
+  const a = { studyDays: { '2026-10-30': 300, '2026-10-25': 50 } }, b = { studyDays: { '2026-10-30': 200, '2026-10-31': 400 }, stamps: { wiped: 60 } };
+  assert.deepEqual(C.mergeSnapshots(a, b).studyDays, { '2026-10-30': 300, '2026-10-31': 400 }, 'the newer time per day; nothing from before a reset');
+  assert.deepEqual(C.mergeSnapshots({}, {}).studyDays, {}, 'old snapshots have none');
+});
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));
