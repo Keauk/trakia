@@ -55,6 +55,7 @@ the table below; `python3 tools/check_decisions.py` verifies the structure and t
 | [D-045](D-045-forgiving-streak.md) | Show a forgiving streak in the top bar, with rest days, and count all study | top bar / stats / sync | in progress |
 | [D-046](D-046-stories-past-500.md) | Continue the Reading tab past word 500, with three stories each at levels 600 and 700 | reading / content | done |
 | [D-047](D-047-yi-dropdown.md) | Offer ѝ in a tiny dropdown when the learner types a lone и | practise | in progress |
+| [D-048](D-048-stories-past-700.md) | Continue the Reading tab past word 700, with three stories each at levels 800, 900 and 1000 | reading / content | done |
 
 Suggested order for the open items: D-005 (audio), D-004 (production focus, to be read against
 D-024's one card per sentence), D-007 (continue button and reminders).

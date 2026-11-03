@@ -74,5 +74,6 @@ access.
   (for example `Всичко е наред`), so the story highlights them as a whole.
 
 ## Open questions
-- Add level 800 next, with Christmas baking, theatre tickets and a storm at the beach?
+- ~~Add level 800 next, with Christmas baking, theatre tickets and a storm at the beach?~~ Yes: D-048
+  adds levels 800, 900 and 1000.
 - Add stories in later grammar stages, so a learner past the first stage reads other tenses?

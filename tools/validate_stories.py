@@ -23,7 +23,7 @@ import json, os, re, sys, unicodedata
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from validate_sentences import build_index, resolve_lemma, FREE, norm
 
-LEVELS = (100, 200, 300, 400, 500, 600, 700)
+LEVELS = (100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
 STAGE1 = {'present', 'da-clause', 'comparative', 'numeral'}
 GLOSS_MAX = 0.03
 WORD_RE = re.compile(r'[^\W\d_]+')   # same as /\p{L}+/u in core.js storyTokens
