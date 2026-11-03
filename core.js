@@ -326,6 +326,14 @@
     }
     return out;
   }
+  /** where a lone и sits right before the caret, so that it may be meant as ѝ (her), or -1 (D-047). ѝ is always
+   *  a word of its own, so an и with a letter next to it does not count; with `latin`, a lone "i" stands for и.
+   *  @param {string} text @param {number} caret @param {boolean} [latin] */
+  function loneYi(text, caret, latin) {
+    const at = caret - 1, ch = text[at], letter = /\p{L}/u;
+    if (ch !== 'и' && !(latin && ch === 'i')) return -1;
+    return (at > 0 && letter.test(text[at - 1])) || (caret < text.length && letter.test(text[caret])) ? -1 : at;
+  }
 
   // --- scheduling ---------------------------------------------------------------------------
   function newRecord() { return { box: 0, due: 0, reps: 0, lapses: 0, streak: 0, last: 0 }; }
@@ -1262,6 +1270,6 @@
     return out;
   }
 
-  const api = { MAX_RETRIES, retryPlan, streak, studiedDays, INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
+  const api = { MAX_RETRIES, retryPlan, streak, studiedDays, INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, loneYi, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
