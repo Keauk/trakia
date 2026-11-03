@@ -33,6 +33,17 @@ h1{font:700 24px/1.2 var(--serif);margin:0;color:var(--ink)}
 .logo{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;border-radius:6px}
 .logo:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 #hdr-rank{font:400 12px var(--mono);color:var(--faint);white-space:nowrap}
+/* the streak (D-045): a flame and the number, on one line with the word count; a tap says the rest */
+.hdr-streak{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 9px 0 7px;border:0;border-radius:14px;background:var(--nav-track);color:var(--ink-2);font:500 12px/1 var(--mono);cursor:pointer;white-space:nowrap}
+.hdr-streak[hidden]{display:none}
+.hdr-streak svg{flex:none;width:15px;height:15px;fill:none;stroke:var(--almost);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hdr-streak:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+/* the top bar stays on one line: less of the position, then less space, as the screen narrows */
+@media (min-width:768px) and (max-width:980px){.hdr-stage{display:none}header .hrow{gap:8px;padding-left:16px;padding-right:16px}.hright{gap:8px}}
+@media (min-width:768px) and (max-width:840px){#hdr-rank{display:none}}
+@media (max-width:767px){.hrow{gap:8px}.hright{gap:4px}}
+@media (max-width:480px){.hdr-stage{display:none}}
+@media (max-width:340px){header .hrow{padding-left:12px;padding-right:12px}.hright{gap:2px}#hdr-rank{font-size:11px}}
 nav{display:flex;gap:2px;background:var(--nav-track);padding:3px;border-radius:10px}
 .hright{display:flex;align-items:center;gap:19px}
 /* light/dark switch (D-016): a moon in light mode, a sun in dark mode */
@@ -296,7 +307,6 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding
 .task-nums .off span{color:var(--faint)}
 .home-more{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .home-more .btn{padding:11px 8px}
-#home-streak{margin:12px 0 0;text-align:center}
 @media (max-width:640px){.home-tasks{grid-template-columns:1fr}.home-more{grid-template-columns:1fr 1fr}}
 .wc{margin-left:6px;font:600 13px/1 var(--mono)}.wc-new{color:var(--primary)}.wc-learn{color:var(--wrong)}.wc-due{color:var(--correct)}
 .wr-front{font:600 42px/1.2 var(--sans);margin:22px 0 10px;color:var(--ink);overflow-wrap:anywhere}
@@ -412,7 +422,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
       <button data-tab="library">Library</button>
       <button data-tab="settings">Settings</button>
     </nav>
-    <div class="hright"><span id="hdr-rank"></span><button class="theme-btn" id="btn-sound" aria-label="Sound off" title="Sound off"><svg class="i-snd" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><svg class="i-mute" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg></button><button class="theme-btn" id="btn-theme" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button></div>
+    <div class="hright"><button type="button" class="hdr-streak" id="hdr-streak" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><span id="hdr-streak-n"></span></button><span id="hdr-rank"></span><button class="theme-btn" id="btn-sound" aria-label="Sound off" title="Sound off"><svg class="i-snd" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><svg class="i-mute" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg></button><button class="theme-btn" id="btn-theme" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button></div>
   </div>
 </header>
 <main>
@@ -438,7 +448,6 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
         <button class="btn" id="btn-peek">Sneak peek</button>
         <button class="btn" id="btn-lr" title="Hands-free listening">Listen hands-free</button>
       </div>
-      <p class="tiny" id="home-streak" hidden></p>
     </div>
   </div>
 

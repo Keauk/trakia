@@ -1,6 +1,6 @@
-# D-045: Show a forgiving streak on the Practise tab, with rest days, and count all study
+# D-045: Show a forgiving streak in the top bar, with rest days, and count all study
 
-Status: in progress · Created: 2026-11-03 · Area: practise home / stats / sync (`core.js`: `streak`, `studiedDays`, `mergeSnapshots`; `ui.js`: `renderHome`, `renderStats`, `markStudied`; `index.html`: `#home-streak`, `#set-restdays`), GitHub issue #2
+Status: in progress · Created: 2026-11-03 · Area: top bar / stats / sync (`core.js`: `streak`, `studiedDays`, `mergeSnapshots`; `ui.js`: `renderStreak`, `renderRank`, `renderStats`, `markStudied`; `index.html`: `#hdr-streak`, `#set-restdays`), GitHub issue #2
 
 ## Context
 The streak shows only on the Stats tab, and one missed day sets it to 0. Only typed answers and word
@@ -16,8 +16,9 @@ Evidence:
   likely to lose their streak. Duolingo reports these figures itself.
 
 ## Proposal
-1. **On the Practise tab**, one quiet line under the buttons: "12-day streak · 1 rest day left". There
-   is no line while the streak is 0. The Stats tab shows the same number.
+1. **In the top bar**, on every tab, to the left of the word count: a small chip with a flame and the
+   number. A tap (or hover) says the rest: "12-day streak · 1 rest day left". There is no chip while
+   the streak is 0. The Stats tab shows the same number.
 2. **All study counts**: sentence and word answers, grammar drills, sneak peek answers, a story marked
    as read, story questions, and at least 1 minute of hands-free listening.
 3. **Rest days**: a day without study does not break the streak while any 7 days in a row hold no more
@@ -47,8 +48,11 @@ learner must buy or switch on, or restoring a streak that has already ended.
 - Unit tests: study days in a row; today not yet studied; rest days within and beyond the limit; the
   edge of the 7-day window; limit 0; no study at all; `restLeft`; a change to summer time;
   `studiedDays` from each source; the merge and a reset of `studyDays`.
-- Smoke test: the Practise tab and the Stats tab show the same number, finishing the questions of a
-  story notes today, and the setting changes the line.
+- Smoke test: the top bar and the Stats tab show the same number, the chip sits left of the word count,
+  a tap shows the words, finishing the questions of a story notes today, and the setting changes the
+  words.
+- In a browser, from 330 px up: the top bar stays on one line, and the chip, the word count and the icons
+  share one centre line.
 - `npm test` passes.
 
 ## Effort and risks
@@ -59,13 +63,24 @@ About 60 lines. Risks:
 
 ## As built
 - As proposed. `core.js`: `streak`, `studiedDays`, `studyDays` in `mergeSnapshots`. `ui.js`:
-  `markStudied`, the line on the Practise tab, the Stats number, the setting.
+  `markStudied`, `renderStreak`, the Stats number, the setting.
 
 ### Decisions taken
 - The window is a rolling 7 days, not a calendar week. A calendar week would allow 4 missed days in a
   row across a weekend boundary.
 - The explanation of rest days is in the help text of the setting, not a tooltip, because a phone has
   no hover.
+- 2026-11-03: the streak moved from a line in the Practise buttons card to a chip in the top bar, at the
+  learner's request: the line looked squeezed into that card. A tap on the chip shows the rest days,
+  because a phone has no hover.
+- 2026-11-03: to keep the top bar on one line, it drops "· stage N" at 480 px and below and from 768 to
+  980 px, and the whole word count from 768 to 840 px (there the tabs share the bar). The stage stays in
+  Settings.
+
+### Measurements
+- 2026-11-03, Chrome, a streak of 150 and word 2952, at 18 widths from 320 to 1280 px: no overflow from
+  330 px up. At 320 px the bar is 2 px too wide, and the icons are not clipped. The chip, the word count
+  and the icons share one centre line at every width.
 
 ## Open questions
 None.

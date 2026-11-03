@@ -373,20 +373,21 @@ document.querySelector('nav button[data-tab=practise]').click();
   assert.ok(added.length && added.every(x => x === 2), 'two lapses per sentence, not four: ' + added.join());
   $('btn-home').click();
 }
-// D-045: the Practise tab and the Stats tab show the same streak, and the setting changes the line
+// D-045: the top bar and the Stats tab show the same streak, a tap says the rest, and the setting changes the words
 {
-  const line = $('home-streak');
-  assert.equal(line.hidden, false); assert.match(line.textContent, /^\d+-day streak · 2 rest days left$/);
-  const days = line.textContent.match(/^\d+/)[0];
+  const chip = $('hdr-streak');
+  assert.equal(chip.hidden, false); assert.equal($('home-stats').textContent.includes('streak'), false);
+  const days = $('hdr-streak-n').textContent; assert.match(days, /^\d+$/);
+  assert.equal(chip.nextElementSibling, $('hdr-rank'), 'to the left of the word count');
+  assert.equal(chip.getAttribute('aria-label'), days + '-day streak · 2 rest days left');
+  chip.click(); assert.equal($('toast').textContent, days + '-day streak · 2 rest days left');
   document.querySelector('nav button[data-tab=stats]').click();
   assert.match($('stats-today').textContent, new RegExp(days + '\\s*day streak'));
   document.querySelector('nav button[data-tab=settings]').click();
   assert.equal($('set-restdays').value, '2', 'two rest days by default');
   $('set-restdays').value = '0'; $('set-restdays').dispatchEvent(new window.Event('input'));
   assert.equal(JSON.parse(window.localStorage.getItem('trakia.settings')).restDays, 0, 'stored as a number');
-  document.querySelector('nav button[data-tab=practise]').click();
-  assert.match(line.textContent, /^\d+-day streak$/, 'no rest days: no mention of them');
-  document.querySelector('nav button[data-tab=settings]').click();
+  assert.equal(chip.getAttribute('aria-label'), days + '-day streak', 'no rest days: no mention of them');
   $('set-restdays').value = '2'; $('set-restdays').dispatchEvent(new window.Event('input'));
   document.querySelector('nav button[data-tab=practise]').click();
 }

@@ -125,7 +125,15 @@ let session = null;   // {queue:[{key, retry}], i, free, counts:{correct,almost,
 /** the streak now (D-045) */
 function streakNow() { return C.streak(C.studiedDays({ log, drillLog, days: dayTotals, studyDays }), Date.now(), settings.restDays == null ? 2 : settings.restDays); }
 /** note today as a day of study, for study that the answer logs do not hold (D-045) */
-function markStudied() { const k = dayKey(Date.now()); if (!studyDays[k]) { studyDays[k] = Date.now(); save.studyDays(); } }
+function markStudied() { const k = dayKey(Date.now()); if (!studyDays[k]) { studyDays[k] = Date.now(); save.studyDays(); renderStreak(); } }
+/** the position in the top bar; a narrow screen hides the stage */
+function renderRank() { $('hdr-rank').innerHTML = `word ${+settings.rank}<span class="hdr-stage"> · stage ${+(settings.stage || 5)}</span>`; }
+/** the streak in the top bar: a flame and the number, hidden at 0; the words are in its label and in the toast of a tap (D-045) */
+function renderStreak() {
+  const st = streakNow(), b = $('hdr-streak'), text = `${st.days}-day streak` + (settings.restDays ? ` · ${st.restLeft} rest day${st.restLeft === 1 ? '' : 's'} left` : '');
+  b.hidden = !st.days; $('hdr-streak-n').textContent = String(st.days); b.title = text; b.setAttribute('aria-label', text);
+}
+$('hdr-streak').addEventListener('click', () => toast($('hdr-streak').title));
 function renderHome() {
   const now = Date.now();
   const elig = SENT.filter(s => C.eligible(s, settings));
@@ -135,10 +143,9 @@ function renderHome() {
   // new sentences pause while today's sentence reviews reach the limit (D-042)
   const load = C.sentenceLoad(SENT, progress, settings, now), max = settings.sentenceMax == null ? 100 : settings.sentenceMax, paused = load.reviews >= max && unseenElig > 0;
   $('home-stats').innerHTML = taskNums({ fresh: unseenElig, learning, due: due - learning }, paused ? `New sentences paused: ${load.reviews} sentence reviews today, limit ${max}.` : '');
-  $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
+  renderRank();
   $('btn-start').textContent = due || (unseenElig && !paused) ? 'Practise' : 'Free practice';
-  const st = streakNow(), line = $('home-streak');
-  line.hidden = !st.days; line.textContent = `${st.days}-day streak` + (settings.restDays ? ` · ${st.restLeft} rest day${st.restLeft === 1 ? '' : 's'} left` : '');
+  renderStreak();
   renderWordsButton();
 }
 const stat = (v, label) => `<div class="stat"><b>${v}</b><span>${label}</span></div>`;
@@ -230,7 +237,7 @@ function nextDrill() {
   const t = drills[p.key] || { ok: 0, bad: 0 };
   if (p.result === 'wrong') t.bad += 1; else t.ok += 1;
   t.last = Date.now(); drills[p.key] = t;
-  drillLog.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0]);
+  drillLog.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0]); renderStreak();
   save.drills(); save.drillLog();
   session.counts[p.result]++;
   session.i++; renderCard();
@@ -414,7 +421,7 @@ function next() {
   const plan = C.retryPlan(effective, item.retry);
   if (plan.apply || !progress[p.key]) progress[p.key] = C.applyResult(progress[p.key], p.result, Date.now(), session.free, undefined, p.reason, settings);
   log.push([Date.now(), p.key, p.result === 'correct' ? 2 : p.result === 'almost' ? 1 : 0, session.free ? 1 : 0, effective === 'correct' ? 2 : effective === 'almost' ? 1 : 0, progress[p.key].rating || 0]);
-  save.progress(); save.log(); recordSentDay();
+  save.progress(); save.log(); recordSentDay(); renderStreak();
   session.counts[p.result]++;
   if (plan.again) {
     // with keyboard blocks (D-021) a retry joins the retries typed on the same keyboard
@@ -698,8 +705,8 @@ function applySnapshot(m) {
   // redraw what is on screen, without leaving the tab or the session summary
   const tab = document.querySelector('.tab.active');
   if (tab && tab.id === 'tab-practise') renderHome(); else if (tab && tab.id === 'tab-stats') renderStats(); else if (tab && tab.id === 'tab-library') renderLib(false); else if (tab && tab.id === 'tab-settings') renderSettings(); else if (tab && tab.id === 'tab-reading' && $('reading-story').hidden) renderReading();
-  $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
-  wrRefresh();
+  renderRank();
+  renderStreak(); wrRefresh();
 }
 $('btn-export-progress').addEventListener('click', () => download('trakia-progress-' + dayKey(Date.now()) + '.json', Object.assign(snapshot(), { exported: new Date().toISOString() })));
 $('import-progress').addEventListener('change', async e => {
@@ -720,7 +727,7 @@ const bind = (id, key, type) => {
   return write;
 };
 const writers = [bind('set-rank', 'rank', 'num'), bind('set-rank-range', 'rank', 'num'), bind('set-stage', 'stage', 'num'), bind('set-tol', 'tolerance', 'num'), bind('set-lang', 'lang'), bind('set-dirs', 'directions'), bind('set-run', 'dirRun', 'num'), bind('set-order', 'newOrder'), bind('set-size', 'sessionSize', 'num'), bind('set-new', 'newPerSession', 'num'), bind('set-typo', 'typoPct', 'num'), bind('set-retention', 'retention', 'num'), bind('set-maxivl', 'maxInterval', 'num'), bind('set-almost', 'almostPolicy'), bind('set-passes', 'almostFreePasses', 'num'), bind('set-bag', 'bagOfWords', 'bool'), bind('set-punct', 'strictPunct', 'bool'), bind('set-yi', 'strictYi', 'bool'), bind('set-accents', 'stripAccents', 'bool'), bind('set-forms', 'strictForms', 'bool'), bind('set-translit', 'translit', 'bool'), bind('set-theme', 'theme'), bind('set-wallpaper', 'wallpaper'), bind('set-wallpaper-url', 'wallpaperUrl'), bind('set-wallpaper-dim', 'wallpaperDim', 'num'), bind('set-sound', 'sound', 'bool'), bind('set-autoplay', 'autoplay', 'bool'), bind('set-voices', 'voices'), bind('set-speed', 'speed', 'num'), bind('set-dictation', 'dictation', 'bool'), bind('set-newwords', 'newWords', 'num'), bind('set-dailymax', 'dailyMax', 'num'), bind('set-sentmax', 'sentenceMax', 'num'), bind('set-restdays', 'restDays', 'num')];
-function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax' || key === 'sentenceMax' || key === 'restDays') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5); }
+function afterSettingChange(key) { if (key === 'lang' || key === 'newWords' || key === 'dailyMax' || key === 'sentenceMax' || key === 'restDays') { renderHome(); } if (key === 'stage') { renderRankHelp(); renderStageHelp(); } if (key === 'retention') { settings.retention = Math.min(0.95, Math.max(0.8, settings.retention || 0.9)); renderRetentionHelp(); } if (key === 'rank' || key === 'tolerance') { $('set-rank').value = settings.rank; $('set-rank-range').value = settings.rank; renderRankHelp(); } if (key === 'theme') applyTheme(); if (key.startsWith('wallpaper')) applyWallpaper(); if (key === 'sound') applySound(); renderRank(); }
 function renderRankHelp() {
   const w = WORD_BY_RANK.get(settings.rank); $('rank-word').textContent = w ? `${w.bg} – ${w.en}` : '';
   const elig = SENT.filter(s => C.eligible(s, settings)).length, next = C.nextUnlock(SENT, settings);
@@ -810,7 +817,7 @@ const pausedText = (/** @type {ReturnType<typeof C.wordQueue>} */ q) => `New wor
 function followWords() {
   if (!C.hasWords(progress)) return;
   const r = C.wordRank(progress); if (r === settings.rank) return;
-  settings.rank = r; save.settings(); $('hdr-rank').textContent = 'word ' + settings.rank + ' · stage ' + (settings.stage || 5);
+  settings.rank = r; save.settings(); renderRank();
 }
 function fmtIvl(/** @type {number} */ ms) {
   const d = ms / 86400e3;
@@ -879,7 +886,7 @@ function gradeWordCard(/** @type {number} */ g) {
   if (!wr || !wr.key || !wr.shown) return;
   const now = Date.now(), k = wr.key, was = progress[k], score = g === 1 ? 0 : g === 2 ? 1 : 2;
   progress[k] = C.gradeWord(was, g, now, settings); save.progress();
-  log.push([now, k, score, 0, score, g]); save.log();
+  log.push([now, k, score, 0, score, g]); save.log(); renderStreak();
   if (!was) followWords();
   recordWordDay(); syncLater();
   wr.last = k; wr.n++; stopAudio(); wrNext(); sayFront();
