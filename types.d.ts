@@ -91,6 +91,8 @@ interface Settings {
   newWords: number; dailyMax: number;
   /** no new sentence cards while today's sentence reviews reach sentenceMax (D-042); shared */
   sentenceMax: number;
+  /** missed days a streak allows in any 7 days (D-045); shared */
+  restDays: number;
   freeSize?: number; fsrs?: Partial<FsrsOptions>;
 }
 
@@ -133,6 +135,8 @@ interface Snapshot {
   wordDays?: Record<string, [number, number, number]>;
   /** per day: sentences started, sentences known, when the entry was written (D-043) */
   sentDays?: Record<string, [number, number, number]>;
+  /** days of study that the answer logs do not hold: when each was noted (D-045) */
+  studyDays?: Record<string, number>;
 }
 
 /** One compacted day (D-029): answers and drill answers as [wrong, almost, correct], session starts. */
