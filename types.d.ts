@@ -42,7 +42,24 @@ interface GrammarLabel { chip: string; text: string; card?: string; pos?: string
 
 interface GrammarTable { headers: string[]; rows: string[][] }
 interface GrammarCard { id: string; stage: number; title: string; intro: string; table: GrammarTable; notes?: string[]; examples?: string[] }
-interface GrammarData { version: number; pronouns: string[]; cards: GrammarCard[]; paradigms: any }
+/** A grammar lesson from data/grammar.json (D-049), checked by tools/check_lessons.py. */
+interface Lesson {
+  id: string; card: string; stage: number; title: string; rule: string[]; table?: GrammarTable;
+  /** the trap for speakers of this language */
+  contrast: { nl: string; en: string };
+  examples: string[];
+  /** labels: D-039 labels of the target words; next: the labels of a word that belongs with a target (the verb after да); order: the place counts too;
+   *  cue: per language, a prompt must hold one of these words; exclude: sentence ids; hint: a line on every item */
+  pool: { labels: string[]; next?: string[]; order?: boolean; cue?: { nl?: string[]; en?: string[] }; exclude?: string[]; hint?: string };
+}
+interface LessonItem {
+  id: string; kind: 'gap' | 'sentence'; lesson: string; sentence: string; targets: string[]; unseen: boolean;
+  gap?: { from: number; to: number; answer: string };
+}
+/** A sentence answered in a lesson: `ok` and the flags are those of the first time. */
+interface LessonSeen { first: number; ok: boolean; unseen: boolean; delayed: boolean; last: number }
+interface LessonState { last: number; seen: Record<string, LessonSeen> }
+interface GrammarData { version: number; pronouns: string[]; cards: GrammarCard[]; lessons?: Lesson[]; paradigms: any }
 
 /** A reading story from data/stories.json (D-026), checked by tools/validate_stories.py. */
 interface Story {
@@ -127,6 +144,8 @@ interface Snapshot {
   cleared: Record<string, number>;
   /** stories read and quiz scores (D-026, D-028) */
   reading: Record<string, ReadingRecord>;
+  /** grammar lessons (D-049) */
+  lessons?: Record<string, LessonState>;
   /** totals of the days older than the last 30 (D-029) */
   days: Record<string, DaySummary>;
   /** words guessed in a sneak peek, by rank (D-031) */

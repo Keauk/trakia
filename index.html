@@ -284,6 +284,27 @@ input[type=range]{width:100%}
 .gcard .ex{margin:6px 0 0;padding-left:0;list-style:none}
 .gcard .ex li{margin:4px 0}
 .gcard .ex .sub{display:inline;margin-left:6px}
+/* grammar lessons (D-049) */
+.lesson-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lesson-list .stage-h{margin:8px 0 0}
+.lesson-row{width:100%;display:flex;justify-content:space-between;align-items:baseline;gap:12px;text-align:left;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font:500 15px/1.35 var(--sans);color:var(--ink);cursor:pointer}
+.lesson-row:hover{border-color:var(--primary)}
+.lesson-row .tiny{flex:none}
+.lesson h2{margin-top:12px}
+.lesson-rule p,.lesson-contrast p{margin:8px 0;line-height:1.5}
+.lesson table{margin:12px 0;font-size:14px}
+.lesson-contrast{margin:14px 0;padding-left:12px;border-left:2px solid var(--primary)}
+.lesson-contrast .label{margin:0 0 2px}
+.lesson-ex{padding:10px 0;border-bottom:1px solid var(--line)}
+.lesson-ex .ex-gloss{margin:0}
+.lesson-ex .tiny{margin:6px 0 0;display:flex;align-items:center;gap:8px}
+.lesson .row{margin:14px 0 10px}
+.ex-w.static,.ex-w.static:hover{cursor:default;background:none;padding:2px 4px}
+.ex-w.target .ex-bg{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.gap-line{flex-basis:100%;font:500 19px/1.35 var(--sans);color:var(--ink)}
+.gap{color:var(--primary);font-weight:700;letter-spacing:.04em}
+.lesson-hint{margin:10px 0 0;padding-left:10px;border-left:2px solid var(--almost);font:400 14px/1.45 var(--sans);color:var(--ink-2)}
+.notes .n-rule{color:var(--ink);font-weight:500}
 .stage-h{margin:22px 0 8px;font:500 12px var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
 #update-bar{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card);border:1px solid var(--primary);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:14px;box-shadow:var(--card-shadow);z-index:9;display:flex;gap:10px;align-items:center}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
@@ -548,6 +569,7 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
           <p class="listen-hint" id="listen-hint" hidden></p>
         </div>
         <div id="newwords" class="newwords"></div>
+        <p id="lesson-hint" class="lesson-hint" role="status" hidden></p>
         <textarea id="answer" rows="1" name="trakia-answer" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="done" placeholder="Type the translation"></textarea>
         <p id="translit-preview" class="preview" hidden></p>
         <div class="actions" id="answer-actions">
@@ -608,12 +630,20 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
 </section>
 
 <section id="tab-grammar" class="tab">
+  <div id="lesson-page" hidden></div>
+  <div id="grammar-list">
+  <div class="card" id="lessons-card">
+    <h2>Lessons</h2>
+    <p class="muted">A short rule, then practice with sentences at your level.</p>
+    <ul class="lesson-list" id="lesson-list"></ul>
+  </div>
   <div class="card">
     <h2>Grammar reference</h2>
     <p class="muted">Tables for each grammar stage, with example sentences from the practice set. Cards beyond your stage are shown collapsed. <b>Drill</b> runs a short "give the form" exercise on that table.</p>
     <div class="row" style="margin-top:8px"><button class="btn primary" id="btn-gdrill-all">Grammar drill (your stage)</button></div>
   </div>
   <div id="grammar-cards"></div>
+  </div>
 </section>
 <section id="tab-stats" class="tab">
   <div class="card">

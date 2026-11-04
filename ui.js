@@ -29,6 +29,7 @@ let drills = LS.get('drills', {});       // {itemId: {ok, bad, last}}
 let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 /** @type {Snapshot['stamps']} */ let stamps = LS.get('stamps', {});   // when shared settings / the deleted list last changed, last full reset (D-025)
 /** @type {Record<string, number>} */ let cleared = LS.get('cleared', {});   // per-card resets, so a sync does not bring them back
+/** @type {Record<string, LessonState>} */ let lessons = LS.get('lessons', {});   // grammar lessons: when practised, the sentences answered (D-049)
 /** @type {Record<string, ReadingRecord>} */ let reading = LS.get('reading', {});   // stories read, quiz scores (D-026, D-028)
 /** @type {Record<string, DaySummary>} */ let dayTotals = LS.get('days', {});   // totals of the days older than the last 30 (D-029)
 /** @type {Record<string, {at: number, ok: boolean}>} */ let peeks = LS.get('peeks', {});   // words guessed in a sneak peek, by rank (D-031)
@@ -38,7 +39,7 @@ let drillLog = LS.get('drillLog', []);   // [ts, itemId, score 2|1|0]
 let sharedNow = JSON.stringify(C.sharedSettings(settings)), deletedNow = JSON.stringify(deleted);
 const save = {
   settings: () => { const sh = JSON.stringify(C.sharedSettings(settings)); if (sh !== sharedNow) { sharedNow = sh; stamps.settings = Date.now(); LS.set('stamps', stamps); } LS.set('settings', settings); },
-  progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts),
+  progress: () => LS.set('progress', progress), userAlts: () => LS.set('userAlts', userAlts), lessons: () => LS.set('lessons', lessons),
   userSentences: () => LS.set('userSentences', userSentences), deleted: () => { const dn = JSON.stringify(deleted); if (dn !== deletedNow) { deletedNow = dn; stamps.deleted = Date.now(); LS.set('stamps', stamps); } LS.set('deleted', deleted); }, log: () => LS.set('log', log), sessions: () => LS.set('sessions', sessions), drills: () => LS.set('drills', drills), drillLog: () => LS.set('drillLog', drillLog), reading: () => LS.set('reading', reading), days: () => LS.set('days', dayTotals), peeks: () => LS.set('peeks', peeks), wordDays: () => LS.set('wordDays', wordDays), sentDays: () => LS.set('sentDays', sentDays), studyDays: () => LS.set('studyDays', studyDays),
 };
 // fold answers older than 30 days into day totals (D-029)
@@ -249,18 +250,23 @@ $('answer').addEventListener('input', e => {
     const pos = a.selectionStart ?? a.value.length; a.value = a.value.replace(/[\r\n]+/g, typedEnter ? '' : ' ').trimEnd(); a.selectionStart = a.selectionEnd = Math.min(pos, a.value.length);
     if (typedEnter && session) { if (session.pending) next(); else checkAnswer(false); return; }   // keyboards that insert a line break instead of sending Enter
   }
-  if (session && !session.drill && /^\p{Ll}/u.test(a.value)) {   // a sentence starts with a capital, whatever the keyboard does (D-038)
+  if (session && (!session.drill || lessonSentence()) && /^\p{Ll}/u.test(a.value)) {   // a sentence starts with a capital, whatever the keyboard does (D-038)
     const s = a.selectionStart, end = a.selectionEnd; a.value = a.value[0].toUpperCase() + a.value.slice(1); a.selectionStart = s; a.selectionEnd = end;
   }
   fitAnswer();
 });
 /** open a card of the Grammar tab @param {string | undefined} id */
-function openCard(id) { showTab('grammar'); const el = $('gcard-' + id); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } }
-$('gloss').addEventListener('click', e => { const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); openCard(a.dataset.gcard); });
+function openCard(id) { lessonOpen = null; showTab('grammar'); const el = $('gcard-' + id); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } }
+$('gloss').addEventListener('click', e => {
+  const l = closest(e, '[data-lesson]'); if (l) { e.preventDefault(); openLesson(l.dataset.lesson); return; }
+  const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); openCard(a.dataset.gcard);
+});
 function allAccepted(s, dir, key) { return C.acceptedFor(s, dir).concat(userAlts[key] || []); }
 
 function renderCard() {
+  $('lesson-hint').hidden = true;
   if (!session || session.i >= session.queue.length) return endSession();
+  if (session.lesson) return renderLessonItem();
   if (session.drill) return renderDrillCard();
   const item = session.queue[session.i], { dir, s } = cardOf(item), K = C.parseKey(item.key);
   if (!s) { session.i++; return renderCard(); }
@@ -272,8 +278,7 @@ function renderCard() {
   $('prompt').lang = K.toBg && !K.listen ? K.lang : 'bg'; $('prompt').hidden = K.listen;
   $('listen-box').hidden = !K.listen; $('listen-hint').hidden = true; $('listen-hint').textContent = otherText(s).text;
   $('btn-listen-hint').hidden = false; $('btn-listen-text').hidden = false;
-  const chips = K.listen ? '' : (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
-  $('newwords').innerHTML = chips ? '<span class="tiny">new:</span>' + chips : '';
+  $('newwords').innerHTML = K.listen ? '' : newWordChips(s);
   const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.lang = K.toBg ? 'bg' : K.lang;
   const L = LANG_NAME[K.lang] || 'Dutch';
   inp.placeholder = K.listen ? 'Напиши каквото чуваш' : K.toBg ? 'Въведи превод' : narrow() ? `Type in ${L}` : `Type the ${L} translation`;
@@ -282,9 +287,14 @@ function renderCard() {
   hideSay(); if (K.listen) offerSay(s, 'btn-listen', true); else if (!K.toBg) offerSay(s, 'btn-say');   // a Bulgarian prompt can be heard (D-005)
   setTimeout(() => inp.focus(), 50);
 }
-function toBgCard() { const it = session && session.queue[session.i]; return !!(it && !session.drill && C.parseKey(it.key).toBg); }
+/** the words of a sentence beyond the learner's position @param {Sentence} s */
+function newWordChips(s) {
+  const chips = (s.lemmas || []).map(l => { const hit = WIDX.get(C.normalise(l.split('#')[0], 'bg')); return hit && hit.rank > settings.rank ? `<span class="chip" title="rank ${hit.rank}">${esc(hit.bg)} – ${esc(hit.en)}</span>` : ''; }).join('');
+  return chips ? '<span class="tiny">new:</span>' + chips : '';
+}
+function toBgCard() { const it = session && session.queue[session.i]; return !!(it && (!session.drill || session.lesson) && C.parseKey(it.key).toBg); }
 function typedValue() { const v = $('answer').value; return settings.translit && toBgCard() ? C.translit(v) : v; }
-$('answer').addEventListener('input', () => { if (!session || session.drill) return; if (settings.translit && toBgCard()) $('translit-preview').textContent = C.translit($('answer').value); });
+$('answer').addEventListener('input', () => { if (!session || (session.drill && !session.lesson)) return; if (settings.translit && toBgCard()) $('translit-preview').textContent = C.translit($('answer').value); });
 // ѝ (her): a lone и offers ѝ in a tiny dropdown. Tab or a tap takes it, anything else leaves the и (D-047)
 let yiAt = -1;   // the position of the и on offer, -1 when the dropdown is closed
 function hideYi() { yiAt = -1; $('yi-pop').hidden = true; }
@@ -349,11 +359,12 @@ $('btn-start').addEventListener('click', () => startSession());
 $('btn-free').addEventListener('click', () => startSession({ free: true }));
 $('btn-gdrill').addEventListener('click', () => startDrill());
 $('btn-gdrill-all').addEventListener('click', () => { showTab('practise'); startDrill(); });
-$('btn-again').addEventListener('click', () => { if (lastWasDrill) startDrill(); else startSession(); });
-$('btn-home').addEventListener('click', () => { $('session-done').hidden = true; $('session-home').hidden = false; renderHome(); });
+$('btn-again').addEventListener('click', () => { if (lastLesson) startLesson(lastLesson); else if (lastWasDrill) startDrill(); else startSession(); });
+$('btn-home').addEventListener('click', () => { $('session-done').hidden = true; $('session-home').hidden = false; renderHome(); if (lastLesson) openLesson(lastLesson); });
 
 function checkAnswer(giveUp) {
   hideYi();
+  if (session.lesson) return checkLessonItem(giveUp);
   if (session.drill) return checkDrill(giveUp);
   const item = session.queue[session.i], { dir, s } = cardOf(item), key = item.key, K = C.parseKey(key);
   const lang = K.toBg ? 'bg' : K.lang;
@@ -409,12 +420,16 @@ function resetExplain(s) {
   $('btn-explain').hidden = !exFor; $('btn-explain').textContent = 'Explain the grammar'; $('btn-explain').setAttribute('aria-expanded', 'false');
   $('explain').hidden = true; $('explain').innerHTML = '';
 }
-function renderExplain() {
-  const s = exFor; if (!s || !s.ex) return;
-  const [note, ex] = s.ex;
-  /** @type {{t: string, lead: string, tail: string}[]} each word with the punctuation around it */ const cols = [];
+/** each word of a sentence with the punctuation around it @param {Sentence} s */
+function exCols(s) {
+  /** @type {{t: string, lead: string, tail: string}[]} */ const cols = [];
   let lead = '';
   for (const t of C.storyTokens(s.bg)) { if (t.w) { cols.push({ t: t.t, lead: lead.trim(), tail: '' }); lead = ''; } else if (cols.length) cols[cols.length - 1].tail += t.t; else lead += t.t; }
+  return cols;
+}
+function renderExplain() {
+  const s = exFor; if (!s || !s.ex) return;
+  const [note, ex] = s.ex, cols = exCols(s);
   if (exSel < 0) exSel = Math.max(0, ex.findIndex(x => x[1].length));   // start on the first word with something to explain
   const gloss = cols.map((c, i) => {
     const [m, ls, end, n] = ex[i] || ['', [], '', ''], cut = end && C.storyKey(c.t).endsWith(C.storyKey(end)) ? end.length : 0;
@@ -452,11 +467,13 @@ $('explain').addEventListener('click', e => {
 function acceptMine() {
   const p = session.pending; if (!p || !p.typed.trim()) return;
   (userAlts[p.key] = userAlts[p.key] || []).push(p.typed.trim()); save.userAlts(); VOCAB = buildVocab();
+  if (session.lesson) session.queue[session.i].firstOk = true;   // the learner's form was right after all
   p.result = 'correct'; setState('correct'); $('verdict').className = 'verdict correct'; $('verdict').textContent = '✓ Accepted as correct'; $('verdict-note').textContent = 'added to your accepted answers';
   $('btn-accept').hidden = true; toast('Saved as an accepted answer');
 }
 function next() {
   const p = session.pending; if (!p) return;
+  if (session.lesson) return nextLessonItem();
   if (session.drill) return nextDrill();
   const item = session.queue[session.i];
   const effective = p.result === 'almost' && p.outcome ? p.outcome.rating : p.result;
@@ -474,20 +491,25 @@ function next() {
   session.i++; renderCard();
 }
 let lastWasDrill = false;
+/** @type {string | null} */ let lastLesson = null;
 function endSession() {
   if (!session) return;
-  lastWasDrill = !!session.drill;
+  $('lesson-hint').hidden = true;
+  lastWasDrill = !!session.drill; lastLesson = session.lesson ? session.lesson.id : null;
   const c = session.counts, total = c.correct + c.almost + c.wrong;
   $('session-run').hidden = true; $('session-done').hidden = false;
   $('done-stats').innerHTML = stat(c.correct, '✓ correct') + stat(c.almost, '≈ almost') + stat(c.wrong, '✗ wrong') + stat(total ? Math.round(100 * (c.correct + c.almost) / total) + '%' : '–', 'accuracy');
-  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : (session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') + ' ' + sentKnownText()) : 'No answers recorded.';
-  $('btn-again').textContent = session.drill ? 'Drill again' : 'Practise again';
+  $('done-summary').textContent = total ? `${total} answers in ${Math.max(1, Math.round((Date.now() - session.started) / 60e3))} min.` + (session.lesson ? ` ${session.lesson.first} right on the first try.` : session.drill ? ' Grammar drill: counted on the Stats tab, no review cards created.' : (session.free ? ' Free practice never moves cards forward; a wrong answer still sends a card back.' : '') + ' ' + sentKnownText()) : 'No answers recorded.';
+  $('btn-again').textContent = session.drill && !session.lesson ? 'Drill again' : 'Practise again';
+  $('btn-home').textContent = session.lesson ? 'Back to the lesson' : 'Back';
   session = null; hideSay(); syncRunning(); sync();
 }
 
 // ---------- grammar tab ----------
+const STAGE_NAMES = /** @type {Record<number, string>} */ ({ 1: 'Stage 1 — present tense', 2: 'Stage 2 — future and imperatives', 3: 'Stage 3 — past tense and perfect', 4: 'Stage 4 — imperfect and conditional' });
 function renderGrammar() {
-  const stage = settings.stage || 5, names = { 1: 'Stage 1 — present tense', 2: 'Stage 2 — future and imperatives', 3: 'Stage 3 — past tense and perfect', 4: 'Stage 4 — imperfect and conditional' };
+  const stage = settings.stage || 5, names = STAGE_NAMES;
+  renderLessons();
   let html = '';
   for (const st of [1, 2, 3, 4]) {
     const cards = GRAMMAR.cards.filter(c => c.stage === st); if (!cards.length) continue;
@@ -506,6 +528,152 @@ function renderGrammar() {
   $('grammar-cards').innerHTML = html;
 }
 $('grammar-cards').addEventListener('click', e => { const b = closest(e, '[data-drill]'); if (!b) return; const id = b.dataset.drill; showTab('practise'); startDrill(id); });
+
+// ---------- grammar lessons: a short rule, then practice at once (D-049) ----------
+const LESSONS = GRAMMAR.lessons || [];
+/** @type {string | null} */ let lessonOpen = null;
+const lessonById = (/** @type {string} */ id) => LESSONS.find(l => l.id === id);
+function lessonSentence() { return !!session && !!session.lesson && session.queue[session.i]?.item.kind === 'sentence'; }
+/** "today", "yesterday" or "3 days ago" @param {number} ts */
+function daysAgo(ts) {
+  const a = new Date(ts), b = new Date(), n = Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime() - new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime()) / 864e5);
+  return n <= 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`;
+}
+/** the list of lessons, or the lesson that is open */
+function renderLessons() {
+  $('lessons-card').hidden = !LESSONS.length;
+  const stage = settings.stage || 5;
+  let html = '';
+  for (const st of [...new Set(LESSONS.map(l => l.stage))].sort()) {
+    html += `<li class="stage-h">${esc(STAGE_NAMES[st] || 'Stage ' + st)}${st > stage ? ' · beyond your stage' : ''}</li>`;
+    for (const l of LESSONS.filter(x => x.stage === st)) {
+      const seen = lessons[l.id];
+      html += `<li><button type="button" class="lesson-row" data-lesson="${esc(l.id)}"><span>${esc(l.title)}</span><span class="tiny">${seen ? 'practised ' + daysAgo(seen.last) : 'new'}</span></button></li>`;
+    }
+  }
+  $('lesson-list').innerHTML = html;
+  const l = lessonOpen ? lessonById(lessonOpen) : null;
+  $('grammar-list').hidden = !!l; $('lesson-page').hidden = !l;
+  if (l) $('lesson-page').innerHTML = lessonHtml(l);
+}
+/** an example of a lesson: the sentence word by word (D-039), with the target words marked @param {Lesson} l @param {Sentence} s */
+function lessonExample(l, s) {
+  const at = new Set(C.lessonTargets(l, s).map(t => t.i)), ex = s.ex ? s.ex[1] : [];
+  const gloss = exCols(s).map((c, i) => {
+    const [m, ls] = ex[i] || ['', []], chips = at.has(i) ? ls.map(x => LABELS[x] ? LABELS[x].chip : x).join(' · ') : '';
+    return `<span class="ex-w static${at.has(i) ? ' target' : ' plain'}"><span class="ex-bg" lang="bg">${esc(c.lead + c.t + c.tail.trim())}</span><span class="ex-m">${esc(m)}</span>${chips ? `<span class="ex-c">${esc(chips)}</span>` : ''}</span>`;
+  }).join('');
+  const o = otherText(s);
+  return `<div class="lesson-ex"><div class="ex-gloss">${gloss}</div><p class="tiny" lang="${esc(o.lang)}">${esc(o.text)}${soundOn() ? sayBtn(s.au, 'Listen to the sentence') : ''}</p></div>`;
+}
+/** @param {Lesson} l */
+function lessonHtml(l) {
+  const langs = settings.lang === 'mixed' ? ['nl', 'en'] : [settings.lang === 'en' ? 'en' : 'nl'], names = /** @type {Record<string, string>} */ ({ nl: 'For Dutch speakers', en: 'For English speakers' });
+  const table = l.table ? `<table class="fixed"><tr>${l.table.headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>${l.table.rows.map(r => `<tr>${r.map(x => `<td lang="bg">${esc(x)}</td>`).join('')}</tr>`).join('')}</table>` : '';
+  const contrast = langs.map(k => `<div class="lesson-contrast"><p class="label">${names[k]}</p><p>${esc(l.contrast[/** @type {'nl' | 'en'} */ (k)])}</p></div>`).join('');
+  const examples = l.examples.map(id => SENT_BY_ID.get(id)).filter(s => !!s).map(s => lessonExample(l, /** @type {Sentence} */ (s))).join('');
+  const card = GRAMMAR.cards.find(c => c.id === l.card);
+  return `<div class="card lesson"><button type="button" class="link-btn" data-lesson-back>← All lessons</button>
+    <h2>${esc(l.title)}</h2>
+    <div class="lesson-rule">${l.rule.map(p => `<p>${esc(p)}</p>`).join('')}</div>${table}${contrast}
+    ${examples ? `<p class="label">Examples</p>${examples}` : ''}
+    <div class="row"><button type="button" class="btn primary" data-lesson-start="${esc(l.id)}">Practise</button></div>
+    ${card ? `<p class="tiny">The full table: <a href="#" data-gcard="${esc(card.id)}">${esc(card.title)}</a></p>` : ''}</div>`;
+}
+/** @param {string | undefined} id */
+function openLesson(id) { lessonOpen = id || null; showTab('grammar'); window.scrollTo(0, 0); }
+$('tab-grammar').addEventListener('click', e => {
+  const start = closest(e, '[data-lesson-start]'); if (start) { startLesson(start.dataset.lessonStart || ''); return; }
+  if (closest(e, '[data-lesson-back]')) { lessonOpen = null; renderLessons(); window.scrollTo(0, 0); return; }
+  const open = closest(e, '[data-lesson]'); if (open) { openLesson(open.dataset.lesson); return; }
+  const a = closest(e, '#lesson-page [data-gcard]'); if (a) { e.preventDefault(); openCard(a.dataset.gcard); }
+});
+/** @param {LessonItem} item @param {string} lang */
+const lessonKey = (item, lang) => `${item.sentence}|${lang}2bg`;
+/** @param {string} id */
+function startLesson(id) {
+  const l = lessonById(id); if (!l) return;
+  const items = C.buildLessonRun(l, SENT, lessons[id], progress, settings);
+  if (!items.length) { toast('No sentences for this lesson yet'); return; }
+  const had = lessons[id], delayed = !!had && dayKey(had.last) !== dayKey(Date.now());
+  showTab('practise');
+  session = { drill: true, lesson: { id, first: 0, extras: 0, delayed, used: items.map(i => i.sentence) }, queue: items.map(it => ({ key: lessonKey(it, C.langFor(it.sentence, settings)), item: it })), i: 0, free: false, counts: { correct: 0, almost: 0, wrong: 0 }, pending: null, started: Date.now(), label: l.title };
+  $('session-home').hidden = true; $('session-done').hidden = true; $('session-run').hidden = false;
+  prefetchClips([...new Set(items.map(it => (SENT_BY_ID.get(it.sentence) || {}).au).filter(Boolean))]);
+  renderCard();
+}
+/** the Bulgarian of a gap item, with the target blank and its dictionary form @param {Sentence} s @param {LessonItem} item */
+function gapLine(s, item) {
+  const g = /** @type {NonNullable<LessonItem['gap']>} */ (item.gap);
+  let html = '', i = -1;
+  for (const t of C.storyTokens(s.bg)) {
+    if (t.w) i++;
+    const inside = t.w ? i >= g.from && i <= g.to : i >= g.from && i < g.to;   // the punctuation after the blank stays
+    if (!inside) html += esc(t.t); else if (i === g.from && t.w) html += '<span class="gap">_____</span>';
+  }
+  const last = item.targets[item.targets.length - 1], lemma = ((s.words || {})[C.storyKey(last)] || '').split('#')[0];
+  return `<span class="gap-line" lang="bg">${html}</span>${lemma ? `<span class="hint" lang="bg">(${esc(lemma)})</span>` : ''}`;
+}
+function renderLessonItem() {
+  const q = session.queue[session.i], item = q.item, s = SENT_BY_ID.get(item.sentence), l = /** @type {Lesson} */ (lessonById(item.lesson));
+  if (!s) { session.i++; return renderCard(); }
+  const L = C.langFor(s.id, settings), cue = l.pool.hint ? `<span class="hint">${esc(l.pool.hint)}</span>` : '';
+  session.pending = null; q.tried = false; q.shown = Date.now(); hideSay();
+  renderProgress(); renderChips(l.title, false, false); setState('idle'); syncRunning();
+  $('prompt').textContent = s[L] || s.nl; $('prompt').lang = L; $('prompt').hidden = false; $('listen-box').hidden = true; promptSource = null; if (popFor) hideWordPop();
+  $('newwords').innerHTML = (item.gap ? gapLine(s, item) : newWordChips(s)) + cue;
+  const inp = $('answer'); inp.value = ''; inp.style.height = ''; inp.lang = 'bg'; inp.placeholder = item.gap ? 'Въведи формата' : 'Въведи превод';
+  $('translit-preview').hidden = !settings.translit; $('translit-preview').textContent = '';
+  $('feedback').hidden = true; $('answer-actions').hidden = false; inp.disabled = false;
+  setTimeout(() => inp.focus(), 50);
+}
+/** what the feedback says about a missed target: the words of the rule (D-039 labels), so that lesson and feedback agree
+ *  @param {Lesson} l @param {Sentence} s @param {string[]} missed @param {string} typed */
+function ruleNote(l, s, missed, typed) {
+  const words = C.normalise(typed, 'bg', settings).split(' ');
+  if (l.pool.order && LABELS.order && missed.some(m => words.includes(m))) return LABELS.order.text;
+  const hit = C.lessonTargets(l, s).find(x => missed.includes(C.normalise(x.form, 'bg', settings)));
+  const label = hit && s.ex ? s.ex[1][hit.i][1].find(x => l.pool.labels.includes(x)) : '';
+  const L = LABELS[label || l.pool.labels[0]];
+  return L ? L.text : l.rule[0];
+}
+/** @param {boolean} giveUp */
+function checkLessonItem(giveUp) {
+  const q = session.queue[session.i], item = q.item, s = /** @type {Sentence} */ (SENT_BY_ID.get(item.sentence)), l = /** @type {Lesson} */ (lessonById(item.lesson)), dir = q.key.split('|')[1];
+  const typed = giveUp ? '' : typedValue(), order = !!l.pool.order;
+  const accepted = item.gap ? [item.gap.answer] : allAccepted(s, dir, q.key);
+  const opt = Object.assign({}, settings, { vocab: VOCAB.bg, bagOfWords: item.gap || order ? false : settings.bagOfWords });
+  const r = giveUp ? { result: 'wrong', expected: accepted[0], t: '', a: C.normalise(accepted[0], 'bg', settings), reason: 'skip' } : C.check(typed, accepted, 'bg', opt);
+  const tc = C.targetCheck(r, item.targets, opt, VOCAB.bg, order);
+  if (!q.tried) { q.firstOk = tc.ok; q.ms = Date.now() - q.shown; }
+  // only the target is wrong: say why and offer one more try; the first try is what counts
+  if (tc.only && !q.tried && !giveUp) {
+    q.tried = true; setState('almost');
+    $('lesson-hint').textContent = 'Not yet. ' + ruleNote(l, s, tc.missed, typed); $('lesson-hint').hidden = false;
+    $('answer').focus(); return;
+  }
+  $('lesson-hint').hidden = true;
+  session.pending = { result: r.result, typed, key: q.key, reason: r.reason, outcome: null };
+  showFeedback(r, s, dir, accepted, giveUp, null, []);
+  if (item.gap) $('btn-accept').hidden = true;
+  const note = !tc.ok ? ruleNote(l, s, tc.missed.length ? tc.missed : item.targets.map(f => C.normalise(f, 'bg', settings)), typed) : r.result === 'wrong' ? 'The grammar of this lesson was right. The mistake is elsewhere.' : '';
+  if (note) { $('notes').insertAdjacentHTML('afterbegin', `<li class="n-rule">${esc(note)}</li>`); $('notes').hidden = false; }
+  $('gloss').innerHTML = (item.gap ? `<span lang="bg">${esc(s.bg)}</span><br>` : '') + `See: <a href="#" data-lesson="${esc(l.id)}">${esc(l.title)}</a>`;
+}
+function nextLessonItem() {
+  const p = session.pending; if (!p) return;
+  const q = session.queue[session.i], item = q.item, id = item.lesson, now = Date.now(), run = session.lesson, ok = !!q.firstOk, st = lessons[id] || { last: 0, seen: {} }, had = st.seen[item.sentence];
+  st.seen[item.sentence] = had ? Object.assign({}, had, { last: now }) : { first: now, ok, unseen: item.unseen, delayed: run.delayed, last: now };
+  st.last = now; lessons[id] = st; save.lessons();
+  drillLog.push([now, item.id, ok ? 2 : 0, q.ms || 0, item.unseen ? 1 : 0]); renderStreak(); save.drillLog();
+  session.counts[p.result]++; if (ok) run.first++;
+  // a missed rule returns on another sentence, at most twice in a run
+  if (!ok && run.extras < 2) {
+    const extra = C.lessonExtra(/** @type {Lesson} */ (lessonById(id)), SENT, st, progress, settings, run.used);
+    if (extra) { run.extras++; run.used.push(extra.sentence); session.queue.push({ key: lessonKey(extra, C.langFor(extra.sentence, settings)), item: extra }); }
+  }
+  session.i++; renderCard();
+}
 
 // ---------- stats ----------
 function renderStats() {
@@ -733,15 +901,15 @@ $('import-file').addEventListener('change', async e => {
 });
 function download(name, obj) { const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 /** everything that travels between devices (D-025); the sync token is not part of it @returns {Snapshot} */
-function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays, studyDays }; }
+function snapshot() { return { app: 'trakia', version: 2, settings: C.sharedSettings(settings), progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, lessons, days: dayTotals, peeks, wordDays, sentDays, studyDays }; }
 /** take over a merged snapshot: this device keeps its own device settings, and no stamp is bumped @param {Snapshot} m */
 function applySnapshot(m) {
   m = Object.assign({}, m, C.compactHistory(m, Date.now()));
   settings = Object.assign({}, DEFAULTS, m.settings, Object.fromEntries(C.DEVICE_SETTINGS.filter(k => k in settings).map(k => [k, settings[k]])));
-  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; dayTotals = m.days; peeks = m.peeks || {}; wordDays = m.wordDays || {}; sentDays = m.sentDays || {}; studyDays = m.studyDays || {};
+  progress = m.progress; userAlts = m.userAlts; userSentences = m.userSentences; deleted = m.deleted; log = m.log; sessions = m.sessions; drills = m.drills; drillLog = m.drillLog; stamps = m.stamps; cleared = m.cleared; reading = m.reading; lessons = m.lessons || {}; dayTotals = m.days; peeks = m.peeks || {}; wordDays = m.wordDays || {}; sentDays = m.sentDays || {}; studyDays = m.studyDays || {};
   if (C.hasWords(progress)) settings.rank = C.wordRank(progress);   // the position follows the deck words (D-035)
   sharedNow = JSON.stringify(C.sharedSettings(settings)); deletedNow = JSON.stringify(deleted);
-  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, days: dayTotals, peeks, wordDays, sentDays, studyDays })) LS.set(k, v);
+  for (const [k, v] of Object.entries({ settings, progress, userAlts, userSentences, deleted, log, sessions, drills, drillLog, stamps, cleared, reading, lessons, days: dayTotals, peeks, wordDays, sentDays, studyDays })) LS.set(k, v);
   recordWordDay();
   refreshSentences(); recordSentDay();
   // redraw what is on screen, without leaving the tab or the session summary
@@ -782,7 +950,7 @@ $('load-words').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target); const file = input.files && input.files[0]; if (!file) return; input.value = '';
   try { const j = JSON.parse(await file.text()); const r = Math.max(0, ...j.filter(w => w.learned).map(w => +w.rank)); settings.rank = r; save.settings(); renderSettings(); afterSettingChange('rank'); toast('Word position set to ' + r); } catch (err) { toast('Could not read words.json'); }
 });
-$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; dayTotals = {}; peeks = {}; wordDays = {}; sentDays = {}; studyDays = {}; save.wordDays(); save.sentDays(); save.studyDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
+$('btn-reset').addEventListener('click', () => { if (!confirm(syncState.token ? 'Delete all progress, accepted answers and statistics on this device and, at their next sync, on your other devices?' : 'Delete all progress, accepted answers and statistics on this device?')) return; stamps.wiped = Date.now(); LS.set('stamps', stamps); progress = {}; userAlts = {}; log = []; sessions = []; drills = {}; drillLog = []; reading = {}; lessons = {}; save.lessons(); dayTotals = {}; peeks = {}; wordDays = {}; sentDays = {}; studyDays = {}; save.wordDays(); save.sentDays(); save.studyDays(); save.peeks(); save.reading(); save.days(); save.progress(); save.userAlts(); save.log(); save.sessions(); save.drills(); save.drillLog(); toast('Progress reset'); renderHome(); });
 $('btn-undelete').addEventListener('click', () => { deleted = []; save.deleted(); refreshSentences(); toast('All sentences restored'); });
 
 // ---------- sneak peek: guess the next Anki words from a sentence (D-031) ----------
