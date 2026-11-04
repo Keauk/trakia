@@ -61,6 +61,7 @@ trakia/
   tools/check_decisions.py     checks decisions/D-*.md against decisions/TEMPLATE.md and the README table
   tools/SENTENCE_BRIEF.md      the brief the sentence-writing agents followed
   tools/STORY_BRIEF.md         the brief for the reading stories (cast, gloss rule, questions)
+  tools/LESSON_BRIEF.md        the brief for the grammar lessons (rule, contrast notes, pool); tools/check_lessons.py checks them
   app/index.html           the trainer UI: markup and CSS
   app/ui.js                the UI script (DOM, sessions, settings, library, stats); was inline until D-013
   app/types.d.ts           shared shapes for the type check (Sentence, Settings, ProgressRecord, ...)
@@ -231,6 +232,13 @@ BG→NL card has been answered correctly once" (default; recognition before prod
 * "hardest 20" (most lapses) with a *drill these* button
 * all numbers derived on the fly from the progress blob; nothing to keep in sync
 * reading: stories read of those open, average score of the latest question tries (D-028)
+
+### 4.3a Grammar lessons (D-049)
+
+* a lesson in `data/grammar.json` (`lessons`) is a short rule, a note for Dutch or English speakers, marked examples and a pool: the D-039 labels of the target words
+* a run: 3 gap items and 5 whole sentences on one rule, unseen sentences first; `C.buildLessonRun`
+* the first try counts. When only the target is wrong, the app names the rule and gives one more try; a missed rule returns on another sentence, at most twice; `C.targetCheck`
+* a run never touches a sentence card. State lives in `trakia.lessons`, answers also in `trakia.drillLog`, so the streak counts them
 
 ### 4.3b Sneak peek (D-031)
 

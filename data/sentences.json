@@ -5794,7 +5794,8 @@
 "Houdt hij van je?"
 ],
 "bg_alt": [
-"Той обича ли те?"
+"Той обича ли те?",
+"Той те обича ли?"
 ],
 "en_alt": [],
 "en": "Does he love you?",
@@ -12158,7 +12159,9 @@
 "Onze oma maakt avondeten voor de gasten.",
 "Onze oma maakt het diner voor de gasten."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Баба ни прави вечерята за гостите."
+],
 "en_alt": [
 "Our grandmother is making dinner for the guests.",
 "Our grandma is making dinner for the guests.",
@@ -12283,7 +12286,9 @@
 "nl_alt": [
 "De gasten komen voor het diner."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Гостите идват за вечерята."
+],
 "en_alt": [
 "The guests are coming to dinner.",
 "The guests come for dinner."
@@ -18475,7 +18480,9 @@
 "nl_alt": [
 "We moeten een nieuw dak op het huis maken."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Трябва да сложим нов покрив на къщата."
+],
 "en_alt": [
 "We have to put a new roof on the house.",
 "We must put a new roof on the house.",
@@ -18976,7 +18983,9 @@
 "Kunt u mij met de tas helpen?",
 "Kunnen jullie me helpen met de tas?"
 ],
-"bg_alt": [],
+"bg_alt": [
+"Можете ли да ми помогнете с чантата?"
+],
 "en_alt": [],
 "en": "Can you help me with the bag?",
 "lemmas": [
@@ -23912,7 +23921,9 @@
 "Ik moet weg, mama wacht op me.",
 "Ik moet gaan, mam wacht op mij."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Трябва да тръгна, мама ме чака."
+],
 "en_alt": [
 "I've got to go, Mum's waiting for me.",
 "I must go, Mom is waiting for me.",
@@ -25481,7 +25492,9 @@
 "nl_alt": [
 "Heb je een pan? Ik wil eieren maken."
 ],
-"bg_alt": [],
+"bg_alt": [
+"Имаш ли тиган? Искам да направя яйца."
+],
 "en_alt": [
 "Have you got a frying pan? I want to make myself some eggs.",
 "Do you have a pan? I want to make some eggs for myself.",

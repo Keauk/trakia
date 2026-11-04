@@ -155,7 +155,7 @@
     if (bg && sameBag(t, a)) {
       // only clitics out of place: the other words stand in the same order on both sides
       const rest = (/** @type {string} */ x) => x.split(' ').filter(w => !CLITICS.has(w)).join(' ');
-      return rest(t) === rest(a) ? [{ kind: 'clitic', note: 'word order: short words like ми, се and ли stand right after the first stressed word', pair: [t, a] }] : [];
+      return rest(t) === rest(a) ? [{ kind: 'clitic', note: 'word order: short words like ми and се stand next to the verb and cannot start a clause; ли follows the word it asks about', pair: [t, a] }] : [];
     }
     const pairs = alignWords(t, a).filter(([x, y]) => x !== y);
     if (pairs.length > 4 || pairs.length * 2 > a.split(' ').length) return [];
@@ -903,6 +903,98 @@
     return out;
   }
 
+  // ---------- grammar lessons (D-049) ----------
+  const LESSON_ITEMS = 8, LESSON_GAPS = 3, LESSON_MIN_POOL = 10;   // a full run and the two extra items of a missed rule
+  /** the words of a sentence that a lesson is about, by word position: the words with one of its labels and, with
+   *  `pool.next`, the first of the next two words with one of those labels (the verb after да).
+   *  None when the explanation does not line up with the words.
+   *  @param {Lesson} lesson @param {Sentence} s @returns {{i: number, form: string}[]} */
+  function lessonTargets(lesson, s) {
+    if (!s.ex) return [];
+    const words = storyTokens(s.bg).filter(t => t.w).map(t => t.t), ex = s.ex[1], P = lesson.pool, next = P.next || [];
+    if (words.length !== ex.length) return [];
+    /** @type {Set<number>} */ const at = new Set();
+    words.forEach((_, i) => {
+      if (!ex[i][1].some(l => P.labels.includes(l))) return;
+      at.add(i);
+      for (let j = i + 1; next.length && j <= i + 2 && j < words.length; j++) if (ex[j][1].some(l => next.includes(l))) { at.add(j); break; }
+    });
+    return [...at].sort((a, b) => a - b).map(i => ({ i, form: words[i] }));
+  }
+  /** the sentences a lesson can use: within the higher of the learner's and the lesson's stage, the target form in every
+   *  accepted answer, a prompt that asks for the form (`pool.cue`). Too few at the learner's rank: the next ranks, up to 10.
+   *  @param {Lesson} lesson @param {Sentence[]} sentences @param {Partial<Settings>} settings @returns {Sentence[]} */
+  function lessonPool(lesson, sentences, settings) {
+    const P = lesson.pool, stage = Math.max(settings.stage == null ? 5 : settings.stage, lesson.stage), limit = (settings.rank || 0) + (settings.tolerance || 0);
+    const usable = (/** @type {Sentence} */ s) => {
+      if ((P.exclude || []).includes(s.id) || !grammarOk(s, { stage })) return false;
+      const forms = lessonTargets(lesson, s).map(t => normalise(t.form, 'bg', settings)), L = langFor(s.id, settings);
+      if (!forms.length) return false;
+      const cue = P.cue && P.cue[L];
+      if (cue && !cue.some(c => (String(s[L] || '')).toLowerCase().split(/[^\p{L}]+/u).includes(c))) return false;
+      // not bg_alt_en: it only swaps ти and вие, which an English prompt leaves open (D-018), so a target there may differ by right
+      return [s.bg].concat(s.bg_alt || []).every(a => { const w = normalise(a, 'bg', settings).split(' '); return forms.every(f => w.includes(f)); });
+    };
+    const all = sentences.filter(usable), near = all.filter(s => s.max_rank == null || s.max_rank <= limit);
+    if (near.length >= LESSON_MIN_POOL) return near;
+    return near.concat(all.filter(s => !near.includes(s)).sort((a, b) => (a.max_rank || 0) - (b.max_rank || 0)).slice(0, LESSON_MIN_POOL - near.length));
+  }
+  /** when this sentence was last answered in this lesson or typed towards Bulgarian as a card; 0 when it is unseen
+   *  @param {Sentence} s @param {LessonState | undefined} state @param {Progress} progress */
+  function lessonLastUse(s, state, progress) {
+    let last = state && state.seen && state.seen[s.id] ? state.seen[s.id].last : 0;
+    for (const dir of ['nl2bg', 'en2bg']) { const p = progress && progress[s.id + '|' + dir]; if (p) last = Math.max(last, p.last || 1); }
+    return last;
+  }
+  /** the lesson's sentences, best first: within the lesson's stage, unseen or used longest ago, fewest other grammar labels, shortest
+   *  @param {Lesson} lesson @param {Sentence[]} sentences @param {LessonState | undefined} state @param {Progress} progress @param {Partial<Settings>} settings @param {() => number} rand @returns {Sentence[]} */
+  function lessonOrder(lesson, sentences, state, progress, settings, rand) {
+    const others = (/** @type {Sentence} */ s) => { const at = new Set(lessonTargets(lesson, s).map(t => t.i)); return s.ex ? s.ex[1].reduce((n, w, i) => n + (at.has(i) ? 0 : w[1].length), 0) : 0; };
+    return lessonPool(lesson, sentences, settings).map(s => ({ s, k: [grammarOk(s, { stage: lesson.stage }) ? 0 : 1, lessonLastUse(s, state, progress), others(s), s.bg.length, rand()] }))
+      .sort((a, b) => { for (let i = 0; i < a.k.length; i++) if (a.k[i] !== b.k[i]) return a.k[i] - b.k[i]; return 0; }).map(x => x.s);
+  }
+  /** one item of a lesson run; a gap item blanks the first target (with `pool.next`, the two words together)
+   *  @param {Lesson} lesson @param {Sentence} s @param {'gap' | 'sentence'} kind @param {LessonState | undefined} state @param {Progress} progress @returns {LessonItem} */
+  function lessonItem(lesson, s, kind, state, progress) {
+    const t = lessonTargets(lesson, s), base = { id: `les:${lesson.id}:${s.id}`, kind, lesson: lesson.id, sentence: s.id, unseen: lessonLastUse(s, state, progress) === 0 };
+    if (kind === 'sentence') return Object.assign(base, { targets: t.map(x => x.form) });
+    const part = lesson.pool.next ? t.slice(0, 2) : t.slice(0, 1), forms = part.map(x => x.form);
+    return Object.assign(base, { targets: forms, gap: { from: part[0].i, to: part[part.length - 1].i, answer: forms.join(' ') } });
+  }
+  /** a lesson run: 3 gap items, then 5 whole sentences, all about one rule; no sentence twice
+   *  @param {Lesson} lesson @param {Sentence[]} sentences @param {LessonState | undefined} state @param {Progress} progress @param {Partial<Settings>} settings @param {() => number} [rand] @returns {LessonItem[]} */
+  function buildLessonRun(lesson, sentences, state, progress, settings, rand) {
+    const picked = lessonOrder(lesson, sentences, state, progress, settings, rand || Math.random).slice(0, LESSON_ITEMS);
+    const canGap = (/** @type {Sentence} */ s) => { const t = lessonTargets(lesson, s); return !lesson.pool.next || (t.length > 1 && t[1].i === t[0].i + 1); };
+    const want = Math.round(picked.length * LESSON_GAPS / LESSON_ITEMS), gaps = picked.filter(canGap).slice(0, want);
+    return gaps.map(s => lessonItem(lesson, s, 'gap', state, progress)).concat(picked.filter(s => !gaps.includes(s)).map(s => lessonItem(lesson, s, 'sentence', state, progress)));
+  }
+  /** the next sentence for a missed rule: a whole sentence that this run has not used, or null
+   *  @param {Lesson} lesson @param {Sentence[]} sentences @param {LessonState | undefined} state @param {Progress} progress @param {Partial<Settings>} settings @param {string[]} used sentence ids @param {() => number} [rand] @returns {LessonItem | null} */
+  function lessonExtra(lesson, sentences, state, progress, settings, used, rand) {
+    const s = lessonOrder(lesson, sentences, state, progress, settings, rand || Math.random).find(x => !used.includes(x.id));
+    return s ? lessonItem(lesson, s, 'sentence', state, progress) : null;
+  }
+  /** Did the learner get the lesson's target right, whatever else went wrong? `ok`: every target is there; a typing slip counts as right, a known
+   *  wrong form does not, and in a word of one or two letters every letter counts; in a word-order lesson the target must also stand in its place. `only`: nothing but the targets differs, so the rule can be
+   *  named and one more try offered. `missed`: the normalised targets that are wrong.
+   *  @param {{result: string, t: string, a: string}} r what `check` returned @param {string[]} targets @param {Record<string, any>} opt @param {Set<string>} vocab @param {boolean} [order] @returns {{ok: boolean, only: boolean, missed: string[]}} */
+  function targetCheck(r, targets, opt, vocab, order) {
+    const all = targets.map(f => normalise(f, 'bg', opt));
+    if (r.result === 'correct') return { ok: true, only: false, missed: [] };
+    if (!r.t) return { ok: false, only: false, missed: all };
+    const closest = r.a.split(' '), want = all.filter(y => closest.includes(y));   // a target that the closest accepted answer does not have is not at stake (the other "you", D-018)
+    // a word-order lesson: the same words, and only the targets have moved
+    const without = (/** @type {string} */ x) => x.split(' ').filter(w => !want.includes(w)).join(' ');
+    if (order && sameBag(r.t, r.a) && without(r.t) === without(r.a)) return { ok: false, only: true, missed: want };
+    const pairs = alignWords(r.t, r.a), typed = r.t.split(' ');
+    const slip = (/** @type {string} */ y) => pairs.some(([x, a]) => a === y && y.length > 2 && !!x && !x.includes(' ') && x !== y && !formSlip(x, y, vocab, 'bg') && distance(x, y) <= Math.max(1, Math.round(y.length * 0.2)));
+    const here = (/** @type {string} */ y) => order ? pairs.some(([x, a]) => a === y && x === y) : typed.includes(y);
+    const missed = want.filter(y => !here(y) && !slip(y));
+    const only = missed.length > 0 && pairs.every(([x, a]) => x === a || missed.includes(a) || (!a && missed.includes(x)));
+    return { ok: !missed.length, only, missed };
+  }
+
   // ---------- history: recent answers in full, older days as totals (D-029) ----------
   /** the local calendar day of a timestamp, "YYYY-MM-DD" */
   function dayKey(/** @type {number} */ ts) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -1028,10 +1120,18 @@
     // other days of study (D-045): per day the newer time, nothing from before a reset
     /** @type {Record<string, number>} */ const allStudy = {};
     for (const side of [L.studyDays || {}, R.studyDays || {}]) for (const k in side) allStudy[k] = Math.max(allStudy[k] || 0, side[k]);
+    // grammar lessons (D-049): the state of the side that practised last; per sentence the earliest answer keeps its outcome, nothing from before a reset
+    /** @type {Record<string, LessonState>} */ const allLessons = {};
+    for (const side of [L.lessons || {}, R.lessons || {}]) for (const k in side) {
+      const r = side[k], had = allLessons[k], seen = Object.assign({}, had && had.seen);
+      for (const id in r.seen || {}) { const e = r.seen[id], h = seen[id]; seen[id] = !h ? e : Object.assign({}, e.first < h.first ? e : h, { last: Math.max(e.last, h.last) }); }
+      allLessons[k] = Object.assign({}, !had || (r.last || 0) >= (had.last || 0) ? r : had, { seen });
+    }
+    const lessons = sortedMap(allLessons, l => (l.last || 0) > wiped ? Object.assign({}, l, { seen: sortedMap(l.seen, e => e.last > wiped ? e : undefined) }) : undefined);
     return {
       app: 'trakia', version: 2, settings, progress, userAlts: sortedMap(allAlts, a => a.slice().sort()), userSentences, deleted,
       log: mergeEvents(L.log, R.log, wiped), sessions: mergeEvents(L.sessions, R.sessions, wiped), drills, drillLog: mergeEvents(L.drillLog, R.drillLog, wiped),
-      stamps, cleared, reading, days: sortedMap(allDays, normDay), peeks: sortedMap(allPeeks, p => p.at > wiped ? p : undefined),
+      stamps, cleared, reading, lessons, days: sortedMap(allDays, normDay), peeks: sortedMap(allPeeks, p => p.at > wiped ? p : undefined),
       wordDays: knownDays('wordDays'), sentDays: knownDays('sentDays'), studyDays: sortedMap(allStudy, ts => ts > wiped ? ts : undefined),
     };
   }
@@ -1270,6 +1370,6 @@
     return out;
   }
 
-  const api = { MAX_RETRIES, retryPlan, streak, studiedDays, INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, loneYi, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
+  const api = { MAX_RETRIES, retryPlan, streak, studiedDays, INTERVALS, MAX_BOX, ALMOST, STAGES, grammarOk, drillItems, buildDrill, langFor, parseKey, acceptedFor, looseFor, vocabulary, alignWords, wordSlips, aspectPairs, explain, lessonTargets, lessonPool, buildLessonRun, lessonExtra, targetCheck, FSRS_PARAMS, FSRS_DEFAULTS, fsrsOpts, fsrsReview, retrievability, recallNow, migrateRecord, boxFromRecord, maturity, almostOutcome, STOP, contentLemmas, spreadOut, fullBlocks, onePerSentence, REST, NEW_RESERVE, interleave, weightedSample, normalise, distance, check, diff, wordMarks, translit, loneYi, applyResult, eligible, cardKeys, buildSession, nextUnlock, hashId, parseDelimited, wordIndex, rowToSentence, newRecord, sameBag, DEVICE_SETTINGS, sharedSettings, LISTEN_AFTER, mergeSnapshots, dayKey, compactHistory, peekItems, storyTokens, storyKey, storyEligible, listenItems, WORD_DIRS, wordKey, wordRank, hasWords, dayLoad, sentenceLoad, wordQueue, gradeWord, wordIntervals, seedWords, KNOWN_DAYS, isKnownWord, wordCounts, sentenceCounts, FORGOT_DAYS, wordList };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else global.TrakiaCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

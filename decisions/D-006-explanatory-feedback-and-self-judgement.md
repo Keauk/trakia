@@ -21,7 +21,7 @@ expected line, each with a precise trigger:
   the reverse for an ongoing or repeated action.
 - *Clitic order* (Bulgarian): the same words in another order, and every word that moved is a
   clitic (ме, те, го, я, ни, ви, ги, ми, ти, му, ѝ, им, се, си, съм forms, ще, не, ли): "short words
-  like ми, се and ли stand right after the first stressed word".
+  like ми and се stand next to the verb and cannot start a clause; ли follows the word it asks about".
 - *Spelling* (every language): a pair within edit distance 2 that is not a word form:
   "spelling: млеко → мляко".
 - *Missing word* / *extra word* (every language): a word on one side only.

@@ -777,5 +777,119 @@ setTimeout(async () => {
     document.querySelector('#lib-view [data-view=sentences]').click();
     assert.ok(!$('lib-sentences').hidden && $('lib-words').hidden);
   }
+  // D-049: a grammar lesson, from the list through a run and back
+  {
+    const LS_ = k => JSON.parse(window.localStorage.getItem('trakia.' + k) || 'null');
+    const DATA = window.TRAKIA_DATA, lessonsData = DATA.grammar.lessons, art = lessonsData.find(l => l.id === 'article-forms');
+    const progressBefore = window.localStorage.getItem('trakia.progress');
+    document.querySelector('nav button[data-tab=grammar]').click();
+    const rows = [...document.querySelectorAll('#lesson-list .lesson-row')];
+    assert.equal(rows.length, lessonsData.length, 'one row per lesson');
+    assert.ok(rows.every(r => /new$/.test(r.textContent)), 'all new at first');
+    assert.equal($('lesson-page').hidden, true);
+    rows.find(r => r.dataset.lesson === 'article-forms').click();
+    assert.equal($('lesson-page').hidden, false); assert.equal($('grammar-list').hidden, true);
+    const page = $('lesson-page');
+    assert.ok(page.querySelector('h2').textContent === art.title);
+    assert.ok(page.textContent.includes(art.rule[0]) && page.textContent.includes(art.contrast.nl), 'the rule and the note for a Dutch speaker');
+    assert.ok(!page.textContent.includes(art.contrast.en), 'not the note for an English speaker');
+    assert.equal(page.querySelectorAll('.lesson-ex').length, art.examples.length);
+    assert.ok(page.querySelectorAll('.ex-w.target').length >= art.examples.length, 'the target forms are marked');
+    assert.ok(page.querySelector('table'), 'the table of endings');
+    page.querySelector('[data-lesson-back]').click();
+    assert.equal($('grammar-list').hidden, false, 'back to the list');
+    $('lesson-list').querySelector('[data-lesson=article-forms]').click();
+    page.querySelector('[data-lesson-start]').click();
+    assert.equal($('session-run').hidden, false); assert.ok($('tab-practise').classList.contains('active'));
+    assert.equal($('counter').textContent, '1 of 8');
+    assert.equal($('dir-badge').textContent, art.title);
+    const current = () => DATA.sentences.find(s => s.nl === $('prompt').textContent);
+    const targets = s => C.lessonTargets(art, s).map(t => t.form);
+    const put = v => { $('answer').value = v; $('answer').dispatchEvent(new window.Event('input')); $('btn-check').click(); };
+    // a gap: the Bulgarian with a blank, the dictionary form, and no rule yet
+    let s = current();
+    assert.ok(s && $('newwords').querySelector('.gap'), 'a gap item');
+    assert.ok(!$('newwords').textContent.includes(targets(s)[0]), 'the form is blank');
+    assert.equal(/[.?!]$/.test($('newwords').querySelector('.gap-line').textContent), true, 'the punctuation after the blank stays');
+    assert.ok($('lesson-hint').hidden, 'the rule is hidden during an item');
+    // only the target is wrong: the rule, one more try, and the first try is what counts
+    put('xxxxxxx');
+    assert.equal($('feedback').hidden, true, 'no answer yet'); assert.equal($('lesson-hint').hidden, false);
+    assert.match($('lesson-hint').textContent, /^Not yet\. /); assert.equal($('answer').disabled, false);
+    assert.equal($('run-card').dataset.state, 'almost');
+    put(targets(s)[0].toLowerCase());
+    assert.equal($('feedback').hidden, false, 'the second try ends it'); assert.equal($('lesson-hint').hidden, true);
+    assert.ok($('verdict').classList.contains('correct'));
+    assert.ok($('gloss').textContent.includes(s.bg), 'a gap shows the whole sentence afterwards');
+    assert.equal($('gloss').querySelector('[data-lesson]').dataset.lesson, 'article-forms', 'a link to the lesson');
+    assert.equal($('btn-accept').hidden, true);
+    assert.equal((LS_('lessons') || {})['article-forms'], undefined, 'saved on Continue');
+    $('btn-next').click();
+    let st = LS_('lessons')['article-forms'];
+    assert.equal(st.seen[s.id].ok, false, 'the first try failed'); assert.equal(st.seen[s.id].delayed, false); assert.equal(st.seen[s.id].unseen, true);
+    assert.equal($('counter').textContent, '2 of 9', 'a missed rule returns on another sentence');
+    // right at once
+    s = current(); put(targets(s)[0]);
+    assert.equal($('lesson-hint').hidden, true); assert.ok($('verdict').classList.contains('correct'));
+    $('btn-next').click();
+    assert.equal(LS_('lessons')['article-forms'].seen[s.id].ok, true); assert.equal($('counter').textContent, '3 of 9');
+    // Don't know: no second try, the form and the rule
+    s = current(); $('btn-dontknow').click();
+    assert.equal($('feedback').hidden, false); assert.ok($('notes').querySelector('.n-rule'), 'the rule is named');
+    $('btn-next').click();
+    assert.equal($('counter').textContent, '4 of 10');
+    // a whole sentence: the capital of D-038, no blank, an accepted answer
+    s = current();
+    assert.equal($('newwords').querySelector('.gap'), null, 'a whole sentence');
+    $('answer').value = 'а'; $('answer').dispatchEvent(new window.Event('input'));
+    assert.equal($('answer').value, 'А', 'a sentence starts with a capital');
+    put(s.bg);
+    assert.ok($('verdict').classList.contains('correct')); assert.equal($('btn-accept').hidden, true, 'nothing to accept when right');
+    $('btn-next').click();
+    // the target right and another word wrong: the rule does not fail, no second try
+    s = current();
+    const t0 = targets(s)[0], words = s.bg.replace(/[.?!,]/g, '').split(' '), other = words.findIndex(w => w !== t0 && !targets(s).includes(w));
+    if (other >= 0) {
+      words[other] = 'жжжжжжжж'; put(words.join(' '));
+      assert.equal($('feedback').hidden, false, 'no second try'); assert.ok($('verdict').classList.contains('wrong'));
+      assert.match($('notes').textContent, /The grammar of this lesson was right/);
+      $('btn-next').click();
+      assert.equal(LS_('lessons')['article-forms'].seen[s.id].ok, true);
+    }
+    // the rest, right; the extra items are new sentences
+    while (!$('session-run').hidden) { s = current(); put(C.lessonTargets(art, s).length && $('newwords').querySelector('.gap') ? targets(s)[0] : s.bg); $('btn-next').click(); }
+    const answered = Object.keys(LS_('lessons')['article-forms'].seen);
+    assert.equal(answered.length, new Set(answered).size); assert.ok(answered.length >= 8);
+    assert.equal(window.localStorage.getItem('trakia.progress'), progressBefore, 'a run changes no sentence card');
+    assert.match($('done-summary').textContent, /right on the first try/);
+    assert.equal($('btn-again').textContent, 'Practise again'); assert.equal($('btn-home').textContent, 'Back to the lesson');
+    // answers count for the streak and the drill log, with the time and whether the sentence was new
+    const logged = LS_('drillLog').filter(e => String(e[1]).startsWith('les:article-forms:'));
+    assert.equal(logged.length, answered.length); assert.equal(logged[0].length, 5); assert.equal(logged[0][4], 1);
+    // back to the lesson; the list shows it was practised
+    $('btn-home').click();
+    assert.equal($('lesson-page').hidden, false); assert.ok($('tab-grammar').classList.contains('active'));
+    page.querySelector('[data-lesson-back]').click();
+    assert.match($('lesson-list').querySelector('[data-lesson=article-forms]').textContent, /practised today/);
+    // a word-order lesson: the same words in the wrong place are wrong, and only they are
+    const ord = lessonsData.find(l => l.id === 'object-pronouns');
+    $('lesson-list').querySelector('[data-lesson=object-pronouns]').click();
+    page.querySelector('[data-lesson-start]').click();
+    assert.ok($('newwords').textContent.includes(ord.pool.hint), 'the cue is on every item');
+    const curO = () => DATA.sentences.find(x => x.nl === $('prompt').textContent);
+    while ($('newwords').querySelector('.gap')) { const x = curO(); put(C.lessonTargets(ord, x)[0].form); $('btn-next').click(); }
+    const x = curO(), tf = C.lessonTargets(ord, x)[0].form, plain = x.bg.replace(/[.?!,]/g, '').split(' ');
+    plain.splice(plain.indexOf(tf), 1); const moved = plain.concat(tf).join(' ');
+    if (C.normalise(moved, 'bg', {}) !== C.normalise(x.bg, 'bg', {})) { put(moved); assert.equal($('lesson-hint').hidden, false, 'a pronoun in the wrong place: not yet'); put(x.bg); assert.ok($('verdict').classList.contains('correct')); $('btn-next').click(); }
+    $('btn-quit').click();
+    assert.equal(LS_('lessons')['object-pronouns'].last > 0, true);
+    // quitting during the second try leaves no hint behind
+    $('btn-again').click();
+    if ($('newwords').querySelector('.gap')) { put('жжжж'); assert.equal($('lesson-hint').hidden, false); }
+    $('btn-quit').click();
+    assert.equal($('lesson-hint').hidden, true, 'the hint is gone after quitting');
+
+    $('btn-home').click();
+  }
   console.log('UI smoke test passed');
 }, 100);

@@ -5,7 +5,7 @@ See [DESIGN.md](DESIGN.md) for the design and how to run it.
 
 ```
 data/words.json        word list exported from the Anki deck (ordered by Rank = study order)
-data/grammar.json      grammar reference tables and drill paradigms (Grammar tab)
+data/grammar.json      grammar lessons, reference tables and drill paradigms (Grammar tab)
 data/sentences.json    practice sentences with Dutch translations, alternatives and max_rank (reviewed twice; see data/REVIEW_CHANGES.md)
 tools/                 export_anki_words.py, anki_progress.py, validate_sentences.py, build_data.py, build_audio.py, find_combinations.js, check_decisions.py, publish.sh, tests
 decisions/             decision log, one record per feature (see decisions/README.md and CLAUDE.md)

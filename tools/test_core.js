@@ -183,7 +183,7 @@ t('D-006 explain', () => {
   assert.deepEqual(n('Искам да изям супата.', 'Искам да ям супата.'), ['aspect: an ongoing or repeated action takes the imperfective ям, not изям']);
   assert.equal(aspects.get('знам'), undefined); assert.equal(aspects.get('съм'), undefined); assert.deepEqual(aspects.get('събуя'), { other: 'събувам', perfective: true });
   // clitic order: only when the other words keep their order
-  assert.deepEqual(n('Ми харесва.', 'Харесва ми.'), ['word order: short words like ми, се and ли stand right after the first stressed word']);
+  assert.deepEqual(n('Ми харесва.', 'Харесва ми.'), ['word order: short words like ми and се stand next to the verb and cannot start a clause; ли follows the word it asks about']);
   assert.deepEqual(n('Мляко купих.', 'Купих мляко.'), [], 'plain word order gets no note (the verdict already says so)');
   // spelling and a missing or extra word
   assert.deepEqual(n('Купих млеко.', 'Купих мляко.'), ['spelling: млеко → мляко']);
@@ -825,5 +825,117 @@ t('the days with study come from every source (D-045)', () => {
   const a = { studyDays: { '2026-10-30': 300, '2026-10-25': 50 } }, b = { studyDays: { '2026-10-30': 200, '2026-10-31': 400 }, stamps: { wiped: 60 } };
   assert.deepEqual(C.mergeSnapshots(a, b).studyDays, { '2026-10-30': 300, '2026-10-31': 400 }, 'the newer time per day; nothing from before a reset');
   assert.deepEqual(C.mergeSnapshots({}, {}).studyDays, {}, 'old snapshots have none');
+});
+// ---------- grammar lessons (D-049) ----------
+const LES = (pool, stage) => ({ id: 'x', card: 'c', stage: stage || 1, title: 'T', rule: ['r'], contrast: { nl: 'n', en: 'e' }, examples: [], pool });
+/** a sentence with one list of labels per word */
+const LS = (id, bg, labels, more) => Object.assign({ id, bg, nl: id + ' de', en: id + ' the', max_rank: 10, ex: ['', bg.match(/\p{L}+/gu).map((w, i) => ['', labels[i] || [], '', ''])] }, more);
+t('lessonTargets: the labelled words, the word that belongs with them, nothing when the words do not line up', () => {
+  const s = LS('a', 'Искам да отида там.', [['1sg'], ['da'], ['1sg'], []]);
+  assert.deepEqual(C.lessonTargets(LES({ labels: ['da'] }), s).map(x => x.form), ['да']);
+  assert.deepEqual(C.lessonTargets(LES({ labels: ['da'], next: ['1sg'] }), s), [{ i: 1, form: 'да' }, { i: 2, form: 'отида' }], 'the verb after да');
+  const apart = LS('b', 'Искам да ви дам ключа.', [['1sg'], ['da'], ['cl-dat'], ['1sg'], []]);
+  assert.deepEqual(C.lessonTargets(LES({ labels: ['da'], next: ['1sg'] }), apart).map(x => x.form), ['да', 'дам'], 'a short pronoun may stand between');
+  assert.deepEqual(C.lessonTargets(LES({ labels: ['da'] }), Object.assign({}, s, { ex: ['', [['', ['da'], '', '']]] })), [], 'an explanation that does not line up');
+  assert.deepEqual(C.lessonTargets(LES({ labels: ['da'] }), { id: 'c', bg: 'да' }), [], 'no explanation');
+});
+t('lessonPool: stage, rank, accepted answers, cue and exclusions; too few at the rank: the next ranks, up to 10', () => {
+  const les = LES({ labels: ['the'] }), the = [['the'], []];
+  const base = { rank: 20, stage: 1, lang: 'nl' }, ids = (l, s, st) => C.lessonPool(l, s, st).map(x => x.id);
+  const past = LS('p', 'Жената дойде.', the, { grammar: ['aorist'] });
+  assert.deepEqual(ids(les, [past], base), [], 'beyond the stage');
+  assert.deepEqual(ids(les, [past], Object.assign({}, base, { stage: 3 })), ['p'], 'the learner is further on');
+  assert.deepEqual(ids(LES({ labels: ['the'] }, 3), [past], base), ['p'], 'the lesson is further on');
+  const alt = LS('q', 'Жената дойде.', the, { bg_alt: ['Жена дойде.'] });
+  assert.deepEqual(ids(les, [alt], base), [], 'an accepted answer without the target would not need the rule');
+  assert.deepEqual(ids(les, [LS('r', 'Жената дойде.', the, { bg_alt: ['Дойде жената.'] })], base), ['r'], 'every accepted answer has it');
+  const you = LS('e', 'Виждам те.', [[], ['the']], { bg_alt_en: ['Виждам ви.'] });
+  assert.deepEqual(ids(les, [you], Object.assign({}, base, { lang: 'en' })), ['e'], 'the other "you" of an English prompt does not remove a sentence');
+  const cue = LES({ labels: ['the'], cue: { nl: ['de', 'het'] } });
+  assert.deepEqual(ids(cue, [LS('c', 'Жената дойде.', the, { nl: 'Vrouw kwam.' })], base), [], 'the prompt does not ask for the form');
+  assert.deepEqual(ids(cue, [LS('c', 'Жената дойде.', the, { nl: 'De vrouw kwam.' })], base), ['c'], 'whole words, in any case');
+  assert.deepEqual(ids(cue, [LS('c', 'Жената дойде.', the, { nl: 'Deze vrouw kwam.' })], base), [], 'not part of a word');
+  assert.deepEqual(ids(LES({ labels: ['the'], exclude: ['c'] }), [LS('c', 'Жената дойде.', the)], base), [], 'excluded by id');
+  const many = Array.from({ length: 12 }, (_, i) => LS('s' + i, 'Жената дойде.', the, { max_rank: 15 + i * 2 }));
+  assert.deepEqual(ids(les, many, base), ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9'], 'widened in rank order, up to 10');
+  assert.equal(C.lessonPool(les, many, Object.assign({}, base, { rank: 100 })).length, 12, 'no limit when enough are in reach');
+});
+t('buildLessonRun: 3 gaps then 5 sentences, no sentence twice, unseen first', () => {
+  const les = LES({ labels: ['the'] }), st = { rank: 100, stage: 1, lang: 'nl' };
+  const many = Array.from({ length: 12 }, (_, i) => LS('s' + i, 'Жената дойде ' + 'да'.repeat(i + 1) + '.', [['the'], [], []], { max_rank: i + 1 }));
+  const run = C.buildLessonRun(les, many, undefined, {}, st, () => 0.5);
+  assert.deepEqual(run.map(x => x.kind), ['gap', 'gap', 'gap', 'sentence', 'sentence', 'sentence', 'sentence', 'sentence']);
+  assert.equal(new Set(run.map(x => x.sentence)).size, 8);
+  assert.deepEqual(run[0], { id: 'les:x:s0', kind: 'gap', lesson: 'x', sentence: 's0', unseen: true, targets: ['Жената'], gap: { from: 0, to: 0, answer: 'Жената' } });
+  assert.equal(run[3].gap, undefined); assert.deepEqual(run[3].targets, ['Жената']);
+  // answered in this lesson or typed as a card: after the unseen ones, longest ago first
+  const state = { last: 5, seen: { s0: { first: 1, ok: true, unseen: true, delayed: false, last: 300 } } };
+  const later = C.buildLessonRun(les, many, state, { 's1|nl2bg': { last: 200 } }, st, () => 0.5);
+  assert.ok(!later.some(x => x.sentence === 's0' || x.sentence === 's1'), 'both seen: not picked while 8 unseen remain');
+  assert.ok(later.every(x => x.unseen));
+  const few = many.slice(0, 9), again = C.buildLessonRun(les, few, state, { 's1|nl2bg': { last: 200 } }, st, () => 0.5);
+  assert.ok(!again.some(x => x.sentence === 's0'), 'answered last of all'); assert.equal(again[again.length - 1].sentence, 's1'); assert.equal(again[again.length - 1].unseen, false);
+  // the extra item of a missed rule is a whole sentence the run has not used
+  const x = C.lessonExtra(les, many, state, {}, st, ['s2', 's3'], () => 0.5);
+  assert.equal(x.kind, 'sentence'); assert.equal(x.sentence, 's1');
+  assert.equal(C.lessonExtra(les, many, undefined, {}, st, many.map(s => s.id), () => 0.5), null, 'none left');
+  // a small pool: fewer gaps, and the run is what there is
+  assert.deepEqual(C.buildLessonRun(les, many.slice(0, 4), undefined, {}, Object.assign({}, st), () => 0.5).map(k => k.kind), ['gap', 'gap', 'sentence', 'sentence']);
+  assert.deepEqual(C.buildLessonRun(les, [], undefined, {}, st), []);
+  // within the lesson's stage first
+  const hard = LS('h', 'Жената.', [['the']], { grammar: ['aorist'], max_rank: 1 }), easy = LS('e', 'Жената и още много думи тук.', [['the'], [], [], [], [], []], { max_rank: 9 });
+  assert.deepEqual(C.buildLessonRun(les, [hard, easy], undefined, {}, { rank: 100, stage: 5, lang: 'nl' }, () => 0.5).map(k => k.sentence), ['e', 'h']);
+  // with `next`: a gap blanks the two words together, and only when they stand side by side
+  const da = LES({ labels: ['da'], next: ['2sg'] });
+  const side = LS('a', 'Искаш да дойдеш.', [[], ['da'], ['2sg']]), part = LS('b', 'Искаш да ми дадеш.', [[], ['da'], [], ['2sg']]), more = ['c', 'd', 'e'].map(i => LS(i, 'Искаш да ми дадеш ' + i + 'а.', [[], ['da'], [], ['2sg'], []]));
+  const dar = C.buildLessonRun(da, [part, side, ...more], undefined, {}, st, () => 0.5);
+  assert.deepEqual(dar.filter(k => k.gap).map(k => [k.sentence, k.gap.answer, k.gap.from, k.gap.to]), [['a', 'да дойдеш', 1, 2]]);
+});
+t('targetCheck: right despite other slips; the rule is named only when nothing else differs', () => {
+  const opt = { typoPct: 10 }, vocab = new Set(['книгата', 'книгите', 'жената', 'виждам', 'те']);
+  const tc = (typed, accepted, targets, order) => C.targetCheck(C.check(typed, accepted, 'bg', Object.assign({}, opt, { vocab, bagOfWords: !order })), targets, opt, vocab, order);
+  assert.deepEqual(tc('Жената чете книгите.', ['Жената чете книгите.'], ['книгите']), { ok: true, only: false, missed: [] }, 'all right');
+  assert.deepEqual(tc('Жената чете книга.', ['Жената чете книгите.'], ['книгите']), { ok: false, only: true, missed: ['книгите'] }, 'only the target is wrong');
+  assert.deepEqual(tc('Жена чете книгата.', ['Жената чете книгите.'], ['книгите']), { ok: false, only: false, missed: ['книгите'] }, 'another word is wrong too');
+  assert.deepEqual(tc('Жена гледа книгите.', ['Жената чете книгите.'], ['книгите']), { ok: true, only: false, missed: [] }, 'the mistake is elsewhere');
+  assert.equal(tc('Жената чете книгитe.', ['Жената чете книгите.'], ['книгите']).ok, true, 'a typing slip is no grammar error');
+  assert.equal(tc('Жената чете книгата.', ['Жената чете книгите.'], ['книгите']).ok, false, 'a known wrong form is');
+  assert.equal(tc('Виждам тт.', ['Виждам те.'], ['те']).ok, false, 'in a short word, every letter counts');
+  assert.deepEqual(tc('', ['Жената чете книгите.'], ['книгите']), { ok: false, only: false, missed: ['книгите'] }, 'nothing typed: no second try');
+  // an accepted alternative compares against that alternative
+  assert.equal(tc('Книгите чете жената.', ['Жената чете книгите.', 'Книгите чете жената.'], ['книгите']).ok, true);
+  // two targets
+  assert.deepEqual(tc('Искам отида.', ['Искам да отида.'], ['да', 'отида']), { ok: false, only: true, missed: ['да'] }, 'да is missing');
+  assert.deepEqual(tc('Искам да отидеш.', ['Искам да отида.'], ['да', 'отида']), { ok: false, only: true, missed: ['отида'] }, 'the wrong person');
+  // word order: the place counts only in a word-order lesson
+  assert.deepEqual(tc('Те виждам.', ['Виждам те.'], ['те'], true), { ok: false, only: true, missed: ['те'] }, 'the pronoun in the wrong place');
+  assert.equal(tc('Те виждам.', ['Виждам те.'], ['те'], false).ok, true, 'elsewhere order is not the point');
+  assert.equal(tc('Виждам те.', ['Виждам те.'], ['те'], true).ok, true);
+  assert.equal(C.targetCheck({ result: 'wrong', t: '', a: 'те' }, ['те'], opt, vocab).ok, false, 'Don\'t know');
+  // the other "you" of an English prompt: the target that it does not have is not at stake (D-018)
+  const yo = tc('Видях ви вчера.', ['Видях те днес.', 'Видях ви днес.'], ['те']);
+  assert.deepEqual(yo, { ok: true, only: false, missed: [] }, 'the mistake is elsewhere');
+  // the setting for ѝ applies
+  const yi = (o) => C.targetCheck(C.check('Дадох и', ['Дадох ѝ'], 'bg', Object.assign({ vocab }, o)), ['ѝ'], o, vocab);
+  assert.equal(yi({}).ok, true, 'и and ѝ count the same by default');
+  assert.equal(yi({ strictYi: true }).ok, false, 'not with Strict ѝ');
+});
+t('compactHistory folds the longer log entries of a lesson answer into the day totals (D-049)', () => {
+  const now = Date.UTC(2026, 10, 4, 12), old = now - 40 * 864e5, key = C.dayKey(old);
+  const c = C.compactHistory({ log: [], sessions: [], days: {}, drillLog: [[old, 'les:x:s1', 2, 900, 1], [old, 'les:x:s2', 0, 1200, 0], [now, 'les:x:s3', 2, 800, 1]] }, now);
+  assert.deepEqual(c.days[key].d, [1, 0, 1], 'one wrong, one correct');
+  assert.deepEqual(c.drillLog, [[now, 'les:x:s3', 2, 800, 1]], 'recent entries stay in full');
+});
+t('mergeSnapshots: lessons keep the answers of both devices (D-049)', () => {
+  const a = { lessons: { x: { last: 200, seen: { s1: { first: 100, ok: true, unseen: true, delayed: false, last: 200 }, s2: { first: 150, ok: false, unseen: true, delayed: false, last: 150 } } } } };
+  const b = { lessons: { x: { last: 300, seen: { s1: { first: 120, ok: false, unseen: false, delayed: true, last: 300 }, s3: { first: 300, ok: true, unseen: true, delayed: true, last: 300 } } }, y: { last: 50, seen: {} } } };
+  const m = C.mergeSnapshots(a, b).lessons;
+  assert.deepEqual(Object.keys(m.x.seen), ['s1', 's2', 's3'], 'a union, so nothing comes back as unseen');
+  assert.deepEqual(m.x.seen.s1, { first: 100, ok: true, unseen: true, delayed: false, last: 300 }, 'the earliest answer keeps its outcome, the last use is the latest');
+  assert.equal(m.x.last, 300); assert.deepEqual(m.y, { last: 50, seen: {} });
+  assert.deepEqual(C.mergeSnapshots(b, a).lessons, m, 'either way round');
+  const wiped = C.mergeSnapshots(a, Object.assign({}, b, { stamps: { wiped: 160 } })).lessons;
+  assert.equal(wiped.y, undefined, 'nothing from before a reset'); assert.deepEqual(Object.keys(wiped.x.seen), ['s1', 's3']);
+  assert.deepEqual(C.mergeSnapshots({}, {}).lessons, {}, 'old snapshots have none');
 });
 console.log(n, 'test groups passed' + (process.exitCode ? ' (with failures)' : ''));

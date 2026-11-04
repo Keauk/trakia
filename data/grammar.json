@@ -1228,6 +1228,192 @@
    ]
   }
  ],
+ "lessons": [
+  {
+   "id": "article-forms",
+   "card": "article",
+   "stage": 1,
+   "title": "The definite article: its forms",
+   "rule": [
+    "Bulgarian has no separate word for \"the\". It is an ending on the word: жена → жената, дете → детето, книги → книгите.",
+    "-та for a feminine word, -то for a neuter word, -те for most plurals. A plural in -а or -я takes -та: деца → децата.",
+    "With an adjective, the ending goes on the first word only: новата книга.",
+    "Masculine words in a consonant have their own forms: see the reference card. Those in -а or -я take -та (бащата), those in -о take -то (дядото)."
+   ],
+   "table": {
+    "headers": [
+     "word",
+     "ending",
+     "examples"
+    ],
+    "rows": [
+     [
+      "feminine (most words in -а, -я)",
+      "-та",
+      "жена → жената, маса → масата"
+     ],
+     [
+      "neuter (most words in -о, -е)",
+      "-то",
+      "дете → детето, кафе → кафето"
+     ],
+     [
+      "plural",
+      "-те",
+      "книги → книгите, мъже → мъжете"
+     ],
+     [
+      "plural in -а / -я",
+      "-та",
+      "деца → децата, села → селата"
+     ]
+    ]
+   },
+   "contrast": {
+    "nl": "Dutch puts de or het before the noun. Bulgarian adds an ending instead: de vrouw = жената. De or het does not tell you the ending: de koffie = кафето, with the neuter -то.",
+    "en": "English puts \"the\" before the noun, and it never changes. Bulgarian adds an ending that depends on the word: the woman = жената, the child = детето. In \"the new book\", the ending goes on the adjective: новата книга."
+   },
+   "examples": [
+    "M086",
+    "M088",
+    "M015"
+   ],
+   "pool": {
+    "labels": [
+     "the"
+    ],
+    "cue": {
+     "nl": [
+      "de",
+      "het"
+     ],
+     "en": [
+      "the"
+     ]
+    },
+    "exclude": [
+     "A070",
+     "A074",
+     "A188",
+     "B064",
+     "B147",
+     "F086",
+     "M007",
+     "P005",
+     "P051",
+     "A036",
+     "A066",
+     "B007",
+     "A073",
+     "B014",
+     "A151"
+    ]
+   }
+  },
+  {
+   "id": "da",
+   "card": "da",
+   "stage": 1,
+   "title": "да instead of an infinitive",
+   "rule": [
+    "Bulgarian has no infinitive. After verbs such as искам, мога, трябва and обичам, use да + a verb with a person ending.",
+    "The verb after да shows its own person: искам да отида (I want to go), искаш да отидеш (you want to go), искам да дойдеш (I want you to come).",
+    "Трябва and може ли stay the same: трябва да отидем (we must go), може ли да вляза?",
+    "For one complete action, use the perfective verb: отида, not отивам. Не goes first: не искам да ям."
+   ],
+   "contrast": {
+    "nl": "Dutch uses an infinitive, often with no word before it: ik wil gaan, ik kan wachten. Bulgarian always needs да, and the second verb takes the person: искам да отида, мога да чакам.",
+    "en": "English uses \"to go\", which never changes. In Bulgarian the second verb changes with the person: искам да отида, искаш да отидеш. English \"I can wait\" has no \"to\", but Bulgarian still needs да: мога да чакам."
+   },
+   "examples": [
+    "M051",
+    "B086",
+    "A137"
+   ],
+   "pool": {
+    "labels": [
+     "da"
+    ],
+    "next": [
+     "1sg",
+     "2sg",
+     "3sg",
+     "1pl",
+     "2pl",
+     "3pl"
+    ],
+    "exclude": [
+     "A157",
+     "B158",
+     "B155",
+     "B143",
+     "B175",
+     "P001",
+     "P009"
+    ]
+   }
+  },
+  {
+   "id": "object-pronouns",
+   "card": "pronouns",
+   "stage": 1,
+   "title": "Short object pronouns and their place",
+   "rule": [
+    "\"Me, you, him\" have short forms: ме, те, го, я, ни, ви, ги. \"To me, to you, to him\" have their own: ми, ти, му, ѝ, ни, ви, им. Verbs such as дам, нося, кажа and вярвам take the \"to\" forms: не ти вярвам.",
+    "These words never start a clause, and they stand next to the verb.",
+    "If the verb starts the clause, they go after it: обичам те. If another word comes first, they go before the verb: не те виждам, защо ме гледаш? With ли: разбирате ли ме?"
+   ],
+   "contrast": {
+    "nl": "In a Dutch main clause the pronoun stays after the conjugated verb: ik zie je, ik zie je niet. In Bulgarian its place depends on what starts the clause: виждам те, but не те виждам. Dutch niet comes late, while не stands right before the pronoun.",
+    "en": "In English the pronoun stays after the verb: I see you, I don't see you, why do you look at me? In Bulgarian its place depends on what starts the clause: виждам те, but не те виждам and защо ме гледаш?"
+   },
+   "examples": [
+    "A146",
+    "A095",
+    "M072"
+   ],
+   "pool": {
+    "labels": [
+     "cl-acc",
+     "cl-dat"
+    ],
+    "order": true,
+    "cue": {
+     "nl": [
+      "me",
+      "mij",
+      "je",
+      "jou",
+      "hem",
+      "haar",
+      "ons",
+      "u",
+      "jullie",
+      "hen",
+      "hun",
+      "ze"
+     ],
+     "en": [
+      "me",
+      "you",
+      "him",
+      "her",
+      "us",
+      "them"
+     ]
+    },
+    "hint": "Use a short pronoun.",
+    "exclude": [
+     "A087",
+     "P097",
+     "B168",
+     "P081",
+     "B118",
+     "P030"
+    ]
+   }
+  }
+ ],
  "paradigms": {
   "present": [
    {
