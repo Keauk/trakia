@@ -256,7 +256,7 @@ $('answer').addEventListener('input', e => {
   fitAnswer();
 });
 /** open a card of the Grammar tab @param {string | undefined} id */
-function openCard(id) { lessonOpen = null; showTab('grammar'); const el = $('gcard-' + id); if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); } }
+function openCard(id) { lessonOpen = null; showTab('grammar'); const el = $('gcard-' + id); if (el) { $('grammar-tables').open = true; el.open = true; el.scrollIntoView({ block: 'start' }); } }
 $('gloss').addEventListener('click', e => {
   const l = closest(e, '[data-lesson]'); if (l) { e.preventDefault(); openLesson(l.dataset.lesson); return; }
   const a = closest(e, '[data-gcard]'); if (!a) return; e.preventDefault(); openCard(a.dataset.gcard);
@@ -506,22 +506,26 @@ function endSession() {
 }
 
 // ---------- grammar tab ----------
+const DRILL_CARDS = new Set(C.drillItems(GRAMMAR, 5).map(it => it.card));   // not every table has drill items
 const STAGE_NAMES = /** @type {Record<number, string>} */ ({ 1: 'Stage 1 — present tense', 2: 'Stage 2 — future and imperatives', 3: 'Stage 3 — past tense and perfect', 4: 'Stage 4 — imperfect and conditional' });
 function renderGrammar() {
   const stage = settings.stage || 5, names = STAGE_NAMES;
   renderLessons();
+  $('tables-count').textContent = `${GRAMMAR.cards.length} tables, with optional drills`;
+  // a table stays open until the learner closes it, also after a drill or another tab
+  const open = new Set([...$('grammar-cards').querySelectorAll('details[open]')].map(d => d.id));
   let html = '';
   for (const st of [1, 2, 3, 4]) {
     const cards = GRAMMAR.cards.filter(c => c.stage === st); if (!cards.length) continue;
     html += `<div class="stage-h">${names[st]}${st > stage ? ' · beyond your stage' : ''}</div>`;
     for (const c of cards) {
       const ex = (c.examples || []).map(id => SENT_BY_ID.get(id)).filter(Boolean);
-      html += `<details class="card gcard" id="gcard-${esc(c.id)}"${st <= stage ? ' open' : ''}><summary>${esc(c.title)}${st > stage ? ' <span class="badge">stage ' + st + '</span>' : ''}</summary>
+      html += `<details class="gcard" id="gcard-${esc(c.id)}"${open.has('gcard-' + c.id) ? ' open' : ''}><summary>${esc(c.title)}</summary>
         <p class="muted">${esc(c.intro)}</p>
         <table class="fixed"><tr>${c.table.headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>${c.table.rows.map(r => `<tr>${r.map(x => `<td lang="bg">${esc(x)}</td>`).join('')}</tr>`).join('')}</table>
         ${c.notes && c.notes.length ? `<ul class="muted" style="padding-left:18px;margin:6px 0">${c.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
         ${ex.length ? `<p class="label">From the sentences</p><ul class="ex">${ex.map(s => `<li><span lang="bg">${esc(s.bg)}</span><span class="sub tiny" lang="nl">${esc(s.nl)}</span></li>`).join('')}</ul>` : ''}
-        <div class="row"><button class="btn small" data-drill="${esc(c.id)}">Drill this table</button></div>
+        ${DRILL_CARDS.has(c.id) ? `<div class="row"><button class="btn small" data-drill="${esc(c.id)}">Drill this table</button></div>` : ''}
       </details>`;
     }
   }
@@ -542,13 +546,17 @@ function daysAgo(ts) {
 /** the list of lessons, or the lesson that is open */
 function renderLessons() {
   $('lessons-card').hidden = !LESSONS.length;
-  const stage = settings.stage || 5;
+  const stage = settings.stage || 5, next = LESSONS.find(l => !lessons[l.id]), done = LESSONS.filter(l => lessons[l.id]).length;
+  // where the learner is: the lessons practised, and the first one still new
+  $('lesson-count').textContent = `${done} of ${LESSONS.length} practised`;
+  $('lesson-segs').innerHTML = LESSONS.map(l => `<i class="${lessons[l.id] ? 'done' : l === next ? 'cur' : ''}"></i>`).join('');
+  $('lesson-segs').setAttribute('aria-valuemin', '0'); $('lesson-segs').setAttribute('aria-valuemax', String(LESSONS.length)); $('lesson-segs').setAttribute('aria-valuenow', String(done));
   let html = '';
   for (const st of [...new Set(LESSONS.map(l => l.stage))].sort()) {
     html += `<li class="stage-h">${esc(STAGE_NAMES[st] || 'Stage ' + st)}${st > stage ? ' · beyond your stage' : ''}</li>`;
     for (const l of LESSONS.filter(x => x.stage === st)) {
-      const seen = lessons[l.id];
-      html += `<li><button type="button" class="lesson-row" data-lesson="${esc(l.id)}"><span>${esc(l.title)}</span><span class="tiny">${seen ? 'practised ' + daysAgo(seen.last) : 'new'}</span></button></li>`;
+      const seen = lessons[l.id], isNext = l === next, state = seen ? 'practised ' + daysAgo(seen.last) : isNext ? 'next' : '';
+      html += `<li><button type="button" class="lesson-row${seen ? ' done' : ''}${isNext ? ' next' : ''}" data-lesson="${esc(l.id)}"${isNext ? ' aria-current="step"' : ''}><span class="lesson-mark" aria-hidden="true">${seen ? '✓' : ''}</span><span class="lesson-name">${esc(l.title)}</span><span class="tiny">${state}</span></button></li>`;
     }
   }
   $('lesson-list').innerHTML = html;

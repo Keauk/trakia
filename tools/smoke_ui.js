@@ -84,7 +84,8 @@ assert.ok(id.ex, 'every sentence has its explanation');
   if (lab >= 0) {
     $('explain').querySelectorAll('.ex-w')[lab].click();
     const a = $('explain').querySelector('[data-gcard]'); assert.ok(a, 'a link to the grammar card');
-    a.click(); assert.ok($('gcard-' + a.dataset.gcard).open, 'the grammar card opens');
+    a.click(); assert.ok($('gcard-' + a.dataset.gcard).open, 'the grammar card opens'); assert.ok($('grammar-tables').open, 'and the section around it');
+    $('grammar-tables').open = false; $('gcard-' + a.dataset.gcard).open = false;
     document.querySelector('nav button[data-tab=practise]').click();
   }
   $('btn-explain').click(); assert.equal($('explain').hidden, true);
@@ -785,9 +786,21 @@ setTimeout(async () => {
     document.querySelector('nav button[data-tab=grammar]').click();
     const rows = [...document.querySelectorAll('#lesson-list .lesson-row')];
     assert.equal(rows.length, lessonsData.length, 'one row per lesson');
-    assert.ok(rows.every(r => /new$/.test(r.textContent)), 'all new at first');
+    // where the learner is: nothing practised yet, the first lesson is next, and the tables stay out of the way
+    assert.equal($('lesson-count').textContent, '0 of ' + rows.length + ' practised');
+    assert.deepEqual(rows.map(r => r.classList.contains('next')), rows.map((_, i) => i === 0), 'only the first lesson is next');
+    assert.match(rows[0].textContent, /next$/); assert.equal(rows[0].getAttribute('aria-current'), 'step');
+    assert.equal($('lesson-segs').children.length, rows.length); assert.equal($('lesson-segs').children[0].className, 'cur');
+    assert.equal($('grammar-tables').open, false, 'the tables are closed');
+    assert.equal(document.querySelectorAll('#grammar-cards details[open]').length, 0, 'every table is closed too');
+    assert.match($('tables-count').textContent, /^\d+ tables/);
+    assert.ok($('gcard-sum').querySelector('[data-drill]'), 'a table with drill items offers a drill'); assert.equal($('gcard-da').querySelector('[data-drill]'), null, 'a table without any does not');
+    // a table stays open until the learner closes it, also after another tab
+    const tb = document.querySelector('#grammar-cards details'); $('grammar-tables').open = true; tb.open = true;
+    document.querySelector('nav button[data-tab=stats]').click(); document.querySelector('nav button[data-tab=grammar]').click();
+    assert.ok($('grammar-tables').open && $(tb.id).open, 'still open'); $(tb.id).open = false; $('grammar-tables').open = false;
     assert.equal($('lesson-page').hidden, true);
-    rows.find(r => r.dataset.lesson === 'article-forms').click();
+    $('lesson-list').querySelector('[data-lesson=article-forms]').click();
     assert.equal($('lesson-page').hidden, false); assert.equal($('grammar-list').hidden, true);
     const page = $('lesson-page');
     assert.ok(page.querySelector('h2').textContent === art.title);
@@ -870,7 +883,10 @@ setTimeout(async () => {
     $('btn-home').click();
     assert.equal($('lesson-page').hidden, false); assert.ok($('tab-grammar').classList.contains('active'));
     page.querySelector('[data-lesson-back]').click();
-    assert.match($('lesson-list').querySelector('[data-lesson=article-forms]').textContent, /practised today/);
+    const doneRow = $('lesson-list').querySelector('[data-lesson=article-forms]');
+    assert.match(doneRow.textContent, /practised today/); assert.ok(doneRow.classList.contains('done')); assert.equal(doneRow.querySelector('.lesson-mark').textContent, '✓');
+    assert.match($('lesson-count').textContent, /^1 of /); assert.equal($('lesson-segs').children[0].className, 'done'); assert.equal($('lesson-segs').children[1].className, 'cur', 'the next lesson moved on');
+    assert.ok(!doneRow.classList.contains('next')); assert.ok($('lesson-list').querySelector('[data-lesson=da]').classList.contains('next'));
     // a word-order lesson: the same words in the wrong place are wrong, and only they are
     const ord = lessonsData.find(l => l.id === 'object-pronouns');
     $('lesson-list').querySelector('[data-lesson=object-pronouns]').click();

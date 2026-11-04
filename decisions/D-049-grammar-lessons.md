@@ -118,9 +118,11 @@ order is by stage, then as listed. A bold lesson joins its stage when it has its
 6. **Nothing is locked or required.** Any lesson opens at any time, and sentence practice never waits for
    grammar. A quiet line on the Practise home card shows the rules due. When all published lessons of a
    stage have had a run, the Grammar tab offers to raise the stage (D-008). Only a tap does this.
-7. **The tables stay.** Each lesson links to its reference card, and the Grammar tab keeps the cards.
-   "Drill this table" (D-009) stays there as an optional warm-up. The top-level "Grammar drill" buttons
-   go in step 2, when reviews can replace them.
+7. **The tables stay, out of the way.** The Grammar tab shows the lessons first, with the number practised and
+   the next lesson marked. The reference tables sit in one section below, closed at every page load, and
+   each table in it opens on its own. Each lesson links to its table, and such a link opens it. "Drill this
+   table" (D-009) stays there as an optional warm-up. The top-level "Grammar drill" buttons go in step 2,
+   when reviews can replace them.
 8. **Stats show the only direct evidence.** Per rule: first-try accuracy on unseen sentences at least one
    day after the last practice of that rule, with the median response time.
 
@@ -328,6 +330,22 @@ Step 1 is built. Steps 2–5 are not started.
 - Seven accepted answers added to `data/sentences.json` after the review: M064, B054, B065, P072, B068, M014, M049.
   P001 and P009 have the prompt "in bed blijven" for `лежа`; they are excluded from the lesson, and their text
   is unchanged.
+- The learner found the first layout hard to scan: lessons and open tables together, about 13 screens long. So the
+  tables moved into one closed section. Research behind the layout:
+  - People spend 57% of viewing time above the fold and 74% in the first two screens, so the top holds the main
+    goal (Nielsen Norman Group, Scrolling and Attention, 2018).
+  - Show the few most important things first, put rarer ones behind a clearly labelled control, and stop at two
+    levels (Nielsen Norman Group, Progressive Disclosure). Here the two levels are the section and a table.
+  - Accordions suit content where people need only a few pieces, and items stay open until the user closes them
+    (Nielsen Norman Group, Accordions on Desktop). So a table stays open across tabs and after a drill.
+  - Opening must not move the page, and a first item that starts open hides the structure (Nielsen Norman Group,
+    Accordions on Mobile). So all start closed, and nothing scrolls on opening.
+  - State what the system's state is, so that people can decide the next step (Nielsen Norman Group, Visibility of
+    System Status). So: "1 of 3 practised", and "next" on the first lesson not yet practised.
+  - Visible progress can raise effort towards a goal (Kivetz, Urminsky & Zheng 2006, reward cards, not learning
+    apps). No study was found on next-lesson markers in learning apps, so that part is a judgement.
+- "Drill this table" no longer shows on the four tables with no drill items (pronouns, questions, да, numbers). It
+  only gave a message there. The "stage 2" badges went too: the stage heading already says it.
 - The plan's "61 sentences do not line up with their explanation" was a counting error of the plan: hyphens. With
   the app's own word tokens, none differ.
 
@@ -341,6 +359,9 @@ Step 1 is built. Steps 2–5 are not started.
 | Short object pronouns | 10 / 10 | 15 / 15 | 35 / 34 |
 
 (Rank 100 is widened to 10 where fewer fit.)
+
+Grammar tab with three lessons, page height: desktop 10,373 → 800 px (13.0 → 1.0 screens), phone 12,791 → 839 px
+(15.2 → 1.0 screens). With the section open: 1,667 px on a phone, 2,414 px with one table open.
 
 Rule length: 88, 87 and 90 words. Chromium on phone emulation, desktop and dark mode: no page errors and no
 sideways scrolling. A whole run also works offline after the service worker has installed. Not tested on a real

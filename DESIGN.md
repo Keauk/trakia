@@ -238,6 +238,7 @@ BG→NL card has been answered correctly once" (default; recognition before prod
 * a lesson in `data/grammar.json` (`lessons`) is a short rule, a note for Dutch or English speakers, marked examples and a pool: the D-039 labels of the target words
 * a run: 3 gap items and 5 whole sentences on one rule, unseen sentences first; `C.buildLessonRun`
 * the first try counts. When only the target is wrong, the app names the rule and gives one more try; a missed rule returns on another sentence, at most twice; `C.targetCheck`
+* the Grammar tab shows the lessons first, with the count practised and the next lesson marked; the reference tables sit in one section below, closed at every page load, and each table opens on its own
 * a run never touches a sentence card. State lives in `trakia.lessons`, answers also in `trakia.drillLog`, so the streak counts them
 
 ### 4.3b Sneak peek (D-031)
