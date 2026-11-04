@@ -1316,10 +1316,10 @@
    "stage": 1,
    "title": "да instead of an infinitive",
    "rule": [
-    "Bulgarian has no infinitive. After verbs such as искам, мога, трябва and обичам, use да + a verb with a person ending.",
-    "The verb after да shows its own person: искам да отида (I want to go), искаш да отидеш (you want to go), искам да дойдеш (I want you to come).",
-    "Трябва and може ли stay the same: трябва да отидем (we must go), може ли да вляза?",
-    "For one complete action, use the perfective verb: отида, not отивам. Не goes first: не искам да ям."
+    "Bulgarian has no infinitive. After искам, мога, трябва and обичам, use да + a verb with a person ending.",
+    "The verb after да shows its own person: искам да отида (I want to go), искаш да отидеш, искам да дойдеш (I want you to come).",
+    "Трябва and може ли stay the same: трябва да отидем, може ли да вляза?",
+    "For one complete action, use the perfective verb: отида, not отивам. After обичам, the verb is imperfective: обичам да чета. Не goes before the first verb: не искам да ям."
    ],
    "contrast": {
     "nl": "Dutch uses an infinitive, often with no word before it: ik wil gaan, ik kan wachten. Bulgarian always needs да, and the second verb takes the person: искам да отида, мога да чакам.",
@@ -1359,7 +1359,7 @@
    "stage": 1,
    "title": "Short object pronouns and their place",
    "rule": [
-    "\"Me, you, him\" have short forms: ме, те, го, я, ни, ви, ги. \"To me, to you, to him\" have their own: ми, ти, му, ѝ, ни, ви, им. Verbs such as дам, нося, кажа and вярвам take the \"to\" forms: не ти вярвам.",
+    "\"Me, you, him\" are ме, те, го, я, ни, ви, ги. \"To me, to you, to him\" are ми, ти, му, ѝ, ни, ви, им. Whoever receives something takes a \"to\" form: ще ти дам, ще му кажа; so does вярвам: не ти вярвам.",
     "These words never start a clause, and they stand next to the verb.",
     "If the verb starts the clause, they go after it: обичам те. If another word comes first, they go before the verb: не те виждам, защо ме гледаш? With ли: разбирате ли ме?"
    ],
