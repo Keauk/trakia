@@ -275,7 +275,8 @@ input[type=range]{width:100%}
 .lib-row-detail{background:var(--input-bg);font-size:13px}
 .lib-row-detail td{padding:10px}
 /* grammar tab */
-.gcard summary{cursor:pointer;font-weight:600;font-size:16px;display:flex;gap:8px;align-items:center;list-style:none}
+.gcard{padding:11px 0;border-bottom:1px solid var(--line)}
+.gcard summary{cursor:pointer;font-weight:500;font-size:15px;display:flex;gap:8px;align-items:center;list-style:none}
 .gcard summary::-webkit-details-marker{display:none}
 .gcard summary::before{content:'▸';color:var(--faint);font-size:14px}
 .gcard[open] summary::before{content:'▾'}
@@ -287,9 +288,24 @@ input[type=range]{width:100%}
 /* grammar lessons (D-049) */
 .lesson-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .lesson-list .stage-h{margin:8px 0 0}
-.lesson-row{width:100%;display:flex;justify-content:space-between;align-items:baseline;gap:12px;text-align:left;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font:500 15px/1.35 var(--sans);color:var(--ink);cursor:pointer}
+.lesson-progress{display:flex;align-items:center;gap:12px;margin-top:12px}
+.lesson-progress .segs{flex:1}
+.lesson-row{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font:500 15px/1.35 var(--sans);color:var(--ink);cursor:pointer}
 .lesson-row:hover{border-color:var(--primary)}
+.lesson-row .lesson-name{flex:1}
 .lesson-row .tiny{flex:none}
+.lesson-mark{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1}
+.lesson-row.done .lesson-mark{border-color:var(--correct);color:var(--correct)}
+.lesson-row.next{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.lesson-row.next .lesson-mark{border-color:var(--primary)}
+.lesson-row.next .tiny{color:var(--primary);font-weight:600}
+.gtables>summary{cursor:pointer;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;list-style:none}
+.gtables>summary::-webkit-details-marker{display:none}
+.gtables>summary::before{content:'▸';color:var(--faint);font-size:14px}
+.gtables[open]>summary::before{content:'▾'}
+.gtables-title{font:600 17px/1.3 var(--sans)}
+.gtables>.muted{margin:12px 0 0}
+.gtables .stage-h{margin:20px 0 2px}
 .lesson h2{margin-top:12px}
 .lesson-rule p,.lesson-contrast p{margin:8px 0;line-height:1.5}
 .lesson table{margin:12px 0;font-size:14px}
@@ -635,14 +651,15 @@ body.typing .actions{bottom:0;padding-bottom:calc(12px + env(safe-area-inset-bot
   <div class="card" id="lessons-card">
     <h2>Lessons</h2>
     <p class="muted">A short rule, then practice with sentences at your level.</p>
+    <div class="lesson-progress"><div class="segs" id="lesson-segs" role="progressbar" aria-label="Lessons practised"></div><span class="count" id="lesson-count"></span></div>
     <ul class="lesson-list" id="lesson-list"></ul>
   </div>
-  <div class="card">
-    <h2>Grammar reference</h2>
-    <p class="muted">Tables for each grammar stage, with example sentences from the practice set. Cards beyond your stage are shown collapsed. <b>Drill</b> runs a short "give the form" exercise on that table.</p>
-    <div class="row" style="margin-top:8px"><button class="btn primary" id="btn-gdrill-all">Grammar drill (your stage)</button></div>
-  </div>
-  <div id="grammar-cards"></div>
+  <details class="card gtables" id="grammar-tables">
+    <summary><span class="gtables-title">Reference tables</span><span class="tiny" id="tables-count"></span></summary>
+    <p class="muted">The forms of each grammar stage, with examples from the practice set. <b>Drill</b> runs a short "give the form" exercise on a table.</p>
+    <div class="row" style="margin-top:8px"><button class="btn" id="btn-gdrill-all">Grammar drill (your stage)</button></div>
+    <div id="grammar-cards"></div>
+  </details>
   </div>
 </section>
 <section id="tab-stats" class="tab">
