@@ -192,6 +192,10 @@ main{max-width:708px;margin:0 auto;padding:30px 24px 36px}
 .btn.next:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--st) 30%,transparent)}
 /* home, done, stats */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.stats.n4{grid-template-columns:repeat(4,1fr)}.stats.n5{grid-template-columns:repeat(5,1fr)}
+.card .stats:last-child{margin-bottom:0}
+/* phones: the Today tiles as 2 + 2, or 3 + 2, never a lone tile */
+@media (max-width:767px){.stats.n4{grid-template-columns:repeat(2,1fr)}.stats.n5{grid-template-columns:repeat(6,1fr)}.stats.n5 .stat{grid-column:span 2}.stats.n5 .stat:nth-child(n+4){grid-column:span 3}}
 .stat{background:var(--input-bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .stat b{display:block;font:600 24px/1.1 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink)}
 .stat b small{font:600 13px/1 var(--sans);color:var(--correct);margin-left:6px}.stat b small.neg{color:var(--wrong)}

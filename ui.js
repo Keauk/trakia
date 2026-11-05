@@ -692,8 +692,10 @@ function renderStats() {
   const t = byDay[today] || [0, 0, 0], tot = t[0] + t[1] + t[2];
   const ms = log.filter(l => dayKey(l[0]) === today).map(l => l[0]);
   let minutes = 0; for (let i = 1; i < ms.length; i++) { const gap = ms[i] - ms[i - 1]; if (gap < 5 * 60e3) minutes += gap; }
-  const listenedMin = Math.round((LS.get('listened', {})[today] || 0) / 60);
-  $('stats-today').innerHTML = stat(tot, 'answers') + stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy') + stat(sessions.filter(s => dayKey(s) === today).length, 'sessions') + stat(Math.round(minutes / 60e3), 'minutes') + stat(streakNow().days, 'day streak') + (listenedMin ? stat(listenedMin, 'min listened') : '');
+  // one row of tiles: answers, accuracy, minutes, minutes listened (once the learner has ever listened), streak
+  const listened = LS.get('listened', {}), listenedMin = Math.round((listened[today] || 0) / 60), everListened = Object.values(listened).some(v => v > 0);
+  const tiles = [stat(tot, 'answers'), stat(tot ? Math.round(100 * (t[2] + t[1]) / tot) + '%' : '–', 'accuracy'), stat(Math.round(minutes / 60e3), 'minutes')].concat(everListened ? [stat(listenedMin, 'min listened')] : [], [stat(streakNow().days, 'day streak')]);
+  $('stats-today').className = 'stats n' + tiles.length; $('stats-today').innerHTML = tiles.join('');
   // chart data
   const days = []; for (let d = 13; d >= 0; d--) { const k = dayKey(now - d * 86400e3); days.push({ k, label: k.slice(5), v: byDay[k] || [0, 0, 0] }); }
   drawChart(days);
@@ -730,7 +732,7 @@ function renderStats() {
   $('stats-progress').innerHTML = html;
   // hardest
   const hard = Object.entries(progress).filter(([k, p]) => p.lapses > 0 && SENT_BY_ID.has(k.split('|')[0])).sort((a, b) => b[1].lapses - a[1].lapses || (a[1].s || 0) - (b[1].s || 0)).slice(0, 20);
-  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:62px"><col style="width:56px"><col style="width:60px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>stab.</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); const Kh = C.parseKey(k); return `<tr><td>${esc(Kh.toBg ? (s[Kh.lang] || s.nl) : s.bg)}</td><td>${dirLabel(dir)}</td><td>${p.lapses}</td><td>${p.state === 'review' ? fmtDays(p.s) : 'learn'}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
+  $('hardest').className = 'fixed'; $('hardest').innerHTML = hard.length ? '<colgroup><col><col style="width:74px"><col style="width:66px"><col style="width:60px"></colgroup><tr><th>sentence</th><th>dir</th><th>lapses</th><th>stab.</th></tr>' + hard.map(([k, p]) => { const [id, dir] = k.split('|'); const s = SENT_BY_ID.get(id); const Kh = C.parseKey(k); return `<tr><td>${esc(Kh.toBg ? (s[Kh.lang] || s.nl) : s.bg)}</td><td>${dirLabel(dir)}</td><td>${p.lapses}</td><td>${p.state === 'review' ? fmtDays(p.s) : 'learn'}</td></tr>`; }).join('') : '<tr><td class="tiny">No lapses yet.</td></tr>';
   $('btn-drill').disabled = !hard.length; $('btn-drill').onclick = () => { showTab('practise'); startSession({ keys: hard.map(h => h[0]) }); };
 }
 function drawChart(days) {
